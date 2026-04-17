@@ -1,0 +1,40 @@
+{
+  "rules": [
+    {
+      "id": "HBP-001",
+      "condition": "goal/scope/non-goal/acceptance 중 둘 이상 부재",
+      "patch": "REQ 초안과 acceptance 초안 생성",
+      "notify": "reports/human-bottleneck-patch.json + Human Bottleneck Patch Applied"
+    },
+    {
+      "id": "HBP-002",
+      "condition": "REQ/BUILD/OPERATE 혼합",
+      "patch": "thread/worktree 분리 권고와 handoff note 생성",
+      "notify": "patch report + current iteration note"
+    },
+    {
+      "id": "HBP-003",
+      "condition": "verify_commands 또는 quality_hooks 비어 있음",
+      "patch": "bootstrap candidate command 제안",
+      "notify": "DRAFT_PATCH"
+    },
+    {
+      "id": "HBP-004",
+      "condition": "정의되지 않은 신규 변수 또는 외부 의존 등장",
+      "patch": "unknowns 등록 및 U0-U3 분류",
+      "notify": "unknowns.base + current iteration canvas"
+    },
+    {
+      "id": "HBP-005",
+      "condition": "OPERATE/L3인데 release docs 부재",
+      "patch": "runbook/release/rollback 템플릿 생성",
+      "notify": "patched docs"
+    },
+    {
+      "id": "HBP-006",
+      "condition": "thread split/worktree 후 handoff note 부재",
+      "patch": "memory checkpoint 생성",
+      "notify": "daily note + patch report"
+    }
+  ]
+}

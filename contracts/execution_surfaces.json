@@ -1,0 +1,37 @@
+{
+  "phase": "phase0-environment-audit",
+  "surfaces": [
+    "windows-native",
+    "wsl-ubuntu"
+  ],
+  "required_tool_families": [
+    "git",
+    "python",
+    "node",
+    "npm"
+  ],
+  "optional_tool_families": [
+    "uv"
+  ],
+  "missing_reason_taxonomy": [
+    "not_installed",
+    "not_on_path",
+    "surface_mismatch",
+    "policy_intentional",
+    "unconfirmed"
+  ],
+  "surface_gate_rules": {
+    "required_missing_status": "BLOCKED",
+    "optional_missing_status": "HOLD",
+    "wsl_distro_missing_status": "BLOCKED",
+    "exclude_environment_blocked_runs_from_variant_scoring": true
+  },
+  "evidence_sources": [
+    "package.json",
+    "pyproject.toml",
+    "contracts/project_policy.json",
+    "management:docs/LOCAL_ENVIRONMENTS.md",
+    "management:docs/RUNBOOK.md",
+    "management:docs/CLOSE_OUT.md"
+  ]
+}

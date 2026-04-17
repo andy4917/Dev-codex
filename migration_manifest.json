@@ -1,0 +1,97 @@
+{
+  "generated_at": "2026-04-16",
+  "authority": "/home/andy4917/Dev-Management/contracts/workspace_authority.json",
+  "mappings": [
+    {
+      "before": "/home/andy4917/code/reservation-system",
+      "after": "/home/andy4917/Dev-Product/reservation-system",
+      "action": "moved",
+      "scope": "product-repo",
+      "reason": "Preserve dirty git worktree while relocating into the canonical Dev-Product root."
+    },
+    {
+      "before": "/home/andy4917/code/.latest_reservation_system_canonical",
+      "after": "/home/andy4917/Dev-Management/quarantine/2026-04-16/legacy-markers/.latest_reservation_system_canonical",
+      "action": "quarantined",
+      "scope": "legacy-marker",
+      "reason": "Legacy marker kept only as evidence, not as source of truth."
+    },
+    {
+      "before": "/home/andy4917/code/.latest_reservation_system_verify",
+      "after": "/home/andy4917/Dev-Management/quarantine/2026-04-16/legacy-markers/.latest_reservation_system_verify",
+      "action": "quarantined",
+      "scope": "legacy-marker",
+      "reason": "Legacy marker kept only as evidence, not as source of truth."
+    },
+    {
+      "before": "reservation-system/contracts/{context7_policy,environment_sync_policy,execution_surfaces,experiment_policy,human_bottleneck_rules,memory_policy,spawn_policy,syncthing_policy,toolchain_policy}.json",
+      "after": "/home/andy4917/Dev-Management/contracts",
+      "action": "moved",
+      "scope": "global-contracts",
+      "reason": "Promoted repo-local global policy into Management authority scope."
+    },
+    {
+      "before": "reservation-system/docs/{PROMPT_BLOCKS,LOCAL_ENVIRONMENTS,HOOKS_WSL,TOOLCHAIN,WINDOWS_WSL_RUNTIME_MODEL,PREREQUISITES,SESSION_THREAD_CONTAMINATION_AUDIT,CLOSE_OUT,RUNBOOK,RELEASE_PLAN,ROLLBACK,CONTEXT7_USAGE,DEPENDENCY_INVERSION,SYNCTHING,USER_READINESS,USER_SCORECARD}.md",
+      "after": "/home/andy4917/Dev-Management/docs",
+      "action": "moved",
+      "scope": "global-docs",
+      "reason": "Promoted global operating docs out of the product repo."
+    },
+    {
+      "before": "reservation-system/.agents/skills",
+      "after": "/home/andy4917/Dev-Workflow/skills",
+      "action": "moved",
+      "scope": "workflow-skills",
+      "reason": "Established Dev-Workflow as the canonical optional skill source."
+    },
+    {
+      "before": "reservation-system/scripts/{_common.py,audit_execution_surfaces.py,check_*.py,delivery_gate.py,install_hooks.py,install_or_repair_toolchain.py,session_router.py,update_wsl_and_ubuntu.py,lib/,workspace_alignment/}",
+      "after": "/home/andy4917/Dev-Workflow/scripts",
+      "action": "moved",
+      "scope": "workflow-shared-scripts",
+      "reason": "Centralized reusable validators and orchestration scripts under Dev-Workflow."
+    },
+    {
+      "before": "reservation-system/plugins/codex-vibe-execution",
+      "after": "/home/andy4917/Dev-Workflow/plugins/codex-vibe-execution",
+      "action": "moved",
+      "scope": "workflow-plugin-source",
+      "reason": "Canonicalized shared plugin/template source under Dev-Workflow."
+    },
+    {
+      "before": "reservation-system/.agents/plugins/marketplace.json",
+      "after": "/home/andy4917/Dev-Workflow/.agents/plugins/marketplace.json",
+      "action": "moved",
+      "scope": "workflow-marketplace",
+      "reason": "Canonicalized shared plugin discovery metadata under Dev-Workflow."
+    },
+    {
+      "before": "reservation-system/{config/guardrails,.github/guardrails,.github/workflows/guardrails.yml}",
+      "after": "/home/andy4917/Dev-Workflow",
+      "action": "moved",
+      "scope": "workflow-guardrails",
+      "reason": "Moved reusable guardrail assets out of the product repo."
+    },
+    {
+      "before": "reservation-system/{docs/runtime,.codex_tmp,.codex/agents,.codex/bin,.codex/hooks,.codex/hooks.json,.codex/setup-codex-studio.sh,.githooks}",
+      "after": "/home/andy4917/Dev-Management/quarantine/2026-04-16/product-runtime",
+      "action": "quarantined",
+      "scope": "legacy-runtime",
+      "reason": "Legacy runtime/hook assets removed from canonical policy surface."
+    },
+    {
+      "before": "/mnt/c/Users/anise/.codex/{hooks.json,hooks,config.toml.bak,.codex-global-state.json.bak,.codex-global-state.json.rootfix-20260416-0225.bak,session_index.jsonl.bak,state_5.sqlite.bak,state_5.sqlite.rootfix-20260416-0225.bak}",
+      "after": "/home/andy4917/Dev-Management/quarantine/2026-04-16/windows-codex",
+      "action": "quarantined",
+      "scope": "windows-legacy-runtime",
+      "reason": "Removed legacy backup and hook surfaces from the Windows generated mirror."
+    },
+    {
+      "before": "/home/andy4917/Dev-Management/AGENTS.md",
+      "after": "/home/andy4917/Dev-Management/quarantine/2026-04-16/management-root-duplicate/AGENTS.md",
+      "action": "quarantined",
+      "scope": "duplicate-global-policy",
+      "reason": "Root-level AGENTS duplicate removed in favor of generated ~/.codex/AGENTS.md."
+    }
+  ]
+}

@@ -1,0 +1,161 @@
+{
+  "version": 1,
+  "scope": "codex-global",
+  "summary": "Deduction-only scorecard policy for Codex global delivery oversight.",
+  "principles": {
+    "deductions_only": true,
+    "writer_self_scoring_forbidden": true,
+    "user_bonus_forbidden": true,
+    "score_is_not_pass": true,
+    "disqualifier_outranks_score": true,
+    "pass_requires_reviewer_green": true,
+    "pass_requires_clean_room_verify": true
+  },
+  "axes": {
+    "trust_score": {
+      "max_points": 30,
+      "floor": 24,
+      "applicable_when": "always",
+      "owner_roles": [
+        "skeptic_reviewer",
+        "final_auditor",
+        "user_review"
+      ]
+    },
+    "completion_score": {
+      "max_points": 30,
+      "floor": 24,
+      "applicable_when": "always",
+      "owner_roles": [
+        "correctness_verifier",
+        "final_auditor",
+        "user_review"
+      ]
+    },
+    "compliance_score": {
+      "max_points": 20,
+      "floor": 16,
+      "applicable_when": "always",
+      "owner_roles": [
+        "skeptic_reviewer",
+        "final_auditor",
+        "user_review"
+      ]
+    },
+    "reliability_score": {
+      "max_points": 10,
+      "floor": 7,
+      "applicable_when_any": [
+        "reliability_applicable",
+        "external_calls"
+      ],
+      "owner_roles": [
+        "contamination_monitor",
+        "final_auditor",
+        "user_review"
+      ]
+    },
+    "search_evidence_score": {
+      "max_points": 10,
+      "floor": 7,
+      "applicable_when_any": [
+        "search_evidence_applicable",
+        "retrieval_canonical_decision_path",
+        "external_docs_dependency",
+        "search_engineering_core_path"
+      ],
+      "owner_roles": [
+        "correctness_verifier",
+        "final_auditor",
+        "user_review"
+      ]
+    }
+  },
+  "total_score": {
+    "floor": 80
+  },
+  "review_roles": {
+    "skeptic_reviewer": {
+      "required_by_default": true,
+      "required_unless": [
+        "small_l0"
+      ]
+    },
+    "correctness_verifier": {
+      "required_when_any": [
+        "completion_review_required",
+        "search_evidence_applicable",
+        "retrieval_canonical_decision_path",
+        "external_docs_dependency"
+      ]
+    },
+    "contamination_monitor": {
+      "required_when_any": [
+        "contamination_review_required",
+        "reliability_applicable",
+        "external_calls",
+        "untrusted_context",
+        "web_or_mcp_access",
+        "security_sensitive"
+      ]
+    },
+    "final_auditor": {
+      "required_by_default": true,
+      "required_modes": [
+        "verify",
+        "release"
+      ],
+      "required_when_any": [
+        "final_auditor_required"
+      ]
+    }
+  },
+  "caps": [
+    {
+      "id": "retrieval_canonical_decision_path",
+      "max_total_score": 85,
+      "when_all": {
+        "retrieval_canonical_decision_path": true
+      },
+      "reason": "Retrieval is on the canonical decision path, so total score is capped at 85."
+    },
+    {
+      "id": "external_calls_without_reliability_evidence",
+      "max_total_score": 79,
+      "when_all": {
+        "external_calls": true,
+        "reliability_evidence_present": false
+      },
+      "reason": "External-call work without shared wrapper, timeout, bounded retry, jitter, idempotency, and circuit-breaker evidence is capped at 79."
+    },
+    {
+      "id": "untrusted_context_without_security_evidence",
+      "max_total_score": 84,
+      "when_all": {
+        "untrusted_context": true,
+        "security_evidence_present": false
+      },
+      "reason": "Web, MCP, or untrusted-context work without prompt-injection defense and output-validation evidence is capped at 84."
+    }
+  ],
+  "advisories": [
+    {
+      "id": "search_engineering_not_core_path",
+      "when_all": {
+        "search_evidence_applicable": false,
+        "search_engineering_core_path": false,
+        "retrieval_canonical_decision_path": false
+      },
+      "message": "Search Engineering is not on the core path, so search evidence remains advisory-only."
+    }
+  ],
+  "gate_order": [
+    "disqualifier_check",
+    "reviewer_green_check",
+    "trace_presence_check",
+    "axis_floor_check",
+    "platform_cap_check",
+    "existing_readiness_and_manual_close_out_check",
+    "clean_room_verify_check"
+  ]
+}

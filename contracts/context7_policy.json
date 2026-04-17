@@ -1,0 +1,60 @@
+{
+  "version": 1,
+  "server_name": "context7",
+  "remote_template": {
+    "url": "https://mcp.context7.com/mcp",
+    "env_http_headers": {
+      "CONTEXT7_API_KEY": "CONTEXT7_API_KEY"
+    },
+    "enabled": true,
+    "required": false,
+    "startup_timeout_sec": 40,
+    "tool_timeout_sec": 120
+  },
+  "fallback_template": {
+    "command": "npx",
+    "args": [
+      "-y",
+      "@upstash/context7-mcp"
+    ],
+    "enabled": true,
+    "required": false,
+    "startup_timeout_sec": 40,
+    "tool_timeout_sec": 120
+  },
+  "agent_targets": [],
+  "protected_change_globs": [
+    "package.json",
+    "package-lock.json",
+    "app_v2/package.json",
+    "pyproject.toml",
+    "uv.lock",
+    "requirements*.txt",
+    ".codex/*.toml",
+    "config/**",
+    "scripts/install_or_repair_toolchain.py",
+    "scripts/update_wsl_and_ubuntu.py",
+    "scripts/check_context7.py",
+    "scripts/bootstrap_real_env.py"
+  ],
+  "source_candidate_globs": [
+    "app_v2/**/*.ts",
+    "app_v2/**/*.tsx",
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "scripts/**/*.js",
+    "scripts/**/*.mjs",
+    "scripts/**/*.ts"
+  ],
+  "self_config_globs": [
+    ".codex/config.toml",
+    "scripts/bootstrap_real_env.py"
+  ],
+  "required_report_fields": [
+    "query",
+    "resolved_library_id",
+    "docs_retrieved",
+    "version_evidence",
+    "decision_summary"
+  ]
+}

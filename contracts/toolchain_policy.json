@@ -1,0 +1,251 @@
+{
+  "version": 1,
+  "windows": {
+    "required_tools": [
+      "git",
+      "pwsh",
+      "wt",
+      "wsl",
+      "ubuntu",
+      "python",
+      "pipx",
+      "uv",
+      "7zip"
+    ],
+    "optional_tools": [
+      "node",
+      "npm",
+      "corepack",
+      "pnpm",
+      "syncthing",
+      "winget",
+      "choco",
+      "scoop",
+      "vs_build_tools"
+    ],
+    "repairable_path_tools": [
+      "git",
+      "pwsh",
+      "pipx",
+      "uv",
+      "node",
+      "npm",
+      "corepack",
+      "winget"
+    ],
+    "candidate_paths": {
+      "git": [
+        "%ProgramFiles%\\Git\\cmd\\git.exe"
+      ],
+      "pwsh": [
+        "%ProgramFiles%\\PowerShell\\7\\pwsh.exe"
+      ],
+      "wt": [
+        "%LOCALAPPDATA%\\Microsoft\\WindowsApps\\wt.exe"
+      ],
+      "winget": [
+        "%LOCALAPPDATA%\\Microsoft\\WindowsApps\\winget.exe"
+      ],
+      "python": [
+        "%LOCALAPPDATA%\\Programs\\Python\\Python312\\python.exe",
+        "%LOCALAPPDATA%\\Programs\\Python\\Python313\\python.exe",
+        "%LOCALAPPDATA%\\Programs\\Python\\Python314\\python.exe",
+        "%ProgramFiles%\\Python312\\python.exe",
+        "%ProgramFiles%\\Python313\\python.exe",
+        "%ProgramFiles%\\Python314\\python.exe"
+      ],
+      "pipx": [
+        "%APPDATA%\\Python\\Python312\\Scripts\\pipx.exe",
+        "%APPDATA%\\Python\\Python313\\Scripts\\pipx.exe",
+        "%APPDATA%\\Python\\Python314\\Scripts\\pipx.exe",
+        "%USERPROFILE%\\.local\\bin\\pipx.exe"
+      ],
+      "uv": [
+        "%USERPROFILE%\\.cargo\\bin\\uv.exe",
+        "%LOCALAPPDATA%\\Programs\\uv\\uv.exe",
+        "%LOCALAPPDATA%\\Microsoft\\WinGet\\Links\\uv.exe"
+      ],
+      "node": [
+        "%ProgramFiles%\\nodejs\\node.exe"
+      ],
+      "npm": [
+        "%ProgramFiles%\\nodejs\\npm.cmd"
+      ],
+      "corepack": [
+        "%ProgramFiles%\\nodejs\\corepack.cmd"
+      ],
+      "choco": [
+        "%ProgramData%\\chocolatey\\bin\\choco.exe"
+      ],
+      "scoop": [
+        "%USERPROFILE%\\scoop\\shims\\scoop.cmd"
+      ],
+      "syncthing": [
+        "%LOCALAPPDATA%\\Syncthing\\syncthing.exe"
+      ],
+      "vs_build_tools": [
+        "%ProgramFiles(x86)%\\Microsoft Visual Studio\\Installer\\vswhere.exe"
+      ],
+      "7zip": [
+        "%ProgramFiles%\\7-Zip\\7z.exe"
+      ]
+    },
+    "package_ids": {
+      "git": {
+        "winget": "Git.Git",
+        "choco": "git"
+      },
+      "pwsh": {
+        "winget": "Microsoft.PowerShell",
+        "choco": "powershell-core"
+      },
+      "wt": {
+        "winget": "Microsoft.WindowsTerminal"
+      },
+      "python": {
+        "winget": "Python.Python.3.12",
+        "choco": "python"
+      },
+      "uv": {
+        "winget": "astral-sh.uv"
+      },
+      "syncthing": {
+        "winget": "Syncthing.Syncthing",
+        "choco": "syncthing"
+      },
+      "7zip": {
+        "winget": "7zip.7zip",
+        "choco": "7zip"
+      }
+    }
+  },
+  "wsl": {
+    "required_tools": [
+      "git",
+      "curl",
+      "wget",
+      "zip",
+      "unzip",
+      "jq",
+      "rsync",
+      "file",
+      "tree",
+      "ca_certificates",
+      "openssh_client",
+      "bubblewrap",
+      "build_essential",
+      "make",
+      "gcc",
+      "gxx",
+      "cmake",
+      "pkg_config",
+      "python3",
+      "python3_pip",
+      "python3_venv",
+      "pipx",
+      "uv",
+      "nvm",
+      "node",
+      "npm",
+      "corepack",
+      "pnpm",
+      "dos2unix",
+      "sqlite3",
+      "electron_runtime"
+    ],
+    "optional_tools": [
+      "yarn",
+      "syncthing"
+    ],
+    "apt_packages": {
+      "git": "git",
+      "curl": "curl",
+      "wget": "wget",
+      "zip": "zip",
+      "unzip": "unzip",
+      "jq": "jq",
+      "rsync": "rsync",
+      "file": "file",
+      "tree": "tree",
+      "ca_certificates": "ca-certificates",
+      "openssh_client": "openssh-client",
+      "bubblewrap": "bubblewrap",
+      "build_essential": "build-essential",
+      "make": "make",
+      "gcc": "gcc",
+      "gxx": "g++",
+      "cmake": "cmake",
+      "pkg_config": "pkg-config",
+      "python3": "python3",
+      "python3_pip": "python3-pip",
+      "python3_venv": "python3-venv",
+      "pipx": "pipx",
+      "dos2unix": "dos2unix",
+      "sqlite3": "sqlite3",
+      "electron_runtime": [
+        "libnss3",
+        "libasound2t64",
+        "libxss1",
+        "libgtk-3-0t64",
+        "libatk-bridge2.0-0t64",
+        "libcups2t64"
+      ],
+      "syncthing": "syncthing"
+    },
+    "script_installers": {
+      "uv": "curl -LsSf https://astral.sh/uv/install.sh | sh",
+      "nvm": "curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash",
+      "node_bundle": "export NVM_DIR=\"$HOME/.nvm\" && . \"$NVM_DIR/nvm.sh\" && nvm install --lts && nvm alias default 'lts/*' && corepack enable && corepack prepare pnpm@latest --activate && (command -v yarn >/dev/null 2>&1 || npm install -g yarn)"
+    }
+  },
+  "parity_groups": [
+    {
+      "name": "git",
+      "windows": "git",
+      "wsl": "git"
+    },
+    {
+      "name": "python",
+      "windows": "python",
+      "wsl": "python3"
+    },
+    {
+      "name": "uv",
+      "windows": "uv",
+      "wsl": "uv"
+    },
+    {
+      "name": "node",
+      "windows": "node",
+      "wsl": "node"
+    },
+    {
+      "name": "npm",
+      "windows": "npm",
+      "wsl": "npm"
+    },
+    {
+      "name": "corepack",
+      "windows": "corepack",
+      "wsl": "corepack"
+    },
+    {
+      "name": "pnpm",
+      "windows": "pnpm",
+      "wsl": "pnpm"
+    },
+    {
+      "name": "syncthing",
+      "windows": "syncthing",
+      "wsl": "syncthing"
+    }
+  ],
+  "blocked_conditions": [
+    "administrator_privilege_required",
+    "reboot_required",
+    "gui_or_license_approval_required",
+    "wsl_first_boot_pending",
+    "network_or_repository_failure",
+    "destructive_overwrite_required"
+  ]
+}

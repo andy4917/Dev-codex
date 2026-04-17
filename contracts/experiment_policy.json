@@ -1,0 +1,71 @@
+{
+  "baseline_constants": {
+    "main_thread_model": "gpt-5.4",
+    "bounded_subagent_model": "gpt-5.4-mini",
+    "web_search_mode": "cached",
+    "subagent_mode": "explicit-only",
+    "max_subagents": 2,
+    "allowed_subagent_roles": [
+      "explorer",
+      "verifier"
+    ]
+  },
+  "variants": [
+    {
+      "id": "control",
+      "description": "Current prompt blocks and operating baseline only."
+    },
+    {
+      "id": "v1-agents-skill-standardization",
+      "description": "AGENTS and repo skill standardization only."
+    },
+    {
+      "id": "v2-thread-reuse",
+      "description": "Thread reuse protocol only."
+    },
+    {
+      "id": "v3-prompt-caching",
+      "description": "Prompt caching only."
+    },
+    {
+      "id": "v4-tool-search",
+      "description": "Tool search only."
+    },
+    {
+      "id": "v5-wsl-hooks",
+      "description": "WSL-only hooks enforcement only."
+    }
+  ],
+  "soft_budget": {
+    "project_budget_usd": 50.0,
+    "warning_threshold_pct": 80,
+    "per_run_soft_cap_usd": 5.0,
+    "per_task_soft_cap_usd": 0.5,
+    "over_budget_status": "HOLD"
+  },
+  "metrics": [
+    "prompt_tokens",
+    "cached_tokens",
+    "completion_tokens",
+    "turn_count",
+    "retry_count",
+    "web_calls",
+    "mcp_calls",
+    "tool_calls",
+    "diff_acceptance_rate",
+    "test_pass_rate",
+    "cost_per_success_task"
+  ],
+  "pass_criteria": {
+    "completion_tokens_pct_delta_max": 5.0,
+    "test_pass_rate": ">= baseline",
+    "diff_acceptance_rate": ">= baseline",
+    "cost_per_success_task": "< baseline",
+    "avg_turns_per_task": "< baseline"
+  },
+  "scoring": {
+    "exclude_environment_blocked_runs": true,
+    "winner_requires_all_quality_guards": true,
+    "combine_variants_only_after_single_variant_wins": true
+  }
+}

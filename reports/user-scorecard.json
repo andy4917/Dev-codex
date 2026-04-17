@@ -1,0 +1,315 @@
+{
+  "status": "BLOCKED",
+  "scope": "codex-global",
+  "policy_version": 1,
+  "generated_at": "2026-04-17T15:16:59.253968+00:00",
+  "workspace_root": "/home/andy4917/Dev-Product/reservation-system",
+  "mode": "verify",
+  "disqualifier_result": {
+    "status": "PASS",
+    "matched_rules": [],
+    "unknown_ids": [],
+    "reasons": [
+      "no disqualifiers recorded"
+    ],
+    "generated_at": "2026-04-17T15:16:59.249097+00:00"
+  },
+  "authoritative_context_path": "/mnt/c/Users/anise/.codex/state/scorecard-context/reservation-system/trace-0d51c24d6c80b096.json",
+  "trace": {
+    "required": true,
+    "status": "PASS",
+    "evidence_refs": [
+      "/home/andy4917/Dev-Product/reservation-system/reports/traceability-report.json"
+    ],
+    "notes": "",
+    "issues": [],
+    "acceptance_count": 8,
+    "traceability_count": 8,
+    "report_path": "/home/andy4917/Dev-Product/reservation-system/reports/traceability-report.json",
+    "present": true
+  },
+  "scores": {
+    "trust_score": {
+      "applicable": true,
+      "max_points": 30,
+      "floor": 24,
+      "score": 30,
+      "reviewer_deductions": 0,
+      "user_deductions": 0,
+      "passes_floor": true,
+      "deductions": []
+    },
+    "completion_score": {
+      "applicable": true,
+      "max_points": 30,
+      "floor": 24,
+      "score": 30,
+      "reviewer_deductions": 0,
+      "user_deductions": 0,
+      "passes_floor": true,
+      "deductions": []
+    },
+    "compliance_score": {
+      "applicable": true,
+      "max_points": 20,
+      "floor": 16,
+      "score": 20,
+      "reviewer_deductions": 0,
+      "user_deductions": 0,
+      "passes_floor": true,
+      "deductions": []
+    },
+    "reliability_score": {
+      "applicable": false,
+      "max_points": 10,
+      "floor": 7,
+      "score": null,
+      "reviewer_deductions": 0,
+      "user_deductions": 0,
+      "passes_floor": null,
+      "deductions": []
+    },
+    "search_evidence_score": {
+      "applicable": true,
+      "max_points": 10,
+      "floor": 7,
+      "score": 10,
+      "reviewer_deductions": 0,
+      "user_deductions": 0,
+      "passes_floor": true,
+      "deductions": []
+    }
+  },
+  "applicable_axes": [
+    "trust_score",
+    "completion_score",
+    "compliance_score",
+    "search_evidence_score"
+  ],
+  "raw_total_score": 90,
+  "capped_total_score": 90,
+  "total_floor": 80,
+  "axis_floor_check": {
+    "status": "PASS",
+    "failed_axes": [],
+    "raw_total_passes": true
+  },
+  "platform_cap": {
+    "status": "PASS",
+    "cap_applied": false,
+    "cap_limit": 90,
+    "active_caps": []
+  },
+  "reviewer_requirements": {
+    "required_roles": [
+      "skeptic_reviewer",
+      "correctness_verifier",
+      "contamination_monitor",
+      "final_auditor"
+    ],
+    "missing_required_roles": [],
+    "non_green_required_roles": [
+      "skeptic_reviewer",
+      "correctness_verifier",
+      "contamination_monitor",
+      "final_auditor"
+    ],
+    "reviewer_green": false
+  },
+  "reviewer_penalties": {
+    "skeptic_reviewer": [],
+    "correctness_verifier": [],
+    "contamination_monitor": [],
+    "final_auditor": []
+  },
+  "user_penalties": [],
+  "existing_readiness": {
+    "status": "BLOCKED",
+    "reason": "user readiness is conditional",
+    "manual_close_out": [],
+    "evidence_refs": [],
+    "structure_sound": true,
+    "day0_ready": true,
+    "understanding_ready": true,
+    "local_environments_ready": false,
+    "human_review_ready": true,
+    "plan_evidence_ready": true,
+    "environment_audit_ready": true,
+    "environment_surface": "wsl-ubuntu",
+    "toolchain_ready": true,
+    "context7_ready": true,
+    "dip_ready": true,
+    "production_ready": false,
+    "overall": "conditional",
+    "baseline_stage": "template-ready",
+    "required_local_environment_actions": {
+      "Setup": "python scripts/project_setup.py --bootstrap",
+      "Smoke": "python scripts/run_acceptance.py smoke",
+      "Full Verify": "python scripts/run_acceptance.py full",
+      "Delivery Gate": "python scripts/delivery_gate.py --mode verify"
+    },
+    "toolchain": {
+      "status": "PASS",
+      "summary": "Windows and WSL inventory collection completed.",
+      "attempts": [],
+      "blockers": [],
+      "warnings": [
+        "pnpm",
+        "syncthing",
+        "scoop"
+      ],
+      "evidence": {
+        "inventory_reports": [
+          "reports/inventory.windows.json",
+          "reports/inventory.wsl.json",
+          "reports/toolchain.windows.json",
+          "reports/toolchain.wsl.json",
+          "reports/toolchain.parity.json"
+        ]
+      },
+      "generated_at": "2026-04-17T15:02:14.557040+00:00",
+      "windows_status": "PASS",
+      "wsl_status": "PASS",
+      "parity_status": "PASS"
+    },
+    "context7": {
+      "status": "PASS",
+      "required": true,
+      "detected_changes": [
+        ".codex/config.toml",
+        "app_v2/main/bgeModelInstaller.ts",
+        "app_v2/main/providerWorkspaceManager.ts",
+        "app_v2/renderer/App.tsx",
+        "pyproject.toml",
+        "scripts/bootstrap_real_env.py",
+        "scripts/check_context7.py",
+        "scripts/install_or_repair_toolchain.py",
+        "scripts/update_wsl_and_ubuntu.py",
+        "uv.lock"
+      ],
+      "entries": [
+        {
+          "query": "Codex latest GitHub release and Context7 remote HTTP runtime configuration for the WSL-first reservation-system workspace",
+          "resolved_library_id": "openai/codex@rust-v0.121.0 + context7-remote-http",
+          "docs_retrieved": [
+            "https://github.com/openai/codex/releases/tag/rust-v0.121.0",
+            "management:contracts/context7_policy.json",
+            "management:docs/CONTEXT7_USAGE.md"
+          ],
+          "version_evidence": "Verified latest GitHub release rust-v0.121.0 published on 2026-04-15 and confirmed remote HTTP mode because CONTEXT7_API_KEY is available via windows_env.",
+          "decision_summary": "Keep Context7 in remote HTTP mode for protected dependency and runtime changes, and preserve this evidence record so delivery-gate validation can reuse the current session evidence without falling back to stale reports."
+        }
+      ]
+    },
+    "dip": {
+      "status": "PASS",
+      "summary": "DIP check completed.",
+      "attempts": [],
+      "blockers": [],
+      "warnings": [],
+      "evidence": {},
+      "generated_at": "2026-04-17T15:02:27.550282+00:00",
+      "violations": [],
+      "waivers": [],
+      "scanned_files": 3
+    },
+    "report_path": "/home/andy4917/Dev-Product/reservation-system/reports/user-readiness.json"
+  },
+  "clean_room_verify": {
+    "status": "PASS",
+    "reason": "",
+    "manual_close_out": [],
+    "evidence_refs": [],
+    "mode": "full",
+    "results": [
+      {
+        "command": "python scripts/build_inventory_cpp_core.py",
+        "exit_code": 0,
+        "stdout_summary": "running build_ext\ninventory_cpp_core ready: /home/andy4917/Dev-Product/reservation-system/inventory_cpp_core.cpython-312-x86_64-linux-gnu.so",
+        "stderr_summary": ""
+      },
+      {
+        "command": "python tests/regression_cpp_core_required_py.py",
+        "exit_code": 0,
+        "stdout_summary": "regression_cpp_core_required_py: OK",
+        "stderr_summary": ""
+      },
+      {
+        "command": "npm run app:check",
+        "exit_code": 0,
+        "stdout_summary": "> uhs-desktop-app@0.1.0 app:check\n> tsc -p tsconfig.json --noEmit && npm run app:hygiene:check\n\n\n> uhs-desktop-app@0.1.0 app:hygiene:check\n> python3 tests/regression_cpp_core_required_py.py && python3 scripts/check_contract_hygiene.py --cwd . && node tests/regression_app_v2_operational_hardcoding_guard.mjs\n\nregression_cpp_core_required_py: OK\ncheck_contract_hygiene: OK\nregression_app_v2_operati...",
+        "stderr_summary": ""
+      },
+      {
+        "command": "npm run app:verify:artifacts",
+        "exit_code": 0,
+        "stdout_summary": "> uhs-desktop-app@0.1.0 app:verify:artifacts\n> npm run app:build && node scripts/app_v2_artifact_check.mjs\n\n\n> uhs-desktop-app@0.1.0 app:build\n> npm run app:build:renderer && npm run app:build:main\n\n\n> uhs-desktop-app@0.1.0 app:build:renderer\n> vite build --config app_v2/vite.config.ts\n\nvite v6.4.1 building for production...\ntransforming...\n✓ 31 modules transformed.\nrendering chunks...\ncomputin...",
+        "stderr_summary": ""
+      },
+      {
+        "command": "npm run app:verify:electron-smoke",
+        "exit_code": 0,
+        "stdout_summary": "> uhs-desktop-app@0.1.0 app:verify:electron-smoke\n> node scripts/app_v2_electron_smoke.mjs\n\n\n> uhs-desktop-app@0.1.0 app:build\n> npm run app:build:renderer && npm run app:build:main\n\n\n> uhs-desktop-app@0.1.0 app:build:renderer\n> vite build --config app_v2/vite.config.ts\n\nvite v6.4.1 building for production...\ntransforming...\n✓ 31 modules transformed.\nrendering chunks...\ncomputing gzip size...\n....",
+        "stderr_summary": ""
+      },
+      {
+        "command": "python tests/run_regressions.py",
+        "exit_code": 0,
+        "stdout_summary": "regression_app_v2_arrival_single_board_contract: OK\nregression_app_v2_bge_install_contract: OK\nregression_app_v2_bge_readonly_expansion: OK\nregression_app_v2_branch_contract: OK\nregression_app_v2_cleanup_contract: OK\nregression_app_v2_electron_smoke: OK\nregression_app_v2_end_user_shell_contract: OK\nregression_app_v2_error_management_contract: OK\nregression_app_v2_hybrid_candidate_engine: OK\nreg...",
+        "stderr_summary": ""
+      }
+    ],
+    "report_path": "/home/andy4917/Dev-Product/reservation-system/reports/acceptance-report.json"
+  },
+  "advisories": [],
+  "errors": [],
+  "gate_checks": {
+    "1_disqualifier_check": {
+      "status": "PASS",
+      "reasons": [
+        "no disqualifiers recorded"
+      ]
+    },
+    "2_reviewer_green_check": {
+      "status": "BLOCKED",
+      "reasons": [
+        "reviewer not green: skeptic_reviewer",
+        "reviewer not green: correctness_verifier",
+        "reviewer not green: contamination_monitor",
+        "reviewer not green: final_auditor"
+      ]
+    },
+    "3_trace_presence_check": {
+      "status": "PASS",
+      "reasons": []
+    },
+    "4_axis_floor_check": {
+      "status": "PASS",
+      "reasons": []
+    },
+    "5_platform_cap_check": {
+      "status": "PASS",
+      "reasons": []
+    },
+    "6_existing_readiness_and_manual_close_out_check": {
+      "status": "BLOCKED",
+      "reasons": [
+        "user readiness is conditional"
+      ]
+    },
+    "7_clean_room_verify_check": {
+      "status": "PASS",
+      "reasons": []
+    }
+  },
+  "gate_status": "BLOCKED",
+  "gate_failure_step": "2_reviewer_green_check",
+  "gate_reasons": [
+    "reviewer not green: skeptic_reviewer",
+    "reviewer not green: correctness_verifier",
+    "reviewer not green: contamination_monitor",
+    "reviewer not green: final_auditor"
+  ],
+  "remaining_manual_close_out": [],
+  "final_decision": "BLOCKED"
+}

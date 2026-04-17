@@ -1,0 +1,46 @@
+{
+  "version": 2,
+  "windows_role": "user_environment_ui_plane",
+  "wsl_role": "canonical_build_test_runtime_surface",
+  "canonical_wsl": {
+    "approved_prefixes": [
+      "/home"
+    ],
+    "preferred_root_names": [
+      "code"
+    ],
+    "windows_access_hosts": [
+      "wsl$",
+      "wsl.localhost"
+    ],
+    "disallow_same_host_syncthing_pair": true
+  },
+  "legacy_mount": {
+    "blocked_prefixes": [
+      "windows-user-mount"
+    ],
+    "classification": "evidence_only"
+  },
+  "mirror_mode": {
+    "allowed_wsl_prefixes": [
+      "/srv",
+      "/workspace/mirrors"
+    ],
+    "requires_existing_mirror_or_multi_device": true
+  },
+  "stale_workspace_markers": [
+    "windows-user-mount",
+    "legacy-home-dev-repos"
+  ],
+  "ignored_runtime_paths": [
+    ".git",
+    ".codex/state",
+    ".venv",
+    "node_modules",
+    "dist",
+    "build",
+    "coverage",
+    "logs",
+    "reports"
+  ]
+}

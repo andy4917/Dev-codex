@@ -1,0 +1,382 @@
+{
+  "generated_at": "2026-04-17T15:17:01.556707+00:00",
+  "repo_root": "/home/andy4917/Dev-Management",
+  "authority_path": "/home/andy4917/Dev-Management/contracts/workspace_authority.json",
+  "status": "BLOCKED",
+  "command_results": {
+    "delivery_gate_verify": {
+      "name": "delivery_gate_verify",
+      "command": "/usr/bin/python3 /home/andy4917/Dev-Management/scripts/delivery_gate.py --mode verify --workspace-root /home/andy4917/Dev-Management",
+      "exit_code": 2,
+      "stdout": "BLOCKED\n- reviewer not green: skeptic_reviewer\n- reviewer not green: correctness_verifier\n- reviewer not green: contamination_monitor\n- reviewer not green: final_auditor\n",
+      "stderr": "",
+      "status": "BLOCKED",
+      "report_path": "/home/andy4917/Dev-Management/reports/user-scorecard.json",
+      "gate_status": "BLOCKED",
+      "final_decision": "BLOCKED"
+    },
+    "export_user_score_summary": {
+      "name": "export_user_score_summary",
+      "command": "/usr/bin/python3 /home/andy4917/Dev-Management/scripts/export_user_score_summary.py",
+      "exit_code": 0,
+      "stdout": "1. disqualifier 결과: PASS\n2. trust_score: 30\n3. completion_score: 30\n4. compliance_score: 20\n5. reliability_score: N/A\n6. search_evidence_score: 10\n7. total_score: 90\n8. reviewer별 감점 근거:\n- skeptic_reviewer: none\n- correctness_verifier: none\n- contamination_monitor: none\n- final_auditor: none\n9. 사용자 감점 근거:\n- none\n10. cap 적용 여부와 이유: not applied\n11. gate 상태: BLOCKED\n12. 남은 manual close-out: none\n13. 최종 판정: BLOCKED\n",
+      "stderr": "",
+      "status": "PASS"
+    },
+    "audit_workspace_write_report": {
+      "name": "audit_workspace_write_report",
+      "command": "/usr/bin/python3 /home/andy4917/Dev-Management/scripts/audit_workspace.py --write-report",
+      "exit_code": 0,
+      "stdout": "{\n  \"authority_path\": \"/home/andy4917/Dev-Management/contracts/workspace_authority.json\",\n  \"trusted_projects\": [\n    \"/home/andy4917/Dev-Management\",\n    \"/home/andy4917/Dev-Workflow\",\n    \"/home/andy4917/Dev-Product\"\n  ],\n  \"agents_files\": [\n    \"/home/andy4917/.codex/AGENTS.md\",\n    \"/home/andy4917/Dev-Product/reservation-system/AGENTS.md\",\n    \"/mnt/c/Users/anise/.codex/AGENTS.md\"\n  ],\n  \"config_files\": [\n    \"/home/andy4917/.codex/config.toml\",\n    \"/home/andy4917/Dev-Product/reservation-system/.codex/config.toml\",\n    \"/mnt/c/Users/anise/.codex/config.toml\"\n  ],\n  \"contracts_dirs\": [\n    \"/home/andy4917/Dev-Management/contracts\",\n    \"/home/andy4917/Dev-Product/reservation-system/contracts\"\n  ],\n  \"violations\": {\n    \"unexpected_agents\": [],\n    \"unexpected_configs\": [],\n    \"unexpected_contract_dirs\": []\n  },\n  \"project_rule_leaks\": [],\n  \"project_root_markers_git_only\": true,\n  \"windows_generated_mirror\": true,\n  \"old_path_refs_outside_quarantine\": [],\n  \"status\": \"PASS\"\n}\n",
+      "stderr": "",
+      "status": "PASS",
+      "report_path": "/home/andy4917/Dev-Management/reports/audit.final.json",
+      "audit_status": "PASS"
+    }
+  },
+  "migration_evidence": {
+    "before_after_mapping": [
+      {
+        "before": "/home/andy4917/code/reservation-system",
+        "after": "/home/andy4917/Dev-Product/reservation-system",
+        "action": "moved",
+        "scope": "product-repo",
+        "reason": "Preserve dirty git worktree while relocating into the canonical Dev-Product root."
+      },
+      {
+        "before": "/home/andy4917/code/.latest_reservation_system_canonical",
+        "after": "/home/andy4917/Dev-Management/quarantine/2026-04-16/legacy-markers/.latest_reservation_system_canonical",
+        "action": "quarantined",
+        "scope": "legacy-marker",
+        "reason": "Legacy marker kept only as evidence, not as source of truth."
+      },
+      {
+        "before": "/home/andy4917/code/.latest_reservation_system_verify",
+        "after": "/home/andy4917/Dev-Management/quarantine/2026-04-16/legacy-markers/.latest_reservation_system_verify",
+        "action": "quarantined",
+        "scope": "legacy-marker",
+        "reason": "Legacy marker kept only as evidence, not as source of truth."
+      },
+      {
+        "before": "reservation-system/contracts/{context7_policy,environment_sync_policy,execution_surfaces,experiment_policy,human_bottleneck_rules,memory_policy,spawn_policy,syncthing_policy,toolchain_policy}.json",
+        "after": "/home/andy4917/Dev-Management/contracts",
+        "action": "moved",
+        "scope": "global-contracts",
+        "reason": "Promoted repo-local global policy into Management authority scope."
+      },
+      {
+        "before": "reservation-system/docs/{PROMPT_BLOCKS,LOCAL_ENVIRONMENTS,HOOKS_WSL,TOOLCHAIN,WINDOWS_WSL_RUNTIME_MODEL,PREREQUISITES,SESSION_THREAD_CONTAMINATION_AUDIT,CLOSE_OUT,RUNBOOK,RELEASE_PLAN,ROLLBACK,CONTEXT7_USAGE,DEPENDENCY_INVERSION,SYNCTHING,USER_READINESS,USER_SCORECARD}.md",
+        "after": "/home/andy4917/Dev-Management/docs",
+        "action": "moved",
+        "scope": "global-docs",
+        "reason": "Promoted global operating docs out of the product repo."
+      },
+      {
+        "before": "reservation-system/.agents/skills",
+        "after": "/home/andy4917/Dev-Workflow/skills",
+        "action": "moved",
+        "scope": "workflow-skills",
+        "reason": "Established Dev-Workflow as the canonical optional skill source."
+      },
+      {
+        "before": "reservation-system/scripts/{_common.py,audit_execution_surfaces.py,check_*.py,delivery_gate.py,install_hooks.py,install_or_repair_toolchain.py,session_router.py,update_wsl_and_ubuntu.py,lib/,workspace_alignment/}",
+        "after": "/home/andy4917/Dev-Workflow/scripts",
+        "action": "moved",
+        "scope": "workflow-shared-scripts",
+        "reason": "Centralized reusable validators and orchestration scripts under Dev-Workflow."
+      },
+      {
+        "before": "reservation-system/plugins/codex-vibe-execution",
+        "after": "/home/andy4917/Dev-Workflow/plugins/codex-vibe-execution",
+        "action": "moved",
+        "scope": "workflow-plugin-source",
+        "reason": "Canonicalized shared plugin/template source under Dev-Workflow."
+      },
+      {
+        "before": "reservation-system/.agents/plugins/marketplace.json",
+        "after": "/home/andy4917/Dev-Workflow/.agents/plugins/marketplace.json",
+        "action": "moved",
+        "scope": "workflow-marketplace",
+        "reason": "Canonicalized shared plugin discovery metadata under Dev-Workflow."
+      },
+      {
+        "before": "reservation-system/{config/guardrails,.github/guardrails,.github/workflows/guardrails.yml}",
+        "after": "/home/andy4917/Dev-Workflow",
+        "action": "moved",
+        "scope": "workflow-guardrails",
+        "reason": "Moved reusable guardrail assets out of the product repo."
+      },
+      {
+        "before": "reservation-system/{docs/runtime,.codex_tmp,.codex/agents,.codex/bin,.codex/hooks,.codex/hooks.json,.codex/setup-codex-studio.sh,.githooks}",
+        "after": "/home/andy4917/Dev-Management/quarantine/2026-04-16/product-runtime",
+        "action": "quarantined",
+        "scope": "legacy-runtime",
+        "reason": "Legacy runtime/hook assets removed from canonical policy surface."
+      },
+      {
+        "before": "/mnt/c/Users/anise/.codex/{hooks.json,hooks,config.toml.bak,.codex-global-state.json.bak,.codex-global-state.json.rootfix-20260416-0225.bak,session_index.jsonl.bak,state_5.sqlite.bak,state_5.sqlite.rootfix-20260416-0225.bak}",
+        "after": "/home/andy4917/Dev-Management/quarantine/2026-04-16/windows-codex",
+        "action": "quarantined",
+        "scope": "windows-legacy-runtime",
+        "reason": "Removed legacy backup and hook surfaces from the Windows generated mirror."
+      },
+      {
+        "before": "/home/andy4917/Dev-Management/AGENTS.md",
+        "after": "/home/andy4917/Dev-Management/quarantine/2026-04-16/management-root-duplicate/AGENTS.md",
+        "action": "quarantined",
+        "scope": "duplicate-global-policy",
+        "reason": "Root-level AGENTS duplicate removed in favor of generated ~/.codex/AGENTS.md."
+      }
+    ],
+    "canonical_tree": {
+      "canonical_roots": {
+        "management": "/home/andy4917/Dev-Management",
+        "workflow": "/home/andy4917/Dev-Workflow",
+        "product": "/home/andy4917/Dev-Product"
+      },
+      "management": {
+        "root": "/home/andy4917/Dev-Management",
+        "exists": true,
+        "top_level_entries": [
+          "contracts",
+          "docs",
+          "migration_manifest.json",
+          "quarantine",
+          "reports",
+          "scripts",
+          "tests"
+        ]
+      },
+      "workflow": {
+        "root": "/home/andy4917/Dev-Workflow",
+        "exists": true,
+        "top_level_entries": [
+          "config",
+          "plugins",
+          "reports",
+          "scripts",
+          "skills",
+          "tests"
+        ]
+      },
+      "product": {
+        "root": "/home/andy4917/Dev-Product",
+        "exists": true,
+        "top_level_entries": [
+          "reservation-system"
+        ]
+      },
+      "inventory_after_report": {
+        "generated_at": "2026-04-16",
+        "canonical_roots": [
+          "/home/andy4917/Dev-Management",
+          "/home/andy4917/Dev-Product",
+          "/home/andy4917/Dev-Workflow"
+        ],
+        "agents_files": [
+          "/home/andy4917/.codex/AGENTS.md",
+          "/home/andy4917/Dev-Product/reservation-system/AGENTS.md",
+          "/mnt/c/Users/anise/.codex/AGENTS.md"
+        ],
+        "config_files": [
+          "/home/andy4917/.codex/config.toml",
+          "/home/andy4917/Dev-Product/reservation-system/.codex/config.toml",
+          "/mnt/c/Users/anise/.codex/config.toml"
+        ],
+        "policy_contract_dirs": [
+          "/home/andy4917/Dev-Management/contracts",
+          "/home/andy4917/Dev-Product/reservation-system/contracts"
+        ],
+        "workflow_script_source": [
+          "/home/andy4917/Dev-Workflow/scripts/__pycache__",
+          "/home/andy4917/Dev-Workflow/scripts/_common.py",
+          "/home/andy4917/Dev-Workflow/scripts/audit_execution_surfaces.py",
+          "/home/andy4917/Dev-Workflow/scripts/check_context7.py",
+          "/home/andy4917/Dev-Workflow/scripts/check_dip.py",
+          "/home/andy4917/Dev-Workflow/scripts/check_hook_logs.py",
+          "/home/andy4917/Dev-Workflow/scripts/check_local_environments.py",
+          "/home/andy4917/Dev-Workflow/scripts/check_path_visibility.py",
+          "/home/andy4917/Dev-Workflow/scripts/check_runaway.py",
+          "/home/andy4917/Dev-Workflow/scripts/check_sync_conflicts.py",
+          "/home/andy4917/Dev-Workflow/scripts/check_syncthing.py",
+          "/home/andy4917/Dev-Workflow/scripts/check_toolchain.py",
+          "/home/andy4917/Dev-Workflow/scripts/check_traceability.py",
+          "/home/andy4917/Dev-Workflow/scripts/check_unknowns.py",
+          "/home/andy4917/Dev-Workflow/scripts/check_wsl_status.py",
+          "/home/andy4917/Dev-Workflow/scripts/delivery_gate.py",
+          "/home/andy4917/Dev-Workflow/scripts/guardrails",
+          "/home/andy4917/Dev-Workflow/scripts/install_hooks.py",
+          "/home/andy4917/Dev-Workflow/scripts/install_or_repair_toolchain.py",
+          "/home/andy4917/Dev-Workflow/scripts/lib",
+          "/home/andy4917/Dev-Workflow/scripts/session_router.py",
+          "/home/andy4917/Dev-Workflow/scripts/update_wsl_and_ubuntu.py",
+          "/home/andy4917/Dev-Workflow/scripts/workspace_alignment"
+        ],
+        "workflow_skill_source": [
+          "/home/andy4917/Dev-Workflow/skills/acceptance-writer",
+          "/home/andy4917/Dev-Workflow/skills/anti-cheat-auditor",
+          "/home/andy4917/Dev-Workflow/skills/architecture-pack",
+          "/home/andy4917/Dev-Workflow/skills/benchmark-packet",
+          "/home/andy4917/Dev-Workflow/skills/delivery-gate-reviewer",
+          "/home/andy4917/Dev-Workflow/skills/design-pack",
+          "/home/andy4917/Dev-Workflow/skills/env-audit",
+          "/home/andy4917/Dev-Workflow/skills/hook-log-review",
+          "/home/andy4917/Dev-Workflow/skills/ops-packet",
+          "/home/andy4917/Dev-Workflow/skills/proof-runner",
+          "/home/andy4917/Dev-Workflow/skills/refactor-guard",
+          "/home/andy4917/Dev-Workflow/skills/review-packet",
+          "/home/andy4917/Dev-Workflow/skills/scope-lock",
+          "/home/andy4917/Dev-Workflow/skills/session-router"
+        ],
+        "product_shared_script_symlinks": [
+          "/home/andy4917/Dev-Product/reservation-system/scripts/_common.py",
+          "/home/andy4917/Dev-Product/reservation-system/scripts/audit_execution_surfaces.py",
+          "/home/andy4917/Dev-Product/reservation-system/scripts/check_context7.py",
+          "/home/andy4917/Dev-Product/reservation-system/scripts/check_dip.py",
+          "/home/andy4917/Dev-Product/reservation-system/scripts/check_hook_logs.py",
+          "/home/andy4917/Dev-Product/reservation-system/scripts/check_local_environments.py",
+          "/home/andy4917/Dev-Product/reservation-system/scripts/check_path_visibility.py",
+          "/home/andy4917/Dev-Product/reservation-system/scripts/check_runaway.py",
+          "/home/andy4917/Dev-Product/reservation-system/scripts/check_sync_conflicts.py",
+          "/home/andy4917/Dev-Product/reservation-system/scripts/check_syncthing.py",
+          "/home/andy4917/Dev-Product/reservation-system/scripts/check_toolchain.py",
+          "/home/andy4917/Dev-Product/reservation-system/scripts/check_traceability.py",
+          "/home/andy4917/Dev-Product/reservation-system/scripts/check_unknowns.py",
+          "/home/andy4917/Dev-Product/reservation-system/scripts/check_wsl_status.py",
+          "/home/andy4917/Dev-Product/reservation-system/scripts/delivery_gate.py",
+          "/home/andy4917/Dev-Product/reservation-system/scripts/install_hooks.py",
+          "/home/andy4917/Dev-Product/reservation-system/scripts/install_or_repair_toolchain.py",
+          "/home/andy4917/Dev-Product/reservation-system/scripts/lib",
+          "/home/andy4917/Dev-Product/reservation-system/scripts/session_router.py",
+          "/home/andy4917/Dev-Product/reservation-system/scripts/update_wsl_and_ubuntu.py",
+          "/home/andy4917/Dev-Product/reservation-system/scripts/workspace_alignment"
+        ],
+        "windows_generated_mirror": {
+          "agents": "/mnt/c/Users/anise/.codex/AGENTS.md",
+          "config": "/mnt/c/Users/anise/.codex/config.toml",
+          "skills": "/mnt/c/Users/anise/.codex/skills/dev-workflow"
+        }
+      }
+    },
+    "surviving_agents_files": [
+      {
+        "path": "/home/andy4917/.codex/AGENTS.md",
+        "justification": "Allowed because it is the generated Linux runtime agents target from workspace authority."
+      },
+      {
+        "path": "/home/andy4917/Dev-Product/reservation-system/AGENTS.md",
+        "justification": "Allowed because project-specific rules are allowed only inside Dev-Product/<project>."
+      },
+      {
+        "path": "/mnt/c/Users/anise/.codex/AGENTS.md",
+        "justification": "Allowed because it is the generated Windows mirror agents target from workspace authority."
+      }
+    ],
+    "surviving_config_files": [
+      {
+        "path": "/home/andy4917/.codex/config.toml",
+        "justification": "Allowed because it is the generated Linux runtime config target from workspace authority."
+      },
+      {
+        "path": "/home/andy4917/Dev-Product/reservation-system/.codex/config.toml",
+        "justification": "Allowed because project-specific rules are allowed only inside Dev-Product/<project>."
+      },
+      {
+        "path": "/mnt/c/Users/anise/.codex/config.toml",
+        "justification": "Allowed because it is the generated Windows mirror config target from workspace authority."
+      }
+    ],
+    "cleanup_summary": {
+      "generated_at": "2026-04-16",
+      "quarantine_root": "/home/andy4917/Dev-Management/quarantine/2026-04-16",
+      "moved_to_management": [
+        "/home/andy4917/Dev-Management/contracts",
+        "/home/andy4917/Dev-Management/docs"
+      ],
+      "moved_to_workflow": [
+        "/home/andy4917/Dev-Workflow/scripts",
+        "/home/andy4917/Dev-Workflow/skills",
+        "/home/andy4917/Dev-Workflow/plugins/codex-vibe-execution",
+        "/home/andy4917/Dev-Workflow/.agents/plugins/marketplace.json",
+        "/home/andy4917/Dev-Workflow/config/guardrails",
+        "/home/andy4917/Dev-Workflow/.github/guardrails",
+        "/home/andy4917/Dev-Workflow/.github/workflows/guardrails.yml"
+      ],
+      "quarantined": [
+        "/home/andy4917/Dev-Management/quarantine/2026-04-16/legacy-markers",
+        "/home/andy4917/Dev-Management/quarantine/2026-04-16/product-runtime",
+        "/home/andy4917/Dev-Management/quarantine/2026-04-16/windows-codex",
+        "/home/andy4917/Dev-Management/quarantine/2026-04-16/management-root-duplicate",
+        "/home/andy4917/Dev-Management/quarantine/2026-04-16/preexisting-dev-management-agent"
+      ],
+      "symlinked": [
+        "/home/andy4917/.codex/skills/dev-workflow",
+        "/home/andy4917/.codex/workspace_authority.json",
+        "/home/andy4917/Dev-Workflow/plugins/codex-vibe-execution/skills",
+        "/home/andy4917/Dev-Product/reservation-system/scripts/_common.py",
+        "/home/andy4917/Dev-Product/reservation-system/scripts/delivery_gate.py",
+        "/home/andy4917/Dev-Product/reservation-system/scripts/lib",
+        "/home/andy4917/Dev-Product/reservation-system/scripts/workspace_alignment"
+      ],
+      "deleted": [
+        "/home/andy4917/code (removed after migration because only legacy marker files remained)",
+        "empty repo-local global-policy directories under reservation-system (.agents, plugins, config, .github/workflows)"
+      ],
+      "generated_runtime": [
+        "/home/andy4917/.codex/AGENTS.md",
+        "/home/andy4917/.codex/config.toml",
+        "/mnt/c/Users/anise/.codex/AGENTS.md",
+        "/mnt/c/Users/anise/.codex/config.toml",
+        "/mnt/c/Users/anise/.codex/skills/dev-workflow"
+      ],
+      "counts": {
+        "moved_to_management": 2,
+        "moved_to_workflow": 7,
+        "quarantined": 5,
+        "deleted": 2
+      }
+    },
+    "git_root_marker_proof": {
+      "expected_markers": [
+        ".git"
+      ],
+      "linux_config_path": "/home/andy4917/.codex/config.toml",
+      "linux_config_markers": [
+        ".git"
+      ],
+      "windows_config_path": "/mnt/c/Users/anise/.codex/config.toml",
+      "windows_config_markers": [
+        ".git"
+      ],
+      "audit_report_value": true,
+      "status": "PASS"
+    },
+    "windows_mirror_proof": {
+      "linux_agents_path": "/home/andy4917/.codex/AGENTS.md",
+      "windows_agents_path": "/mnt/c/Users/anise/.codex/AGENTS.md",
+      "linux_agents_sha256": "496eaee8f197e3205aea7d16e862465143b8783da00f4777904e1e164cdc0ea2",
+      "windows_agents_sha256": "b3e4ffd0e205dee145c3b025c106ad7bfd70d47ab32200cb773636bde560e43d",
+      "linux_config_path": "/home/andy4917/.codex/config.toml",
+      "windows_config_path": "/mnt/c/Users/anise/.codex/config.toml",
+      "linux_config_sha256": "244205e1b4f2fdb593cdaae2b4157e382fd65f4393a6443a8c6e851325d0b0ca",
+      "windows_config_sha256": "43d856c06f2e63be5a0040a637ff93d560f431c06a9b3abe148a4d86c9e5eb33",
+      "expected_generated_header": "GENERATED - DO NOT EDIT",
+      "agents_header_ok": true,
+      "config_header_ok": true,
+      "agents_body_matches_linux": true,
+      "config_body_matches_linux": true,
+      "audit_report_value": true,
+      "status": "PASS"
+    },
+    "hardcoding_legacy_duplicate_audit": {
+      "violations": {
+        "unexpected_agents": [],
+        "unexpected_configs": [],
+        "unexpected_contract_dirs": []
+      },
+      "project_rule_leaks": [],
+      "old_path_refs_outside_quarantine": [],
+      "status": "PASS"
+    }
+  }
+}

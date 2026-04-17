@@ -1,0 +1,24 @@
+{
+  "status": "PASS",
+  "summary": "Toolchain parity collected across Windows and WSL.",
+  "attempts": [],
+  "blockers": [],
+  "warnings": [
+    "pnpm"
+  ],
+  "evidence": {
+    "windows_project_path": "\\\\wsl$\\Ubuntu\\home\\andy4917\\Dev-Management",
+    "wsl_project_path": "/home/andy4917/Dev-Management"
+  },
+  "generated_at": "2026-04-17T12:00:21.251501+00:00",
+  "mismatches": [],
+  "optional_mismatches": [
+    {
+      "tool": "pnpm",
+      "windows_tool": "pnpm",
+      "wsl_tool": "pnpm",
+      "windows": false,
+      "wsl": true
+    }
+  ]
+}

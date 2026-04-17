@@ -1,0 +1,17 @@
+{
+  "checkpoint_on_thread_end": true,
+  "append_daily_note": true,
+  "write_issue_summary": true,
+  "decision_log": "memory/decision_log.jsonl",
+  "issue_summary_dir": "memory/issue_summaries",
+  "knowledge_paths": {
+    "work_items": "knowledge/notes/work-items",
+    "evidence": "knowledge/notes/evidence",
+    "decisions": "knowledge/notes/decisions",
+    "research": "knowledge/notes/research",
+    "daily": "knowledge/notes/daily",
+    "views": "knowledge/views",
+    "canvases": "knowledge/canvases",
+    "templates": "knowledge/templates"
+  }
+}

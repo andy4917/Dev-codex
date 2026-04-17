@@ -1,0 +1,24 @@
+{
+  "status": "PASS",
+  "summary": "Windows and WSL inventory collection completed.",
+  "attempts": [],
+  "blockers": [],
+  "warnings": [
+    "pnpm",
+    "syncthing",
+    "scoop"
+  ],
+  "evidence": {
+    "inventory_reports": [
+      "reports/inventory.windows.json",
+      "reports/inventory.wsl.json",
+      "reports/toolchain.windows.json",
+      "reports/toolchain.wsl.json",
+      "reports/toolchain.parity.json"
+    ]
+  },
+  "generated_at": "2026-04-17T12:00:21.252618+00:00",
+  "windows_status": "PASS",
+  "wsl_status": "PASS",
+  "parity_status": "PASS"
+}

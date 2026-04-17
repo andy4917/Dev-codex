@@ -1,0 +1,90 @@
+{
+  "context_version": 1,
+  "status": "READY",
+  "task_id": "reservation-system-verify",
+  "workspace_root": "/home/andy4917/Dev-Product/reservation-system",
+  "delivery_mode": "verify",
+  "trace_id": "trace-0d51c24d6c80b096",
+  "codex_project_id": "reservation-system",
+  "git_sha": "3373303dba3217feb67d974d401d34bff9b722e0",
+  "worktree_id": "/home/andy4917/Dev-Product/reservation-system",
+  "fresh_evidence_manifest_path": "/home/andy4917/Dev-Product/reservation-system/reports/authority/fresh-evidence.json",
+  "task_context": {
+    "small_l0": false,
+    "completion_review_required": true,
+    "contamination_review_required": false,
+    "final_auditor_required": true,
+    "trace_required": true,
+    "reliability_applicable": false,
+    "external_calls": false,
+    "reliability_evidence_present": false,
+    "search_evidence_applicable": true,
+    "search_engineering_core_path": false,
+    "retrieval_canonical_decision_path": false,
+    "external_docs_dependency": true,
+    "untrusted_context": false,
+    "web_or_mcp_access": true,
+    "security_sensitive": false,
+    "security_evidence_present": false
+  },
+  "evidence_inputs": {
+    "trace_report_path": "/home/andy4917/Dev-Product/reservation-system/reports/traceability-report.json",
+    "existing_readiness_report_path": "/home/andy4917/Dev-Product/reservation-system/reports/user-readiness.json",
+    "clean_room_verify_report_path": "/home/andy4917/Dev-Product/reservation-system/reports/acceptance-report.json"
+  },
+  "trace": {
+    "required": true,
+    "status": "PASS",
+    "evidence_refs": [
+      "/home/andy4917/Dev-Product/reservation-system/reports/traceability-report.json"
+    ],
+    "notes": ""
+  },
+  "existing_readiness": {
+    "status": "BLOCKED",
+    "reason": "user readiness is conditional",
+    "manual_close_out": [],
+    "evidence_refs": []
+  },
+  "clean_room_verify": {
+    "status": "PASS",
+    "reason": "",
+    "manual_close_out": [],
+    "evidence_refs": []
+  },
+  "user_review": {
+    "status": "PENDING",
+    "penalties": [],
+    "notes": ""
+  },
+  "disqualifiers": [],
+  "reviewers": {
+    "skeptic_reviewer": {
+      "status": "PENDING",
+      "green": false,
+      "penalties": [],
+      "notes": ""
+    },
+    "correctness_verifier": {
+      "status": "PENDING",
+      "green": false,
+      "penalties": [],
+      "notes": ""
+    },
+    "contamination_monitor": {
+      "status": "PENDING",
+      "green": false,
+      "penalties": [],
+      "notes": ""
+    },
+    "final_auditor": {
+      "status": "PENDING",
+      "green": false,
+      "penalties": [],
+      "notes": ""
+    }
+  },
+  "authoritative_context_path": "/mnt/c/Users/anise/.codex/state/scorecard-context/reservation-system/trace-0d51c24d6c80b096.json",
+  "authoritative_context_hash": "187937b18369c97017b3dd7d05a94b39acb66b1d82913eae743f9262b1d6ee21",
+  "authority_audit_path": "/home/andy4917/Dev-Product/reservation-system/reports/scorecard-authority-audit.json"
+}

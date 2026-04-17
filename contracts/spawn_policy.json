@@ -1,0 +1,20 @@
+{
+  "auto_spawn": {
+    "enabled": true,
+    "max_spawn_per_turn": 2,
+    "max_depth": 1
+  },
+  "simple_task_if": [
+    "tier in [L0, L1]",
+    "no_open_unknowns_of_class_U2_or_U3",
+    "no_contract_or_api_or_ops_impact",
+    "task_kind in [file_search, doc_compare, local_fix, smoke_verify]"
+  ],
+  "main_agent_only_if": [
+    "core_algorithm",
+    "schema_change",
+    "integration_boundary",
+    "security",
+    "release_or_operate"
+  ]
+}

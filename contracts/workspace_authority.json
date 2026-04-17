@@ -1,0 +1,230 @@
+{
+  "version": 1,
+  "canonical_roots": {
+    "management": "/home/andy4917/Dev-Management",
+    "workflow": "/home/andy4917/Dev-Workflow",
+    "product": "/home/andy4917/Dev-Product"
+  },
+  "classification_rules": {
+    "management": {
+      "description": "Global authority, operating contracts, audits, migration manifests, quarantine records, and generated runtime orchestration.",
+      "allowed_categories": [
+        "authority",
+        "global_contracts",
+        "global_operating_docs",
+        "migration_manifests",
+        "audit_reports",
+        "quarantine",
+        "runtime_generation_scripts"
+      ],
+      "promoted_contracts": [
+        "context7_policy.json",
+        "disqualifier_policy.json",
+        "environment_sync_policy.json",
+        "execution_surfaces.json",
+        "experiment_policy.json",
+        "human_bottleneck_rules.json",
+        "memory_policy.json",
+        "spawn_policy.json",
+        "syncthing_policy.json",
+        "toolchain_policy.json",
+        "user_score_policy.json"
+      ],
+      "promoted_docs": [
+        "CLOSE_OUT.md",
+        "CONTEXT7_USAGE.md",
+        "DEPENDENCY_INVERSION.md",
+        "HOOKS_WSL.md",
+        "LOCAL_ENVIRONMENTS.md",
+        "PREREQUISITES.md",
+        "PROMPT_BLOCKS.md",
+        "RELEASE_PLAN.md",
+        "ROLLBACK.md",
+        "RUNBOOK.md",
+        "SESSION_THREAD_CONTAMINATION_AUDIT.md",
+        "SYNCTHING.md",
+        "TOOLCHAIN.md",
+        "USER_READINESS.md",
+        "USER_SCORECARD.md",
+        "WINDOWS_WSL_RUNTIME_MODEL.md"
+      ]
+    },
+    "workflow": {
+      "description": "Reusable workflow assets, validators, templates, plugins, and optional skills with one canonical source.",
+      "allowed_categories": [
+        "shared_validators",
+        "shared_orchestration",
+        "shared_plugins",
+        "shared_guardrails",
+        "shared_templates",
+        "shared_skills"
+      ],
+      "shared_scripts": [
+        "audit_execution_surfaces.py",
+        "check_context7.py",
+        "check_dip.py",
+        "check_hook_logs.py",
+        "check_local_environments.py",
+        "check_path_visibility.py",
+        "check_runaway.py",
+        "check_sync_conflicts.py",
+        "check_syncthing.py",
+        "check_toolchain.py",
+        "check_traceability.py",
+        "check_unknowns.py",
+        "check_wsl_status.py",
+        "delivery_gate.py",
+        "install_hooks.py",
+        "install_or_repair_toolchain.py",
+        "session_router.py",
+        "update_wsl_and_ubuntu.py",
+        "_common.py"
+      ],
+      "shared_script_dirs": [
+        "guardrails",
+        "lib",
+        "workspace_alignment"
+      ],
+      "canonical_skill_source": "skills",
+      "plugin_source": "plugins/codex-vibe-execution",
+      "marketplace_source": ".agents/plugins/marketplace.json",
+      "guardrail_sources": [
+        "config/guardrails",
+        ".github/guardrails",
+        ".github/workflows/guardrails.yml"
+      ]
+    },
+    "product": {
+      "description": "Product repositories and project-local rules only.",
+      "allowed_repo_local_rule_paths": [
+        "AGENTS.md",
+        ".codex/config.toml",
+        "contracts/",
+        "scripts/"
+      ],
+      "allowed_project_contracts": [
+        "acceptance.json",
+        "benchmark_tasks.json",
+        "dip_policy.json",
+        "project_policy.json",
+        "risk_register.json",
+        "traceability.json",
+        "unknowns.json"
+      ],
+      "forbidden_repo_local_policy_categories": [
+        "global_contracts",
+        "global_hooks",
+        "global_agents",
+        "global_plugins",
+        "global_guardrails",
+        "global_runtime_docs"
+      ]
+    }
+  },
+  "hardcoding_definition": {
+    "summary": "Any duplicate or stale policy, topology, path, classification, legacy split, fallback branch, shadow config, backup policy copy, or deprecated output that exists outside this authority file or generated runtime files.",
+    "forbidden_patterns": [
+      "legacy branch",
+      "fallback branch",
+      "old config split",
+      "shadow config",
+      "backup copy",
+      "deprecated copy"
+    ],
+    "path_rules": {
+      "canonical_root_paths_allowed_only_in": [
+        "contracts/workspace_authority.json",
+        "generated_runtime_files"
+      ],
+      "historical_evidence_allowlist": [
+        "migration_manifest.json"
+      ],
+      "legacy_repo_paths_to_remove": [
+        "/home/andy4917/code/reservation-system",
+        "~/code/reservation-system",
+        "\\\\wsl$\\Ubuntu\\home\\andy4917\\code\\reservation-system",
+        "\\\\wsl.localhost\\Ubuntu\\home\\andy4917\\code\\reservation-system"
+      ]
+    }
+  },
+  "runtime_state_exclusions": [
+    "auth",
+    "history",
+    "logs",
+    "caches",
+    "sqlite",
+    "session_index",
+    "sessions",
+    "shell_snapshots",
+    "recent_workspaces",
+    "favorites",
+    "installation_id",
+    "models_cache",
+    "tmp",
+    "reports",
+    "memory",
+    "knowledge"
+  ],
+  "cleanup_policy": {
+    "quarantine_root": "/home/andy4917/Dev-Management/quarantine/2026-04-16",
+    "ambiguous_items": "move_to_quarantine",
+    "exact_duplicates": "delete_only_after_checksum_match_or_generated_match",
+    "legacy_backups": "move_to_quarantine",
+    "legacy_hooks": "move_to_quarantine",
+    "runtime_state": "preserve_as_state_not_policy",
+    "repo_local_global_policy": "move_out_of_product_repo",
+    "old_marker_files": "move_to_quarantine",
+    "final_rescan_required": true
+  },
+  "generation_targets": {
+    "global_runtime": {
+      "linux": {
+        "agents": "/home/andy4917/.codex/AGENTS.md",
+        "config": "/home/andy4917/.codex/config.toml"
+      },
+      "windows_mirror": {
+        "agents": "/mnt/c/Users/anise/.codex/AGENTS.md",
+        "config": "/mnt/c/Users/anise/.codex/config.toml",
+        "generated_header": "GENERATED - DO NOT EDIT"
+      }
+    },
+    "scorecard": {
+      "policy": "/home/andy4917/Dev-Management/contracts/user_score_policy.json",
+      "disqualifiers": "/home/andy4917/Dev-Management/contracts/disqualifier_policy.json",
+      "review_snapshot": "/home/andy4917/Dev-Management/reports/user-scorecard.review.json",
+      "reviewer_verdict_root": "/home/andy4917/.codex/state/reviewer-verdicts",
+      "context_root": "/home/andy4917/.codex/state/scorecard-context",
+      "workspace_authority_root": "/home/andy4917/.codex/state/workspace-authority",
+      "report": "/home/andy4917/Dev-Management/reports/user-scorecard.json",
+      "delivery_gate": "/home/andy4917/Dev-Management/scripts/delivery_gate.py",
+      "summary_export": "/home/andy4917/Dev-Management/scripts/export_user_score_summary.py"
+    },
+    "global_config": {
+      "approval_policy": "on-request",
+      "sandbox_mode": "workspace-write",
+      "web_search": "cached",
+      "project_root_markers": [
+        ".git"
+      ],
+      "network_access": true,
+      "trusted_projects": [
+        "/home/andy4917/Dev-Management",
+        "/home/andy4917/Dev-Workflow",
+        "/home/andy4917/Dev-Product"
+      ],
+      "enabled_plugins": [
+        "github@openai-curated"
+      ]
+    },
+    "skill_exposure": {
+      "wsl_symlink": {
+        "target": "/home/andy4917/Dev-Workflow/skills",
+        "link": "/home/andy4917/.codex/skills/dev-workflow"
+      },
+      "windows_generated_mirror": {
+        "source": "/home/andy4917/Dev-Workflow/skills",
+        "target": "/mnt/c/Users/anise/.codex/skills/dev-workflow"
+      }
+    }
+  }
+}

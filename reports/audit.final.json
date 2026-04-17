@@ -1,0 +1,32 @@
+{
+  "authority_path": "/home/andy4917/Dev-Management/contracts/workspace_authority.json",
+  "trusted_projects": [
+    "/home/andy4917/Dev-Management",
+    "/home/andy4917/Dev-Workflow",
+    "/home/andy4917/Dev-Product"
+  ],
+  "agents_files": [
+    "/home/andy4917/.codex/AGENTS.md",
+    "/home/andy4917/Dev-Product/reservation-system/AGENTS.md",
+    "/mnt/c/Users/anise/.codex/AGENTS.md"
+  ],
+  "config_files": [
+    "/home/andy4917/.codex/config.toml",
+    "/home/andy4917/Dev-Product/reservation-system/.codex/config.toml",
+    "/mnt/c/Users/anise/.codex/config.toml"
+  ],
+  "contracts_dirs": [
+    "/home/andy4917/Dev-Management/contracts",
+    "/home/andy4917/Dev-Product/reservation-system/contracts"
+  ],
+  "violations": {
+    "unexpected_agents": [],
+    "unexpected_configs": [],
+    "unexpected_contract_dirs": []
+  },
+  "project_rule_leaks": [],
+  "project_root_markers_git_only": true,
+  "windows_generated_mirror": true,
+  "old_path_refs_outside_quarantine": [],
+  "status": "PASS"
+}

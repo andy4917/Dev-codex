@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "required_modes": [
+    "mirror"
+  ],
+  "required_folder_type": "sendreceive",
+  "required_folder_settings": {
+    "fsWatcherEnabled": true,
+    "ignorePerms": true,
+    "autoNormalize": true
+  },
+  "required_versioning": {
+    "type": "simple",
+    "keep": 5
+  },
+  "conflict_glob": ".sync-conflict-*",
+  "default_ignore_patterns": [
+    ".git",
+    ".codex/state",
+    ".venv",
+    "node_modules",
+    "dist",
+    "build",
+    "coverage",
+    ".pytest_cache",
+    ".mypy_cache",
+    ".ruff_cache",
+    "logs",
+    "reports"
+  ]
+}

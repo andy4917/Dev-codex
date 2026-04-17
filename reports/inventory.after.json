@@ -1,0 +1,91 @@
+{
+  "generated_at": "2026-04-16",
+  "canonical_roots": [
+    "/home/andy4917/Dev-Management",
+    "/home/andy4917/Dev-Product",
+    "/home/andy4917/Dev-Workflow"
+  ],
+  "agents_files": [
+    "/home/andy4917/.codex/AGENTS.md",
+    "/home/andy4917/Dev-Product/reservation-system/AGENTS.md",
+    "/mnt/c/Users/anise/.codex/AGENTS.md"
+  ],
+  "config_files": [
+    "/home/andy4917/.codex/config.toml",
+    "/home/andy4917/Dev-Product/reservation-system/.codex/config.toml",
+    "/mnt/c/Users/anise/.codex/config.toml"
+  ],
+  "policy_contract_dirs": [
+    "/home/andy4917/Dev-Management/contracts",
+    "/home/andy4917/Dev-Product/reservation-system/contracts"
+  ],
+  "workflow_script_source": [
+    "/home/andy4917/Dev-Workflow/scripts/__pycache__",
+    "/home/andy4917/Dev-Workflow/scripts/_common.py",
+    "/home/andy4917/Dev-Workflow/scripts/audit_execution_surfaces.py",
+    "/home/andy4917/Dev-Workflow/scripts/check_context7.py",
+    "/home/andy4917/Dev-Workflow/scripts/check_dip.py",
+    "/home/andy4917/Dev-Workflow/scripts/check_hook_logs.py",
+    "/home/andy4917/Dev-Workflow/scripts/check_local_environments.py",
+    "/home/andy4917/Dev-Workflow/scripts/check_path_visibility.py",
+    "/home/andy4917/Dev-Workflow/scripts/check_runaway.py",
+    "/home/andy4917/Dev-Workflow/scripts/check_sync_conflicts.py",
+    "/home/andy4917/Dev-Workflow/scripts/check_syncthing.py",
+    "/home/andy4917/Dev-Workflow/scripts/check_toolchain.py",
+    "/home/andy4917/Dev-Workflow/scripts/check_traceability.py",
+    "/home/andy4917/Dev-Workflow/scripts/check_unknowns.py",
+    "/home/andy4917/Dev-Workflow/scripts/check_wsl_status.py",
+    "/home/andy4917/Dev-Workflow/scripts/delivery_gate.py",
+    "/home/andy4917/Dev-Workflow/scripts/guardrails",
+    "/home/andy4917/Dev-Workflow/scripts/install_hooks.py",
+    "/home/andy4917/Dev-Workflow/scripts/install_or_repair_toolchain.py",
+    "/home/andy4917/Dev-Workflow/scripts/lib",
+    "/home/andy4917/Dev-Workflow/scripts/session_router.py",
+    "/home/andy4917/Dev-Workflow/scripts/update_wsl_and_ubuntu.py",
+    "/home/andy4917/Dev-Workflow/scripts/workspace_alignment"
+  ],
+  "workflow_skill_source": [
+    "/home/andy4917/Dev-Workflow/skills/acceptance-writer",
+    "/home/andy4917/Dev-Workflow/skills/anti-cheat-auditor",
+    "/home/andy4917/Dev-Workflow/skills/architecture-pack",
+    "/home/andy4917/Dev-Workflow/skills/benchmark-packet",
+    "/home/andy4917/Dev-Workflow/skills/delivery-gate-reviewer",
+    "/home/andy4917/Dev-Workflow/skills/design-pack",
+    "/home/andy4917/Dev-Workflow/skills/env-audit",
+    "/home/andy4917/Dev-Workflow/skills/hook-log-review",
+    "/home/andy4917/Dev-Workflow/skills/ops-packet",
+    "/home/andy4917/Dev-Workflow/skills/proof-runner",
+    "/home/andy4917/Dev-Workflow/skills/refactor-guard",
+    "/home/andy4917/Dev-Workflow/skills/review-packet",
+    "/home/andy4917/Dev-Workflow/skills/scope-lock",
+    "/home/andy4917/Dev-Workflow/skills/session-router"
+  ],
+  "product_shared_script_symlinks": [
+    "/home/andy4917/Dev-Product/reservation-system/scripts/_common.py",
+    "/home/andy4917/Dev-Product/reservation-system/scripts/audit_execution_surfaces.py",
+    "/home/andy4917/Dev-Product/reservation-system/scripts/check_context7.py",
+    "/home/andy4917/Dev-Product/reservation-system/scripts/check_dip.py",
+    "/home/andy4917/Dev-Product/reservation-system/scripts/check_hook_logs.py",
+    "/home/andy4917/Dev-Product/reservation-system/scripts/check_local_environments.py",
+    "/home/andy4917/Dev-Product/reservation-system/scripts/check_path_visibility.py",
+    "/home/andy4917/Dev-Product/reservation-system/scripts/check_runaway.py",
+    "/home/andy4917/Dev-Product/reservation-system/scripts/check_sync_conflicts.py",
+    "/home/andy4917/Dev-Product/reservation-system/scripts/check_syncthing.py",
+    "/home/andy4917/Dev-Product/reservation-system/scripts/check_toolchain.py",
+    "/home/andy4917/Dev-Product/reservation-system/scripts/check_traceability.py",
+    "/home/andy4917/Dev-Product/reservation-system/scripts/check_unknowns.py",
+    "/home/andy4917/Dev-Product/reservation-system/scripts/check_wsl_status.py",
+    "/home/andy4917/Dev-Product/reservation-system/scripts/delivery_gate.py",
+    "/home/andy4917/Dev-Product/reservation-system/scripts/install_hooks.py",
+    "/home/andy4917/Dev-Product/reservation-system/scripts/install_or_repair_toolchain.py",
+    "/home/andy4917/Dev-Product/reservation-system/scripts/lib",
+    "/home/andy4917/Dev-Product/reservation-system/scripts/session_router.py",
+    "/home/andy4917/Dev-Product/reservation-system/scripts/update_wsl_and_ubuntu.py",
+    "/home/andy4917/Dev-Product/reservation-system/scripts/workspace_alignment"
+  ],
+  "windows_generated_mirror": {
+    "agents": "/mnt/c/Users/anise/.codex/AGENTS.md",
+    "config": "/mnt/c/Users/anise/.codex/config.toml",
+    "skills": "/mnt/c/Users/anise/.codex/skills/dev-workflow"
+  }
+}

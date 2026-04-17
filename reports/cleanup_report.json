@@ -1,0 +1,44 @@
+{
+  "generated_at": "2026-04-16",
+  "quarantine_root": "/home/andy4917/Dev-Management/quarantine/2026-04-16",
+  "moved_to_management": [
+    "/home/andy4917/Dev-Management/contracts",
+    "/home/andy4917/Dev-Management/docs"
+  ],
+  "moved_to_workflow": [
+    "/home/andy4917/Dev-Workflow/scripts",
+    "/home/andy4917/Dev-Workflow/skills",
+    "/home/andy4917/Dev-Workflow/plugins/codex-vibe-execution",
+    "/home/andy4917/Dev-Workflow/.agents/plugins/marketplace.json",
+    "/home/andy4917/Dev-Workflow/config/guardrails",
+    "/home/andy4917/Dev-Workflow/.github/guardrails",
+    "/home/andy4917/Dev-Workflow/.github/workflows/guardrails.yml"
+  ],
+  "quarantined": [
+    "/home/andy4917/Dev-Management/quarantine/2026-04-16/legacy-markers",
+    "/home/andy4917/Dev-Management/quarantine/2026-04-16/product-runtime",
+    "/home/andy4917/Dev-Management/quarantine/2026-04-16/windows-codex",
+    "/home/andy4917/Dev-Management/quarantine/2026-04-16/management-root-duplicate",
+    "/home/andy4917/Dev-Management/quarantine/2026-04-16/preexisting-dev-management-agent"
+  ],
+  "symlinked": [
+    "/home/andy4917/.codex/skills/dev-workflow",
+    "/home/andy4917/.codex/workspace_authority.json",
+    "/home/andy4917/Dev-Workflow/plugins/codex-vibe-execution/skills",
+    "/home/andy4917/Dev-Product/reservation-system/scripts/_common.py",
+    "/home/andy4917/Dev-Product/reservation-system/scripts/delivery_gate.py",
+    "/home/andy4917/Dev-Product/reservation-system/scripts/lib",
+    "/home/andy4917/Dev-Product/reservation-system/scripts/workspace_alignment"
+  ],
+  "deleted": [
+    "/home/andy4917/code (removed after migration because only legacy marker files remained)",
+    "empty repo-local global-policy directories under reservation-system (.agents, plugins, config, .github/workflows)"
+  ],
+  "generated_runtime": [
+    "/home/andy4917/.codex/AGENTS.md",
+    "/home/andy4917/.codex/config.toml",
+    "/mnt/c/Users/anise/.codex/AGENTS.md",
+    "/mnt/c/Users/anise/.codex/config.toml",
+    "/mnt/c/Users/anise/.codex/skills/dev-workflow"
+  ]
+}
