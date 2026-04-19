@@ -7,11 +7,14 @@
       "/home"
     ],
     "preferred_root_names": [
-      "code"
+      "Dev-Management",
+      "Dev-Workflow",
+      "Dev-Product"
     ],
+    "preferred_windows_access_host": "wsl.localhost",
     "windows_access_hosts": [
-      "wsl$",
-      "wsl.localhost"
+      "wsl.localhost",
+      "wsl$"
     ],
     "disallow_same_host_syncthing_pair": true
   },

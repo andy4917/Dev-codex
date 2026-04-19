@@ -4,6 +4,9 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
+import subprocess
+import tomllib
 from pathlib import Path
 from typing import Iterable
 
@@ -41,9 +44,43 @@ WINDOWS_STATE_DIRS = {
     "vendor_imports",
 }
 
+DATED_DIR_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+PROTECTED_SCORE_POLICY_FILES = (
+    "contracts/user_score_policy.json",
+    "contracts/disqualifier_policy.json",
+)
+
 
 def load_authority() -> dict:
     return json.loads(AUTHORITY_PATH.read_text(encoding="utf-8"))
+
+
+def load_json(path: Path, default=None):
+    if not path.exists():
+        return {} if default is None else default
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def load_toml(path: Path) -> dict:
+    if not path.exists():
+        return {}
+    with path.open("rb") as handle:
+        return tomllib.load(handle)
+
+
+def git_lines(repo_root: Path, *args: str) -> list[str]:
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(repo_root), *args],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+    except OSError:
+        return []
+    if result.returncode != 0:
+        return []
+    return [line for line in result.stdout.splitlines() if line.strip()]
 
 
 def runtime_skip_tokens(authority: dict) -> set[str]:
@@ -123,6 +160,201 @@ def text_paths(paths: Iterable[Path], needles: list[str]) -> list[str]:
     return sorted(hits)
 
 
+def forbidden_feature_flags(authority: dict) -> set[str]:
+    feature_rules = authority.get("hardcoding_definition", {}).get("feature_rules", {})
+    return {str(item).strip() for item in feature_rules.get("forbidden_feature_flags", []) if str(item).strip()}
+
+
+def detect_forbidden_feature_flags(config_paths: Iterable[Path], authority: dict) -> list[dict[str, str]]:
+    forbidden = forbidden_feature_flags(authority)
+    findings: list[dict[str, str]] = []
+    if not forbidden:
+        return findings
+    for path in config_paths:
+        payload = load_toml(path)
+        features = payload.get("features", {})
+        if not isinstance(features, dict):
+            continue
+        for feature in sorted(forbidden):
+            if features.get(feature) is True:
+                findings.append(
+                    {
+                        "path": str(path),
+                        "feature": feature,
+                        "reason": f"forbidden feature flag '{feature}' is still enabled",
+                    }
+                )
+    return findings
+
+
+def normalize_legacy_path_markers(authority: dict) -> list[str]:
+    return [
+        str(item).replace("\\", "/").lower()
+        for item in authority.get("hardcoding_definition", {})
+        .get("path_rules", {})
+        .get("legacy_repo_paths_to_remove", [])
+        if str(item).strip()
+    ]
+
+
+def detect_runtime_restore_seed_violations(state_path: Path, authority: dict) -> list[dict[str, object]]:
+    state = load_json(state_path, default={})
+    if not isinstance(state, dict) or not state:
+        return []
+
+    violations: list[dict[str, object]] = []
+    restore = authority.get("runtime_layering", {}).get("restore_seed_policy", {})
+    preferred_host = str(restore.get("preferred_windows_access_host", "wsl.localhost")).lower()
+    legacy_markers = normalize_legacy_path_markers(authority)
+
+    projectless = state.get("projectless-thread-ids", [])
+    if isinstance(projectless, list) and projectless:
+        violations.append(
+            {
+                "category": "projectless_restore_refs",
+                "path": str(state_path),
+                "reason": f"projectless restore refs remain active: {len(projectless)}",
+                "disqualifier_ids": ["DQ-010"],
+                "evidence_refs": [str(state_path)],
+            }
+        )
+
+    hints = state.get("thread-workspace-root-hints", {})
+    if isinstance(hints, dict) and hints:
+        violations.append(
+            {
+                "category": "thread_workspace_root_hints",
+                "path": str(state_path),
+                "reason": f"thread workspace root hints remain active: {len(hints)}",
+                "disqualifier_ids": ["DQ-010"],
+                "evidence_refs": [str(state_path)],
+            }
+        )
+
+    for key in ("active-workspace-roots", "electron-saved-workspace-roots", "project-order"):
+        raw_values = state.get(key, [])
+        if not isinstance(raw_values, list):
+            continue
+        bad_values: list[str] = []
+        for value in raw_values:
+            if not isinstance(value, str):
+                continue
+            normalized = value.replace("\\", "/").lower()
+            if normalized.startswith("//wsl$/") or "/mnt/c/" in normalized or any(marker in normalized for marker in legacy_markers):
+                bad_values.append(value)
+                continue
+            if normalized.startswith("//wsl.localhost/") and preferred_host == "wsl.localhost":
+                continue
+            if normalized.startswith("//") and preferred_host and not normalized.startswith(f"//{preferred_host}/"):
+                bad_values.append(value)
+        if bad_values:
+            violations.append(
+                {
+                    "category": key.replace("-", "_"),
+                    "path": str(state_path),
+                    "reason": f"{key} contains stale or non-canonical runtime roots",
+                    "values": bad_values,
+                    "disqualifier_ids": ["DQ-010"],
+                    "evidence_refs": [str(state_path)],
+                }
+            )
+    return violations
+
+
+def build_tamper_events(
+    *,
+    old_path_refs: Iterable[str],
+    forbidden_features: Iterable[dict[str, str]],
+    runtime_restore_seed_violations: Iterable[dict[str, object]],
+    score_policy_tamper_events: Iterable[dict[str, object]],
+) -> list[dict[str, object]]:
+    events: list[dict[str, object]] = []
+    for path in sorted(set(old_path_refs)):
+        events.append(
+            {
+                "category": "legacy_path_reference",
+                "reason": "legacy path reference remains outside allowlist or quarantine",
+                "path": path,
+                "disqualifier_ids": ["DQ-004", "DQ-010"],
+                "evidence_refs": [path],
+            }
+        )
+    for finding in forbidden_features:
+        events.append(
+            {
+                "category": "forbidden_feature_flag",
+                "reason": finding["reason"],
+                "path": finding["path"],
+                "feature": finding["feature"],
+                "disqualifier_ids": ["DQ-010"],
+                "evidence_refs": [finding["path"]],
+            }
+        )
+    for violation in runtime_restore_seed_violations:
+        events.append(dict(violation))
+    for violation in score_policy_tamper_events:
+        events.append(dict(violation))
+    return events
+
+
+def read_text(path: Path) -> str:
+    if not path.exists():
+        return ""
+    return path.read_text(encoding="utf-8")
+
+
+def strip_generated_header(text: str) -> str:
+    lines = text.splitlines()
+    while lines and lines[0].strip() in {"GENERATED - DO NOT EDIT", "# GENERATED - DO NOT EDIT"}:
+        lines = lines[1:]
+    while lines and not lines[0].strip():
+        lines = lines[1:]
+    return "\n".join(lines).strip()
+
+
+def quarantine_root_policy_ok(quarantine_root: Path) -> bool:
+    return not DATED_DIR_RE.fullmatch(quarantine_root.name)
+
+
+def generated_runtime_mirror_matches_linux(
+    *,
+    linux_agents: Path,
+    linux_config: Path,
+    windows_agents: Path,
+    windows_config: Path,
+) -> bool:
+    if not all(path.exists() for path in [linux_agents, linux_config, windows_agents, windows_config]):
+        return False
+    return (
+        strip_generated_header(read_text(linux_agents)) == strip_generated_header(read_text(windows_agents))
+        and strip_generated_header(read_text(linux_config)) == strip_generated_header(read_text(windows_config))
+    )
+
+
+def policy_update_workorder_present(*paths: Path) -> bool:
+    for path in paths:
+        if path.exists() and "Policy Update Workorder:" in read_text(path):
+            return True
+    return False
+
+
+def detect_score_policy_tamper_events(management_root: Path, workflow_root: Path) -> list[dict[str, object]]:
+    changed = git_lines(management_root, "diff", "--name-only", "HEAD", "--", *PROTECTED_SCORE_POLICY_FILES)
+    if not changed:
+        return []
+    if policy_update_workorder_present(management_root / "DESIGN_REVIEW.md", workflow_root / "DESIGN_REVIEW.md"):
+        return []
+    return [
+        {
+            "category": "score_policy_tamper_without_policy_update_workorder",
+            "reason": "protected score policy changed without a policy update workorder marker",
+            "path": str(management_root / changed[0]),
+            "disqualifier_ids": ["DQ-011"],
+            "evidence_refs": [str(management_root / path) for path in changed],
+        }
+    ]
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Audit the canonical Codex workspace layout.")
     parser.add_argument("--write-report", action="store_true", help="Write the audit report to the default report path.")
@@ -190,16 +422,24 @@ def main() -> int:
         "unexpected_contract_dirs": [str(p) for p in contracts_dirs if str(p) not in allowed_contract_dirs],
     }
 
+    linux_agents = Path("/home/andy4917/.codex/AGENTS.md")
     global_config = Path("/home/andy4917/.codex/config.toml")
-    project_root_marker_ok = global_config.exists() and 'project_root_markers = [".git"]' in global_config.read_text(encoding="utf-8")
+    project_root_marker_ok = global_config.exists() and 'project_root_markers = [".git"]' in read_text(global_config)
     windows_agents = Path("/mnt/c/Users/anise/.codex/AGENTS.md")
     windows_config = Path("/mnt/c/Users/anise/.codex/config.toml")
     windows_generated_header_ok = (
         windows_agents.exists()
         and windows_config.exists()
-        and windows_agents.read_text(encoding="utf-8").startswith("GENERATED - DO NOT EDIT")
-        and windows_config.read_text(encoding="utf-8").startswith("# GENERATED - DO NOT EDIT")
+        and read_text(windows_agents).startswith("GENERATED - DO NOT EDIT")
+        and read_text(windows_config).startswith("# GENERATED - DO NOT EDIT")
     )
+    windows_generated_body_matches_linux = generated_runtime_mirror_matches_linux(
+        linux_agents=linux_agents,
+        linux_config=global_config,
+        windows_agents=windows_agents,
+        windows_config=windows_config,
+    )
+    quarantine_root_ok = quarantine_root_policy_ok(quarantine_root)
 
     files_to_scan: list[Path] = []
     for base in scan_roots:
@@ -225,6 +465,15 @@ def main() -> int:
         and path != str(AUTHORITY_PATH)
         and Path(path).name not in historical_allowlist
     ]
+    forbidden_feature_findings = detect_forbidden_feature_flags(config_files, authority)
+    runtime_restore_seed_violations = detect_runtime_restore_seed_violations(WINDOWS_CODEX / ".codex-global-state.json", authority)
+    score_policy_tamper_events = detect_score_policy_tamper_events(Path(roots["management"]), Path(roots["workflow"]))
+    tamper_events = build_tamper_events(
+        old_path_refs=old_path_refs,
+        forbidden_features=forbidden_feature_findings,
+        runtime_restore_seed_violations=runtime_restore_seed_violations,
+        score_policy_tamper_events=score_policy_tamper_events,
+    )
 
     product_rule_leaks = []
     for path in agents_files + config_files + list(contracts_dirs):
@@ -243,11 +492,26 @@ def main() -> int:
         "contracts_dirs": [str(p) for p in sorted(contracts_dirs)],
         "violations": violations,
         "project_rule_leaks": sorted(set(product_rule_leaks)),
+        "quarantine_root_policy_ok": quarantine_root_ok,
         "project_root_markers_git_only": project_root_marker_ok,
         "windows_generated_mirror": windows_generated_header_ok,
+        "windows_generated_mirror_matches_linux": windows_generated_body_matches_linux,
+        "forbidden_feature_flags_enabled": forbidden_feature_findings,
+        "runtime_restore_seed_violations": runtime_restore_seed_violations,
         "old_path_refs_outside_quarantine": sorted(set(old_path_refs)),
+        "tamper_events": tamper_events,
         "status": "PASS"
-        if not any(violations.values()) and not product_rule_leaks and project_root_marker_ok and windows_generated_header_ok and not old_path_refs
+        if (
+            not any(violations.values())
+            and not product_rule_leaks
+            and quarantine_root_ok
+            and project_root_marker_ok
+            and windows_generated_header_ok
+            and windows_generated_body_matches_linux
+            and not forbidden_feature_findings
+            and not runtime_restore_seed_violations
+            and not old_path_refs
+        )
         else "FAIL",
     }
 

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-04-17T15:17:01.556707+00:00",
+  "generated_at": "2026-04-17T16:02:10.469994+00:00",
   "repo_root": "/home/andy4917/Dev-Management",
   "authority_path": "/home/andy4917/Dev-Management/contracts/workspace_authority.json",
   "status": "BLOCKED",
@@ -27,7 +27,7 @@
       "name": "audit_workspace_write_report",
       "command": "/usr/bin/python3 /home/andy4917/Dev-Management/scripts/audit_workspace.py --write-report",
       "exit_code": 0,
-      "stdout": "{\n  \"authority_path\": \"/home/andy4917/Dev-Management/contracts/workspace_authority.json\",\n  \"trusted_projects\": [\n    \"/home/andy4917/Dev-Management\",\n    \"/home/andy4917/Dev-Workflow\",\n    \"/home/andy4917/Dev-Product\"\n  ],\n  \"agents_files\": [\n    \"/home/andy4917/.codex/AGENTS.md\",\n    \"/home/andy4917/Dev-Product/reservation-system/AGENTS.md\",\n    \"/mnt/c/Users/anise/.codex/AGENTS.md\"\n  ],\n  \"config_files\": [\n    \"/home/andy4917/.codex/config.toml\",\n    \"/home/andy4917/Dev-Product/reservation-system/.codex/config.toml\",\n    \"/mnt/c/Users/anise/.codex/config.toml\"\n  ],\n  \"contracts_dirs\": [\n    \"/home/andy4917/Dev-Management/contracts\",\n    \"/home/andy4917/Dev-Product/reservation-system/contracts\"\n  ],\n  \"violations\": {\n    \"unexpected_agents\": [],\n    \"unexpected_configs\": [],\n    \"unexpected_contract_dirs\": []\n  },\n  \"project_rule_leaks\": [],\n  \"project_root_markers_git_only\": true,\n  \"windows_generated_mirror\": true,\n  \"old_path_refs_outside_quarantine\": [],\n  \"status\": \"PASS\"\n}\n",
+      "stdout": "{\n  \"authority_path\": \"/home/andy4917/Dev-Management/contracts/workspace_authority.json\",\n  \"trusted_projects\": [\n    \"/home/andy4917/Dev-Management\",\n    \"/home/andy4917/Dev-Workflow\",\n    \"/home/andy4917/Dev-Product\"\n  ],\n  \"agents_files\": [\n    \"/home/andy4917/.codex/AGENTS.md\",\n    \"/home/andy4917/Dev-Product/reservation-system/AGENTS.md\",\n    \"/mnt/c/Users/anise/.codex/AGENTS.md\"\n  ],\n  \"config_files\": [\n    \"/home/andy4917/.codex/config.toml\",\n    \"/home/andy4917/Dev-Product/reservation-system/.codex/config.toml\",\n    \"/mnt/c/Users/anise/.codex/config.toml\"\n  ],\n  \"contracts_dirs\": [\n    \"/home/andy4917/Dev-Management/contracts\",\n    \"/home/andy4917/Dev-Product/reservation-system/contracts\"\n  ],\n  \"violations\": {\n    \"unexpected_agents\": [],\n    \"unexpected_configs\": [],\n    \"unexpected_contract_dirs\": []\n  },\n  \"project_rule_leaks\": [],\n  \"quarantine_root_policy_ok\": true,\n  \"project_root_markers_git_only\": true,\n  \"windows_generated_mirror\": true,\n  \"windows_generated_mirror_matches_linux\": true,\n  \"old_path_refs_outside_quarantine\": [],\n  \"status\": \"PASS\"\n}\n",
       "stderr": "",
       "status": "PASS",
       "report_path": "/home/andy4917/Dev-Management/reports/audit.final.json",
@@ -354,8 +354,8 @@
     "windows_mirror_proof": {
       "linux_agents_path": "/home/andy4917/.codex/AGENTS.md",
       "windows_agents_path": "/mnt/c/Users/anise/.codex/AGENTS.md",
-      "linux_agents_sha256": "496eaee8f197e3205aea7d16e862465143b8783da00f4777904e1e164cdc0ea2",
-      "windows_agents_sha256": "b3e4ffd0e205dee145c3b025c106ad7bfd70d47ab32200cb773636bde560e43d",
+      "linux_agents_sha256": "900828d8a773510a309f795bb4841e74670564e3d0b2c346e3a3917297fa3453",
+      "windows_agents_sha256": "943e88ce7de967264c2583b325ea3890132ca97f33cb27b5fc3256ee36df01fa",
       "linux_config_path": "/home/andy4917/.codex/config.toml",
       "windows_config_path": "/mnt/c/Users/anise/.codex/config.toml",
       "linux_config_sha256": "244205e1b4f2fdb593cdaae2b4157e382fd65f4393a6443a8c6e851325d0b0ca",

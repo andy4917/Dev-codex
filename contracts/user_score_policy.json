@@ -1,15 +1,124 @@
 {
-  "version": 1,
+  "version": 2,
   "scope": "codex-global",
-  "summary": "Deduction-only scorecard policy for Codex global delivery oversight.",
+  "summary": "Anti-cheat weighted scorecard policy for Codex global delivery oversight.",
   "principles": {
-    "deductions_only": true,
+    "deductions_only": false,
     "writer_self_scoring_forbidden": true,
-    "user_bonus_forbidden": true,
+    "user_bonus_forbidden": false,
+    "user_additive_awards": true,
+    "user_problem_discovery_resolution_awards": true,
+    "user_review_layer_requires_explicit_request_or_approval": true,
+    "verified_work_auto_awards_enabled": true,
+    "user_midstream_awards_allowed": true,
     "score_is_not_pass": true,
     "disqualifier_outranks_score": true,
     "pass_requires_reviewer_green": true,
     "pass_requires_clean_room_verify": true
+  },
+  "credit_sources": {
+    "creditable": [
+      "verified_execution",
+      "clean_room_verify",
+      "user_approved_review",
+      "reviewer_penalty",
+      "system_derived"
+    ],
+    "requested_only": [
+      "agent_request"
+    ]
+  },
+  "anti_cheat_layer": {
+    "enabled": true,
+    "summary": "Maximize confirmed work, but remove or cap credit when score surfaces are manipulated, spoofed, or overstuffed.",
+    "reward_function": {
+      "objective": "Reward verified outcomes and user-confirmed problem solving, while minimizing unverified self-credit and score-surface manipulation.",
+      "effective_total_formula": "guarded_total_score = max(raw_total_score - anti_cheat_penalty_points, 0); capped_total_score = min(guarded_total_score, all active caps)"
+    },
+    "penalty_cap": 30,
+    "per_axis_user_award_budgets": {
+      "completion_score": 6
+    },
+    "reserved_award_categories": [
+      "verified_work",
+      "verified_work_execution",
+      "system_verified_work",
+      "derived_award",
+      "system_derived"
+    ],
+    "signal_rules": [
+      {
+        "id": "unauthorized_user_review_modification",
+        "points": 12,
+        "severity": "critical",
+        "disqualifier_id": "DQ-011",
+        "reason": "Unauthorized writes to the protected user-review layer are treated as score manipulation."
+      },
+      {
+        "id": "reserved_derived_award_spoofing",
+        "points": 16,
+        "severity": "critical",
+        "disqualifier_id": "DQ-011",
+        "reason": "Spoofing reserved derived-award categories is treated as reward hacking."
+      },
+      {
+        "id": "non_user_award_source",
+        "points": 12,
+        "severity": "high",
+        "reason": "User awards must originate from the protected user layer only."
+      },
+      {
+        "id": "excessive_bonus_request",
+        "points": 8,
+        "severity": "medium",
+        "reason": "Award requests above the configured budget are partially denied and penalized."
+      },
+      {
+        "id": "reviewer_truth_tamper",
+        "points": 18,
+        "severity": "critical",
+        "disqualifier_id": "DQ-011",
+        "reason": "Reviewer-truth tampering is treated as score manipulation."
+      },
+      {
+        "id": "writer_self_score_attempt",
+        "points": 18,
+        "severity": "critical",
+        "disqualifier_id": "DQ-011",
+        "reason": "Writer self-awards or self-penalty manipulation are forbidden."
+      },
+      {
+        "id": "claimed_verification_without_evidence",
+        "points": 10,
+        "severity": "medium",
+        "reason": "Verification claims without report or evidence references are treated as unverified score pressure."
+      },
+      {
+        "id": "test_deletion_or_weakening_without_rationale",
+        "points": 25,
+        "severity": "high",
+        "reason": "Deleting tests or adding skip or xfail markers without a written rationale is treated as score-surface manipulation."
+      },
+      {
+        "id": "score_policy_tamper_without_policy_update_workorder",
+        "points": 20,
+        "severity": "critical",
+        "disqualifier_id": "DQ-011",
+        "reason": "Changing protected score policy without a policy update workorder is treated as score manipulation."
+      }
+    ],
+    "cap_tiers": [
+      {
+        "min_points": 8,
+        "max_total_score": 89,
+        "reason": "Anti-cheat guard reduced the total score because suspicious scoring signals were detected."
+      },
+      {
+        "min_points": 16,
+        "max_total_score": 79,
+        "reason": "Anti-cheat guard reduced the total score heavily because multiple score-manipulation signals were detected."
+      }
+    ]
   },
   "axes": {
     "trust_score": {
@@ -26,6 +135,23 @@
       "max_points": 30,
       "floor": 24,
       "applicable_when": "always",
+      "scoring_mode": "verified_work_plus_user_awards",
+      "base_points": 0,
+      "award_sources": [
+        "verified_work",
+        "user_review"
+      ],
+      "derived_awards": [
+        {
+          "id": "confirmed_work_execution",
+          "points": 24,
+          "reason": "Clean-room verify passed, so confirmed work execution earns the baseline completion credit automatically.",
+          "category": "system_derived",
+          "when_all": {
+            "clean_room_verify_passed": true
+          }
+        }
+      ],
       "owner_roles": [
         "correctness_verifier",
         "final_auditor",
@@ -112,6 +238,14 @@
   },
   "caps": [
     {
+      "id": "legacy_hardcoding_violation",
+      "target_score_multiplier": 0.7,
+      "when_all": {
+        "legacy_hardcoding_violation": true
+      },
+      "reason": "Legacy or hardcoding violations trigger an automatic rebuild or refactor path, so total score is capped at 70% of the target score."
+    },
+    {
       "id": "retrieval_canonical_decision_path",
       "max_total_score": 85,
       "when_all": {
@@ -154,6 +288,7 @@
     "reviewer_green_check",
     "trace_presence_check",
     "axis_floor_check",
+    "anti_cheat_guard_check",
     "platform_cap_check",
     "existing_readiness_and_manual_close_out_check",
     "clean_room_verify_check"

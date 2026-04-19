@@ -121,8 +121,86 @@
       ]
     }
   },
+  "runtime_layering": {
+    "layers": [
+      {
+        "id": "L0",
+        "name": "canonical_authority",
+        "role": "Canonical WSL contracts, topology, trust and safety invariants.",
+        "mutability": "authoritative"
+      },
+      {
+        "id": "L1",
+        "name": "user_override",
+        "role": "User-selected model, reasoning, UX and feature toggles inside the canonical roots.",
+        "mutability": "user_override"
+      },
+      {
+        "id": "L2",
+        "name": "generated_mirror",
+        "role": "Generated Linux and Windows .codex mirrors rendered from authority plus user overrides.",
+        "mutability": "generated_only"
+      },
+      {
+        "id": "L3",
+        "name": "runtime_restore_seed",
+        "role": "Global restore state, session indexes, session JSONL and thread persistence used only to resume work.",
+        "mutability": "derived_only"
+      },
+      {
+        "id": "L4",
+        "name": "volatile_runtime",
+        "role": "Logs, caches, analytics, shell snapshots and recent history.",
+        "mutability": "volatile"
+      }
+    ],
+    "user_override_policy": {
+      "precedence": "partial_user_override",
+      "allowed_fields": [
+        "model",
+        "model_reasoning_effort",
+        "approval_policy",
+        "sandbox_mode",
+        "web_search",
+        "network_access",
+        "mcp_servers.context7",
+        "features",
+        "ux",
+        "workspace_preference",
+        "memories",
+        "trusted_projects_within_canonical_roots"
+      ],
+      "blocked_feature_overrides": [
+        "js_repl_tools_only",
+        "remote_control"
+      ],
+      "protected_fields": [
+        "canonical_roots",
+        "workspace_authority",
+        "safety_invariants",
+        "non_canonical_root_admission"
+      ]
+    },
+    "restore_seed_policy": {
+      "derived_only": true,
+      "preserve_named_threads": true,
+      "drop_projectless_restore_refs": true,
+      "drop_stale_remote_environment": true,
+      "preferred_windows_access_host": "wsl.localhost",
+      "allowed_windows_access_hosts": [
+        "wsl.localhost",
+        "wsl$"
+      ],
+      "open_target_global": "wsl",
+      "integrated_terminal_shell": "wsl",
+      "follow_up_queue_mode": "steer",
+      "conversation_detail_mode": "steps",
+      "terminal_restore_policy": "background",
+      "default_active_workspace_root": "management"
+    }
+  },
   "hardcoding_definition": {
-    "summary": "Any duplicate or stale policy, topology, path, classification, legacy split, fallback branch, shadow config, backup policy copy, or deprecated output that exists outside this authority file or generated runtime files.",
+    "summary": "Any duplicate or stale policy, topology, path, classification, legacy split, fallback branch, shadow config, backup policy copy, deprecated output, stale feature flag, or stale restore override that survives after canonical replacement is forbidden outside explicit allowlists. Historical batch paths are evidence-only and must never be used as active policy values.",
     "forbidden_patterns": [
       "legacy branch",
       "fallback branch",
@@ -139,11 +217,19 @@
       "historical_evidence_allowlist": [
         "migration_manifest.json"
       ],
+      "historical_batch_paths_not_allowed_in_active_policy": [
+        "cleanup_policy.quarantine_root"
+      ],
       "legacy_repo_paths_to_remove": [
         "/home/andy4917/code/reservation-system",
         "~/code/reservation-system",
         "\\\\wsl$\\Ubuntu\\home\\andy4917\\code\\reservation-system",
         "\\\\wsl.localhost\\Ubuntu\\home\\andy4917\\code\\reservation-system"
+      ]
+    },
+    "feature_rules": {
+      "forbidden_feature_flags": [
+        "use_agent_identity"
       ]
     }
   },
@@ -166,7 +252,7 @@
     "knowledge"
   ],
   "cleanup_policy": {
-    "quarantine_root": "/home/andy4917/Dev-Management/quarantine/2026-04-16",
+    "quarantine_root": "/home/andy4917/Dev-Management/quarantine",
     "ambiguous_items": "move_to_quarantine",
     "exact_duplicates": "delete_only_after_checksum_match_or_generated_match",
     "legacy_backups": "move_to_quarantine",
@@ -200,6 +286,8 @@
       "summary_export": "/home/andy4917/Dev-Management/scripts/export_user_score_summary.py"
     },
     "global_config": {
+      "model": "gpt-5.4",
+      "model_reasoning_effort": "medium",
       "approval_policy": "on-request",
       "sandbox_mode": "workspace-write",
       "web_search": "cached",
@@ -211,6 +299,33 @@
         "/home/andy4917/Dev-Management",
         "/home/andy4917/Dev-Workflow",
         "/home/andy4917/Dev-Product"
+      ],
+      "enabled_features": [
+        "apply_patch_freeform",
+        "artifact",
+        "child_agents_md",
+        "code_mode",
+        "code_mode_only",
+        "codex_git_commit",
+        "codex_hooks",
+        "default_mode_request_user_input",
+        "enable_fanout",
+        "exec_permission_approvals",
+        "guardian_approval",
+        "image_generation",
+        "js_repl",
+        "memories",
+        "multi_agent_v2",
+        "prevent_idle_sleep",
+        "realtime_conversation",
+        "remote_connections",
+        "request_permissions_tool",
+        "runtime_metrics",
+        "shell_zsh_fork",
+        "skill_env_var_dependency_prompt",
+        "telepathy",
+        "tool_search",
+        "undo"
       ],
       "enabled_plugins": [
         "github@openai-curated"

@@ -1,0 +1,159 @@
+{
+  "generated_at": "2026-04-18T15:26:01.639631",
+  "current_surface": "wsl-ubuntu",
+  "repo_requirements": {
+    "required_tools": [
+      "git"
+    ],
+    "optional_tools": [
+      "uv"
+    ],
+    "sources": [
+      "package.json",
+      "pyproject.toml",
+      "management:docs/LOCAL_ENVIRONMENTS.md",
+      "management:docs/RUNBOOK.md",
+      "management:docs/CLOSE_OUT.md"
+    ]
+  },
+  "surfaces": [
+    {
+      "surface": "windows-native",
+      "meta": {
+        "current_project_wsl_path": "/home/andy4917/Dev-Management",
+        "current_project_windows_path": "\\\\wsl$\\Ubuntu\\home\\andy4917\\Dev-Management",
+        "global_codex_home": "C:\\Users\\anise\\.codex",
+        "caption": "Microsoft Windows 11 Home",
+        "version": "10.0.26200",
+        "build": "26200",
+        "powershell": "5.1.26100.8115",
+        "wsl_version_output": "WSL ��\u0004�: 2.6.3.0\n\n��\u0010� ��\u0004�: 6.6.87.2-1\n\nWSLg ��\u0004�: 1.0.71\n\nMSRDC ��\u0004�: 1.2.6353\n\nDirect3D ��\u0004�: 1.611.1-81528511\n\nDXCore ��\u0004�: 10.0.26100.1-240331-1435.ge-release\n\nWindows ��\u0004�: 10.0.26200.8246\n\n",
+        "wsl_status_output": "0��� 0���: Ubuntu\n\n0��� ��\u0004�: 2\n\n",
+        "windows_user_home": "C:\\Users\\anise"
+      },
+      "tools": {
+        "git": {
+          "status": "FOUND",
+          "path": "C:\\Program Files\\Git\\cmd\\git.exe",
+          "detail": ""
+        },
+        "python": {
+          "status": "FOUND",
+          "path": "C:\\Python314\\python.exe",
+          "detail": ""
+        },
+        "python3": {
+          "status": "FOUND",
+          "path": "C:\\Python314\\python.exe",
+          "detail": ""
+        },
+        "node": {
+          "status": "FOUND",
+          "path": "C:\\Program Files\\nodejs\\node.exe",
+          "detail": ""
+        },
+        "npm": {
+          "status": "FOUND",
+          "path": "C:\\Program Files\\nodejs\\npm.cmd",
+          "detail": ""
+        },
+        "uv": {
+          "status": "FOUND",
+          "path": "C:\\Users\\anise\\AppData\\Local\\Microsoft\\WinGet\\Links\\uv.exe",
+          "detail": ""
+        }
+      },
+      "evidence": {
+        "commands": {
+          "git": "probe_windows_tool('git')",
+          "python": "probe_windows_tool('python')",
+          "python3": "probe_windows_tool('python')",
+          "node": "probe_windows_tool('node')",
+          "npm": "probe_windows_tool('npm')",
+          "uv": "probe_windows_tool('uv')"
+        }
+      },
+      "required_tools": [
+        "git"
+      ],
+      "optional_tools": [
+        "uv"
+      ],
+      "missing_reasons": {},
+      "blockers": [],
+      "warnings": [],
+      "environment_ready": true,
+      "status": "PASS"
+    },
+    {
+      "surface": "wsl-ubuntu",
+      "distro": "Ubuntu",
+      "meta": {
+        "distro": "Ubuntu",
+        "release": "Ubuntu 24.04.4 LTS",
+        "lsb_release": "Ubuntu 24.04.4 LTS",
+        "kernel": "6.6.87.2-microsoft-standard-WSL2",
+        "apt_version": "apt 2.8.3 (amd64)",
+        "current_project_wsl_path": "/home/andy4917/Dev-Management",
+        "current_project_windows_path": "\\\\wsl$\\Ubuntu\\home\\andy4917\\Dev-Management",
+        "project_mount": "/",
+        "global_codex_home": "/mnt/c/Users/anise/.codex",
+        "windows_codex_home_exists": true
+      },
+      "tools": {
+        "git": {
+          "status": "FOUND",
+          "path": "/usr/bin/git",
+          "detail": ""
+        },
+        "python": {
+          "status": "FOUND",
+          "path": "/usr/bin/python3",
+          "detail": ""
+        },
+        "python3": {
+          "status": "FOUND",
+          "path": "/usr/bin/python3",
+          "detail": ""
+        },
+        "node": {
+          "status": "FOUND",
+          "path": "/home/andy4917/.nvm/versions/node/v24.14.1/bin/node",
+          "detail": ""
+        },
+        "npm": {
+          "status": "FOUND",
+          "path": "/home/andy4917/.nvm/versions/node/v24.14.1/bin/npm",
+          "detail": ""
+        },
+        "uv": {
+          "status": "FOUND",
+          "path": "/home/andy4917/.local/bin/uv",
+          "detail": ""
+        }
+      },
+      "evidence": {
+        "commands": {
+          "list_distros": "wsl -l -q",
+          "git": "probe_wsl_tool('git')",
+          "python": "probe_wsl_tool('python3')",
+          "python3": "probe_wsl_tool('python3')",
+          "node": "probe_wsl_tool('node')",
+          "npm": "probe_wsl_tool('npm')",
+          "uv": "probe_wsl_tool('uv')"
+        }
+      },
+      "required_tools": [
+        "git"
+      ],
+      "optional_tools": [
+        "uv"
+      ],
+      "missing_reasons": {},
+      "blockers": [],
+      "warnings": [],
+      "environment_ready": true,
+      "status": "PASS"
+    }
+  ]
+}

@@ -1,0 +1,57 @@
+{
+  "status": "PASS",
+  "global_state": {
+    "path": "/mnt/c/Users/anise/.codex/.codex-global-state.json",
+    "changed": true,
+    "removed_projectless_thread_ids": [
+      "019d9b33-5a44-7e91-84be-538e1dfa4f1d",
+      "019d9b58-8a65-70a0-be54-d8e373ceaf59",
+      "019d9c06-7ea0-7380-bccd-0340f2118a3f",
+      "019d9d08-20d1-7f13-b6d8-23b690ba2bb2",
+      "019d9e8b-060a-73a0-97ae-67cda8762f8c",
+      "019d9ec9-7495-74c2-8794-8d54b2c38e78",
+      "019d9f2b-ecc5-7b32-b7ac-7430cf73b88e"
+    ],
+    "removed_thread_hints": [
+      "019d9b33-5a44-7e91-84be-538e1dfa4f1d",
+      "019d9b58-8a65-70a0-be54-d8e373ceaf59",
+      "019d9c06-7ea0-7380-bccd-0340f2118a3f",
+      "019d9d08-20d1-7f13-b6d8-23b690ba2bb2",
+      "019d9e8b-060a-73a0-97ae-67cda8762f8c",
+      "019d9ec9-7495-74c2-8794-8d54b2c38e78",
+      "019d9f2b-ecc5-7b32-b7ac-7430cf73b88e"
+    ],
+    "default_active_root": "\\\\wsl.localhost\\Ubuntu\\home\\andy4917\\Dev-Management",
+    "root_map": {
+      "management": "\\\\wsl.localhost\\Ubuntu\\home\\andy4917\\Dev-Management",
+      "workflow": "\\\\wsl.localhost\\Ubuntu\\home\\andy4917\\Dev-Workflow",
+      "product": "\\\\wsl.localhost\\Ubuntu\\home\\andy4917\\Dev-Product",
+      "reservation-system": "\\\\wsl.localhost\\Ubuntu\\home\\andy4917\\Dev-Product\\reservation-system"
+    },
+    "allowed_unc_hosts": [
+      "wsl.localhost",
+      "wsl$"
+    ]
+  },
+  "local_environments_changed": [],
+  "sessions_changed": [
+    "/mnt/c/Users/anise/.codex/sessions/2026/04/17/rollout-2026-04-17T20-28-47-019d9b33-5a44-7e91-84be-538e1dfa4f1d.jsonl",
+    "/mnt/c/Users/anise/.codex/sessions/2026/04/17/rollout-2026-04-17T21-09-24-019d9b58-8a65-70a0-be54-d8e373ceaf59.jsonl",
+    "/mnt/c/Users/anise/.codex/sessions/2026/04/18/rollout-2026-04-18T00-19-24-019d9c06-7ea0-7380-bccd-0340f2118a3f.jsonl",
+    "/mnt/c/Users/anise/.codex/sessions/2026/04/18/rollout-2026-04-18T01-22-27-019d9c40-36cb-7122-adc5-5105aec52406.jsonl",
+    "/mnt/c/Users/anise/.codex/sessions/2026/04/18/rollout-2026-04-18T01-22-28-019d9c40-3ca7-77b2-8c1b-fd307100f8b6.jsonl",
+    "/mnt/c/Users/anise/.codex/sessions/2026/04/18/rollout-2026-04-18T05-00-48-019d9d08-20d1-7f13-b6d8-23b690ba2bb2.jsonl",
+    "/mnt/c/Users/anise/.codex/sessions/2026/04/18/rollout-2026-04-18T12-03-24-019d9e8b-060a-73a0-97ae-67cda8762f8c.jsonl",
+    "/mnt/c/Users/anise/.codex/sessions/2026/04/18/rollout-2026-04-18T13-11-35-019d9ec9-7495-74c2-8794-8d54b2c38e78.jsonl",
+    "/mnt/c/Users/anise/.codex/sessions/2026/04/18/rollout-2026-04-18T14-59-09-019d9f2b-ecc5-7b32-b7ac-7430cf73b88e.jsonl"
+  ],
+  "threads_db": {
+    "path": "/mnt/c/Users/anise/.codex/state_5.sqlite",
+    "changed_rows": 3
+  },
+  "codex_dev_db": {
+    "path": "/mnt/c/Users/anise/.codex/sqlite/codex-dev.db",
+    "changed_rows": 0,
+    "note": "No live restore seed rows were identified in codex-dev.db for this repair pass."
+  }
+}

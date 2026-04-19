@@ -14,6 +14,24 @@ def _axis_score(payload: dict, key: str) -> str:
     return str(axis.get("score", ""))
 
 
+def _anti_cheat_signals(payload: dict) -> list[dict]:
+    signals = payload.get("anti_cheat_signals", [])
+    if signals:
+        return signals
+    fallback = []
+    for signal in payload.get("anti_cheat_layer", {}).get("signals", []):
+        fallback.append(
+            {
+                "code": signal.get("code", signal.get("id", "")),
+                "severity": signal.get("severity", "medium"),
+                "points": signal.get("points", 0),
+                "reason": signal.get("reason", ""),
+                "evidence_ref": signal.get("evidence_ref", ""),
+            }
+        )
+    return fallback
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Export the ordered user scorecard summary.")
     parser.add_argument("--scorecard-file", default=str(DEFAULT_SCORECARD_FILE))
@@ -38,27 +56,58 @@ def main() -> int:
         else:
             print(f"- {role}: none")
 
-    print("9. 사용자 감점 근거:")
+    print("9. requested/credited credit:")
+    requested_credit = payload.get("requested_credit", [])
+    credited_credit = payload.get("credited_credit", [])
+    requested_reason = {
+        (item.get("axis", ""), item.get("requested_points", 0), item.get("source", "")): item.get("reason", "")
+        for item in requested_credit
+    }
+    if requested_credit:
+        for item in requested_credit:
+            print(f"- requested: {item['source']} {item['axis']} +{item['requested_points']} ({item['reason']})")
+    if credited_credit:
+        for item in credited_credit:
+            reason = requested_reason.get((item.get("axis", ""), item.get("requested_points", 0), item.get("source", "")), "")
+            suffix = f" ({reason})" if reason else ""
+            if item.get("blocked"):
+                print(
+                    f"- credited: {item['source']} {item['axis']} +0/{item['requested_points']} blocked={item.get('block_reason', '')}{suffix}"
+                )
+            elif item.get("capped"):
+                print(
+                    f"- credited: {item['source']} {item['axis']} +{item['credited_points']}/{item['requested_points']} capped{suffix}"
+                )
+            else:
+                print(f"- credited: {item['source']} {item['axis']} +{item['credited_points']}{suffix}")
     if payload.get("user_penalties"):
         for penalty in payload["user_penalties"]:
-            print(f"- user: {penalty['axis']} -{penalty['points']} ({penalty['reason']})")
-    else:
+            print(f"- penalty: user {penalty['axis']} -{penalty['points']} ({penalty['reason']})")
+    if not requested_credit and not credited_credit and not payload.get("user_penalties"):
         print("- none")
+
+    anti_cheat = payload.get("anti_cheat_layer", {})
+    print(
+        f"10. anti-cheat guard: {anti_cheat.get('status', 'UNKNOWN')} "
+        f"(signals={anti_cheat.get('signal_points', 0)}, penalty={anti_cheat.get('penalty_points', 0)}, guarded_total={anti_cheat.get('guarded_total_score', payload.get('raw_total_score', ''))})"
+    )
+    for signal in _anti_cheat_signals(payload):
+        print(f"- signal: {signal['code']} +{signal['points']} ({signal['reason']})")
 
     cap = payload.get("platform_cap", {})
     if cap.get("cap_applied"):
         reasons = ", ".join(str(item.get("reason", "")).strip() for item in cap.get("active_caps", []))
-        print(f"10. cap 적용 여부와 이유: applied (limit={cap.get('cap_limit')}) {reasons}".rstrip())
+        print(f"11. cap 적용 여부와 이유: applied (limit={cap.get('cap_limit')}) {reasons}".rstrip())
     else:
-        print("10. cap 적용 여부와 이유: not applied")
+        print("11. cap 적용 여부와 이유: not applied")
 
-    print(f"11. gate 상태: {payload.get('gate_status', 'UNKNOWN')}")
+    print(f"12. gate 상태: {payload.get('gate_status', 'UNKNOWN')}")
     manual = payload.get("remaining_manual_close_out", [])
     if manual:
-        print(f"12. 남은 manual close-out: {'; '.join(str(item) for item in manual)}")
+        print(f"13. 남은 manual close-out: {'; '.join(str(item) for item in manual)}")
     else:
-        print("12. 남은 manual close-out: none")
-    print(f"13. 최종 판정: {payload.get('final_decision', 'UNKNOWN')}")
+        print("13. 남은 manual close-out: none")
+    print(f"14. 최종 판정: {payload.get('final_decision', 'UNKNOWN')}")
     return 0
 
 

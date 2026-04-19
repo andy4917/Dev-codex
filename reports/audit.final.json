@@ -25,8 +25,119 @@
     "unexpected_contract_dirs": []
   },
   "project_rule_leaks": [],
+  "quarantine_root_policy_ok": true,
   "project_root_markers_git_only": true,
   "windows_generated_mirror": true,
+  "windows_generated_mirror_matches_linux": true,
+  "forbidden_feature_flags_enabled": [],
+  "runtime_restore_seed_violations": [
+    {
+      "category": "projectless_restore_refs",
+      "path": "/mnt/c/Users/anise/.codex/.codex-global-state.json",
+      "reason": "projectless restore refs remain active: 7",
+      "disqualifier_ids": [
+        "DQ-010"
+      ],
+      "evidence_refs": [
+        "/mnt/c/Users/anise/.codex/.codex-global-state.json"
+      ]
+    },
+    {
+      "category": "thread_workspace_root_hints",
+      "path": "/mnt/c/Users/anise/.codex/.codex-global-state.json",
+      "reason": "thread workspace root hints remain active: 7",
+      "disqualifier_ids": [
+        "DQ-010"
+      ],
+      "evidence_refs": [
+        "/mnt/c/Users/anise/.codex/.codex-global-state.json"
+      ]
+    },
+    {
+      "category": "active_workspace_roots",
+      "path": "/mnt/c/Users/anise/.codex/.codex-global-state.json",
+      "reason": "active-workspace-roots contains stale or non-canonical runtime roots",
+      "values": [
+        "\\\\wsl$\\Ubuntu\\home\\andy4917\\Dev-Workflow"
+      ],
+      "disqualifier_ids": [
+        "DQ-010"
+      ],
+      "evidence_refs": [
+        "/mnt/c/Users/anise/.codex/.codex-global-state.json"
+      ]
+    },
+    {
+      "category": "electron_saved_workspace_roots",
+      "path": "/mnt/c/Users/anise/.codex/.codex-global-state.json",
+      "reason": "electron-saved-workspace-roots contains stale or non-canonical runtime roots",
+      "values": [
+        "\\\\wsl$\\Ubuntu\\home\\andy4917\\Dev-Workflow",
+        "\\\\wsl$\\Ubuntu\\home\\andy4917\\Dev-Product\\reservation-system",
+        "\\\\wsl$\\Ubuntu\\home\\andy4917\\Dev-Management"
+      ],
+      "disqualifier_ids": [
+        "DQ-010"
+      ],
+      "evidence_refs": [
+        "/mnt/c/Users/anise/.codex/.codex-global-state.json"
+      ]
+    }
+  ],
   "old_path_refs_outside_quarantine": [],
-  "status": "PASS"
+  "tamper_events": [
+    {
+      "category": "projectless_restore_refs",
+      "path": "/mnt/c/Users/anise/.codex/.codex-global-state.json",
+      "reason": "projectless restore refs remain active: 7",
+      "disqualifier_ids": [
+        "DQ-010"
+      ],
+      "evidence_refs": [
+        "/mnt/c/Users/anise/.codex/.codex-global-state.json"
+      ]
+    },
+    {
+      "category": "thread_workspace_root_hints",
+      "path": "/mnt/c/Users/anise/.codex/.codex-global-state.json",
+      "reason": "thread workspace root hints remain active: 7",
+      "disqualifier_ids": [
+        "DQ-010"
+      ],
+      "evidence_refs": [
+        "/mnt/c/Users/anise/.codex/.codex-global-state.json"
+      ]
+    },
+    {
+      "category": "active_workspace_roots",
+      "path": "/mnt/c/Users/anise/.codex/.codex-global-state.json",
+      "reason": "active-workspace-roots contains stale or non-canonical runtime roots",
+      "values": [
+        "\\\\wsl$\\Ubuntu\\home\\andy4917\\Dev-Workflow"
+      ],
+      "disqualifier_ids": [
+        "DQ-010"
+      ],
+      "evidence_refs": [
+        "/mnt/c/Users/anise/.codex/.codex-global-state.json"
+      ]
+    },
+    {
+      "category": "electron_saved_workspace_roots",
+      "path": "/mnt/c/Users/anise/.codex/.codex-global-state.json",
+      "reason": "electron-saved-workspace-roots contains stale or non-canonical runtime roots",
+      "values": [
+        "\\\\wsl$\\Ubuntu\\home\\andy4917\\Dev-Workflow",
+        "\\\\wsl$\\Ubuntu\\home\\andy4917\\Dev-Product\\reservation-system",
+        "\\\\wsl$\\Ubuntu\\home\\andy4917\\Dev-Management"
+      ],
+      "disqualifier_ids": [
+        "DQ-010"
+      ],
+      "evidence_refs": [
+        "/mnt/c/Users/anise/.codex/.codex-global-state.json"
+      ]
+    }
+  ],
+  "status": "FAIL"
 }

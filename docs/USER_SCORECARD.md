@@ -14,9 +14,13 @@
 
 ## Core Rules
 
-- score is deduction-only oversight, not a reward function
+- score is a gated oversight model, not an automatic reward for shortest-path or minimal-action behavior
 - writer cannot self-score, self-award, or self-excuse
-- reviewer and user may only deduct
+- reviewer penalties still deduct, but confirmed work/performance may earn automatic completion credit after verify
+- `user_review` is a protected user layer. It must not change unless there is an explicit user approval or task request.
+- users may still add extra mid-stream awards for problems found and solved
+- `requested_credit` records proposed additive credit before guardrails, while `credited_credit` records only the points that actually survive source checks and caps
+- the anti-cheat layer treats score-surface manipulation as negative reward: suspicious points are denied, then penalized, then capped, and critical cases escalate to disqualifiers
 - PASS is still determined by reviewer green, existing readiness, and clean-room verify
 - disqualifiers outrank score
 
@@ -38,8 +42,21 @@
 Canonical gate truth now comes from runtime state outside the repo.
 
 - `task_context` controls axis applicability, caps, and reviewer requirements.
+- `completion_score` now uses automatic verified-work awards plus optional user additions. Clean-room verify PASS grants the baseline `24` points automatically, and the user can add more awards up to the axis max.
+- only `completion_score` has a user-award budget, currently `6` points. Other axes default to `0` user-award budget and are treated as score stuffing if a write is attempted.
+- `prepare_user_scorecard_review.py` ignores snapshot/base `user_review` changes unless the payload carries an explicit `user_review_update_request` or `user_review_update_authorized: true`.
+- official anti-cheat codes are `unauthorized_user_review_modification`, `reserved_derived_award_spoofing`, `non_user_source_award`, `excessive_bonus_request`, `reviewer_truth_tamper`, `writer_self_score_attempt`, `claimed_verification_without_evidence`, `test_deletion_or_weakening_without_rationale`, and `score_policy_tamper_without_policy_update_workorder`.
+- unauthorized `user_review` writes, reserved derived-award categories, non-user award sources, unbacked verification claims, and over-budget award requests are all recorded by the anti-cheat layer and can trigger score penalties, caps, or `DQ-011`.
+- `user_review.awards[]` uses the schema `axis`, `points`, `reason`, and optional `category`, `evidence_refs`.
 - `user_review.penalties[]` uses the same schema.
+- `requested_credit[]` uses `axis`, `requested_points`, `source`, `reason`, `evidence_ref`.
+- `credited_credit[]` uses `axis`, `requested_points`, `credited_points`, `source`, `capped`, `blocked`, `block_reason`.
+- `anti_cheat_signals[]` uses `code`, `severity`, `points`, `reason`, `evidence_ref`.
 - `disqualifiers[]` accepts `id`, `reason`, and optional `evidence_refs`.
+- reward function:
+  `raw_total_score = sum(axis_scores)`
+  `guarded_total_score = max(raw_total_score - anti_cheat_penalty_points, 0)`
+  `capped_total_score = min(guarded_total_score, all active caps)`
 - `existing_readiness` carries upstream gate status and remaining manual close-out.
 - `clean_room_verify` carries final verify status.
 
@@ -70,8 +87,9 @@ python /home/andy4917/Dev-Management/scripts/export_user_score_summary.py
 2. reviewer green check
 3. trace presence check
 4. axis floor check
-5. platform cap check
-6. existing readiness and manual close-out check
-7. clean-room verify check
+5. anti-cheat guard check
+6. platform cap check
+7. existing readiness and manual close-out check
+8. clean-room verify check
 
 `quick` mode enforces disqualifiers only and records score output as advisory. `verify` and `release` enforce the full score gate, require fresh evidence only, and fail closed without a valid workspace authority lease.

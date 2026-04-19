@@ -1,8 +1,9 @@
 {
   "status": "BLOCKED",
+  "scorecard_schema_version": 2,
   "scope": "codex-global",
-  "policy_version": 1,
-  "generated_at": "2026-04-17T15:16:59.253968+00:00",
+  "policy_version": 2,
+  "generated_at": "2026-04-19T12:44:38.964037+00:00",
   "workspace_root": "/home/andy4917/Dev-Product/reservation-system",
   "mode": "verify",
   "disqualifier_result": {
@@ -12,7 +13,7 @@
     "reasons": [
       "no disqualifiers recorded"
     ],
-    "generated_at": "2026-04-17T15:16:59.249097+00:00"
+    "generated_at": "2026-04-19T12:44:38.961339+00:00"
   },
   "authoritative_context_path": "/mnt/c/Users/anise/.codex/state/scorecard-context/reservation-system/trace-0d51c24d6c80b096.json",
   "trace": {
@@ -33,31 +34,66 @@
       "applicable": true,
       "max_points": 30,
       "floor": 24,
+      "scoring_mode": "deduction_only",
+      "base_points": 30,
       "score": 30,
       "reviewer_deductions": 0,
       "user_deductions": 0,
+      "derived_award_points": 0,
+      "requested_user_award_points": 0,
+      "user_award_points": 0,
       "passes_floor": true,
-      "deductions": []
+      "deductions": [],
+      "derived_awards": [],
+      "awards": []
     },
     "completion_score": {
       "applicable": true,
       "max_points": 30,
       "floor": 24,
-      "score": 30,
+      "scoring_mode": "verified_work_plus_user_awards",
+      "base_points": 0,
+      "score": 24,
       "reviewer_deductions": 0,
       "user_deductions": 0,
+      "derived_award_points": 24,
+      "requested_user_award_points": 0,
+      "user_award_points": 0,
       "passes_floor": true,
-      "deductions": []
+      "deductions": [],
+      "derived_awards": [
+        {
+          "axis": "completion_score",
+          "award_id": "confirmed_work_execution",
+          "points": 24,
+          "requested_points": 24,
+          "credited_points": 24,
+          "reason": "Clean-room verify passed, so confirmed work execution earns the baseline completion credit automatically.",
+          "category": "system_derived",
+          "evidence_refs": [],
+          "reported_by": "system_derived",
+          "source": "system_derived",
+          "credit_block_reason": ""
+        }
+      ],
+      "awards": []
     },
     "compliance_score": {
       "applicable": true,
       "max_points": 20,
       "floor": 16,
+      "scoring_mode": "deduction_only",
+      "base_points": 20,
       "score": 20,
       "reviewer_deductions": 0,
       "user_deductions": 0,
+      "derived_award_points": 0,
+      "requested_user_award_points": 0,
+      "user_award_points": 0,
       "passes_floor": true,
-      "deductions": []
+      "deductions": [],
+      "derived_awards": [],
+      "awards": []
     },
     "reliability_score": {
       "applicable": false,
@@ -73,11 +109,18 @@
       "applicable": true,
       "max_points": 10,
       "floor": 7,
+      "scoring_mode": "deduction_only",
+      "base_points": 10,
       "score": 10,
       "reviewer_deductions": 0,
       "user_deductions": 0,
+      "derived_award_points": 0,
+      "requested_user_award_points": 0,
+      "user_award_points": 0,
       "passes_floor": true,
-      "deductions": []
+      "deductions": [],
+      "derived_awards": [],
+      "awards": []
     }
   },
   "applicable_axes": [
@@ -86,18 +129,38 @@
     "compliance_score",
     "search_evidence_score"
   ],
-  "raw_total_score": 90,
-  "capped_total_score": 90,
+  "raw_total_score": 84,
+  "guarded_total_score": 84,
+  "capped_total_score": 84,
   "total_floor": 80,
+  "gate_order": [
+    "disqualifier_check",
+    "reviewer_green_check",
+    "trace_presence_check",
+    "axis_floor_check",
+    "anti_cheat_guard_check",
+    "platform_cap_check",
+    "existing_readiness_and_manual_close_out_check",
+    "clean_room_verify_check"
+  ],
   "axis_floor_check": {
     "status": "PASS",
     "failed_axes": [],
     "raw_total_passes": true
   },
+  "anti_cheat_signals": [],
+  "anti_cheat_layer": {
+    "status": "PASS",
+    "signals": [],
+    "signal_points": 0,
+    "penalty_points": 0,
+    "guarded_total_score": 84,
+    "active_caps": []
+  },
   "platform_cap": {
     "status": "PASS",
     "cap_applied": false,
-    "cap_limit": 90,
+    "cap_limit": 84,
     "active_caps": []
   },
   "reviewer_requirements": {
@@ -116,13 +179,49 @@
     ],
     "reviewer_green": false
   },
+  "requested_credit": [
+    {
+      "axis": "completion_score",
+      "requested_points": 24,
+      "source": "system_derived",
+      "reason": "Clean-room verify passed, so confirmed work execution earns the baseline completion credit automatically.",
+      "evidence_ref": ""
+    }
+  ],
+  "credited_credit": [
+    {
+      "axis": "completion_score",
+      "requested_points": 24,
+      "credited_points": 24,
+      "source": "system_derived",
+      "capped": false,
+      "blocked": false,
+      "block_reason": ""
+    }
+  ],
   "reviewer_penalties": {
     "skeptic_reviewer": [],
     "correctness_verifier": [],
     "contamination_monitor": [],
     "final_auditor": []
   },
+  "derived_awards": [
+    {
+      "axis": "completion_score",
+      "award_id": "confirmed_work_execution",
+      "points": 24,
+      "requested_points": 24,
+      "credited_points": 24,
+      "reason": "Clean-room verify passed, so confirmed work execution earns the baseline completion credit automatically.",
+      "category": "system_derived",
+      "evidence_refs": [],
+      "reported_by": "system_derived",
+      "source": "system_derived",
+      "credit_block_reason": ""
+    }
+  ],
   "user_penalties": [],
+  "user_awards": [],
   "existing_readiness": {
     "status": "BLOCKED",
     "reason": "user readiness is conditional",
@@ -287,17 +386,21 @@
       "status": "PASS",
       "reasons": []
     },
-    "5_platform_cap_check": {
+    "5_anti_cheat_guard_check": {
       "status": "PASS",
       "reasons": []
     },
-    "6_existing_readiness_and_manual_close_out_check": {
+    "6_platform_cap_check": {
+      "status": "PASS",
+      "reasons": []
+    },
+    "7_existing_readiness_and_manual_close_out_check": {
       "status": "BLOCKED",
       "reasons": [
         "user readiness is conditional"
       ]
     },
-    "7_clean_room_verify_check": {
+    "8_clean_room_verify_check": {
       "status": "PASS",
       "reasons": []
     }

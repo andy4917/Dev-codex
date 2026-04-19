@@ -97,6 +97,42 @@ def merge_unique(existing: list[Any], incoming: list[Any]) -> list[Any]:
     return merged
 
 
+def default_user_review() -> dict[str, Any]:
+    return {
+        "status": "PENDING",
+        "awards": [],
+        "penalties": [],
+        "notes": "",
+    }
+
+
+def normalize_user_review(payload: dict[str, Any] | None) -> dict[str, Any]:
+    source = payload if isinstance(payload, dict) else {}
+    return {
+        "status": normalize_status(source.get("status"), "PENDING"),
+        "awards": list(source.get("awards", [])),
+        "penalties": list(source.get("penalties", [])),
+        "notes": str(source.get("notes", "")).strip(),
+    }
+
+
+def user_review_update_authorized(payload: dict[str, Any] | None) -> bool:
+    source = payload if isinstance(payload, dict) else {}
+    candidates: list[dict[str, Any]] = [source]
+    nested = source.get("user_review")
+    if isinstance(nested, dict):
+        candidates.append(nested)
+    for candidate in candidates:
+        if bool(candidate.get("user_review_update_authorized", False)) or bool(candidate.get("update_authorized", False)):
+            return True
+        if bool(candidate.get("user_review_approved", False)):
+            return True
+        for key in ("user_review_update_request", "user_review_request_id", "task_request_id", "request_id"):
+            if str(candidate.get(key, "")).strip():
+                return True
+    return False
+
+
 def status_exit_code(status: str) -> int:
     normalized = normalize_status(status)
     if normalized in {"PASS", "WAIVED"}:
@@ -132,6 +168,17 @@ def _run_git(repo_root: Path, *args: str) -> str:
     if result.returncode != 0:
         return ""
     return result.stdout.strip()
+
+
+def git_output(repo_root: Path, *args: str) -> str:
+    return _run_git(repo_root, *args)
+
+
+def git_lines(repo_root: Path, *args: str) -> list[str]:
+    output = git_output(repo_root, *args)
+    if not output:
+        return []
+    return [line for line in output.splitlines() if line.strip()]
 
 
 def git_sha(repo_root: Path) -> str:

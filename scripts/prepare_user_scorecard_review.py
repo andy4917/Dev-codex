@@ -7,9 +7,12 @@ from typing import Any
 
 from _scorecard_common import (
     DEFAULT_REVIEW_FILE,
+    default_user_review,
     file_hash,
     fresh_evidence_manifest_path,
     fresh_trace_id,
+    git_lines,
+    git_output,
     git_sha,
     load_json,
     load_jsonl,
@@ -22,6 +25,7 @@ from _scorecard_common import (
     stable_json_hash,
     strip_signature,
     utc_timestamp,
+    user_review_update_authorized,
     verify_truth_signature,
     worktree_id,
 )
@@ -31,6 +35,16 @@ REVIEWER_ROLES = (
     "correctness_verifier",
     "contamination_monitor",
     "final_auditor",
+)
+
+SKIP_OR_XFAIL_MARKERS = (
+    "@pytest.mark.skip",
+    "@pytest.mark.xfail",
+    "pytest.skip(",
+    "pytest.xfail(",
+    "@unittest.skip",
+    "skipTest(",
+    "SkipTest(",
 )
 
 DEFAULT_TASK_CONTEXT = {
@@ -50,6 +64,7 @@ DEFAULT_TASK_CONTEXT = {
     "web_or_mcp_access": False,
     "security_sensitive": False,
     "security_evidence_present": False,
+    "legacy_hardcoding_violation": False,
 }
 
 
@@ -75,11 +90,7 @@ def default_review_payload() -> dict[str, Any]:
             role: {"status": "PENDING", "green": False, "penalties": [], "notes": ""}
             for role in REVIEWER_ROLES
         },
-        "user_review": {
-            "status": "PENDING",
-            "penalties": [],
-            "notes": "",
-        },
+        "user_review": default_user_review(),
         "disqualifiers": [],
         "existing_readiness": {
             "status": "UNKNOWN",
@@ -98,6 +109,130 @@ def default_review_payload() -> dict[str, Any]:
 
 def empty_reviewer_payload() -> dict[str, Any]:
     return {role: {"status": "PENDING", "green": False, "penalties": [], "notes": ""} for role in REVIEWER_ROLES}
+
+
+def user_review_update_present(base: dict[str, Any]) -> bool:
+    user_review = base.get("user_review")
+    if not isinstance(user_review, dict):
+        return False
+    if list(user_review.get("awards", [])) or list(user_review.get("penalties", [])):
+        return True
+    if str(user_review.get("notes", "")).strip():
+        return True
+    return normalize_status(user_review.get("status"), "PENDING") != "PENDING"
+
+
+def authorized_user_review(base: dict[str, Any]) -> dict[str, Any]:
+    if not user_review_update_authorized(base):
+        return default_user_review()
+    source = base.get("user_review", {})
+    return {
+        "status": normalize_status(source.get("status"), "PENDING"),
+        "awards": list(source.get("awards", [])),
+        "penalties": list(source.get("penalties", [])),
+        "notes": str(source.get("notes", "")).strip(),
+    }
+
+
+def user_review_tamper_events(base: dict[str, Any], base_path: Path) -> list[dict[str, Any]]:
+    if not user_review_update_present(base) or user_review_update_authorized(base):
+        return []
+    return [
+        {
+            "category": "unauthorized_user_review_modification",
+            "reason": "base review tried to modify the protected user-review layer without explicit user approval or task request",
+            "path": str(base_path),
+            "disqualifier_ids": ["DQ-011"],
+            "evidence_refs": [str(base_path)],
+        }
+    ]
+
+
+def _verification_stage_claim_event(
+    *,
+    workspace_root: Path,
+    stage_name: str,
+    stage_payload: dict[str, Any],
+    report_path_raw: str,
+) -> dict[str, Any] | None:
+    status = normalize_status(stage_payload.get("status"), "UNKNOWN")
+    if status not in {"PASS", "WAIVED"}:
+        return None
+
+    report_path = resolve_path(report_path_raw, workspace_root)
+    evidence_refs = [str(item).strip() for item in stage_payload.get("evidence_refs", []) if str(item).strip()]
+    if (report_path is not None and report_path.exists()) or evidence_refs:
+        return None
+
+    return {
+        "category": "claimed_verification_without_evidence",
+        "reason": f"{stage_name} claimed {status} without a report path or evidence references",
+        "path": str(report_path) if report_path is not None else str(workspace_root / "reports"),
+        "disqualifier_ids": [],
+        "evidence_refs": [str(report_path)] if report_path is not None else [],
+    }
+
+
+def verification_claim_tamper_events(workspace_root: Path, context_payload: dict[str, Any]) -> list[dict[str, Any]]:
+    evidence_inputs = context_payload.get("evidence_inputs", {})
+    events: list[dict[str, Any]] = []
+    for stage_name, report_key in (
+        ("existing_readiness", "existing_readiness_report_path"),
+        ("clean_room_verify", "clean_room_verify_report_path"),
+    ):
+        event = _verification_stage_claim_event(
+            workspace_root=workspace_root,
+            stage_name=stage_name,
+            stage_payload=dict(context_payload.get(stage_name, {})),
+            report_path_raw=str(evidence_inputs.get(report_key, "")),
+        )
+        if event is not None:
+            events.append(event)
+    return events
+
+
+def _test_change_rationale_present(workspace_root: Path) -> bool:
+    for path in (workspace_root / "DESIGN_REVIEW.md", workspace_root / "SUMMARY.md"):
+        if path.exists() and "Test Change Rationale:" in path.read_text(encoding="utf-8", errors="ignore"):
+            return True
+    return False
+
+
+def workspace_test_change_tamper_events(workspace_root: Path) -> list[dict[str, Any]]:
+    if _test_change_rationale_present(workspace_root):
+        return []
+
+    deleted_tests: list[str] = []
+    for line in git_lines(workspace_root, "diff", "--name-status", "HEAD", "--", "tests"):
+        parts = line.split("\t")
+        if parts and parts[0].startswith("D") and len(parts) > 1:
+            deleted_tests.append(parts[-1])
+
+    weakening_lines = [
+        line
+        for line in git_output(workspace_root, "diff", "HEAD", "--", "tests").splitlines()
+        if line.startswith("+")
+        and not line.startswith("+++")
+        and any(marker in line for marker in SKIP_OR_XFAIL_MARKERS)
+    ]
+
+    if not deleted_tests and not weakening_lines:
+        return []
+
+    reason_parts: list[str] = []
+    if deleted_tests:
+        reason_parts.append(f"deleted tests: {', '.join(sorted(set(deleted_tests)))}")
+    if weakening_lines:
+        reason_parts.append("added skip or xfail markers in tests without Test Change Rationale")
+    return [
+        {
+            "category": "test_deletion_or_weakening_without_rationale",
+            "reason": "; ".join(reason_parts),
+            "path": str(workspace_root / "tests"),
+            "disqualifier_ids": [],
+            "evidence_refs": [str(workspace_root / "tests")],
+        }
+    ]
 
 
 def stage_from_readiness(report: dict[str, Any]) -> dict[str, Any]:
@@ -179,6 +314,7 @@ def build_context_payload(workspace_root: Path, mode: str, base: dict[str, Any])
         acceptance = dict(delivery_gate.get("acceptance", {}))
 
     trace_id = current_trace_id(workspace_root, mode)
+    user_review = authorized_user_review(base)
     return {
         "context_version": 1,
         "status": "READY",
@@ -199,7 +335,7 @@ def build_context_payload(workspace_root: Path, mode: str, base: dict[str, Any])
         "trace": stage_from_trace(trace, trace_path) if trace_path.exists() else {"required": True, "status": "UNKNOWN", "evidence_refs": [], "notes": ""},
         "existing_readiness": stage_from_readiness(readiness),
         "clean_room_verify": stage_from_acceptance(acceptance),
-        "user_review": dict(base.get("user_review", {"status": "PENDING", "penalties": [], "notes": ""})),
+        "user_review": user_review,
         "disqualifiers": list(base.get("disqualifiers", [])),
     }
 
@@ -241,7 +377,12 @@ def validate_verdict_entry(
     return ""
 
 
-def load_authoritative_reviewers(workspace_root: Path, context_payload: dict[str, Any], context_path: Path) -> tuple[dict[str, Any], dict[str, Any]]:
+def load_authoritative_reviewers(
+    workspace_root: Path,
+    context_payload: dict[str, Any],
+    context_path: Path,
+    extra_tamper_events: list[dict[str, Any]] | None = None,
+) -> tuple[dict[str, Any], dict[str, Any]]:
     reviewers = empty_reviewer_payload()
     trace_id = str(context_payload["trace_id"])
     context_hash = file_hash(context_path)
@@ -287,23 +428,34 @@ def load_authoritative_reviewers(workspace_root: Path, context_payload: dict[str
             "notes": str(valid_entry.get("notes", "")).strip(),
         }
 
+    workspace_audit_path = workspace_root / "reports" / "audit.final.json"
+    workspace_audit = load_json(workspace_audit_path)
+    workspace_tamper_events = [dict(item) for item in workspace_audit.get("tamper_events", []) if isinstance(item, dict)]
+    if extra_tamper_events:
+        workspace_tamper_events = [*extra_tamper_events, *workspace_tamper_events]
+
     audit_report = {
         "workspace_root": str(workspace_root),
         "trace_id": trace_id,
         "authoritative_context_path": str(context_path),
         "authoritative_context_hash": context_hash,
         "reviewer_verdict_dir": str(verdict_root),
+        "workspace_audit_path": str(workspace_audit_path),
+        "workspace_audit_status": normalize_status(workspace_audit.get("status"), "UNKNOWN") if workspace_audit else "UNKNOWN",
         "valid_verdict_roles": valid_roles,
         "ignored_entries": ignored_entries,
         "tamper_events": [
-            {
-                "category": "reviewer_truth",
-                "reason": item["reason"],
-                "role": item["role"],
-                "path": item["path"],
-                "disqualifier_ids": ["DQ-002", "DQ-009"],
-            }
-            for item in ignored_entries
+            *[
+                {
+                    "category": "reviewer_truth",
+                    "reason": item["reason"],
+                    "role": item["role"],
+                    "path": item["path"],
+                    "disqualifier_ids": ["DQ-011"],
+                }
+                for item in ignored_entries
+            ],
+            *workspace_tamper_events,
         ],
         "generated_at": utc_timestamp(),
     }
@@ -323,7 +475,7 @@ def build_snapshot_payload(
     payload["authoritative_context_path"] = str(context_path)
     payload["authoritative_context_hash"] = file_hash(context_path)
     payload["authority_audit_path"] = str(audit_path)
-    payload["user_review"] = dict(base.get("user_review", context_payload.get("user_review", {})))
+    payload["user_review"] = dict(context_payload.get("user_review", default_user_review()))
     payload["disqualifiers"] = list(base.get("disqualifiers", context_payload.get("disqualifiers", [])))
     return payload
 
@@ -341,13 +493,24 @@ def main() -> int:
     workspace_root = resolve_path(args.workspace_root) or Path(args.workspace_root)
     base_path = resolve_path(args.base_file) or Path(args.base_file)
     base = load_json(base_path, default_review_payload())
+    base_user_review_tamper_events = user_review_tamper_events(base, base_path)
 
     context_payload = build_context_payload(workspace_root, args.mode, base)
+    extra_tamper_events = [
+        *base_user_review_tamper_events,
+        *verification_claim_tamper_events(workspace_root, context_payload),
+        *workspace_test_change_tamper_events(workspace_root),
+    ]
     context_path = resolve_path(args.context_output_file) or scorecard_context_path(workspace_root, str(context_payload["trace_id"]))
     snapshot_path = resolve_path(args.review_snapshot_output or args.output_file) or (resolve_path(args.output_file) or DEFAULT_REVIEW_FILE)
 
     save_json(context_path, context_payload)
-    reviewers, audit_report = load_authoritative_reviewers(workspace_root, context_payload, context_path)
+    reviewers, audit_report = load_authoritative_reviewers(
+        workspace_root,
+        context_payload,
+        context_path,
+        extra_tamper_events=extra_tamper_events,
+    )
     audit_path = workspace_root / "reports" / "scorecard-authority-audit.json"
     save_json(audit_path, audit_report)
 

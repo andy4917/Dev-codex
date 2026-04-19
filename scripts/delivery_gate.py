@@ -95,6 +95,17 @@ def run_delivery_gate(review: dict[str, Any], mode: str) -> dict[str, Any]:
         if axis_floor_status != "PASS":
             first_failure("BLOCKED", "4_axis_floor_check", axis_floor_reasons)
 
+        anti_cheat = scorecard.get("anti_cheat_layer", {})
+        anti_cheat_reasons = [str(signal.get("reason", "")).strip() for signal in anti_cheat.get("signals", []) if str(signal.get("reason", "")).strip()]
+        anti_cheat_status = "PASS"
+        if anti_cheat.get("status") == "FAIL":
+            anti_cheat_status = "FAIL"
+        elif any(str(signal.get("code", signal.get("id", ""))).strip() == "claimed_verification_without_evidence" for signal in anti_cheat.get("signals", [])):
+            anti_cheat_status = "BLOCKED"
+        gate_checks["5_anti_cheat_guard_check"] = {"status": anti_cheat_status, "reasons": anti_cheat_reasons}
+        if anti_cheat_status != "PASS":
+            first_failure("FAIL" if anti_cheat_status == "FAIL" else "BLOCKED", "5_anti_cheat_guard_check", anti_cheat_reasons)
+
         cap_reasons: list[str] = []
         if scorecard["platform_cap"]["cap_applied"]:
             for cap in scorecard["platform_cap"]["active_caps"]:
@@ -104,22 +115,22 @@ def run_delivery_gate(review: dict[str, Any], mode: str) -> dict[str, Any]:
                 f"capped total score {scorecard['capped_total_score']} is below floor {scorecard['total_floor']}"
             )
         cap_status = scorecard["platform_cap"]["status"]
-        gate_checks["5_platform_cap_check"] = {"status": cap_status, "reasons": cap_reasons}
+        gate_checks["6_platform_cap_check"] = {"status": cap_status, "reasons": cap_reasons}
         if cap_status != "PASS":
-            first_failure("BLOCKED", "5_platform_cap_check", cap_reasons)
+            first_failure("BLOCKED", "6_platform_cap_check", cap_reasons)
 
         readiness_status, readiness_reasons = _stage_gate_status(scorecard["existing_readiness"])
-        gate_checks["6_existing_readiness_and_manual_close_out_check"] = {
+        gate_checks["7_existing_readiness_and_manual_close_out_check"] = {
             "status": readiness_status,
             "reasons": readiness_reasons,
         }
         if readiness_status != "PASS":
-            first_failure("FAIL" if readiness_status == "FAIL" else "BLOCKED", "6_existing_readiness_and_manual_close_out_check", readiness_reasons)
+            first_failure("FAIL" if readiness_status == "FAIL" else "BLOCKED", "7_existing_readiness_and_manual_close_out_check", readiness_reasons)
 
         verify_status, verify_reasons = _stage_gate_status(scorecard["clean_room_verify"])
-        gate_checks["7_clean_room_verify_check"] = {"status": verify_status, "reasons": verify_reasons}
+        gate_checks["8_clean_room_verify_check"] = {"status": verify_status, "reasons": verify_reasons}
         if verify_status != "PASS":
-            first_failure("FAIL" if verify_status == "FAIL" else "BLOCKED", "7_clean_room_verify_check", verify_reasons)
+            first_failure("FAIL" if verify_status == "FAIL" else "BLOCKED", "8_clean_room_verify_check", verify_reasons)
 
     remaining_manual_close_out = [
         *scorecard["existing_readiness"].get("manual_close_out", []),

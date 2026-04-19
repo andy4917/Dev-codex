@@ -1,0 +1,39 @@
+{
+  "status": "BLOCKED",
+  "summary": "current repo root is WSL-native but outside the canonical Dev-Product tree.",
+  "attempts": [],
+  "blockers": [
+    "current repo root is WSL-native but outside the canonical Dev-Product tree."
+  ],
+  "warnings": [
+    "desktop_dual_wsl_routing_enabled"
+  ],
+  "evidence": {
+    "global_state_workspace_roots": [
+      "\\\\wsl.localhost\\Ubuntu\\home\\andy4917\\Dev-Management"
+    ],
+    "open_target_preferences": {
+      "global": "wsl"
+    },
+    "thread_workspace_root_hints": {},
+    "run_codex_in_wsl": true,
+    "integrated_terminal_shell": "wsl"
+  },
+  "generated_at": "2026-04-17T16:47:11.084486+00:00",
+  "mode": "wsl_native_candidate",
+  "windows_path": "\\\\wsl$\\Ubuntu\\home\\andy4917\\Dev-Management",
+  "windows_access_paths": [
+    "\\\\wsl.localhost\\Ubuntu\\home\\andy4917\\Dev-Management",
+    "\\\\wsl$\\Ubuntu\\home\\andy4917\\Dev-Management"
+  ],
+  "wsl_path": "/home/andy4917/Dev-Management",
+  "windows_ui_root": "C:\\Users\\anise",
+  "global_state_workspace_roots": [
+    "\\\\wsl.localhost\\Ubuntu\\home\\andy4917\\Dev-Management"
+  ],
+  "stale_alignment_refs": [],
+  "recommended_runtime_surface": "wsl-ubuntu-native",
+  "legacy_mount_prefixes": [
+    "windows-user-mount"
+  ]
+}

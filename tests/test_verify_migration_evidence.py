@@ -31,9 +31,10 @@ class VerifyMigrationEvidenceTests(unittest.TestCase):
         project_root = product_root / "reservation-system"
         linux_codex = root / "linux-home" / ".codex"
         windows_codex = root / "windows-home" / ".codex"
-        quarantine_root = repo_root / "quarantine" / "2026-04-16"
+        quarantine_root = repo_root / "quarantine"
+        historical_quarantine_root = quarantine_root / "2026-04-16"
 
-        for path in [repo_root, workflow_root, project_root, linux_codex, windows_codex, quarantine_root]:
+        for path in [repo_root, workflow_root, project_root, linux_codex, windows_codex, historical_quarantine_root]:
             path.mkdir(parents=True, exist_ok=True)
         (repo_root / ".git").mkdir(exist_ok=True)
         (workflow_root / ".git").mkdir(exist_ok=True)
@@ -106,6 +107,7 @@ class VerifyMigrationEvidenceTests(unittest.TestCase):
             "hardcoding_definition": {
                 "path_rules": {
                     "historical_evidence_allowlist": ["migration_manifest.json"],
+                    "historical_batch_paths_not_allowed_in_active_policy": ["cleanup_policy.quarantine_root"],
                     "legacy_repo_paths_to_remove": ["/legacy/reservation-system"],
                 }
             },
@@ -135,7 +137,7 @@ class VerifyMigrationEvidenceTests(unittest.TestCase):
                 "quarantine_root": str(quarantine_root),
                 "moved_to_management": [str(repo_root / "contracts")],
                 "moved_to_workflow": [str(workflow_root / "scripts")],
-                "quarantined": [str(quarantine_root / "legacy-markers")],
+                "quarantined": [str(historical_quarantine_root / "legacy-markers")],
                 "deleted": ["/legacy/code (removed after migration)"],
             },
         )
@@ -169,8 +171,8 @@ class VerifyMigrationEvidenceTests(unittest.TestCase):
             """\
             #!/usr/bin/env python3
             print("1. disqualifier 결과: PASS")
-            print("11. gate 상태: PASS")
-            print("13. 최종 판정: PASS")
+            print("12. gate 상태: PASS")
+            print("14. 최종 판정: PASS")
             """
         )
         audit_script = textwrap.dedent(
