@@ -83,8 +83,10 @@ def render_agents(authority: dict, windows: bool) -> str:
         f"- Writer self-scoring, writer bonus scores, shadow scores, and fallback scores are forbidden. User review is a protected layer and cannot change without explicit user approval or task request; confirmed work/performance awards are derived automatically, users may add extra awards mid-task only within budget, and the anti-cheat layer denies, penalizes, caps, or disqualifies score manipulation attempts.\n"
         f"- Reviewer truth is append-only runtime state under `{scorecard['reviewer_verdict_root']}`; `{scorecard['review_snapshot']}` is a derived human-readable snapshot only.\n"
         f"- Disqualifiers outrank score. PASS still requires reviewer green, existing readiness, and clean-room verify.\n"
+        f"- The global scorecard layer is binding instruction-level guidance across canonical roots. Do not ignore requested vs credited score, anti-cheat output, gate status, summary export, or final audit results.\n"
         f"- Product-local `python scripts/delivery_gate.py --mode verify` wrappers are valid close-out surfaces only when they produce fresh evidence, refresh the derived review snapshot, then call the global scorecard gate and summary export.\n"
         f"- Canonical global scorecard order: `python {roots['management']}/scripts/prepare_user_scorecard_review.py --workspace-root <repo> --mode verify` -> `python {scorecard['delivery_gate']} --mode verify --workspace-root <repo>` -> `python {scorecard['summary_export']}`.\n"
+        f"- Generated runtime hooks may replay the scorecard close-out path at session start and prompt submit, but the canonical enforcement surface remains the explicit verify chain.\n"
         f"- Verify/release require fresh evidence manifests plus a signed workspace authority lease under `{scorecard['workspace_authority_root']}`.\n"
         f"- Required scorecard gate command: `python {scorecard['delivery_gate']} --mode verify`\n"
         f"- Required scorecard summary command: `python {scorecard['summary_export']}`\n"
@@ -345,6 +347,37 @@ def render_config(authority: dict, windows: bool, effective_cfg: dict[str, Any] 
     return "\n".join(lines).rstrip() + "\n"
 
 
+def render_hooks(authority: dict, windows: bool) -> str | None:
+    runtime_hook = authority.get("generation_targets", {}).get("scorecard", {}).get("runtime_hook", {})
+    script = str(runtime_hook.get("script", "")).strip()
+    events = runtime_hook.get("events", {})
+    if not script or not isinstance(events, dict) or not events:
+        return None
+
+    hooks: dict[str, list[dict[str, Any]]] = {}
+    linux_prefix = str(runtime_hook.get("linux_command_prefix", "python3")).strip() or "python3"
+    windows_prefix = str(runtime_hook.get("windows_command_prefix", "wsl.exe python3")).strip() or "wsl.exe python3"
+    for event_name, payload in events.items():
+        matcher = ".*"
+        if isinstance(payload, dict):
+            matcher = str(payload.get("matcher", ".*")).strip() or ".*"
+        command = f"{linux_prefix} {script} --event {event_name}"
+        if windows:
+            command = f"{windows_prefix} {script} --event {event_name}"
+        hooks[str(event_name)] = [
+            {
+                "matcher": matcher,
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": command,
+                    }
+                ],
+            }
+        ]
+    return json.dumps({"hooks": hooks}, ensure_ascii=False, indent=2) + "\n"
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Render generated Codex runtime files from workspace authority.")
     parser.add_argument("--skip-skills", action="store_true", help="Skip skill exposure synchronization.")
@@ -357,6 +390,16 @@ def main() -> int:
     write_text(Path(runtime["linux"]["config"]), render_config(authority, windows=False, effective_cfg=effective_cfg))
     write_text(Path(runtime["windows_mirror"]["agents"]), render_agents(authority, windows=True))
     write_text(Path(runtime["windows_mirror"]["config"]), render_config(authority, windows=True, effective_cfg=effective_cfg))
+    linux_hooks = runtime["linux"].get("hooks_config")
+    if linux_hooks:
+        rendered = render_hooks(authority, windows=False)
+        if rendered is not None:
+            write_text(Path(linux_hooks), rendered)
+    windows_hooks = runtime["windows_mirror"].get("hooks_config")
+    if windows_hooks:
+        rendered = render_hooks(authority, windows=True)
+        if rendered is not None:
+            write_text(Path(windows_hooks), rendered)
     relink(Path.home() / ".codex" / "workspace_authority.json", AUTHORITY_PATH)
 
     if not args.skip_skills:

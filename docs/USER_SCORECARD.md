@@ -4,6 +4,7 @@
 
 - canonical policy root: `/home/andy4917/Dev-Management`
 - runtime mirror: `/home/andy4917/.codex/AGENTS.md`
+- generated runtime hooks: `/home/andy4917/.codex/hooks.json`
 - scorecard policy: `contracts/user_score_policy.json`
 - disqualifier policy: `contracts/disqualifier_policy.json`
 - authoritative reviewer verdict root: `$CODEX_HOME/state/reviewer-verdicts/<codex_project_id>/<trace_id>/`
@@ -23,6 +24,7 @@
 - the anti-cheat layer treats score-surface manipulation as negative reward: suspicious points are denied, then penalized, then capped, and critical cases escalate to disqualifiers
 - PASS is still determined by reviewer green, existing readiness, and clean-room verify
 - disqualifiers outrank score
+- generated global runtime elevates the scorecard layer into instruction-level guidance through `~/.codex/AGENTS.md`, and generated runtime hooks replay the close-out path at session start or prompt submit without replacing explicit verify commands
 
 ## Reviewer Roles
 

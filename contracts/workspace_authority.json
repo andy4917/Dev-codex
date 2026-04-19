@@ -266,11 +266,13 @@
     "global_runtime": {
       "linux": {
         "agents": "/home/andy4917/.codex/AGENTS.md",
-        "config": "/home/andy4917/.codex/config.toml"
+        "config": "/home/andy4917/.codex/config.toml",
+        "hooks_config": "/home/andy4917/.codex/hooks.json"
       },
       "windows_mirror": {
         "agents": "/mnt/c/Users/anise/.codex/AGENTS.md",
         "config": "/mnt/c/Users/anise/.codex/config.toml",
+        "hooks_config": "/mnt/c/Users/anise/.codex/hooks.json",
         "generated_header": "GENERATED - DO NOT EDIT"
       }
     },
@@ -283,7 +285,22 @@
       "workspace_authority_root": "/home/andy4917/.codex/state/workspace-authority",
       "report": "/home/andy4917/Dev-Management/reports/user-scorecard.json",
       "delivery_gate": "/home/andy4917/Dev-Management/scripts/delivery_gate.py",
-      "summary_export": "/home/andy4917/Dev-Management/scripts/export_user_score_summary.py"
+      "summary_export": "/home/andy4917/Dev-Management/scripts/export_user_score_summary.py",
+      "runtime_hook": {
+        "script": "/home/andy4917/Dev-Management/scripts/scorecard_runtime_hook.py",
+        "linux_command_prefix": "python3",
+        "state_root": "/home/andy4917/.codex/state/scorecard-hook",
+        "user_prompt_throttle_seconds": 300,
+        "windows_command_prefix": "wsl.exe python3",
+        "events": {
+          "SessionStart": {
+            "matcher": ".*"
+          },
+          "UserPromptSubmit": {
+            "matcher": ".*"
+          }
+        }
+      }
     },
     "global_config": {
       "model": "gpt-5.4",

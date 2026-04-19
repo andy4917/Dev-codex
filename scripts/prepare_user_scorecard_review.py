@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import re
 from pathlib import Path
 from typing import Any
 
@@ -69,6 +70,20 @@ DEFAULT_TASK_CONTEXT = {
     "security_evidence_present": False,
     "legacy_hardcoding_violation": False,
 }
+
+MARKDOWN_HEADING_PATTERN = re.compile(r"^\s*(?P<hashes>#{1,6})\s*(?P<text>.*?)\s*$")
+TEST_CHANGE_SECTION_LABELS = (
+    "Test Change Rationale",
+    "Test Change Notes",
+)
+IGNORED_TEST_CHANGE_RATIONALE_LINES = {
+    "none",
+    "n/a",
+    "na",
+    "not applicable",
+    "add run-specific rationale here",
+}
+TEST_CHANGE_GUIDANCE_PREFIX = "if this run deleted tests, added skip or xfail"
 
 
 def default_review_payload() -> dict[str, Any]:
@@ -194,9 +209,93 @@ def verification_claim_tamper_events(workspace_root: Path, context_payload: dict
     return events
 
 
+def _parse_markdown_heading(line: str) -> tuple[int, str] | None:
+    match = MARKDOWN_HEADING_PATTERN.match(line)
+    if match is None:
+        return None
+    return len(match.group("hashes")), match.group("text").strip()
+
+
+def _parse_test_change_section_start(text: str) -> str | None:
+    stripped = text.strip()
+    for label in TEST_CHANGE_SECTION_LABELS:
+        if stripped.casefold() == label.casefold():
+            return ""
+        if not stripped.casefold().startswith(label.casefold()):
+            continue
+        remainder = stripped[len(label) :]
+        if not remainder:
+            return ""
+        trimmed = remainder.lstrip()
+        if trimmed.startswith(":"):
+            return trimmed[1:].strip()
+    return None
+
+
+def _extract_test_change_sections(text: str) -> list[list[str]]:
+    sections: list[list[str]] = []
+    lines = text.splitlines()
+    index = 0
+    while index < len(lines):
+        markdown_heading = _parse_markdown_heading(lines[index])
+        if markdown_heading is not None:
+            level, heading_text = markdown_heading
+            inline_rationale = _parse_test_change_section_start(heading_text)
+            if inline_rationale is not None:
+                body_lines = [inline_rationale] if inline_rationale else []
+                index += 1
+                while index < len(lines):
+                    next_heading = _parse_markdown_heading(lines[index])
+                    if next_heading is not None and next_heading[0] <= level:
+                        break
+                    body_lines.append(lines[index])
+                    index += 1
+                sections.append(body_lines)
+                continue
+
+        inline_rationale = _parse_test_change_section_start(lines[index])
+        if inline_rationale is not None:
+            body_lines = [inline_rationale] if inline_rationale else []
+            index += 1
+            while index < len(lines):
+                if _parse_markdown_heading(lines[index]) is not None:
+                    break
+                if _parse_test_change_section_start(lines[index]) is not None:
+                    break
+                body_lines.append(lines[index])
+                index += 1
+            sections.append(body_lines)
+            continue
+        index += 1
+    return sections
+
+
+def _normalize_rationale_line(line: str) -> str:
+    stripped = line.strip()
+    if not stripped:
+        return ""
+    stripped = stripped.lstrip("-*").strip()
+    if _parse_markdown_heading(stripped) is not None:
+        return ""
+    return stripped.rstrip(":").strip().rstrip(".,;!?").strip().casefold()
+
+
 def _test_change_rationale_present(workspace_root: Path) -> bool:
+    def _meaningful_rationale_body(text: str) -> bool:
+        for body_lines in _extract_test_change_sections(text):
+            for raw_line in body_lines:
+                normalized = _normalize_rationale_line(raw_line)
+                if not normalized:
+                    continue
+                if normalized in IGNORED_TEST_CHANGE_RATIONALE_LINES:
+                    continue
+                if normalized.startswith(TEST_CHANGE_GUIDANCE_PREFIX):
+                    continue
+                return True
+        return False
+
     for path in (workspace_root / "DESIGN_REVIEW.md", workspace_root / "SUMMARY.md"):
-        if path.exists() and "Test Change Rationale:" in path.read_text(encoding="utf-8", errors="ignore"):
+        if path.exists() and _meaningful_rationale_body(path.read_text(encoding="utf-8", errors="ignore")):
             return True
     return False
 

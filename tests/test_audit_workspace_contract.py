@@ -225,6 +225,70 @@ trust_level = "trusted"
             self.assertIn("[memories]", linux_config)
             self.assertEqual(self.module.strip_generated_header(linux_config), self.module.strip_generated_header(windows_config))
 
+    def test_rendered_hooks_include_scorecard_runtime_hook_commands(self) -> None:
+        render = _load_render_module()
+        authority = {
+            "canonical_roots": {
+                "management": "/home/andy4917/Dev-Management",
+                "workflow": "/home/andy4917/Dev-Workflow",
+                "product": "/home/andy4917/Dev-Product",
+            },
+            "cleanup_policy": {
+                "quarantine_root": "/home/andy4917/Dev-Management/quarantine",
+            },
+            "runtime_layering": {
+                "restore_seed_policy": {
+                    "preferred_windows_access_host": "wsl.localhost",
+                    "terminal_restore_policy": "background",
+                    "conversation_detail_mode": "steps",
+                },
+                "user_override_policy": {
+                    "allowed_fields": ["model"],
+                    "protected_fields": ["canonical_roots"],
+                },
+            },
+            "generation_targets": {
+                "global_runtime": {
+                    "windows_mirror": {
+                        "generated_header": "GENERATED - DO NOT EDIT",
+                    }
+                },
+                "scorecard": {
+                    "policy": "/home/andy4917/Dev-Management/contracts/user_score_policy.json",
+                    "disqualifiers": "/home/andy4917/Dev-Management/contracts/disqualifier_policy.json",
+                    "reviewer_verdict_root": "/home/andy4917/.codex/state/reviewer-verdicts",
+                    "review_snapshot": "/home/andy4917/Dev-Management/reports/user-scorecard.review.json",
+                    "delivery_gate": "/home/andy4917/Dev-Management/scripts/delivery_gate.py",
+                    "summary_export": "/home/andy4917/Dev-Management/scripts/export_user_score_summary.py",
+                    "workspace_authority_root": "/home/andy4917/.codex/state/workspace-authority",
+                    "runtime_hook": {
+                        "script": "/home/andy4917/Dev-Management/scripts/scorecard_runtime_hook.py",
+                        "linux_command_prefix": "python3",
+                        "windows_command_prefix": "wsl.exe python3",
+                        "events": {
+                            "SessionStart": {"matcher": ".*"},
+                            "UserPromptSubmit": {"matcher": ".*"},
+                        },
+                    }
+                }
+            }
+        }
+
+        rendered_agents = render.render_agents(authority, windows=False)
+        linux_hooks = json.loads(render.render_hooks(authority, windows=False))
+        windows_hooks = json.loads(render.render_hooks(authority, windows=True))
+
+        self.assertIn("binding instruction-level guidance", rendered_agents)
+        self.assertEqual(set(linux_hooks["hooks"]), {"SessionStart", "UserPromptSubmit"})
+        self.assertEqual(
+            linux_hooks["hooks"]["SessionStart"][0]["hooks"][0]["command"],
+            "python3 /home/andy4917/Dev-Management/scripts/scorecard_runtime_hook.py --event SessionStart",
+        )
+        self.assertEqual(
+            windows_hooks["hooks"]["UserPromptSubmit"][0]["hooks"][0]["command"],
+            "wsl.exe python3 /home/andy4917/Dev-Management/scripts/scorecard_runtime_hook.py --event UserPromptSubmit",
+        )
+
     def test_audit_detects_forbidden_feature_flags_and_active_runtime_restore_seed(self) -> None:
         authority = {
             "hardcoding_definition": {
