@@ -3,8 +3,8 @@
   "scorecard_schema_version": 2,
   "scope": "codex-global",
   "policy_version": 2,
-  "generated_at": "2026-04-19T13:49:03.322558+00:00",
-  "workspace_root": "/home/andy4917/Dev-Product/reservation-system",
+  "generated_at": "2026-04-19T17:35:10.578041+00:00",
+  "workspace_root": "/home/andy4917/Dev-Workflow",
   "mode": "verify",
   "disqualifier_result": {
     "status": "PASS",
@@ -13,25 +13,71 @@
     "reasons": [
       "no disqualifiers recorded"
     ],
-    "generated_at": "2026-04-19T13:49:03.313373+00:00"
+    "generated_at": "2026-04-19T17:35:10.574484+00:00"
   },
-  "authoritative_context_path": "/mnt/c/Users/anise/.codex/state/scorecard-context/reservation-system/trace-0d51c24d6c80b096.json",
+  "authoritative_context_path": "/mnt/c/Users/anise/.codex/state/scorecard-context/Dev-Workflow/trace-be062f827e1dadbd.json",
   "trace": {
     "required": true,
-    "status": "PASS",
-    "evidence_refs": [
-      "/home/andy4917/Dev-Product/reservation-system/reports/traceability-report.json"
-    ],
+    "status": "UNKNOWN",
+    "evidence_refs": [],
     "notes": "",
-    "issues": [],
-    "acceptance_count": 8,
-    "traceability_count": 8,
-    "report_path": "/home/andy4917/Dev-Product/reservation-system/reports/traceability-report.json",
-    "present": true,
-    "otel_enabled": false
+    "present": false,
+    "otel_enabled": false,
+    "trace_ref": "/home/andy4917/Dev-Workflow/.agent-runs/2026-04-20-vibe-physics-iaw/trace.jsonl",
+    "tool_decision_count": 0,
+    "tool_result_count": 0,
+    "approval_denied_count": 0
   },
-  "evidence_manifest_path": "/home/andy4917/Dev-Product/reservation-system/reports/authority/fresh-evidence.json",
-  "workorder_path": "",
+  "evidence_manifest_path": "/home/andy4917/Dev-Workflow/.agent-runs/2026-04-20-vibe-physics-iaw/EVIDENCE_MANIFEST.json",
+  "workorder_path": "/home/andy4917/Dev-Workflow/.agent-runs/2026-04-20-vibe-physics-iaw/WORKORDER.json",
+  "taste_gate": {
+    "status": "PASS",
+    "reason": "",
+    "problem_class": "G2_CHECKABLE_EXECUTION",
+    "checkpoint_required": false,
+    "checkpoint_status": "NOT_REQUIRED"
+  },
+  "task_tree": {
+    "status": "PASS",
+    "reason": "",
+    "task_count": 3,
+    "skip_without_rationale_count": 0,
+    "merge_without_rationale_count": 0,
+    "unsupported_transition_count": 0,
+    "task_markdown_issue_count": 0
+  },
+  "evidence_manifest": {
+    "status": "PASS",
+    "reason": "",
+    "current": true
+  },
+  "repeated_verify": {
+    "status": "PASS",
+    "reason": "",
+    "round_count": 2,
+    "no_new_material_findings": true,
+    "waived": false
+  },
+  "cross_verification": {
+    "status": "PASS",
+    "reason": "",
+    "material_claim_count": 1,
+    "unresolved_disagreement_count": 0,
+    "disagreement_refs": []
+  },
+  "convention_lock": {
+    "status": "PASS",
+    "reason": "",
+    "observed_drift_count": 0,
+    "missing_locked_term_count": 0
+  },
+  "summary_coverage": {
+    "status": "PASS",
+    "reason": "",
+    "uncovered_claim_count": 0,
+    "zombie_section_count": 0,
+    "negative_findings_present": true
+  },
   "scores": {
     "trust_score": {
       "applicable": true,
@@ -56,29 +102,15 @@
       "floor": 24,
       "scoring_mode": "verified_work_plus_user_awards",
       "base_points": 0,
-      "score": 24,
+      "score": 0,
       "reviewer_deductions": 0,
       "user_deductions": 0,
-      "derived_award_points": 24,
+      "derived_award_points": 0,
       "requested_user_award_points": 0,
       "user_award_points": 0,
-      "passes_floor": true,
+      "passes_floor": false,
       "deductions": [],
-      "derived_awards": [
-        {
-          "axis": "completion_score",
-          "award_id": "confirmed_work_execution",
-          "points": 24,
-          "requested_points": 24,
-          "credited_points": 24,
-          "reason": "Clean-room verify passed, so confirmed work execution earns the baseline completion credit automatically.",
-          "category": "system_derived",
-          "evidence_refs": [],
-          "reported_by": "system_derived",
-          "source": "system_derived",
-          "credit_block_reason": ""
-        }
-      ],
+      "derived_awards": [],
       "awards": []
     },
     "compliance_score": {
@@ -132,14 +164,21 @@
     "compliance_score",
     "search_evidence_score"
   ],
-  "raw_total_score": 84,
-  "guarded_total_score": 84,
-  "capped_total_score": 84,
+  "raw_total_score": 60,
+  "guarded_total_score": 60,
+  "capped_total_score": 60,
   "total_floor": 80,
   "gate_order": [
     "disqualifier_check",
     "reviewer_green_check",
     "trace_presence_check",
+    "taste_gate_check",
+    "task_tree_check",
+    "evidence_manifest_check",
+    "repeated_verify_check",
+    "cross_verification_check",
+    "convention_lock_check",
+    "summary_coverage_check",
     "axis_floor_check",
     "anti_cheat_guard_check",
     "platform_cap_check",
@@ -147,9 +186,12 @@
     "clean_room_verify_check"
   ],
   "axis_floor_check": {
-    "status": "PASS",
-    "failed_axes": [],
-    "raw_total_passes": true
+    "status": "BLOCKED",
+    "failed_axes": [
+      "completion_score",
+      "total_score"
+    ],
+    "raw_total_passes": false
   },
   "anti_cheat_signals": [],
   "anti_cheat_layer": {
@@ -169,13 +211,13 @@
     "penalty_signal_points": 0,
     "cap_signal_points": 0,
     "penalty_points": 0,
-    "guarded_total_score": 84,
+    "guarded_total_score": 60,
     "active_caps": []
   },
   "platform_cap": {
-    "status": "PASS",
+    "status": "BLOCKED",
     "cap_applied": false,
-    "cap_limit": 84,
+    "cap_limit": 60,
     "active_caps": []
   },
   "reviewer_requirements": {
@@ -194,186 +236,50 @@
     ],
     "reviewer_green": false
   },
-  "requested_credit": [
-    {
-      "axis": "completion_score",
-      "requested_points": 24,
-      "source": "system_derived",
-      "reason": "Clean-room verify passed, so confirmed work execution earns the baseline completion credit automatically.",
-      "evidence_ref": ""
-    }
-  ],
-  "credited_credit": [
-    {
-      "axis": "completion_score",
-      "requested_points": 24,
-      "credited_points": 24,
-      "source": "system_derived",
-      "capped": false,
-      "blocked": false,
-      "block_reason": ""
-    }
-  ],
+  "requested_credit": [],
+  "credited_credit": [],
   "reviewer_penalties": {
     "skeptic_reviewer": [],
     "correctness_verifier": [],
     "contamination_monitor": [],
     "final_auditor": []
   },
-  "derived_awards": [
-    {
-      "axis": "completion_score",
-      "award_id": "confirmed_work_execution",
-      "points": 24,
-      "requested_points": 24,
-      "credited_points": 24,
-      "reason": "Clean-room verify passed, so confirmed work execution earns the baseline completion credit automatically.",
-      "category": "system_derived",
-      "evidence_refs": [],
-      "reported_by": "system_derived",
-      "source": "system_derived",
-      "credit_block_reason": ""
-    }
-  ],
+  "derived_awards": [],
   "user_penalties": [],
   "user_awards": [],
   "existing_readiness": {
-    "status": "BLOCKED",
-    "reason": "user readiness is conditional",
+    "status": "FAIL",
+    "reason": "user readiness is not_ready",
     "manual_close_out": [],
     "evidence_refs": [],
-    "structure_sound": true,
-    "day0_ready": true,
-    "understanding_ready": true,
+    "structure_sound": false,
+    "day0_ready": false,
+    "understanding_ready": false,
     "local_environments_ready": false,
-    "human_review_ready": true,
-    "plan_evidence_ready": true,
-    "environment_audit_ready": true,
-    "environment_surface": "wsl-ubuntu",
-    "toolchain_ready": true,
-    "context7_ready": true,
-    "dip_ready": true,
+    "human_review_ready": false,
+    "plan_evidence_ready": false,
+    "environment_audit_ready": false,
+    "environment_surface": "",
+    "toolchain_ready": false,
+    "context7_ready": false,
+    "dip_ready": false,
     "production_ready": false,
-    "overall": "conditional",
-    "baseline_stage": "template-ready",
+    "overall": "not_ready",
+    "baseline_stage": "not-ready",
     "required_local_environment_actions": {
       "Setup": "python scripts/project_setup.py --bootstrap",
       "Smoke": "python scripts/run_acceptance.py smoke",
       "Full Verify": "python scripts/run_acceptance.py full",
       "Delivery Gate": "python scripts/delivery_gate.py --mode verify"
     },
-    "toolchain": {
-      "status": "PASS",
-      "summary": "Windows and WSL inventory collection completed.",
-      "attempts": [],
-      "blockers": [],
-      "warnings": [
-        "pnpm",
-        "syncthing",
-        "scoop"
-      ],
-      "evidence": {
-        "inventory_reports": [
-          "reports/inventory.windows.json",
-          "reports/inventory.wsl.json",
-          "reports/toolchain.windows.json",
-          "reports/toolchain.wsl.json",
-          "reports/toolchain.parity.json"
-        ]
-      },
-      "generated_at": "2026-04-17T15:02:14.557040+00:00",
-      "windows_status": "PASS",
-      "wsl_status": "PASS",
-      "parity_status": "PASS"
-    },
-    "context7": {
-      "status": "PASS",
-      "required": true,
-      "detected_changes": [
-        ".codex/config.toml",
-        "app_v2/main/bgeModelInstaller.ts",
-        "app_v2/main/providerWorkspaceManager.ts",
-        "app_v2/renderer/App.tsx",
-        "pyproject.toml",
-        "scripts/bootstrap_real_env.py",
-        "scripts/check_context7.py",
-        "scripts/install_or_repair_toolchain.py",
-        "scripts/update_wsl_and_ubuntu.py",
-        "uv.lock"
-      ],
-      "entries": [
-        {
-          "query": "Codex latest GitHub release and Context7 remote HTTP runtime configuration for the WSL-first reservation-system workspace",
-          "resolved_library_id": "openai/codex@rust-v0.121.0 + context7-remote-http",
-          "docs_retrieved": [
-            "https://github.com/openai/codex/releases/tag/rust-v0.121.0",
-            "management:contracts/context7_policy.json",
-            "management:docs/CONTEXT7_USAGE.md"
-          ],
-          "version_evidence": "Verified latest GitHub release rust-v0.121.0 published on 2026-04-15 and confirmed remote HTTP mode because CONTEXT7_API_KEY is available via windows_env.",
-          "decision_summary": "Keep Context7 in remote HTTP mode for protected dependency and runtime changes, and preserve this evidence record so delivery-gate validation can reuse the current session evidence without falling back to stale reports."
-        }
-      ]
-    },
-    "dip": {
-      "status": "PASS",
-      "summary": "DIP check completed.",
-      "attempts": [],
-      "blockers": [],
-      "warnings": [],
-      "evidence": {},
-      "generated_at": "2026-04-17T15:02:27.550282+00:00",
-      "violations": [],
-      "waivers": [],
-      "scanned_files": 3
-    },
-    "report_path": "/home/andy4917/Dev-Product/reservation-system/reports/user-readiness.json"
+    "policy_present": false,
+    "report_path": "/home/andy4917/Dev-Workflow/reports/user-readiness.json"
   },
   "clean_room_verify": {
-    "status": "PASS",
+    "status": "UNKNOWN",
     "reason": "",
     "manual_close_out": [],
-    "evidence_refs": [],
-    "mode": "full",
-    "results": [
-      {
-        "command": "python scripts/build_inventory_cpp_core.py",
-        "exit_code": 0,
-        "stdout_summary": "running build_ext\ninventory_cpp_core ready: /home/andy4917/Dev-Product/reservation-system/inventory_cpp_core.cpython-312-x86_64-linux-gnu.so",
-        "stderr_summary": ""
-      },
-      {
-        "command": "python tests/regression_cpp_core_required_py.py",
-        "exit_code": 0,
-        "stdout_summary": "regression_cpp_core_required_py: OK",
-        "stderr_summary": ""
-      },
-      {
-        "command": "npm run app:check",
-        "exit_code": 0,
-        "stdout_summary": "> uhs-desktop-app@0.1.0 app:check\n> tsc -p tsconfig.json --noEmit && npm run app:hygiene:check\n\n\n> uhs-desktop-app@0.1.0 app:hygiene:check\n> python3 tests/regression_cpp_core_required_py.py && python3 scripts/check_contract_hygiene.py --cwd . && node tests/regression_app_v2_operational_hardcoding_guard.mjs\n\nregression_cpp_core_required_py: OK\ncheck_contract_hygiene: OK\nregression_app_v2_operati...",
-        "stderr_summary": ""
-      },
-      {
-        "command": "npm run app:verify:artifacts",
-        "exit_code": 0,
-        "stdout_summary": "> uhs-desktop-app@0.1.0 app:verify:artifacts\n> npm run app:build && node scripts/app_v2_artifact_check.mjs\n\n\n> uhs-desktop-app@0.1.0 app:build\n> npm run app:build:renderer && npm run app:build:main\n\n\n> uhs-desktop-app@0.1.0 app:build:renderer\n> vite build --config app_v2/vite.config.ts\n\nvite v6.4.1 building for production...\ntransforming...\n✓ 31 modules transformed.\nrendering chunks...\ncomputin...",
-        "stderr_summary": ""
-      },
-      {
-        "command": "npm run app:verify:electron-smoke",
-        "exit_code": 0,
-        "stdout_summary": "> uhs-desktop-app@0.1.0 app:verify:electron-smoke\n> node scripts/app_v2_electron_smoke.mjs\n\n\n> uhs-desktop-app@0.1.0 app:build\n> npm run app:build:renderer && npm run app:build:main\n\n\n> uhs-desktop-app@0.1.0 app:build:renderer\n> vite build --config app_v2/vite.config.ts\n\nvite v6.4.1 building for production...\ntransforming...\n✓ 31 modules transformed.\nrendering chunks...\ncomputing gzip size...\n....",
-        "stderr_summary": ""
-      },
-      {
-        "command": "python tests/run_regressions.py",
-        "exit_code": 0,
-        "stdout_summary": "regression_app_v2_arrival_single_board_contract: OK\nregression_app_v2_bge_install_contract: OK\nregression_app_v2_bge_readonly_expansion: OK\nregression_app_v2_branch_contract: OK\nregression_app_v2_cleanup_contract: OK\nregression_app_v2_electron_smoke: OK\nregression_app_v2_end_user_shell_contract: OK\nregression_app_v2_error_management_contract: OK\nregression_app_v2_hybrid_candidate_engine: OK\nreg...",
-        "stderr_summary": ""
-      }
-    ],
-    "report_path": "/home/andy4917/Dev-Product/reservation-system/reports/acceptance-report.json"
+    "evidence_refs": []
   },
   "advisories": [],
   "errors": [],
@@ -394,30 +300,67 @@
       ]
     },
     "3_trace_presence_check": {
-      "status": "PASS",
-      "reasons": []
-    },
-    "4_axis_floor_check": {
-      "status": "PASS",
-      "reasons": []
-    },
-    "5_anti_cheat_guard_check": {
-      "status": "PASS",
-      "reasons": []
-    },
-    "6_platform_cap_check": {
-      "status": "PASS",
-      "reasons": []
-    },
-    "7_existing_readiness_and_manual_close_out_check": {
       "status": "BLOCKED",
       "reasons": [
-        "user readiness is conditional"
+        "trace is missing, so score is invalid"
       ]
     },
-    "8_clean_room_verify_check": {
+    "4_taste_gate_check": {
       "status": "PASS",
       "reasons": []
+    },
+    "5_task_tree_check": {
+      "status": "PASS",
+      "reasons": []
+    },
+    "6_evidence_manifest_check": {
+      "status": "PASS",
+      "reasons": []
+    },
+    "7_repeated_verify_check": {
+      "status": "PASS",
+      "reasons": []
+    },
+    "8_cross_verification_check": {
+      "status": "PASS",
+      "reasons": []
+    },
+    "9_convention_lock_check": {
+      "status": "PASS",
+      "reasons": []
+    },
+    "10_summary_coverage_check": {
+      "status": "PASS",
+      "reasons": []
+    },
+    "11_axis_floor_check": {
+      "status": "BLOCKED",
+      "reasons": [
+        "axis floor failed: completion_score",
+        "raw total score 60 is below floor 80"
+      ]
+    },
+    "12_anti_cheat_guard_check": {
+      "status": "PASS",
+      "reasons": []
+    },
+    "13_platform_cap_check": {
+      "status": "BLOCKED",
+      "reasons": [
+        "capped total score 60 is below floor 80"
+      ]
+    },
+    "14_existing_readiness_and_manual_close_out_check": {
+      "status": "FAIL",
+      "reasons": [
+        "user readiness is not_ready"
+      ]
+    },
+    "15_clean_room_verify_check": {
+      "status": "BLOCKED",
+      "reasons": [
+        "stage status is UNKNOWN"
+      ]
     }
   },
   "gate_status": "BLOCKED",

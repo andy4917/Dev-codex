@@ -46,13 +46,12 @@ class ScorecardRuntimeHookTests(unittest.TestCase):
             notice = self.module.emit_notice(
                 authority=self.authority,
                 cwd=Path("/home/andy4917/Dev-Workflow"),
-                event="SessionStart",
+                event="UserPromptSubmit",
                 now=1000.0,
                 state_dir=state_dir,
             )
 
-        self.assertIn("Global scorecard layer is binding for /home/andy4917/Dev-Workflow", notice)
-        self.assertIn("explicit verify chain remains the canonical enforcement path", notice)
+        self.assertIn("Binding scorecard layer for /home/andy4917/Dev-Workflow", notice)
         self.assertIn("prepare_user_scorecard_review.py --workspace-root /home/andy4917/Dev-Workflow --mode verify", notice)
 
     def test_emit_notice_is_empty_outside_canonical_roots(self) -> None:
@@ -60,7 +59,7 @@ class ScorecardRuntimeHookTests(unittest.TestCase):
             notice = self.module.emit_notice(
                 authority=self.authority,
                 cwd=Path("/tmp/non-canonical-workspace"),
-                event="SessionStart",
+                event="UserPromptSubmit",
                 now=1000.0,
                 state_dir=Path(tmpdir),
             )

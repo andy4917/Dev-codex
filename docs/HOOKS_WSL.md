@@ -8,7 +8,9 @@
 
 ## Current Handling
 
-- generated global runtime may install `hooks.json` only to replay the binding global scorecard close-out reminder at `SessionStart` and `UserPromptSubmit`.
+- generated global runtime may install `hooks.json` only to replay the binding global scorecard close-out reminder at `UserPromptSubmit`.
+- the active generated Windows hook path should call a generated PowerShell wrapper instead of a raw `wsl.exe python3 ...` command so UNC cwd warnings do not surface as fake hook failures.
+- the wrapper may translate `\\wsl.localhost\\...` cwd values into Linux form, but translation failure must stay quiet and exit `0`.
 - the generated hook must stay advisory. It may re-inject the scorecard layer, but it must not replace `prepare_user_scorecard_review.py`, `delivery_gate.py`, `export_user_score_summary.py`, or `audit_workspace.py --write-report`.
 - generated `hooks.json` is derived state. If authority removes `runtime_hook` or clears its events, the generated file should be deleted so stale reminders do not continue running.
 - legacy hook artifacts는 quarantine에 격리하고, 검토가 필요하면 `python scripts/check_hook_logs.py`로 evidence-only 로그를 읽는다.

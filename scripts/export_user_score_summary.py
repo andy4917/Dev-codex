@@ -36,6 +36,17 @@ def _anti_cheat_signals(payload: dict) -> list[dict]:
     return fallback
 
 
+def _stage_line(payload: dict, key: str, default: str = "UNKNOWN") -> str:
+    stage = payload.get(key, {})
+    if not isinstance(stage, dict):
+        return default
+    status = str(stage.get("status", default)).strip() or default
+    reason = str(stage.get("reason", "")).strip()
+    if reason:
+        return f"{status} ({reason})"
+    return status
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Export the ordered user scorecard summary.")
     parser.add_argument("--scorecard-file", default=str(DEFAULT_SCORECARD_FILE))
@@ -113,13 +124,51 @@ def main() -> int:
     else:
         print("11. cap 적용 여부와 이유: not applied")
 
-    print(f"12. gate 상태: {payload.get('gate_status', 'UNKNOWN')}")
+    print(f"12. taste gate: {_stage_line(payload, 'taste_gate')}")
+    print(f"13. task tree: {_stage_line(payload, 'task_tree')}")
+    print(f"14. evidence manifest: {_stage_line(payload, 'evidence_manifest')}")
+    print(f"15. repeated verify: {_stage_line(payload, 'repeated_verify')}")
+    print(f"16. cross verification: {_stage_line(payload, 'cross_verification')}")
+    print(f"17. convention lock: {_stage_line(payload, 'convention_lock')}")
+    print(f"18. summary coverage: {_stage_line(payload, 'summary_coverage')}")
+    cross = payload.get("cross_verification", {})
+    if isinstance(cross, dict) and cross.get("disagreement_refs"):
+        print(f"- unresolved disagreement refs: {', '.join(str(item) for item in cross.get('disagreement_refs', []))}")
+    summary_coverage = payload.get("summary_coverage", {})
+    if isinstance(summary_coverage, dict):
+        print(
+            f"- negative findings present: {summary_coverage.get('negative_findings_present', False)} "
+            f"uncovered_claims={summary_coverage.get('uncovered_claim_count', 0)} "
+            f"zombie_sections={summary_coverage.get('zombie_section_count', 0)}"
+        )
+
+    print(f"19. gate 상태: {payload.get('gate_status', 'UNKNOWN')}")
     manual = payload.get("remaining_manual_close_out", [])
     if manual:
-        print(f"13. 남은 manual close-out: {'; '.join(str(item) for item in manual)}")
+        print(f"20. 남은 manual close-out: {'; '.join(str(item) for item in manual)}")
     else:
-        print("13. 남은 manual close-out: none")
-    print(f"14. 최종 판정: {payload.get('final_decision', 'UNKNOWN')}")
+        print("20. 남은 manual close-out: none")
+
+    negative_findings: list[str] = []
+    for signal in _anti_cheat_signals(payload):
+        decision = str(signal.get("decision", "warn")).strip().lower() or "warn"
+        if decision in {"penalty", "cap", "dq"}:
+            negative_findings.append(f"{signal['code']}:{decision}")
+    evidence_manifest = payload.get("evidence_manifest", {})
+    if isinstance(evidence_manifest, dict) and evidence_manifest.get("status") == "WAIVED":
+        negative_findings.append("evidence_manifest:waived")
+    repeated_verify = payload.get("repeated_verify", {})
+    if isinstance(repeated_verify, dict) and repeated_verify.get("status") == "WAIVED":
+        negative_findings.append("repeated_verify:waived")
+    if manual:
+        negative_findings.append("manual_close_out:open")
+    if isinstance(cross, dict) and int(cross.get("unresolved_disagreement_count", 0)) > 0:
+        negative_findings.append("cross_verification:unresolved")
+    if negative_findings:
+        print(f"21. Negative Findings: {', '.join(negative_findings)}")
+    else:
+        print("21. Negative Findings: none")
+    print(f"22. 최종 판정: {payload.get('final_decision', 'UNKNOWN')}")
     return 0
 
 

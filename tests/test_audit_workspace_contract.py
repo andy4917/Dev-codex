@@ -264,9 +264,10 @@ trust_level = "trusted"
                     "runtime_hook": {
                         "script": "/home/andy4917/Dev-Management/scripts/scorecard_runtime_hook.py",
                         "linux_command_prefix": "python3",
-                        "windows_command_prefix": "wsl.exe python3",
+                        "windows_command_prefix": "powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File",
+                        "windows_wrapper_path": "/mnt/c/Users/anise/.codex/bin/scorecard-hook-wrapper.ps1",
+                        "windows_wrapper_generated_header": "GENERATED - DO NOT EDIT",
                         "events": {
-                            "SessionStart": {"matcher": ".*"},
                             "UserPromptSubmit": {"matcher": ".*"},
                         },
                     }
@@ -277,23 +278,27 @@ trust_level = "trusted"
         rendered_agents = render.render_agents(authority, windows=False)
         linux_hooks = json.loads(render.render_hooks(authority, windows=False))
         windows_hooks = json.loads(render.render_hooks(authority, windows=True))
+        wrapper = render.render_windows_hook_wrapper(authority)
 
         self.assertIn("binding instruction-level guidance", rendered_agents)
-        self.assertEqual(set(linux_hooks["hooks"]), {"SessionStart", "UserPromptSubmit"})
+        self.assertEqual(set(linux_hooks["hooks"]), {"UserPromptSubmit"})
         self.assertEqual(
-            linux_hooks["hooks"]["SessionStart"][0]["hooks"][0]["command"],
-            "python3 /home/andy4917/Dev-Management/scripts/scorecard_runtime_hook.py --event SessionStart",
+            linux_hooks["hooks"]["UserPromptSubmit"][0]["hooks"][0]["command"],
+            "python3 /home/andy4917/Dev-Management/scripts/scorecard_runtime_hook.py --event UserPromptSubmit",
         )
         self.assertEqual(
             windows_hooks["hooks"]["UserPromptSubmit"][0]["hooks"][0]["command"],
-            "wsl.exe python3 /home/andy4917/Dev-Management/scripts/scorecard_runtime_hook.py --event UserPromptSubmit",
+            "powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File C:/Users/anise/.codex/bin/scorecard-hook-wrapper.ps1 -Event UserPromptSubmit -AuthorityPath /home/andy4917/Dev-Management/contracts/workspace_authority.json",
         )
+        self.assertIsNotNone(wrapper)
+        self.assertIn("Convert-ToLinuxPath", wrapper)
+        self.assertIn("wsl.exe python3 $HookScript", wrapper)
 
     def test_sync_generated_text_removes_stale_hooks_file(self) -> None:
         render = _load_render_module()
         with tempfile.TemporaryDirectory() as tmpdir:
             hook_path = Path(tmpdir) / "hooks.json"
-            hook_path.write_text('{"hooks": {"SessionStart": []}}\n', encoding="utf-8")
+            hook_path.write_text('{"hooks": {"UserPromptSubmit": []}}\n', encoding="utf-8")
 
             render.sync_generated_text(hook_path, None)
 

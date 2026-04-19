@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import re
 from pathlib import Path
 from typing import Any
 
@@ -20,6 +21,14 @@ from _scorecard_common import (
     published_command_log_path,
     published_evidence_manifest_path,
     published_workorder_path,
+    published_waivers_path,
+    published_task_tree_path,
+    published_repeated_verify_path,
+    published_cross_verification_path,
+    published_claim_ledger_path,
+    published_summary_coverage_path,
+    published_convention_lock_path,
+    published_taste_gate_path,
     resolve_path,
     reviewer_verdict_dir,
     save_json,
@@ -54,6 +63,26 @@ AUTO_DQ_DEFAULT_CODES = {
     "score_policy_tamper_without_policy_update_workorder",
     "protected_path_access_attempt",
 }
+TASK_MARKDOWN_REQUIRED_HEADINGS = (
+    "Objective",
+    "Inputs Read",
+    "Changes Made",
+    "Claims",
+    "Evidence Ref",
+    "Verification",
+    "Open Questions",
+)
+VERIFICATION_WORD_PHRASES = (
+    "verified",
+    "verification complete",
+    "as verified",
+    "clean-room passed",
+)
+UNSUPPORTED_TRANSITION_PHRASES = (
+    "therefore",
+    "consistent with",
+)
+NEGATIVE_FINDINGS_HEADING_RE = re.compile(r"^\s*##+\s+Negative Findings\s*$", re.MULTILINE | re.IGNORECASE)
 
 
 def _bool_flag(context: dict[str, Any], key: str) -> bool:
@@ -154,11 +183,67 @@ def _load_support_artifacts(authority_review: dict[str, Any], workspace_root: Pa
         command_log_path = published_command_log_path(workspace_root, manifest_path)
     command_log = load_jsonl(command_log_path) if command_log_path is not None and command_log_path.exists() else []
 
+    waivers_path = resolve_path(evidence_inputs.get("waivers_path", ""), workspace_root)
+    if waivers_path is None and workspace_root is not None:
+        waivers_path = published_waivers_path(workspace_root, manifest_path)
+    waivers = load_json(waivers_path) if waivers_path is not None and waivers_path.exists() else {}
+
+    task_tree_path = resolve_path(evidence_inputs.get("task_tree_path", ""), workspace_root)
+    if task_tree_path is None and workspace_root is not None:
+        task_tree_path = published_task_tree_path(workspace_root, manifest_path)
+    task_tree = load_json(task_tree_path) if task_tree_path is not None and task_tree_path.exists() else {}
+
+    repeated_verify_path = resolve_path(evidence_inputs.get("repeated_verify_path", ""), workspace_root)
+    if repeated_verify_path is None and workspace_root is not None:
+        repeated_verify_path = published_repeated_verify_path(workspace_root, manifest_path)
+    repeated_verify = load_json(repeated_verify_path) if repeated_verify_path is not None and repeated_verify_path.exists() else {}
+
+    cross_verification_path = resolve_path(evidence_inputs.get("cross_verification_path", ""), workspace_root)
+    if cross_verification_path is None and workspace_root is not None:
+        cross_verification_path = published_cross_verification_path(workspace_root, manifest_path)
+    cross_verification = load_json(cross_verification_path) if cross_verification_path is not None and cross_verification_path.exists() else {}
+
+    claim_ledger_path = resolve_path(evidence_inputs.get("claim_ledger_path", ""), workspace_root)
+    if claim_ledger_path is None and workspace_root is not None:
+        claim_ledger_path = published_claim_ledger_path(workspace_root, manifest_path)
+    claim_ledger = load_json(claim_ledger_path) if claim_ledger_path is not None and claim_ledger_path.exists() else {}
+
+    summary_coverage_path = resolve_path(evidence_inputs.get("summary_coverage_path", ""), workspace_root)
+    if summary_coverage_path is None and workspace_root is not None:
+        summary_coverage_path = published_summary_coverage_path(workspace_root, manifest_path)
+    summary_coverage = load_json(summary_coverage_path) if summary_coverage_path is not None and summary_coverage_path.exists() else {}
+
+    convention_lock_path = resolve_path(evidence_inputs.get("convention_lock_path", ""), workspace_root)
+    if convention_lock_path is None and workspace_root is not None:
+        convention_lock_path = published_convention_lock_path(workspace_root, manifest_path)
+    convention_lock = load_json(convention_lock_path) if convention_lock_path is not None and convention_lock_path.exists() else {}
+
+    taste_gate_path = resolve_path(evidence_inputs.get("taste_gate_path", ""), workspace_root)
+    if taste_gate_path is None and workspace_root is not None:
+        taste_gate_path = published_taste_gate_path(workspace_root, manifest_path)
+    taste_gate = load_json(taste_gate_path) if taste_gate_path is not None and taste_gate_path.exists() else {}
+
+    summary_path = resolve_path(evidence_inputs.get("summary_path", ""), workspace_root)
+    if summary_path is None and workspace_root is not None:
+        candidate = workspace_root / "SUMMARY.md"
+        if candidate.exists():
+            summary_path = candidate
+
+    design_review_path = resolve_path(evidence_inputs.get("design_review_path", ""), workspace_root)
+    if design_review_path is None and workspace_root is not None:
+        candidate = workspace_root / "DESIGN_REVIEW.md"
+        if candidate.exists():
+            design_review_path = candidate
+
     current_head = git_sha(workspace_root) if workspace_root is not None else "nogit"
     current_head = current_head or "nogit"
     manifest_head = str(manifest.get("head_commit", "")).strip() or current_head
     manifest_base = str(manifest.get("base_commit", "")).strip() or manifest_head
     is_current = current_head == "nogit" or manifest_head == current_head or manifest_head == "nogit"
+    run_root = manifest_path.parent if manifest_path is not None and manifest_path.name == "EVIDENCE_MANIFEST.json" else None
+    task_markdown_paths: list[Path] = []
+    if isinstance(run_root, Path):
+        task_markdown_paths = sorted(path for path in (run_root / "tasks").glob("stage-*/task-*.md") if path.is_file())
 
     return {
         "workspace_root": workspace_root,
@@ -168,10 +253,32 @@ def _load_support_artifacts(authority_review: dict[str, Any], workspace_root: Pa
         "workorder": workorder if isinstance(workorder, dict) else {},
         "command_log_path": command_log_path,
         "command_log": command_log,
+        "waivers_path": waivers_path,
+        "waivers": waivers if isinstance(waivers, dict) else {},
+        "task_tree_path": task_tree_path,
+        "task_tree": task_tree if isinstance(task_tree, dict) else {},
+        "task_markdown_paths": task_markdown_paths,
+        "repeated_verify_path": repeated_verify_path,
+        "repeated_verify": repeated_verify if isinstance(repeated_verify, dict) else {},
+        "cross_verification_path": cross_verification_path,
+        "cross_verification": cross_verification if isinstance(cross_verification, dict) else {},
+        "claim_ledger_path": claim_ledger_path,
+        "claim_ledger": claim_ledger if isinstance(claim_ledger, dict) else {},
+        "summary_coverage_path": summary_coverage_path,
+        "summary_coverage": summary_coverage if isinstance(summary_coverage, dict) else {},
+        "convention_lock_path": convention_lock_path,
+        "convention_lock": convention_lock if isinstance(convention_lock, dict) else {},
+        "taste_gate_path": taste_gate_path,
+        "taste_gate": taste_gate if isinstance(taste_gate, dict) else {},
+        "summary_path": summary_path,
+        "summary_text": summary_path.read_text(encoding="utf-8", errors="ignore") if isinstance(summary_path, Path) and summary_path.exists() else "",
+        "design_review_path": design_review_path,
+        "design_review_text": design_review_path.read_text(encoding="utf-8", errors="ignore") if isinstance(design_review_path, Path) and design_review_path.exists() else "",
         "base_commit": manifest_base,
         "head_commit": manifest_head,
         "current_head_commit": current_head,
         "is_current": is_current,
+        "run_root": run_root,
     }
 
 
@@ -195,6 +302,554 @@ def _build_signal_provenance(
         "base_commit": str(support.get("base_commit", "")).strip(),
         "head_commit": str(support.get("head_commit", "")).strip(),
     }
+
+
+def _normalized_text(value: object) -> str:
+    return str(value or "").strip()
+
+
+def _waiver_entries(support: dict[str, Any]) -> list[dict[str, Any]]:
+    entries: list[dict[str, Any]] = []
+    for item in support.get("evidence_manifest", {}).get("waivers", []):
+        if isinstance(item, dict):
+            entries.append(item)
+    waiver_payload = support.get("waivers", {})
+    if isinstance(waiver_payload, dict):
+        for item in waiver_payload.get("waivers", []):
+            if isinstance(item, dict):
+                entries.append(item)
+    return entries
+
+
+def _waiver_reason(support: dict[str, Any], *waiver_ids: str) -> str:
+    wanted = {str(item).strip().casefold() for item in waiver_ids if str(item).strip()}
+    for entry in _waiver_entries(support):
+        entry_id = str(entry.get("id", "")).strip().casefold()
+        if entry_id and entry_id in wanted:
+            return str(entry.get("reason", "")).strip()
+    return ""
+
+
+def _v12_contract_active(support: dict[str, Any]) -> bool:
+    workorder = support.get("workorder", {})
+    if isinstance(workorder, dict) and workorder.get("taste_gate"):
+        return True
+    return any(
+        bool(support.get(key))
+        for key in (
+            "task_tree_path",
+            "repeated_verify_path",
+            "cross_verification_path",
+            "claim_ledger_path",
+            "summary_coverage_path",
+            "convention_lock_path",
+            "taste_gate_path",
+        )
+    )
+
+
+def _summary_has_negative_findings(text: str) -> bool:
+    return bool(NEGATIVE_FINDINGS_HEADING_RE.search(text or ""))
+
+
+def _task_markdown_issues(task_refs: list[str], task_markdown_paths: list[Path]) -> list[str]:
+    issues: list[str] = []
+    path_map = {str(path): path for path in task_markdown_paths}
+    for ref in task_refs:
+        if ref not in path_map:
+            issues.append(f"missing task markdown: {ref}")
+            continue
+        text = path_map[ref].read_text(encoding="utf-8", errors="ignore")
+        headings = {
+            match.group(1).strip().casefold()
+            for match in re.finditer(r"^\s*##+\s*(.+?)\s*$", text, flags=re.MULTILINE)
+        }
+        missing = [heading for heading in TASK_MARKDOWN_REQUIRED_HEADINGS if heading.casefold() not in headings]
+        if missing:
+            issues.append(f"{ref} missing sections: {', '.join(missing)}")
+    return issues
+
+
+def _claim_entries(support: dict[str, Any]) -> list[dict[str, Any]]:
+    ledger = support.get("claim_ledger", {})
+    if not isinstance(ledger, dict):
+        return []
+    return [dict(item) for item in ledger.get("claims", []) if isinstance(item, dict)]
+
+
+def _claim_phrase_findings(support: dict[str, Any]) -> dict[str, Any]:
+    verification_refs: list[str] = []
+    transition_refs: list[str] = []
+    stale_refs: list[str] = []
+    claims = _claim_entries(support)
+    if claims:
+        for claim in claims:
+            claim_text = _normalized_text(claim.get("claim_text", "")).casefold()
+            claim_id = _normalized_text(claim.get("claim_id", "")) or _normalized_text(claim.get("source_ref", ""))
+            evidence_refs = [str(item).strip() for item in claim.get("evidence_refs", []) if str(item).strip()]
+            verification_artifacts = [str(item).strip() for item in claim.get("verification_refs", []) if str(item).strip()]
+            if any(phrase in claim_text for phrase in VERIFICATION_WORD_PHRASES) and not evidence_refs and not verification_artifacts:
+                verification_refs.append(claim_id)
+            if any(phrase in claim_text for phrase in UNSUPPORTED_TRANSITION_PHRASES) and not evidence_refs:
+                transition_refs.append(claim_id)
+            if str(claim.get("status", "")).strip().upper() in {"UNVERIFIED", "UNKNOWN", "DISPUTED"}:
+                stale_refs.append(claim_id)
+    else:
+        fallback_sources: list[tuple[str, str]] = []
+        if support.get("summary_text"):
+            fallback_sources.append((str(support.get("summary_path", "")), str(support.get("summary_text", ""))))
+        for path in support.get("task_markdown_paths", []):
+            if isinstance(path, Path) and path.exists():
+                fallback_sources.append((str(path), path.read_text(encoding="utf-8", errors="ignore")))
+        for source_ref, text in fallback_sources:
+            lowered = text.casefold()
+            has_evidence_ref = "evidence ref" in lowered or "evidence_ref" in lowered
+            if any(phrase in lowered for phrase in VERIFICATION_WORD_PHRASES) and not has_evidence_ref:
+                verification_refs.append(source_ref)
+            if any(phrase in lowered for phrase in UNSUPPORTED_TRANSITION_PHRASES) and not has_evidence_ref:
+                transition_refs.append(source_ref)
+    return {
+        "verification_word_without_artifact_count": len(sorted(set(verification_refs))),
+        "verification_word_without_artifact_refs": sorted(set(verification_refs)),
+        "unsupported_transition_count": len(sorted(set(transition_refs))),
+        "unsupported_transition_refs": sorted(set(transition_refs)),
+        "stale_claim_count": len(sorted(set(stale_refs))),
+        "stale_claim_refs": sorted(set(stale_refs)),
+    }
+
+
+def _summary_stage(status: str, reason: str = "", **extra: Any) -> dict[str, Any]:
+    payload = {"status": status, "reason": reason}
+    payload.update(extra)
+    return payload
+
+
+def _taste_gate_summary(support: dict[str, Any]) -> dict[str, Any]:
+    legacy = not _v12_contract_active(support)
+    taste_gate = support.get("taste_gate", {})
+    if not isinstance(taste_gate, dict) or not taste_gate:
+        workorder = support.get("workorder", {})
+        if isinstance(workorder, dict):
+            taste_gate = dict(workorder.get("taste_gate", {}))
+    waiver_reason = _waiver_reason(support, "taste_gate")
+    if not taste_gate:
+        if legacy:
+            return _summary_stage(
+                "WAIVED",
+                "legacy run without taste gate",
+                problem_class="UNKNOWN",
+                checkpoint_required=False,
+                checkpoint_status="WAIVED",
+            )
+        if waiver_reason:
+            return _summary_stage(
+                "WAIVED",
+                waiver_reason,
+                problem_class="UNKNOWN",
+                checkpoint_required=False,
+                checkpoint_status="WAIVED",
+            )
+        return _summary_stage(
+            "BLOCKED",
+            "taste gate artifact is missing for a v1.2 run",
+            problem_class="UNKNOWN",
+            checkpoint_required=False,
+            checkpoint_status="BLOCKED",
+        )
+
+    problem_class = _normalized_text(taste_gate.get("problem_class", "")).upper() or "UNKNOWN"
+    checkpoint_required = bool(taste_gate.get("checkpoint_required", False))
+    checkpoint_status = normalize_status(taste_gate.get("checkpoint_status"), "PENDING")
+    if problem_class == "G2_CHECKABLE_EXECUTION":
+        if checkpoint_required and checkpoint_status not in {"APPROVED", "WAIVED", "NOT_REQUIRED"}:
+            return _summary_stage(
+                "BLOCKED",
+                "taste gate checkpoint is required before checkable execution may proceed",
+                problem_class=problem_class,
+                checkpoint_required=checkpoint_required,
+                checkpoint_status=checkpoint_status,
+            )
+        return _summary_stage(
+            "PASS",
+            "",
+            problem_class=problem_class,
+            checkpoint_required=checkpoint_required,
+            checkpoint_status=checkpoint_status,
+        )
+    if problem_class in {"G1_LEARNING_TASK", "G3_OPEN_RESEARCH"}:
+        if checkpoint_status in {"APPROVED", "WAIVED"}:
+            return _summary_stage(
+                "WAIVED",
+                "taste gate requires proposal-only or checkpointed handling for this problem class",
+                problem_class=problem_class,
+                checkpoint_required=True,
+                checkpoint_status=checkpoint_status,
+            )
+        return _summary_stage(
+            "BLOCKED",
+            "taste gate blocks implementation until a human checkpoint is recorded",
+            problem_class=problem_class,
+            checkpoint_required=True,
+            checkpoint_status=checkpoint_status,
+        )
+    return _summary_stage(
+        "BLOCKED",
+        "taste gate problem_class is missing or invalid",
+        problem_class=problem_class,
+        checkpoint_required=checkpoint_required,
+        checkpoint_status=checkpoint_status,
+    )
+
+
+def _task_tree_summary(support: dict[str, Any], unsupported_transition_count: int) -> dict[str, Any]:
+    legacy = not _v12_contract_active(support)
+    waiver_reason = _waiver_reason(support, "task_tree")
+    task_tree = support.get("task_tree", {})
+    if not isinstance(task_tree, dict) or not task_tree:
+        if legacy:
+            return _summary_stage(
+                "WAIVED",
+                "legacy run without task tree",
+                task_count=0,
+                skip_without_rationale_count=0,
+                merge_without_rationale_count=0,
+                unsupported_transition_count=unsupported_transition_count,
+                task_markdown_issue_count=0,
+            )
+        if waiver_reason:
+            return _summary_stage(
+                "WAIVED",
+                waiver_reason,
+                task_count=0,
+                skip_without_rationale_count=0,
+                merge_without_rationale_count=0,
+                unsupported_transition_count=unsupported_transition_count,
+                task_markdown_issue_count=0,
+            )
+        return _summary_stage(
+            "BLOCKED",
+            "task tree artifact is missing for a v1.2 run",
+            task_count=0,
+            skip_without_rationale_count=0,
+            merge_without_rationale_count=0,
+            unsupported_transition_count=unsupported_transition_count,
+            task_markdown_issue_count=0,
+        )
+
+    tasks = [dict(item) for item in task_tree.get("tasks", []) if isinstance(item, dict)]
+    task_refs = [str(item.get("task_ref", "")).strip() for item in tasks if str(item.get("task_ref", "")).strip()]
+    issues = _task_markdown_issues(task_refs, list(support.get("task_markdown_paths", [])))
+    skip_without_rationale = sum(
+        1 for item in tasks if str(item.get("status", "")).strip().lower() == "skipped" and not _normalized_text(item.get("rationale", ""))
+    )
+    merge_without_rationale = sum(
+        1 for item in tasks if str(item.get("status", "")).strip().lower() == "merged" and not _normalized_text(item.get("rationale", ""))
+    )
+    reason_parts: list[str] = []
+    if skip_without_rationale:
+        reason_parts.append(f"task skip without rationale: {skip_without_rationale}")
+    if merge_without_rationale:
+        reason_parts.append(f"task merge without rationale: {merge_without_rationale}")
+    if issues:
+        reason_parts.append("; ".join(issues))
+    status = "PASS"
+    if not tasks or skip_without_rationale or merge_without_rationale or issues:
+        status = "BLOCKED"
+    return _summary_stage(
+        status,
+        "; ".join(reason_parts),
+        task_count=len(tasks),
+        skip_without_rationale_count=skip_without_rationale,
+        merge_without_rationale_count=merge_without_rationale,
+        unsupported_transition_count=unsupported_transition_count,
+        task_markdown_issue_count=len(issues),
+    )
+
+
+def _evidence_manifest_summary(support: dict[str, Any]) -> dict[str, Any]:
+    legacy = not _v12_contract_active(support)
+    waiver_reason = _waiver_reason(support, "evidence_manifest")
+    manifest_path = support.get("evidence_manifest_path")
+    if not manifest_path:
+        if legacy:
+            return _summary_stage("WAIVED", "legacy run without published evidence manifest", current=False)
+        if waiver_reason:
+            return _summary_stage("WAIVED", waiver_reason, current=False)
+        return _summary_stage("BLOCKED", "evidence manifest is missing for a v1.2 run", current=False)
+    if not bool(support.get("is_current", False)):
+        return _summary_stage("BLOCKED", "published evidence manifest does not match the current head commit", current=False)
+    return _summary_stage("PASS", "", current=True)
+
+
+def _repeated_verify_summary(support: dict[str, Any]) -> dict[str, Any]:
+    legacy = not _v12_contract_active(support)
+    waiver_reason = _waiver_reason(support, "repeated_verify")
+    payload = support.get("repeated_verify", {})
+    if not isinstance(payload, dict) or not payload:
+        if legacy:
+            return _summary_stage("WAIVED", "legacy run without repeated verify", round_count=0, no_new_material_findings=False, waived=True)
+        if waiver_reason:
+            return _summary_stage("WAIVED", waiver_reason, round_count=0, no_new_material_findings=False, waived=True)
+        return _summary_stage("BLOCKED", "repeated verify artifact is missing for a v1.2 run", round_count=0, no_new_material_findings=False, waived=False)
+    rounds = [dict(item) for item in payload.get("rounds", []) if isinstance(item, dict)]
+    round_count = len(rounds)
+    waived = bool(payload.get("waived", False)) or bool(waiver_reason)
+    no_new_material_findings = bool(rounds) and int(rounds[-1].get("new_material_findings", 1)) == 0
+    if waived:
+        return _summary_stage("WAIVED", _normalized_text(payload.get("waiver_reason", "")) or waiver_reason, round_count=round_count, no_new_material_findings=no_new_material_findings, waived=True)
+    if round_count < 2:
+        return _summary_stage("BLOCKED", "repeated verify requires at least 2 rounds unless waived", round_count=round_count, no_new_material_findings=no_new_material_findings, waived=False)
+    if round_count > 5:
+        return _summary_stage("BLOCKED", "repeated verify allows at most 5 rounds", round_count=round_count, no_new_material_findings=no_new_material_findings, waived=False)
+    if not no_new_material_findings:
+        return _summary_stage("BLOCKED", "repeated verify must stop only when no new material findings remain", round_count=round_count, no_new_material_findings=False, waived=False)
+    return _summary_stage("PASS", "", round_count=round_count, no_new_material_findings=True, waived=False)
+
+
+def _cross_verification_summary(support: dict[str, Any]) -> dict[str, Any]:
+    legacy = not _v12_contract_active(support)
+    waiver_reason = _waiver_reason(support, "cross_verification")
+    payload = support.get("cross_verification", {})
+    if not isinstance(payload, dict) or not payload:
+        if legacy:
+            return _summary_stage("WAIVED", "legacy run without cross verification", material_claim_count=0, unresolved_disagreement_count=0, disagreement_refs=[])
+        if waiver_reason:
+            return _summary_stage("WAIVED", waiver_reason, material_claim_count=0, unresolved_disagreement_count=0, disagreement_refs=[])
+        return _summary_stage("BLOCKED", "cross verification artifact is missing for a v1.2 run", material_claim_count=0, unresolved_disagreement_count=0, disagreement_refs=[])
+    entries = [dict(item) for item in payload.get("verifiers", []) if isinstance(item, dict)]
+    grouped: dict[str, list[dict[str, Any]]] = {}
+    for entry in entries:
+        claim_id = _normalized_text(entry.get("claim_id", ""))
+        if not claim_id:
+            continue
+        grouped.setdefault(claim_id, []).append(entry)
+    unresolved: list[str] = []
+    disagreement_refs: list[str] = []
+    for claim_id, claim_entries in grouped.items():
+        results = {str(item.get("result", "")).strip().lower() for item in claim_entries}
+        if "disagree" in results or "unable_to_verify" in results:
+            unresolved.append(claim_id)
+            for entry in claim_entries:
+                refs = [str(item).strip() for item in entry.get("evidence_refs", []) if str(item).strip()]
+                disagreement_refs.extend(refs or [claim_id])
+    if unresolved:
+        return _summary_stage(
+            "BLOCKED",
+            "cross verification contains unresolved disagreement",
+            material_claim_count=len(grouped),
+            unresolved_disagreement_count=len(unresolved),
+            disagreement_refs=sorted(set(disagreement_refs)),
+        )
+    return _summary_stage(
+        "PASS",
+        "",
+        material_claim_count=len(grouped),
+        unresolved_disagreement_count=0,
+        disagreement_refs=[],
+    )
+
+
+def _convention_lock_summary(support: dict[str, Any]) -> dict[str, Any]:
+    legacy = not _v12_contract_active(support)
+    waiver_reason = _waiver_reason(support, "convention_lock")
+    payload = support.get("convention_lock", {})
+    required_terms = {"requested_credit", "credited_credit", "system_derived", "clean_room_verify", "user_review", "reviewer truth"}
+    if not isinstance(payload, dict) or not payload:
+        if legacy:
+            return _summary_stage("WAIVED", "legacy run without convention lock", observed_drift_count=0, missing_locked_term_count=0)
+        if waiver_reason:
+            return _summary_stage("WAIVED", waiver_reason, observed_drift_count=0, missing_locked_term_count=0)
+        return _summary_stage("BLOCKED", "convention lock artifact is missing for a v1.2 run", observed_drift_count=0, missing_locked_term_count=len(required_terms))
+    locked_terms = {
+        _normalized_text(item.get("term", "")).casefold()
+        for item in payload.get("locked_terms", [])
+        if isinstance(item, dict) and _normalized_text(item.get("term", ""))
+    }
+    missing_terms = [term for term in required_terms if term.casefold() not in locked_terms]
+    observed_drift = [dict(item) for item in payload.get("observed_drift", []) if isinstance(item, dict)]
+    status = "PASS" if not observed_drift and not missing_terms else "BLOCKED"
+    reason_parts: list[str] = []
+    if observed_drift:
+        reason_parts.append(f"observed convention drift: {len(observed_drift)}")
+    if missing_terms:
+        reason_parts.append(f"missing locked terms: {', '.join(sorted(missing_terms))}")
+    return _summary_stage(
+        status,
+        "; ".join(reason_parts),
+        observed_drift_count=len(observed_drift),
+        missing_locked_term_count=len(missing_terms),
+    )
+
+
+def _summary_coverage_summary(support: dict[str, Any]) -> dict[str, Any]:
+    legacy = not _v12_contract_active(support)
+    waiver_reason = _waiver_reason(support, "summary_coverage")
+    coverage = support.get("summary_coverage", {})
+    negative_findings_present = _summary_has_negative_findings(str(support.get("summary_text", "")))
+    if isinstance(coverage, dict) and coverage:
+        negative_findings_present = bool(coverage.get("negative_findings_present", False)) and negative_findings_present
+        summary_claims = [dict(item) for item in coverage.get("summary_claims", []) if isinstance(item, dict)]
+        uncovered_claim_count = sum(1 for item in summary_claims if str(item.get("status", "")).strip().lower() == "uncovered")
+        zombie_sections = [str(item).strip() for item in coverage.get("zombie_sections", []) if str(item).strip()]
+        status = "PASS" if negative_findings_present and uncovered_claim_count == 0 and not zombie_sections else "BLOCKED"
+        reason_parts: list[str] = []
+        if not negative_findings_present:
+            reason_parts.append("summary is missing a Negative Findings section")
+        if uncovered_claim_count:
+            reason_parts.append(f"summary has uncovered material claims: {uncovered_claim_count}")
+        if zombie_sections:
+            reason_parts.append(f"summary has zombie sections: {', '.join(zombie_sections)}")
+        return _summary_stage(
+            status,
+            "; ".join(reason_parts),
+            uncovered_claim_count=uncovered_claim_count,
+            zombie_section_count=len(zombie_sections),
+            negative_findings_present=negative_findings_present,
+        )
+    if legacy:
+        return _summary_stage(
+            "WAIVED",
+            "legacy run without summary coverage artifact",
+            uncovered_claim_count=0,
+            zombie_section_count=0,
+            negative_findings_present=negative_findings_present,
+        )
+    if waiver_reason:
+        return _summary_stage(
+            "WAIVED",
+            waiver_reason,
+            uncovered_claim_count=0,
+            zombie_section_count=0,
+            negative_findings_present=negative_findings_present,
+        )
+    reason = "summary coverage artifact is missing for a v1.2 run"
+    if not negative_findings_present:
+        reason += "; summary is also missing a Negative Findings section"
+    return _summary_stage(
+        "BLOCKED",
+        reason,
+        uncovered_claim_count=0,
+        zombie_section_count=0,
+        negative_findings_present=negative_findings_present,
+    )
+
+
+def _v12_anti_cheat_signals(
+    policy: dict[str, Any],
+    support: dict[str, Any],
+    *,
+    task_tree: dict[str, Any],
+    claim_findings: dict[str, Any],
+    cross_verification: dict[str, Any],
+    convention_lock: dict[str, Any],
+    summary_coverage: dict[str, Any],
+) -> list[dict[str, Any]]:
+    rules = _anti_cheat_rules(policy)
+    signals: list[dict[str, Any]] = []
+
+    task_tree_path = support.get("task_tree_path")
+    if int(task_tree.get("skip_without_rationale_count", 0)) or int(task_tree.get("merge_without_rationale_count", 0)):
+        count = int(task_tree.get("skip_without_rationale_count", 0)) + int(task_tree.get("merge_without_rationale_count", 0))
+        signals.append(
+            _anti_cheat_signal(
+                rules,
+                "task_skip_or_merge_without_rationale",
+                reason=f"task tree recorded {count} skipped or merged tasks without rationale",
+                evidence_refs=[str(task_tree_path)] if isinstance(task_tree_path, Path) else [],
+                confidence="high",
+                detected_by="compute_user_scorecard.py",
+                provenance=_build_signal_provenance(support, source_path=str(task_tree_path) if isinstance(task_tree_path, Path) else ""),
+            )
+        )
+
+    if int(claim_findings.get("unsupported_transition_count", 0)):
+        refs = [str(item) for item in claim_findings.get("unsupported_transition_refs", []) if str(item).strip()]
+        signals.append(
+            _anti_cheat_signal(
+                rules,
+                "unsupported_transition_claim",
+                reason="transition language such as therefore or consistent with was used without linked evidence",
+                evidence_refs=refs,
+                confidence="high",
+                detected_by="compute_user_scorecard.py",
+                provenance=_build_signal_provenance(support, source_path=refs[0] if refs else str(support.get("claim_ledger_path", ""))),
+            )
+        )
+
+    if int(claim_findings.get("verification_word_without_artifact_count", 0)):
+        refs = [str(item) for item in claim_findings.get("verification_word_without_artifact_refs", []) if str(item).strip()]
+        signals.append(
+            _anti_cheat_signal(
+                rules,
+                "verification_word_without_artifact",
+                reason="verification language was used without a fresh command, report, or test artifact",
+                evidence_refs=refs,
+                confidence="high",
+                detected_by="compute_user_scorecard.py",
+                provenance=_build_signal_provenance(support, source_path=refs[0] if refs else str(support.get("claim_ledger_path", ""))),
+            )
+        )
+
+    if int(convention_lock.get("observed_drift_count", 0)) or int(convention_lock.get("missing_locked_term_count", 0)):
+        lock_path = support.get("convention_lock_path")
+        signals.append(
+            _anti_cheat_signal(
+                rules,
+                "convention_drift",
+                reason=str(convention_lock.get("reason", "")).strip() or "convention lock drift was recorded",
+                evidence_refs=[str(lock_path)] if isinstance(lock_path, Path) else [],
+                confidence="high",
+                detected_by="compute_user_scorecard.py",
+                provenance=_build_signal_provenance(support, source_path=str(lock_path) if isinstance(lock_path, Path) else ""),
+            )
+        )
+
+    if int(summary_coverage.get("uncovered_claim_count", 0)) or int(summary_coverage.get("zombie_section_count", 0)) or int(claim_findings.get("stale_claim_count", 0)):
+        refs = [str(item) for item in claim_findings.get("stale_claim_refs", []) if str(item).strip()]
+        coverage_path = support.get("summary_coverage_path")
+        signals.append(
+            _anti_cheat_signal(
+                rules,
+                "zombie_section_or_stale_claim",
+                reason=str(summary_coverage.get("reason", "")).strip() or "summary coverage recorded uncovered claims, zombie sections, or stale claims",
+                evidence_refs=refs or ([str(coverage_path)] if isinstance(coverage_path, Path) else []),
+                confidence="high",
+                detected_by="compute_user_scorecard.py",
+                provenance=_build_signal_provenance(support, source_path=str(coverage_path) if isinstance(coverage_path, Path) else ""),
+            )
+        )
+
+    if int(cross_verification.get("unresolved_disagreement_count", 0)):
+        refs = [str(item) for item in cross_verification.get("disagreement_refs", []) if str(item).strip()]
+        cross_path = support.get("cross_verification_path")
+        signals.append(
+            _anti_cheat_signal(
+                rules,
+                "cross_verification_disagreement_unresolved",
+                reason="cross verification contains unresolved disagreement",
+                evidence_refs=refs or ([str(cross_path)] if isinstance(cross_path, Path) else []),
+                confidence="high",
+                detected_by="compute_user_scorecard.py",
+                provenance=_build_signal_provenance(support, source_path=str(cross_path) if isinstance(cross_path, Path) else ""),
+            )
+        )
+
+    if not bool(summary_coverage.get("negative_findings_present", False)):
+        negative_pressure = bool(_waiver_entries(support)) or int(cross_verification.get("unresolved_disagreement_count", 0)) > 0 or int(summary_coverage.get("uncovered_claim_count", 0)) > 0
+        if negative_pressure:
+            summary_path = support.get("summary_path")
+            signals.append(
+                _anti_cheat_signal(
+                    rules,
+                    "aesthetic_or_report_smoothing",
+                    reason="summary omitted a Negative Findings section despite waivers, disagreements, or uncovered claims",
+                    evidence_refs=[str(summary_path)] if isinstance(summary_path, Path) else [],
+                    confidence="high",
+                    detected_by="compute_user_scorecard.py",
+                    provenance=_build_signal_provenance(support, source_path=str(summary_path) if isinstance(summary_path, Path) else ""),
+                )
+            )
+    return signals
 
 
 def _public_anti_cheat_signal(signal: dict[str, Any]) -> dict[str, Any]:
@@ -679,16 +1334,7 @@ def _audit_anti_cheat_signals(policy: dict[str, Any], audit: dict[str, Any], sup
                     provenance=provenance,
                 )
             )
-        elif category in {
-            "claimed_verification_without_evidence",
-            "test_deletion_or_weakening_without_rationale",
-            "score_policy_tamper_without_policy_update_workorder",
-            "evidence_backdating_or_stale_report_reuse",
-            "waiver_without_reason",
-            "protected_path_access_attempt",
-            "verification_command_substitution",
-            "evidence_manifest_mismatch",
-        }:
+        elif category in rules:
             signals.append(
                 _anti_cheat_signal(
                     rules,
@@ -1031,6 +1677,14 @@ def compute_scorecard(policy: dict[str, Any], review: dict[str, Any], mode: str)
     context["clean_room_verify_passed"] = normalize_status(clean_room_verify.get("status"), "UNKNOWN") in {"PASS", "WAIVED"}
     context["evidence_manifest_present"] = bool(support.get("evidence_manifest_path"))
     context["evidence_manifest_current"] = bool(support.get("is_current", False))
+    claim_findings = _claim_phrase_findings(support)
+    taste_gate_summary = _taste_gate_summary(support)
+    task_tree_summary = _task_tree_summary(support, int(claim_findings.get("unsupported_transition_count", 0)))
+    evidence_manifest_summary = _evidence_manifest_summary(support)
+    repeated_verify_summary = _repeated_verify_summary(support)
+    cross_verification_summary = _cross_verification_summary(support)
+    convention_lock_summary = _convention_lock_summary(support)
+    summary_coverage_summary = _summary_coverage_summary(support)
 
     required_roles: list[str] = []
     missing_required_roles: list[str] = []
@@ -1088,6 +1742,15 @@ def compute_scorecard(policy: dict[str, Any], review: dict[str, Any], mode: str)
             mode=mode,
             existing_readiness=existing_readiness,
             clean_room_verify=clean_room_verify,
+        ),
+        *_v12_anti_cheat_signals(
+            policy,
+            support,
+            task_tree=task_tree_summary,
+            claim_findings=claim_findings,
+            cross_verification=cross_verification_summary,
+            convention_lock=convention_lock_summary,
+            summary_coverage=summary_coverage_summary,
         ),
         *award_signals,
     ]
@@ -1233,6 +1896,13 @@ def compute_scorecard(policy: dict[str, Any], review: dict[str, Any], mode: str)
         "trace": trace,
         "evidence_manifest_path": str(support.get("evidence_manifest_path")) if support.get("evidence_manifest_path") else "",
         "workorder_path": str(support.get("workorder_path")) if support.get("workorder_path") else "",
+        "taste_gate": taste_gate_summary,
+        "task_tree": task_tree_summary,
+        "evidence_manifest": evidence_manifest_summary,
+        "repeated_verify": repeated_verify_summary,
+        "cross_verification": cross_verification_summary,
+        "convention_lock": convention_lock_summary,
+        "summary_coverage": summary_coverage_summary,
         "scores": axis_results,
         "applicable_axes": [axis for axis, payload in axis_results.items() if payload["applicable"]],
         "raw_total_score": raw_total,

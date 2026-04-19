@@ -32,6 +32,14 @@ from _scorecard_common import (
     published_command_log_path,
     published_evidence_manifest_path,
     published_workorder_path,
+    published_waivers_path,
+    published_task_tree_path,
+    published_repeated_verify_path,
+    published_cross_verification_path,
+    published_claim_ledger_path,
+    published_summary_coverage_path,
+    published_convention_lock_path,
+    published_taste_gate_path,
 )
 
 REVIEWER_ROLES = (
@@ -420,8 +428,18 @@ def build_context_payload(workspace_root: Path, mode: str, base: dict[str, Any])
     evidence_manifest_path = published_evidence_manifest_path(workspace_root)
     workorder_path = published_workorder_path(workspace_root, evidence_manifest_path)
     command_log_path = published_command_log_path(workspace_root, evidence_manifest_path)
+    waivers_path = published_waivers_path(workspace_root, evidence_manifest_path)
+    task_tree_path = published_task_tree_path(workspace_root, evidence_manifest_path)
+    repeated_verify_path = published_repeated_verify_path(workspace_root, evidence_manifest_path)
+    cross_verification_path = published_cross_verification_path(workspace_root, evidence_manifest_path)
+    claim_ledger_path = published_claim_ledger_path(workspace_root, evidence_manifest_path)
+    summary_coverage_path = published_summary_coverage_path(workspace_root, evidence_manifest_path)
+    convention_lock_path = published_convention_lock_path(workspace_root, evidence_manifest_path)
+    taste_gate_path = published_taste_gate_path(workspace_root, evidence_manifest_path)
+    summary_path = workspace_root / "SUMMARY.md"
+    design_review_path = workspace_root / "DESIGN_REVIEW.md"
     return {
-        "context_version": 1,
+        "context_version": 2,
         "status": "READY",
         "task_id": str(base.get("task_id", "")).strip() or f"{workspace_root.name}-{mode}",
         "workspace_root": str(workspace_root),
@@ -436,6 +454,16 @@ def build_context_payload(workspace_root: Path, mode: str, base: dict[str, Any])
             "evidence_manifest_path": str(evidence_manifest_path) if evidence_manifest_path.exists() else "",
             "workorder_path": str(workorder_path) if workorder_path is not None and workorder_path.exists() else "",
             "command_log_path": str(command_log_path) if command_log_path is not None and command_log_path.exists() else "",
+            "waivers_path": str(waivers_path) if waivers_path is not None and waivers_path.exists() else "",
+            "task_tree_path": str(task_tree_path) if task_tree_path is not None and task_tree_path.exists() else "",
+            "repeated_verify_path": str(repeated_verify_path) if repeated_verify_path is not None and repeated_verify_path.exists() else "",
+            "cross_verification_path": str(cross_verification_path) if cross_verification_path is not None and cross_verification_path.exists() else "",
+            "claim_ledger_path": str(claim_ledger_path) if claim_ledger_path is not None and claim_ledger_path.exists() else "",
+            "summary_coverage_path": str(summary_coverage_path) if summary_coverage_path is not None and summary_coverage_path.exists() else "",
+            "convention_lock_path": str(convention_lock_path) if convention_lock_path is not None and convention_lock_path.exists() else "",
+            "taste_gate_path": str(taste_gate_path) if taste_gate_path is not None and taste_gate_path.exists() else "",
+            "summary_path": str(summary_path) if summary_path.exists() else "",
+            "design_review_path": str(design_review_path) if design_review_path.exists() else "",
             "trace_report_path": str(trace_path) if trace_path.exists() else "",
             "existing_readiness_report_path": str(readiness_path) if readiness_path.exists() else "",
             "clean_room_verify_report_path": str(acceptance_path) if acceptance_path.exists() else "",

@@ -87,6 +87,19 @@ def _append_gate_order_signal(scorecard: dict[str, Any], gate_checks: dict[str, 
         anti_cheat["status"] = "GUARDED"
 
 
+def _summary_gate_status(summary: dict[str, Any]) -> tuple[str, list[str]]:
+    status = normalize_status(summary.get("status"), "UNKNOWN")
+    reasons: list[str] = []
+    reason = str(summary.get("reason", "")).strip()
+    if reason:
+        reasons.append(reason)
+    if status in {"PASS", "WAIVED"}:
+        return "PASS", reasons
+    if status in {"FAIL", "SECURITY_INCIDENT"}:
+        return "FAIL", reasons or [f"summary stage status is {status}"]
+    return "BLOCKED", reasons or [f"summary stage status is {status}"]
+
+
 def run_delivery_gate(review: dict[str, Any], mode: str) -> dict[str, Any]:
     scorecard = compute_scorecard(load_json(DEFAULT_POLICY_FILE), review, mode)
     disqualifier = scorecard["disqualifier_result"]
@@ -145,6 +158,67 @@ def run_delivery_gate(review: dict[str, Any], mode: str) -> dict[str, Any]:
         if trace_status != "PASS":
             first_failure("BLOCKED", "3_trace_presence_check", trace_reasons)
 
+        taste_gate_status, taste_gate_reasons = _summary_gate_status(scorecard.get("taste_gate", {}))
+        gate_checks["4_taste_gate_check"] = {"status": taste_gate_status, "reasons": taste_gate_reasons}
+        if taste_gate_status != "PASS":
+            first_failure("FAIL" if taste_gate_status == "FAIL" else "BLOCKED", "4_taste_gate_check", taste_gate_reasons)
+
+        task_tree_status, task_tree_reasons = _summary_gate_status(scorecard.get("task_tree", {}))
+        gate_checks["5_task_tree_check"] = {"status": task_tree_status, "reasons": task_tree_reasons}
+        if task_tree_status != "PASS":
+            first_failure("FAIL" if task_tree_status == "FAIL" else "BLOCKED", "5_task_tree_check", task_tree_reasons)
+
+        evidence_manifest_status, evidence_manifest_reasons = _summary_gate_status(scorecard.get("evidence_manifest", {}))
+        gate_checks["6_evidence_manifest_check"] = {"status": evidence_manifest_status, "reasons": evidence_manifest_reasons}
+        if evidence_manifest_status != "PASS":
+            first_failure(
+                "FAIL" if evidence_manifest_status == "FAIL" else "BLOCKED",
+                "6_evidence_manifest_check",
+                evidence_manifest_reasons,
+            )
+
+        repeated_verify_status, repeated_verify_reasons = _summary_gate_status(scorecard.get("repeated_verify", {}))
+        gate_checks["7_repeated_verify_check"] = {"status": repeated_verify_status, "reasons": repeated_verify_reasons}
+        if repeated_verify_status != "PASS":
+            first_failure(
+                "FAIL" if repeated_verify_status == "FAIL" else "BLOCKED",
+                "7_repeated_verify_check",
+                repeated_verify_reasons,
+            )
+
+        cross_verification_status, cross_verification_reasons = _summary_gate_status(scorecard.get("cross_verification", {}))
+        gate_checks["8_cross_verification_check"] = {
+            "status": cross_verification_status,
+            "reasons": cross_verification_reasons,
+        }
+        if cross_verification_status != "PASS":
+            first_failure(
+                "FAIL" if cross_verification_status == "FAIL" else "BLOCKED",
+                "8_cross_verification_check",
+                cross_verification_reasons,
+            )
+
+        convention_lock_status, convention_lock_reasons = _summary_gate_status(scorecard.get("convention_lock", {}))
+        gate_checks["9_convention_lock_check"] = {"status": convention_lock_status, "reasons": convention_lock_reasons}
+        if convention_lock_status != "PASS":
+            first_failure(
+                "FAIL" if convention_lock_status == "FAIL" else "BLOCKED",
+                "9_convention_lock_check",
+                convention_lock_reasons,
+            )
+
+        summary_coverage_status, summary_coverage_reasons = _summary_gate_status(scorecard.get("summary_coverage", {}))
+        gate_checks["10_summary_coverage_check"] = {
+            "status": summary_coverage_status,
+            "reasons": summary_coverage_reasons,
+        }
+        if summary_coverage_status != "PASS":
+            first_failure(
+                "FAIL" if summary_coverage_status == "FAIL" else "BLOCKED",
+                "10_summary_coverage_check",
+                summary_coverage_reasons,
+            )
+
         axis_floor_reasons = [
             *[f"axis floor failed: {axis}" for axis in scorecard["axis_floor_check"]["failed_axes"] if axis != "total_score"],
         ]
@@ -153,9 +227,9 @@ def run_delivery_gate(review: dict[str, Any], mode: str) -> dict[str, Any]:
                 f"raw total score {scorecard['raw_total_score']} is below floor {scorecard['total_floor']}"
             )
         axis_floor_status = scorecard["axis_floor_check"]["status"]
-        gate_checks["4_axis_floor_check"] = {"status": axis_floor_status, "reasons": axis_floor_reasons}
+        gate_checks["11_axis_floor_check"] = {"status": axis_floor_status, "reasons": axis_floor_reasons}
         if axis_floor_status != "PASS":
-            first_failure("BLOCKED", "4_axis_floor_check", axis_floor_reasons)
+            first_failure("BLOCKED", "11_axis_floor_check", axis_floor_reasons)
 
         anti_cheat = scorecard.get("anti_cheat_layer", {})
         decision_summary = anti_cheat.get("decision_summary", {})
@@ -166,13 +240,20 @@ def run_delivery_gate(review: dict[str, Any], mode: str) -> dict[str, Any]:
             anti_cheat_status = "FAIL"
         elif any(
             str(signal.get("code", signal.get("id", ""))).strip()
-            in {"claimed_verification_without_evidence", "evidence_backdating_or_stale_report_reuse", "evidence_manifest_mismatch"}
+            in {
+                "claimed_verification_without_evidence",
+                "evidence_backdating_or_stale_report_reuse",
+                "evidence_manifest_mismatch",
+                "verification_word_without_artifact",
+                "cross_verification_disagreement_unresolved",
+                "zombie_section_or_stale_claim",
+            }
             for signal in anti_cheat.get("signals", [])
         ):
             anti_cheat_status = "BLOCKED"
-        gate_checks["5_anti_cheat_guard_check"] = {"status": anti_cheat_status, "reasons": anti_cheat_reasons}
+        gate_checks["12_anti_cheat_guard_check"] = {"status": anti_cheat_status, "reasons": anti_cheat_reasons}
         if anti_cheat_status != "PASS":
-            first_failure("FAIL" if anti_cheat_status == "FAIL" else "BLOCKED", "5_anti_cheat_guard_check", anti_cheat_reasons)
+            first_failure("FAIL" if anti_cheat_status == "FAIL" else "BLOCKED", "12_anti_cheat_guard_check", anti_cheat_reasons)
 
         cap_reasons: list[str] = []
         if scorecard["platform_cap"]["cap_applied"]:
@@ -183,22 +264,22 @@ def run_delivery_gate(review: dict[str, Any], mode: str) -> dict[str, Any]:
                 f"capped total score {scorecard['capped_total_score']} is below floor {scorecard['total_floor']}"
             )
         cap_status = scorecard["platform_cap"]["status"]
-        gate_checks["6_platform_cap_check"] = {"status": cap_status, "reasons": cap_reasons}
+        gate_checks["13_platform_cap_check"] = {"status": cap_status, "reasons": cap_reasons}
         if cap_status != "PASS":
-            first_failure("BLOCKED", "6_platform_cap_check", cap_reasons)
+            first_failure("BLOCKED", "13_platform_cap_check", cap_reasons)
 
         readiness_status, readiness_reasons = _stage_gate_status(scorecard["existing_readiness"])
-        gate_checks["7_existing_readiness_and_manual_close_out_check"] = {
+        gate_checks["14_existing_readiness_and_manual_close_out_check"] = {
             "status": readiness_status,
             "reasons": readiness_reasons,
         }
         if readiness_status != "PASS":
-            first_failure("FAIL" if readiness_status == "FAIL" else "BLOCKED", "7_existing_readiness_and_manual_close_out_check", readiness_reasons)
+            first_failure("FAIL" if readiness_status == "FAIL" else "BLOCKED", "14_existing_readiness_and_manual_close_out_check", readiness_reasons)
 
         verify_status, verify_reasons = _stage_gate_status(scorecard["clean_room_verify"])
-        gate_checks["8_clean_room_verify_check"] = {"status": verify_status, "reasons": verify_reasons}
+        gate_checks["15_clean_room_verify_check"] = {"status": verify_status, "reasons": verify_reasons}
         if verify_status != "PASS":
-            first_failure("FAIL" if verify_status == "FAIL" else "BLOCKED", "8_clean_room_verify_check", verify_reasons)
+            first_failure("FAIL" if verify_status == "FAIL" else "BLOCKED", "15_clean_room_verify_check", verify_reasons)
 
     _append_gate_order_signal(scorecard, gate_checks)
 

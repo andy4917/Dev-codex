@@ -24,7 +24,7 @@
 - the anti-cheat layer treats score-surface manipulation as negative reward: suspicious points are denied, then penalized, then capped, and critical cases escalate to disqualifiers
 - PASS is still determined by reviewer green, existing readiness, and clean-room verify
 - disqualifiers outrank score
-- generated global runtime elevates the scorecard layer into instruction-level guidance through `~/.codex/AGENTS.md`, and generated runtime hooks replay a close-out reminder at session start or prompt submit without replacing the explicit verify chain
+- generated global runtime elevates the scorecard layer into instruction-level guidance through `~/.codex/AGENTS.md`, and the single generated runtime hook replays a close-out reminder on prompt submit without replacing the explicit verify chain
 
 ## Reviewer Roles
 
@@ -47,7 +47,9 @@ Canonical gate truth now comes from runtime state outside the repo.
 - `completion_score` now uses automatic verified-work awards plus optional user additions. Clean-room verify PASS grants the baseline `24` points automatically, and the user can add more awards up to the axis max.
 - only `completion_score` has a user-award budget, currently `6` points. Other axes default to `0` user-award budget and are treated as score stuffing if a write is attempted.
 - `prepare_user_scorecard_review.py` ignores snapshot/base `user_review` changes unless the payload carries an explicit `user_review_update_request` or `user_review_update_authorized: true`.
-- official anti-cheat codes are `unauthorized_user_review_modification`, `reserved_derived_award_spoofing`, `non_user_source_award`, `excessive_bonus_request`, `reviewer_truth_tamper`, `writer_self_score_attempt`, `claimed_verification_without_evidence`, `test_deletion_or_weakening_without_rationale`, `score_policy_tamper_without_policy_update_workorder`, `evidence_backdating_or_stale_report_reuse`, `waiver_without_reason`, `gate_order_drift`, `protected_path_access_attempt`, `verification_command_substitution`, and `evidence_manifest_mismatch`.
+- official anti-cheat codes are `unauthorized_user_review_modification`, `reserved_derived_award_spoofing`, `non_user_source_award`, `excessive_bonus_request`, `reviewer_truth_tamper`, `writer_self_score_attempt`, `claimed_verification_without_evidence`, `test_deletion_or_weakening_without_rationale`, `score_policy_tamper_without_policy_update_workorder`, `evidence_backdating_or_stale_report_reuse`, `waiver_without_reason`, `gate_order_drift`, `protected_path_access_attempt`, `verification_command_substitution`, `evidence_manifest_mismatch`, `task_skip_or_merge_without_rationale`, `unsupported_transition_claim`, `verification_word_without_artifact`, `convention_drift`, `zombie_section_or_stale_claim`, `aesthetic_or_report_smoothing`, `cross_verification_disagreement_unresolved`, `result_fit_tweaking`, and `formula_or_code_simplification_without_case_check`.
+- v1.2 additive scorecard summaries include `taste_gate`, `task_tree`, `repeated_verify`, `cross_verification`, `convention_lock`, `summary_coverage`, and `evidence_manifest`.
+- `SUMMARY.md` should include a `## Negative Findings` section so fail, blocked, cap, penalty, waiver, and unresolved disagreement outcomes remain visible.
 - test-change rationale should be recorded under the canonical heading `## Test Change Rationale:`. `Test Change Notes`, inline-after-colon forms, and legacy plain-label variants remain compatibility inputs only.
 - placeholder-only entries such as `None`, `N/A`, `NA`, and `Not applicable` do not count as rationale, even when they include trailing punctuation.
 - generated `hooks.json` is derived runtime state. If authority disables `runtime_hook` or clears its events, the generated hook file should disappear instead of leaving stale reminders behind.
@@ -99,10 +101,17 @@ python /home/andy4917/Dev-Management/scripts/export_user_score_summary.py
 1. disqualifier check
 2. reviewer green check
 3. trace presence check
-4. axis floor check
-5. anti-cheat guard check
-6. platform cap check
-7. existing readiness and manual close-out check
-8. clean-room verify check
+4. taste gate check
+5. task tree check
+6. evidence manifest check
+7. repeated verify check
+8. cross verification check
+9. convention lock check
+10. summary coverage check
+11. axis floor check
+12. anti-cheat guard check
+13. platform cap check
+14. existing readiness and manual close-out check
+15. clean-room verify check
 
 `quick` mode enforces disqualifiers only and records score output as advisory. `verify` and `release` enforce the full score gate, require fresh evidence only, and fail closed without a valid workspace authority lease.

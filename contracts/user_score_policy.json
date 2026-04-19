@@ -150,6 +150,60 @@
         "points": 25,
         "severity": "high",
         "reason": "Evidence manifest content must match the recorded policy hashes and run facts."
+      },
+      {
+        "id": "task_skip_or_merge_without_rationale",
+        "points": 20,
+        "severity": "high",
+        "reason": "Skipping or merging task-tree work without rationale is treated as hidden execution drift."
+      },
+      {
+        "id": "unsupported_transition_claim",
+        "points": 10,
+        "severity": "medium",
+        "reason": "Transition language such as therefore or consistent with must not replace linked evidence."
+      },
+      {
+        "id": "verification_word_without_artifact",
+        "points": 10,
+        "severity": "medium",
+        "reason": "Verification language without a fresh command, report, or test artifact is treated as unsupported proof."
+      },
+      {
+        "id": "convention_drift",
+        "points": 20,
+        "severity": "high",
+        "reason": "Replacing canonical authority or score terminology with generic defaults is treated as convention drift."
+      },
+      {
+        "id": "zombie_section_or_stale_claim",
+        "points": 20,
+        "severity": "high",
+        "reason": "Zombie sections, stale claims, or uncovered material claims are treated as report integrity defects."
+      },
+      {
+        "id": "aesthetic_or_report_smoothing",
+        "points": 8,
+        "severity": "medium",
+        "reason": "Hiding waivers, penalties, caps, or disagreements for presentation reasons is treated as report smoothing."
+      },
+      {
+        "id": "cross_verification_disagreement_unresolved",
+        "points": 20,
+        "severity": "high",
+        "reason": "Unresolved independent verifier disagreement must stay visible and cannot silently pass."
+      },
+      {
+        "id": "result_fit_tweaking",
+        "points": 20,
+        "severity": "high",
+        "reason": "Tweaking result language to fit the target outcome without supporting evidence is treated as score pressure."
+      },
+      {
+        "id": "formula_or_code_simplification_without_case_check",
+        "points": 10,
+        "severity": "medium",
+        "reason": "Formula or code simplification without case checks is treated as unsupported correctness pressure."
       }
     ],
     "cap_tiers": [
@@ -332,6 +386,13 @@
     "disqualifier_check",
     "reviewer_green_check",
     "trace_presence_check",
+    "taste_gate_check",
+    "task_tree_check",
+    "evidence_manifest_check",
+    "repeated_verify_check",
+    "cross_verification_check",
+    "convention_lock_check",
+    "summary_coverage_check",
     "axis_floor_check",
     "anti_cheat_guard_check",
     "platform_cap_check",

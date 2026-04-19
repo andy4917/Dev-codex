@@ -64,6 +64,8 @@ def render_agents(authority: dict, windows: bool) -> str:
     layering = authority["runtime_layering"]
     restore = layering["restore_seed_policy"]
     override = layering["user_override_policy"]
+    runtime_hook = scorecard.get("runtime_hook", {})
+    hook_events = [str(name) for name in runtime_hook.get("events", {}).keys()]
     blocked_features = [str(item) for item in override.get("blocked_feature_overrides", [])]
     header = ""
     if windows:
@@ -72,6 +74,14 @@ def render_agents(authority: dict, windows: bool) -> str:
     if blocked_features:
         structural_override_line = (
             f"- Structural feature overrides stay pinned to authority defaults: `{', '.join(blocked_features)}`.\n"
+        )
+    hook_notice = "- Generated runtime hooks may replay the scorecard close-out reminder at prompt submit, but the canonical enforcement surface remains the explicit verify chain.\n"
+    if not hook_events:
+        hook_notice = "- Generated runtime hooks are disabled; the canonical enforcement surface remains the explicit verify chain.\n"
+    elif hook_events != ["UserPromptSubmit"]:
+        hook_notice = (
+            "- Generated runtime hooks may replay the scorecard close-out reminder for configured runtime events, "
+            "but the canonical enforcement surface remains the explicit verify chain.\n"
         )
     return (
         f"{header}"
@@ -96,7 +106,7 @@ def render_agents(authority: dict, windows: bool) -> str:
         f"- The global scorecard layer is binding instruction-level guidance across canonical roots. Do not ignore requested vs credited score, anti-cheat output, gate status, summary export, or final audit results.\n"
         f"- Product-local `python scripts/delivery_gate.py --mode verify` wrappers are valid close-out surfaces only when they produce fresh evidence, refresh the derived review snapshot, then call the global scorecard gate and summary export.\n"
         f"- Canonical global scorecard order: `python {roots['management']}/scripts/prepare_user_scorecard_review.py --workspace-root <repo> --mode verify` -> `python {scorecard['delivery_gate']} --mode verify --workspace-root <repo>` -> `python {scorecard['summary_export']}`.\n"
-        f"- Generated runtime hooks may replay the scorecard close-out reminder at session start and prompt submit, but the canonical enforcement surface remains the explicit verify chain.\n"
+        f"{hook_notice}"
         f"- Verify/release require fresh evidence manifests plus a signed workspace authority lease under `{scorecard['workspace_authority_root']}`.\n"
         f"- Required scorecard gate command: `python {scorecard['delivery_gate']} --mode verify`\n"
         f"- Required scorecard summary command: `python {scorecard['summary_export']}`\n"
@@ -366,14 +376,19 @@ def render_hooks(authority: dict, windows: bool) -> str | None:
 
     hooks: dict[str, list[dict[str, Any]]] = {}
     linux_prefix = str(runtime_hook.get("linux_command_prefix", "python3")).strip() or "python3"
-    windows_prefix = str(runtime_hook.get("windows_command_prefix", "wsl.exe python3")).strip() or "wsl.exe python3"
+    windows_prefix = str(runtime_hook.get("windows_command_prefix", "powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File")).strip() or "powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File"
+    windows_wrapper_path = str(runtime_hook.get("windows_wrapper_path", "")).strip()
     for event_name, payload in events.items():
         matcher = ".*"
         if isinstance(payload, dict):
             matcher = str(payload.get("matcher", ".*")).strip() or ".*"
         command = f"{linux_prefix} {script} --event {event_name}"
         if windows:
-            command = f"{windows_prefix} {script} --event {event_name}"
+            wrapper_command_path = linux_path_to_windows_command_path(windows_wrapper_path) if windows_wrapper_path else ""
+            if wrapper_command_path:
+                command = f"{windows_prefix} {wrapper_command_path} -Event {event_name} -AuthorityPath {AUTHORITY_PATH}"
+            else:
+                command = f"{windows_prefix} {script} --event {event_name}"
         hooks[str(event_name)] = [
             {
                 "matcher": matcher,
@@ -386,6 +401,71 @@ def render_hooks(authority: dict, windows: bool) -> str | None:
             }
         ]
     return json.dumps({"hooks": hooks}, ensure_ascii=False, indent=2) + "\n"
+
+
+def linux_path_to_windows_command_path(raw_path: str) -> str:
+    text = str(raw_path or "").strip()
+    if not text:
+        return ""
+    if text.startswith("/mnt/") and len(text) > 7:
+        drive = text[5]
+        remainder = text[7:]
+        return f"{drive.upper()}:/{remainder}"
+    return text.replace("\\", "/")
+
+
+def render_windows_hook_wrapper(authority: dict) -> str | None:
+    runtime_hook = authority.get("generation_targets", {}).get("scorecard", {}).get("runtime_hook", {})
+    script = str(runtime_hook.get("script", "")).strip()
+    wrapper_path = str(runtime_hook.get("windows_wrapper_path", "")).strip()
+    if not script or not wrapper_path:
+        return None
+    generated_header = str(runtime_hook.get("windows_wrapper_generated_header", "GENERATED - DO NOT EDIT")).strip() or "GENERATED - DO NOT EDIT"
+    return (
+        f"# {generated_header}\n"
+        "param(\n"
+        "  [Parameter(Mandatory=$true)][string]$Event,\n"
+        f"  [string]$AuthorityPath = \"{AUTHORITY_PATH}\",\n"
+        f"  [string]$HookScript = \"{script}\"\n"
+        ")\n\n"
+        "$ErrorActionPreference = \"SilentlyContinue\"\n\n"
+        "function Convert-ToLinuxPath([string]$Value) {\n"
+        "  if ([string]::IsNullOrWhiteSpace($Value)) { return \"\" }\n"
+        "  $trimmed = $Value.Trim()\n"
+        "  if ($trimmed.StartsWith('\\\\wsl.localhost\\', [System.StringComparison]::OrdinalIgnoreCase) -or $trimmed.StartsWith('\\\\wsl$\\', [System.StringComparison]::OrdinalIgnoreCase)) {\n"
+        "    $parts = $trimmed -split '\\\\'\n"
+        "    if ($parts.Length -lt 5) { return \"\" }\n"
+        "    $segments = @()\n"
+        "    for ($index = 4; $index -lt $parts.Length; $index++) {\n"
+        "      if ($parts[$index]) { $segments += $parts[$index] }\n"
+        "    }\n"
+        "    if ($segments.Count -eq 0) { return '/' }\n"
+        "    return '/' + ($segments -join '/')\n"
+        "  }\n"
+        "  if ($trimmed -match '^[A-Za-z]:\\\\') {\n"
+        "    $converted = (& wsl.exe wslpath -a \"$trimmed\" 2>$null)\n"
+        "    if ($LASTEXITCODE -eq 0 -and $converted) {\n"
+        "      return (($converted | Out-String).Trim())\n"
+        "    }\n"
+        "  }\n"
+        "  return \"\"\n"
+        "}\n\n"
+        "$cwdPath = \"\"\n"
+        "try { $cwdPath = (Get-Location).ProviderPath } catch { $cwdPath = \"\" }\n"
+        "$linuxCwd = Convert-ToLinuxPath $cwdPath\n"
+        "if ([string]::IsNullOrWhiteSpace($linuxCwd)) { exit 0 }\n"
+        "$output = & wsl.exe python3 $HookScript --event $Event --authority-path $AuthorityPath --cwd $linuxCwd 2>$null\n"
+        "if ($LASTEXITCODE -eq 0 -and $output) {\n"
+        "  if ($output -is [System.Array]) {\n"
+        "    foreach ($line in $output) {\n"
+        "      if (-not [string]::IsNullOrWhiteSpace($line)) { [Console]::Out.WriteLine($line) }\n"
+        "    }\n"
+        "  } else {\n"
+        "    [Console]::Out.WriteLine($output)\n"
+        "  }\n"
+        "}\n"
+        "exit 0\n"
+    )
 
 
 def main() -> int:
@@ -403,6 +483,9 @@ def main() -> int:
     linux_hooks = runtime["linux"].get("hooks_config")
     if linux_hooks:
         sync_generated_text(Path(linux_hooks), render_hooks(authority, windows=False))
+    wrapper_path = authority.get("generation_targets", {}).get("scorecard", {}).get("runtime_hook", {}).get("windows_wrapper_path")
+    if wrapper_path:
+        sync_generated_text(Path(wrapper_path), render_windows_hook_wrapper(authority))
     windows_hooks = runtime["windows_mirror"].get("hooks_config")
     if windows_hooks:
         sync_generated_text(Path(windows_hooks), render_hooks(authority, windows=True))

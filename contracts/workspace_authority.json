@@ -291,11 +291,10 @@
         "linux_command_prefix": "python3",
         "state_root": "/home/andy4917/.codex/state/scorecard-hook",
         "user_prompt_throttle_seconds": 300,
-        "windows_command_prefix": "wsl.exe python3",
+        "windows_command_prefix": "powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File",
+        "windows_wrapper_path": "/mnt/c/Users/anise/.codex/bin/scorecard-hook-wrapper.ps1",
+        "windows_wrapper_generated_header": "GENERATED - DO NOT EDIT",
         "events": {
-          "SessionStart": {
-            "matcher": ".*"
-          },
           "UserPromptSubmit": {
             "matcher": ".*"
           }

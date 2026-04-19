@@ -11,10 +11,7 @@ from typing import Any
 
 
 DEFAULT_AUTHORITY_PATH = Path("/home/andy4917/Dev-Management/contracts/workspace_authority.json")
-DEFAULT_THROTTLE_SECONDS = {
-    "SessionStart": 0,
-    "UserPromptSubmit": 300,
-}
+DEFAULT_USER_PROMPT_THROTTLE_SECONDS = 300
 
 
 def load_json(path: Path) -> dict[str, Any]:
@@ -76,8 +73,8 @@ def hook_state_dir(authority: dict[str, Any]) -> Path:
 def throttle_seconds(authority: dict[str, Any], event: str) -> int:
     cfg = hook_cfg(authority)
     if event == "UserPromptSubmit":
-        return int(cfg.get("user_prompt_throttle_seconds", DEFAULT_THROTTLE_SECONDS[event]))
-    return DEFAULT_THROTTLE_SECONDS.get(event, 0)
+        return int(cfg.get("user_prompt_throttle_seconds", DEFAULT_USER_PROMPT_THROTTLE_SECONDS))
+    return 0
 
 
 def state_file_for(state_dir: Path, workspace_root: Path, event: str) -> Path:
@@ -120,16 +117,12 @@ def build_notice(authority: dict[str, Any], workspace_root: Path) -> str:
     summary_export = Path(scorecard["summary_export"])
     audit = management_root / "scripts" / "audit_workspace.py"
     workspace = str(workspace_root)
-    return "\n".join(
-        [
-            f"[scorecard-hook] Global scorecard layer is binding for {workspace}. Do not ignore requested vs credited score, anti-cheat, gate, or audit output.",
-            "[scorecard-hook] Advisory reminder only. The explicit verify chain remains the canonical enforcement path.",
-            "[scorecard-hook] Before finalizing run: "
-            f"python {prepare} --workspace-root {workspace} --mode verify -> "
-            f"python {delivery_gate} --mode verify --workspace-root {workspace} -> "
-            f"python {summary_export} -> "
-            f"python {audit} --write-report",
-        ]
+    return (
+        f"[scorecard-hook] Binding scorecard layer for {workspace}. "
+        f"Before finalizing run: python {prepare} --workspace-root {workspace} --mode verify -> "
+        f"python {delivery_gate} --mode verify --workspace-root {workspace} -> "
+        f"python {summary_export} -> "
+        f"python {audit} --write-report"
     )
 
 
@@ -154,7 +147,7 @@ def emit_notice(
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Emit the global scorecard close-out reminder from a Codex runtime hook.")
-    parser.add_argument("--event", required=True, help="Hook event name such as SessionStart or UserPromptSubmit.")
+    parser.add_argument("--event", required=True, help="Hook event name. The generated runtime currently uses UserPromptSubmit only.")
     parser.add_argument("--authority-path", default=os.environ.get("CODEX_SCORECARD_HOOK_AUTHORITY_PATH", str(DEFAULT_AUTHORITY_PATH)))
     parser.add_argument("--cwd", default=os.environ.get("CODEX_SCORECARD_HOOK_CWD", os.getcwd()))
     args = parser.parse_args()

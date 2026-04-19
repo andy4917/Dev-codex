@@ -261,20 +261,52 @@ def load_published_evidence_manifest(workspace_root: Path) -> dict[str, Any]:
     return load_json(published_evidence_manifest_path(workspace_root))
 
 
-def published_workorder_path(workspace_root: Path, evidence_manifest_path: Path | None = None) -> Path | None:
+def published_run_artifact_path(workspace_root: Path, filename: str, evidence_manifest_path: Path | None = None) -> Path | None:
     if evidence_manifest_path is not None and evidence_manifest_path.name == "EVIDENCE_MANIFEST.json":
-        candidate = evidence_manifest_path.parent / "WORKORDER.json"
+        candidate = evidence_manifest_path.parent / filename
         if candidate.exists():
             return candidate
-    return latest_agent_run_file(workspace_root, "WORKORDER.json")
+    return latest_agent_run_file(workspace_root, filename)
+
+
+def published_workorder_path(workspace_root: Path, evidence_manifest_path: Path | None = None) -> Path | None:
+    return published_run_artifact_path(workspace_root, "WORKORDER.json", evidence_manifest_path)
 
 
 def published_command_log_path(workspace_root: Path, evidence_manifest_path: Path | None = None) -> Path | None:
-    if evidence_manifest_path is not None and evidence_manifest_path.name == "EVIDENCE_MANIFEST.json":
-        candidate = evidence_manifest_path.parent / "COMMAND_LOG.jsonl"
-        if candidate.exists():
-            return candidate
-    return latest_agent_run_file(workspace_root, "COMMAND_LOG.jsonl")
+    return published_run_artifact_path(workspace_root, "COMMAND_LOG.jsonl", evidence_manifest_path)
+
+
+def published_waivers_path(workspace_root: Path, evidence_manifest_path: Path | None = None) -> Path | None:
+    return published_run_artifact_path(workspace_root, "WAIVERS.json", evidence_manifest_path)
+
+
+def published_task_tree_path(workspace_root: Path, evidence_manifest_path: Path | None = None) -> Path | None:
+    return published_run_artifact_path(workspace_root, "TASK_TREE.json", evidence_manifest_path)
+
+
+def published_repeated_verify_path(workspace_root: Path, evidence_manifest_path: Path | None = None) -> Path | None:
+    return published_run_artifact_path(workspace_root, "REPEATED_VERIFY.json", evidence_manifest_path)
+
+
+def published_cross_verification_path(workspace_root: Path, evidence_manifest_path: Path | None = None) -> Path | None:
+    return published_run_artifact_path(workspace_root, "CROSS_VERIFICATION.json", evidence_manifest_path)
+
+
+def published_claim_ledger_path(workspace_root: Path, evidence_manifest_path: Path | None = None) -> Path | None:
+    return published_run_artifact_path(workspace_root, "CLAIM_LEDGER.json", evidence_manifest_path)
+
+
+def published_summary_coverage_path(workspace_root: Path, evidence_manifest_path: Path | None = None) -> Path | None:
+    return published_run_artifact_path(workspace_root, "SUMMARY_COVERAGE.json", evidence_manifest_path)
+
+
+def published_convention_lock_path(workspace_root: Path, evidence_manifest_path: Path | None = None) -> Path | None:
+    return published_run_artifact_path(workspace_root, "CONVENTION_LOCK.json", evidence_manifest_path)
+
+
+def published_taste_gate_path(workspace_root: Path, evidence_manifest_path: Path | None = None) -> Path | None:
+    return published_run_artifact_path(workspace_root, "TASTE_GATE.json", evidence_manifest_path)
 
 
 def current_policy_hashes() -> dict[str, str]:
