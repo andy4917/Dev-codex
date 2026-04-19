@@ -50,6 +50,30 @@ class IAWCloseoutTests(unittest.TestCase):
     def setUp(self) -> None:
         self.module = _load_module()
 
+    def test_validate_profile_artifacts_requires_convention_lock_for_l2(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            workspace = Path(tmpdir) / "workspace"
+            run_root = workspace / ".agent-runs" / "run-l2"
+            run_root.mkdir(parents=True)
+            (workspace / "SUMMARY.md").write_text("# Summary\n", encoding="utf-8")
+            for name in (
+                "WORKORDER.json",
+                "PLAN.json",
+                "TASK_TREE.json",
+                "EVIDENCE_MANIFEST.json",
+                "COMMAND_LOG.jsonl",
+                "WAIVERS.json",
+                "REPEATED_VERIFY.json",
+                "CLAIM_LEDGER.json",
+                "SUMMARY_COVERAGE.json",
+                "REPLAY.md",
+            ):
+                (run_root / name).write_text("{}\n", encoding="utf-8")
+
+            reasons = self.module._validate_profile_artifacts(self.module._artifact_paths(workspace, "run-l2"), "L2")
+
+        self.assertIn("required run artifact is missing for L2: CONVENTION_LOCK.json", reasons)
+
     def test_validate_manifest_blocks_changed_file_set_hash_mismatch(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             workspace = Path(tmpdir) / "workspace"
@@ -117,6 +141,7 @@ class IAWCloseoutTests(unittest.TestCase):
                 "WORKORDER.json": {"schema_version": 1},
                 "PLAN.json": {"plan": []},
                 "TASK_TREE.json": {"tasks": []},
+                "CONVENTION_LOCK.json": {"schema_version": 1, "locked_terms": []},
                 "EVIDENCE_MANIFEST.json": {"schema_version": 1},
                 "WAIVERS.json": {"waivers": []},
                 "REPEATED_VERIFY.json": {"rounds": []},

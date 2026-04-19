@@ -206,6 +206,14 @@ def detect_runtime_restore_seed_violations(state_path: Path, authority: dict) ->
     violations: list[dict[str, object]] = []
     restore = authority.get("runtime_layering", {}).get("restore_seed_policy", {})
     preferred_host = str(restore.get("preferred_windows_access_host", "wsl.localhost")).lower()
+    allowed_hosts = {
+        preferred_host,
+        *{
+            str(host).strip().lower()
+            for host in restore.get("allowed_windows_access_hosts", [])
+            if str(host).strip()
+        },
+    }
     legacy_markers = normalize_legacy_path_markers(authority)
 
     projectless = state.get("projectless-thread-ids", [])
@@ -241,12 +249,13 @@ def detect_runtime_restore_seed_violations(state_path: Path, authority: dict) ->
             if not isinstance(value, str):
                 continue
             normalized = value.replace("\\", "/").lower()
-            if normalized.startswith("//wsl$/") or "/mnt/c/" in normalized or any(marker in normalized for marker in legacy_markers):
+            if "/mnt/c/" in normalized or any(marker in normalized for marker in legacy_markers):
                 bad_values.append(value)
                 continue
-            if normalized.startswith("//wsl.localhost/") and preferred_host == "wsl.localhost":
-                continue
-            if normalized.startswith("//") and preferred_host and not normalized.startswith(f"//{preferred_host}/"):
+            if normalized.startswith("//"):
+                host = normalized[2:].split("/", 1)[0]
+                if host in allowed_hosts:
+                    continue
                 bad_values.append(value)
         if bad_values:
             violations.append(

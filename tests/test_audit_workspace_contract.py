@@ -368,6 +368,47 @@ remote_connections = true
             )
             self.assertIn("DQ-010", tamper_events[0]["disqualifier_ids"])
 
+    def test_audit_accepts_allowed_wsl_hosts_from_authority(self) -> None:
+        authority = {
+            "hardcoding_definition": {
+                "feature_rules": {
+                    "forbidden_feature_flags": [],
+                },
+                "path_rules": {
+                    "legacy_repo_paths_to_remove": [],
+                },
+            },
+            "runtime_layering": {
+                "restore_seed_policy": {
+                    "preferred_windows_access_host": "wsl.localhost",
+                    "allowed_windows_access_hosts": ["wsl.localhost", "wsl$"],
+                }
+            },
+        }
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            state_path = Path(tmpdir) / ".codex-global-state.json"
+            state_path.write_text(
+                json.dumps(
+                    {
+                        "projectless-thread-ids": [],
+                        "thread-workspace-root-hints": {},
+                        "active-workspace-roots": ["\\\\wsl$\\Ubuntu\\home\\andy4917\\Dev-Workflow"],
+                        "electron-saved-workspace-roots": [
+                            "\\\\wsl.localhost\\Ubuntu\\home\\andy4917\\Dev-Management",
+                            "\\\\wsl$\\Ubuntu\\home\\andy4917\\Dev-Workflow",
+                        ],
+                    },
+                    ensure_ascii=False,
+                    indent=2,
+                ),
+                encoding="utf-8",
+            )
+
+            runtime = self.module.detect_runtime_restore_seed_violations(state_path, authority)
+
+        self.assertEqual(runtime, [])
+
     def test_detect_score_policy_tamper_requires_structured_policy_update_workorder(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             tmp = Path(tmpdir)
