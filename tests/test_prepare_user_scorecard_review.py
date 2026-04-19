@@ -36,6 +36,23 @@ def _git(repo_root: Path, *args: str) -> None:
     )
 
 
+def _git_output(repo_root: Path, *args: str) -> str:
+    result = subprocess.run(
+        ["git", "-C", str(repo_root), *args],
+        check=True,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+    )
+    return result.stdout.strip()
+
+
+def _file_hash(path: Path) -> str:
+    import hashlib
+
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
 class PrepareUserScorecardReviewTests(unittest.TestCase):
     def _build_workspace(self, root: Path) -> tuple[Path, str]:
         workspace = root / "workspace"
@@ -809,12 +826,16 @@ class PrepareUserScorecardReviewTests(unittest.TestCase):
             )
             self.assertIn(compute.returncode, {0, 1, 2}, msg=compute.stderr)
             scorecard = json.loads(compute_output.read_text(encoding="utf-8"))
-            self.assertTrue(any(item["code"] == "writer_self_score_attempt" for item in scorecard["anti_cheat_signals"]))
+            signal = next(item for item in scorecard["anti_cheat_signals"] if item["code"] == "writer_self_score_attempt")
+            self.assertEqual(signal["decision"], "cap")
+            self.assertEqual(signal["confidence"], "high")
             self.assertEqual(scorecard["requested_credit"][0]["source"], "agent_request")
             self.assertEqual(scorecard["requested_credit"][0]["requested_points"], 5)
             self.assertEqual(scorecard["credited_credit"][0]["credited_points"], 0)
             self.assertTrue(scorecard["credited_credit"][0]["blocked"])
             self.assertEqual(scorecard["credited_credit"][0]["block_reason"], "requested_only_source")
+            self.assertEqual(scorecard["anti_cheat_layer"]["decision_summary"]["highest_decision"], "cap")
+            self.assertEqual(scorecard["disqualifier_result"]["status"], "PASS")
 
     def test_clean_room_verify_waived_still_grants_system_derived_completion_credit(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -945,9 +966,10 @@ class PrepareUserScorecardReviewTests(unittest.TestCase):
             )
             self.assertIn(compute.returncode, {0, 1, 2}, msg=compute.stderr)
             scorecard = json.loads(compute_output.read_text(encoding="utf-8"))
-            self.assertTrue(
-                any(item["code"] == "claimed_verification_without_evidence" for item in scorecard["anti_cheat_signals"])
-            )
+            signal = next(item for item in scorecard["anti_cheat_signals"] if item["code"] == "claimed_verification_without_evidence")
+            self.assertEqual(signal["decision"], "penalty")
+            self.assertEqual(signal["confidence"], "high")
+            self.assertTrue(signal["provenance"]["source_file"])
 
             gate_output = tmp / "gate-scorecard.json"
             gate = subprocess.run(
@@ -970,6 +992,230 @@ class PrepareUserScorecardReviewTests(unittest.TestCase):
             self.assertEqual(gate.returncode, 2, msg=gate.stderr)
             gated = json.loads(gate_output.read_text(encoding="utf-8"))
             self.assertEqual(gated["gate_status"], "BLOCKED")
+
+    def test_stale_evidence_manifest_blocks_verify_credit_and_adds_cap_signal(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp = Path(tmpdir)
+            workspace, _trace_id = self._build_workspace(tmp)
+            _git(workspace, "init")
+            _git(workspace, "config", "user.email", "codex@example.com")
+            _git(workspace, "config", "user.name", "Codex")
+            _git(workspace, "add", ".")
+            _git(workspace, "commit", "-m", "baseline")
+            head = _git_output(workspace, "rev-parse", "HEAD")
+
+            run_root = workspace / ".agent-runs" / "2026-04-19-run"
+            _write_json(
+                run_root / "WORKORDER.json",
+                {
+                    "schema_version": 1,
+                    "run_id": "2026-04-19-run",
+                    "canonical_repo": str(ROOT),
+                    "support_repo": str(workspace),
+                    "objective": "test stale evidence manifest",
+                    "allowed_change_zones": [str(workspace)],
+                    "protected_paths": ["user_review.approved.json"],
+                    "acceptance_criteria": ["clean_room_verify credit requires current evidence"],
+                    "verification_commands": ["pytest"],
+                    "rollback_plan_required": True,
+                },
+            )
+            _write_json(
+                run_root / "EVIDENCE_MANIFEST.json",
+                {
+                    "schema_version": 1,
+                    "run_id": "2026-04-19-run",
+                    "base_commit": head,
+                    "head_commit": "deadbeef",
+                    "changed_files": [],
+                    "commands": [{"cmd": "pytest", "cwd": str(workspace), "exit_code": 0, "started_at": "2026-04-19T00:00:00Z", "ended_at": "2026-04-19T00:00:01Z"}],
+                    "artifacts": [],
+                    "waivers": [],
+                    "policy_hashes": {
+                        "current": {
+                            "user_score_policy.json": _file_hash(ROOT / "contracts" / "user_score_policy.json"),
+                            "disqualifier_policy.json": _file_hash(ROOT / "contracts" / "disqualifier_policy.json"),
+                        }
+                    },
+                    "state_history": [{"state": "SELF_VERIFIED", "entered_at": "2026-04-19T00:00:02Z"}],
+                },
+            )
+
+            codex_home = tmp / "codex-home"
+            context_output = codex_home / "state" / "scorecard-context" / workspace.name / "trace-verify-001.json"
+            snapshot_output = tmp / "review-out.json"
+            compute_output = tmp / "scorecard.json"
+            base_review = tmp / "base-review.json"
+            _write_json(base_review, {"status": "TEMPLATE", "user_review": {"status": "PENDING", "awards": [], "penalties": [], "notes": ""}})
+
+            prepare = subprocess.run(
+                [
+                    sys.executable,
+                    str(PREPARE),
+                    "--workspace-root",
+                    str(workspace),
+                    "--mode",
+                    "verify",
+                    "--base-file",
+                    str(base_review),
+                    "--context-output-file",
+                    str(context_output),
+                    "--review-snapshot-output",
+                    str(snapshot_output),
+                ],
+                cwd=ROOT,
+                env=self._env(codex_home),
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+            )
+            self.assertEqual(prepare.returncode, 0, msg=prepare.stderr)
+
+            compute = subprocess.run(
+                [
+                    sys.executable,
+                    str(COMPUTE),
+                    "--review-file",
+                    str(snapshot_output),
+                    "--output-file",
+                    str(compute_output),
+                    "--mode",
+                    "verify",
+                ],
+                cwd=ROOT,
+                env=self._env(codex_home),
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+            )
+            self.assertIn(compute.returncode, {0, 1, 2}, msg=compute.stderr)
+            scorecard = json.loads(compute_output.read_text(encoding="utf-8"))
+            stale_signal = next(item for item in scorecard["anti_cheat_signals"] if item["code"] == "evidence_backdating_or_stale_report_reuse")
+            self.assertEqual(stale_signal["decision"], "cap")
+            self.assertEqual(scorecard["scores"]["completion_score"]["derived_award_points"], 0)
+
+            gate_output = tmp / "gate-scorecard.json"
+            gate = subprocess.run(
+                [
+                    sys.executable,
+                    str(GATE),
+                    "--review-file",
+                    str(snapshot_output),
+                    "--output-file",
+                    str(gate_output),
+                    "--mode",
+                    "verify",
+                ],
+                cwd=ROOT,
+                env=self._env(codex_home),
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+            )
+            self.assertEqual(gate.returncode, 2, msg=gate.stderr)
+
+    def test_manifest_based_signals_cover_waiver_protected_path_command_substitution_and_hash_mismatch(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp = Path(tmpdir)
+            workspace, _trace_id = self._build_workspace(tmp)
+            _git(workspace, "init")
+            _git(workspace, "config", "user.email", "codex@example.com")
+            _git(workspace, "config", "user.name", "Codex")
+            _git(workspace, "add", ".")
+            _git(workspace, "commit", "-m", "baseline")
+            head = _git_output(workspace, "rev-parse", "HEAD")
+
+            run_root = workspace / ".agent-runs" / "2026-04-19-run"
+            _write_json(
+                run_root / "WORKORDER.json",
+                {
+                    "schema_version": 1,
+                    "run_id": "2026-04-19-run",
+                    "canonical_repo": str(ROOT),
+                    "support_repo": str(workspace),
+                    "objective": "test manifest based anti-cheat signals",
+                    "allowed_change_zones": [str(workspace)],
+                    "protected_paths": ["user_review.approved.json", "reviewer_verdict.log"],
+                    "acceptance_criteria": ["signals emitted from manifest mismatches"],
+                    "verification_commands": ["pytest", "python scripts/delivery_gate.py --mode verify"],
+                    "rollback_plan_required": True,
+                },
+            )
+            _write_json(
+                run_root / "EVIDENCE_MANIFEST.json",
+                {
+                    "schema_version": 1,
+                    "run_id": "2026-04-19-run",
+                    "base_commit": head,
+                    "head_commit": head,
+                    "changed_files": ["user_review.approved.json"],
+                    "commands": [{"cmd": "python scripts/run_acceptance.py full", "cwd": str(workspace), "exit_code": 0, "started_at": "2026-04-19T00:00:00Z", "ended_at": "2026-04-19T00:00:01Z"}],
+                    "artifacts": [],
+                    "waivers": [{"id": "pytest", "reason": ""}],
+                    "policy_hashes": {
+                        "current": {
+                            "user_score_policy.json": "bad",
+                            "disqualifier_policy.json": "bad",
+                        }
+                    },
+                    "state_history": [{"state": "SELF_VERIFIED", "entered_at": "2026-04-19T00:00:02Z"}],
+                },
+            )
+
+            codex_home = tmp / "codex-home"
+            context_output = codex_home / "state" / "scorecard-context" / workspace.name / "trace-verify-001.json"
+            snapshot_output = tmp / "review-out.json"
+            compute_output = tmp / "scorecard.json"
+            base_review = tmp / "base-review.json"
+            _write_json(base_review, {"status": "TEMPLATE", "user_review": {"status": "PENDING", "awards": [], "penalties": [], "notes": ""}})
+
+            prepare = subprocess.run(
+                [
+                    sys.executable,
+                    str(PREPARE),
+                    "--workspace-root",
+                    str(workspace),
+                    "--mode",
+                    "verify",
+                    "--base-file",
+                    str(base_review),
+                    "--context-output-file",
+                    str(context_output),
+                    "--review-snapshot-output",
+                    str(snapshot_output),
+                ],
+                cwd=ROOT,
+                env=self._env(codex_home),
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+            )
+            self.assertEqual(prepare.returncode, 0, msg=prepare.stderr)
+
+            compute = subprocess.run(
+                [
+                    sys.executable,
+                    str(COMPUTE),
+                    "--review-file",
+                    str(snapshot_output),
+                    "--output-file",
+                    str(compute_output),
+                    "--mode",
+                    "verify",
+                ],
+                cwd=ROOT,
+                env=self._env(codex_home),
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+            )
+            self.assertIn(compute.returncode, {0, 1, 2}, msg=compute.stderr)
+            scorecard = json.loads(compute_output.read_text(encoding="utf-8"))
+            codes = {item["code"] for item in scorecard["anti_cheat_signals"]}
+            self.assertTrue({"waiver_without_reason", "protected_path_access_attempt", "verification_command_substitution", "evidence_manifest_mismatch"}.issubset(codes))
+            protected_signal = next(item for item in scorecard["anti_cheat_signals"] if item["code"] == "protected_path_access_attempt")
+            self.assertEqual(protected_signal["decision"], "dq")
+            self.assertEqual(scorecard["anti_cheat_layer"]["decision_summary"]["highest_decision"], "dq")
 
     def test_test_deletion_or_weakening_without_rationale_is_recorded(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

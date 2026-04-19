@@ -10,12 +10,16 @@ from _scorecard_common import (
     DEFAULT_POLICY_FILE,
     DEFAULT_REVIEW_FILE,
     DEFAULT_SCORECARD_FILE,
+    current_policy_hashes,
     file_hash,
     git_sha,
     load_json,
     load_jsonl,
     normalize_status,
     project_id,
+    published_command_log_path,
+    published_evidence_manifest_path,
+    published_workorder_path,
     resolve_path,
     reviewer_verdict_dir,
     save_json,
@@ -40,6 +44,15 @@ LEGACY_SIGNAL_CODE_ALIASES = {
     "derived_award_spoof_attempt": "reserved_derived_award_spoofing",
     "unexpected_user_award_axis": "excessive_bonus_request",
     "excessive_user_award_points": "excessive_bonus_request",
+    "non_user_award_source": "non_user_source_award",
+}
+DECISION_ORDER = {"warn": 0, "penalty": 1, "cap": 2, "dq": 3}
+AUTO_DQ_DEFAULT_CODES = {
+    "unauthorized_user_review_modification",
+    "reserved_derived_award_spoofing",
+    "reviewer_truth_tamper",
+    "score_policy_tamper_without_policy_update_workorder",
+    "protected_path_access_attempt",
 }
 
 
@@ -84,14 +97,168 @@ def _credited_credit_entry(entry: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _compat_evidence_manifest(
+    raw_manifest: dict[str, Any],
+    *,
+    manifest_path: Path | None,
+    workspace_root: Path | None,
+) -> dict[str, Any]:
+    if raw_manifest.get("schema_version") == 1:
+        manifest = dict(raw_manifest)
+    else:
+        fallback_head = git_sha(workspace_root) if workspace_root is not None else "nogit"
+        fallback_head = fallback_head or "nogit"
+        raw_git_sha = str(raw_manifest.get("git_sha", "")).strip() or fallback_head
+        manifest = {
+            "schema_version": 0,
+            "run_id": str(raw_manifest.get("trace_id", "")).strip()
+            or (manifest_path.parent.name if manifest_path is not None and manifest_path.name == "EVIDENCE_MANIFEST.json" else ""),
+            "base_commit": raw_git_sha,
+            "head_commit": raw_git_sha,
+            "changed_files": [],
+            "commands": [],
+            "artifacts": [],
+            "waivers": [],
+            "policy_hashes": {
+                "current": current_policy_hashes(),
+            },
+            "state_history": [],
+            "trace": {},
+        }
+    manifest["base_commit"] = str(manifest.get("base_commit", "")).strip() or "nogit"
+    manifest["head_commit"] = str(manifest.get("head_commit", "")).strip() or manifest["base_commit"]
+    manifest["commands"] = list(manifest.get("commands", []))
+    manifest["changed_files"] = list(manifest.get("changed_files", []))
+    manifest["artifacts"] = list(manifest.get("artifacts", []))
+    manifest["waivers"] = list(manifest.get("waivers", []))
+    manifest["policy_hashes"] = dict(manifest.get("policy_hashes", {}))
+    manifest["trace"] = dict(manifest.get("trace", {}))
+    return manifest
+
+
+def _load_support_artifacts(authority_review: dict[str, Any], workspace_root: Path | None) -> dict[str, Any]:
+    evidence_inputs = authority_review.get("evidence_inputs", {})
+    manifest_path = resolve_path(evidence_inputs.get("evidence_manifest_path", ""), workspace_root)
+    if manifest_path is None and workspace_root is not None:
+        manifest_path = published_evidence_manifest_path(workspace_root)
+    manifest_payload = load_json(manifest_path) if manifest_path is not None and manifest_path.exists() else {}
+    manifest = _compat_evidence_manifest(manifest_payload if isinstance(manifest_payload, dict) else {}, manifest_path=manifest_path, workspace_root=workspace_root)
+
+    workorder_path = resolve_path(evidence_inputs.get("workorder_path", ""), workspace_root)
+    if workorder_path is None and workspace_root is not None:
+        workorder_path = published_workorder_path(workspace_root, manifest_path)
+    workorder = load_json(workorder_path) if workorder_path is not None and workorder_path.exists() else {}
+
+    command_log_path = resolve_path(evidence_inputs.get("command_log_path", ""), workspace_root)
+    if command_log_path is None and workspace_root is not None:
+        command_log_path = published_command_log_path(workspace_root, manifest_path)
+    command_log = load_jsonl(command_log_path) if command_log_path is not None and command_log_path.exists() else []
+
+    current_head = git_sha(workspace_root) if workspace_root is not None else "nogit"
+    current_head = current_head or "nogit"
+    manifest_head = str(manifest.get("head_commit", "")).strip() or current_head
+    manifest_base = str(manifest.get("base_commit", "")).strip() or manifest_head
+    is_current = current_head == "nogit" or manifest_head == current_head or manifest_head == "nogit"
+
+    return {
+        "workspace_root": workspace_root,
+        "evidence_manifest_path": manifest_path,
+        "evidence_manifest": manifest,
+        "workorder_path": workorder_path,
+        "workorder": workorder if isinstance(workorder, dict) else {},
+        "command_log_path": command_log_path,
+        "command_log": command_log,
+        "base_commit": manifest_base,
+        "head_commit": manifest_head,
+        "current_head_commit": current_head,
+        "is_current": is_current,
+    }
+
+
+def _build_signal_provenance(
+    support: dict[str, Any],
+    *,
+    source_path: str = "",
+    fallback_path: str = "",
+) -> dict[str, Any]:
+    raw_source = source_path.strip() or fallback_path.strip()
+    workspace_root = support.get("workspace_root")
+    path = resolve_path(raw_source, workspace_root if isinstance(workspace_root, Path) else None) if raw_source else None
+    if path is None:
+        path = support.get("evidence_manifest_path")
+    source_hash = ""
+    if isinstance(path, Path) and path.exists() and path.is_file():
+        source_hash = file_hash(path)
+    return {
+        "source_file": str(path) if isinstance(path, Path) else raw_source,
+        "source_hash": source_hash,
+        "base_commit": str(support.get("base_commit", "")).strip(),
+        "head_commit": str(support.get("head_commit", "")).strip(),
+    }
+
+
 def _public_anti_cheat_signal(signal: dict[str, Any]) -> dict[str, Any]:
     evidence_refs = [str(ref) for ref in signal.get("evidence_refs", []) if str(ref).strip()]
     return {
         "code": str(signal.get("code", signal.get("id", ""))).strip(),
         "severity": str(signal.get("severity", "medium")).strip() or "medium",
+        "confidence": str(signal.get("confidence", "medium")).strip() or "medium",
+        "decision": str(signal.get("decision", "warn")).strip() or "warn",
+        "detected_by": str(signal.get("detected_by", "compute_user_scorecard.py")).strip() or "compute_user_scorecard.py",
+        "provenance": dict(signal.get("provenance", {})),
         "points": int(signal.get("points", 0)),
         "reason": str(signal.get("reason", "")).strip(),
         "evidence_ref": evidence_refs[0] if evidence_refs else "",
+    }
+
+
+def _finalize_anti_cheat_signal(policy: dict[str, Any], signal: dict[str, Any]) -> dict[str, Any]:
+    code = str(signal.get("code", signal.get("id", ""))).strip()
+    confidence = str(signal.get("confidence", "medium")).strip().lower() or "medium"
+    severity = str(signal.get("severity", "medium")).strip().lower() or "medium"
+    disqualifier_id = str(signal.get("disqualifier_id", "")).strip()
+    auto_dq_codes = set(policy.get("anti_cheat_layer", {}).get("decision_policy", {}).get("auto_dq_codes", AUTO_DQ_DEFAULT_CODES))
+
+    decision = str(signal.get("decision", "")).strip().lower()
+    if not decision:
+        if confidence != "high":
+            decision = "warn"
+        elif severity == "medium":
+            decision = "penalty"
+        elif severity == "high":
+            decision = "cap"
+        elif severity == "critical" and disqualifier_id and code in auto_dq_codes:
+            decision = "dq"
+        elif severity == "critical":
+            decision = "cap"
+        else:
+            decision = "warn"
+    return {
+        **signal,
+        "confidence": confidence,
+        "decision": decision,
+        "detected_by": str(signal.get("detected_by", "compute_user_scorecard.py")).strip() or "compute_user_scorecard.py",
+        "provenance": dict(signal.get("provenance", {})),
+    }
+
+
+def _decision_summary(signals: list[dict[str, Any]]) -> dict[str, Any]:
+    counts = {"warn": 0, "penalty": 0, "cap": 0, "dq": 0}
+    highest = "warn"
+    auto_dq_signals: list[str] = []
+    for signal in signals:
+        decision = str(signal.get("decision", "warn")).strip().lower() or "warn"
+        if decision not in counts:
+            decision = "warn"
+        counts[decision] += 1
+        if DECISION_ORDER[decision] > DECISION_ORDER[highest]:
+            highest = decision
+        if decision == "dq":
+            auto_dq_signals.append(str(signal.get("code", signal.get("id", ""))).strip())
+    return {
+        "highest_decision": highest,
+        "counts": counts,
+        "auto_dq_signals": auto_dq_signals,
     }
 
 
@@ -155,9 +322,17 @@ def _caps_for_context(policy: dict[str, Any], context: dict[str, Any]) -> list[d
     return active
 
 
-def _derived_awards_for_axis(axis_name: str, axis_policy: dict[str, Any], context: dict[str, Any]) -> tuple[list[dict[str, Any]], list[str]]:
+def _derived_awards_for_axis(
+    axis_name: str,
+    axis_policy: dict[str, Any],
+    context: dict[str, Any],
+    *,
+    evidence_manifest_ok: bool,
+) -> tuple[list[dict[str, Any]], list[str]]:
     awards: list[dict[str, Any]] = []
     errors: list[str] = []
+    if not evidence_manifest_ok:
+        return awards, errors
     for award in axis_policy.get("derived_awards", []):
         required = award.get("when_all", {})
         if not all(bool(context.get(key, False)) == bool(value) for key, value in required.items()):
@@ -440,6 +615,10 @@ def _anti_cheat_signal(
     reason: str = "",
     evidence_refs: list[str] | None = None,
     details: dict[str, Any] | None = None,
+    confidence: str = "",
+    decision: str = "",
+    detected_by: str = "",
+    provenance: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     code = LEGACY_SIGNAL_CODE_ALIASES.get(signal_id, signal_id)
     rule = rules.get(code, {})
@@ -454,10 +633,14 @@ def _anti_cheat_signal(
         "evidence_refs": refs,
         "evidence_ref": refs[0] if refs else "",
         "details": dict(details or {}),
+        "confidence": confidence or str(rule.get("confidence", "high")).strip() or "high",
+        "decision": decision or str(rule.get("decision", "")).strip().lower(),
+        "detected_by": detected_by or "compute_user_scorecard.py",
+        "provenance": dict(provenance or {}),
     }
 
 
-def _audit_anti_cheat_signals(policy: dict[str, Any], audit: dict[str, Any]) -> list[dict[str, Any]]:
+def _audit_anti_cheat_signals(policy: dict[str, Any], audit: dict[str, Any], support: dict[str, Any]) -> list[dict[str, Any]]:
     rules = _anti_cheat_rules(policy)
     signals: list[dict[str, Any]] = []
     for event in audit.get("tamper_events", []):
@@ -465,6 +648,11 @@ def _audit_anti_cheat_signals(policy: dict[str, Any], audit: dict[str, Any]) -> 
             continue
         category = str(event.get("category", "")).strip()
         evidence_refs = [str(ref) for ref in event.get("evidence_refs", []) if str(ref).strip()]
+        provenance = _build_signal_provenance(
+            support,
+            source_path=str(event.get("path", "")).strip(),
+            fallback_path=str(audit.get("workspace_audit_path", "")).strip(),
+        )
         if category in {"unauthorized_user_review_update", "unauthorized_user_review_modification"}:
             signals.append(
                 _anti_cheat_signal(
@@ -473,6 +661,9 @@ def _audit_anti_cheat_signals(policy: dict[str, Any], audit: dict[str, Any]) -> 
                     reason=str(event.get("reason", "")).strip(),
                     evidence_refs=evidence_refs,
                     details={"category": category, "path": str(event.get("path", "")).strip()},
+                    confidence="high",
+                    detected_by="prepare_user_scorecard_review.py",
+                    provenance=provenance,
                 )
             )
         elif category in {"reviewer_truth", "reviewer_truth_tamper"}:
@@ -483,12 +674,20 @@ def _audit_anti_cheat_signals(policy: dict[str, Any], audit: dict[str, Any]) -> 
                     reason=str(event.get("reason", "")).strip(),
                     evidence_refs=evidence_refs,
                     details={"category": category, "path": str(event.get("path", "")).strip()},
+                    confidence="high",
+                    detected_by="prepare_user_scorecard_review.py",
+                    provenance=provenance,
                 )
             )
         elif category in {
             "claimed_verification_without_evidence",
             "test_deletion_or_weakening_without_rationale",
             "score_policy_tamper_without_policy_update_workorder",
+            "evidence_backdating_or_stale_report_reuse",
+            "waiver_without_reason",
+            "protected_path_access_attempt",
+            "verification_command_substitution",
+            "evidence_manifest_mismatch",
         }:
             signals.append(
                 _anti_cheat_signal(
@@ -497,12 +696,15 @@ def _audit_anti_cheat_signals(policy: dict[str, Any], audit: dict[str, Any]) -> 
                     reason=str(event.get("reason", "")).strip(),
                     evidence_refs=evidence_refs,
                     details={"category": category, "path": str(event.get("path", "")).strip()},
+                    confidence=str(event.get("confidence", "high")).strip() or "high",
+                    detected_by=str(event.get("detected_by", "prepare_user_scorecard_review.py")).strip() or "prepare_user_scorecard_review.py",
+                    provenance=provenance,
                 )
             )
     return signals
 
 
-def _raw_user_review_score_signals(policy: dict[str, Any], authority_review: dict[str, Any]) -> list[dict[str, Any]]:
+def _raw_user_review_score_signals(policy: dict[str, Any], authority_review: dict[str, Any], support: dict[str, Any]) -> list[dict[str, Any]]:
     rules = _anti_cheat_rules(policy)
     signals: list[dict[str, Any]] = []
     user_review = authority_review.get("user_review", {})
@@ -521,13 +723,147 @@ def _raw_user_review_score_signals(policy: dict[str, Any], authority_review: dic
                         reason=f"writer or agent attempted to write user_review.{section}",
                         evidence_refs=[str(authority_review.get("authoritative_context_path", "")).strip()],
                         details={"section": section, "axis": str(item.get("axis", "")).strip()},
+                        confidence="high",
+                        detected_by="compute_user_scorecard.py",
+                        provenance=_build_signal_provenance(
+                            support,
+                            source_path=str(authority_review.get("authoritative_context_path", "")).strip(),
+                        ),
                     )
                 )
     return signals
 
 
+def _manifest_anti_cheat_signals(
+    policy: dict[str, Any],
+    support: dict[str, Any],
+    *,
+    mode: str,
+    existing_readiness: dict[str, Any],
+    clean_room_verify: dict[str, Any],
+) -> list[dict[str, Any]]:
+    rules = _anti_cheat_rules(policy)
+    manifest = dict(support.get("evidence_manifest", {}))
+    workorder = dict(support.get("workorder", {}))
+    manifest_path = support.get("evidence_manifest_path")
+    evidence_refs = [str(manifest_path)] if isinstance(manifest_path, Path) else []
+    provenance = _build_signal_provenance(
+        support,
+        fallback_path=str(manifest_path) if isinstance(manifest_path, Path) else "",
+    )
+    signals: list[dict[str, Any]] = []
+
+    verify_claimed = normalize_status(existing_readiness.get("status"), "UNKNOWN") in {"PASS", "WAIVED"} or normalize_status(clean_room_verify.get("status"), "UNKNOWN") in {"PASS", "WAIVED"}
+    if mode in {"verify", "release"} and verify_claimed and not bool(support.get("is_current", False)):
+        signals.append(
+            _anti_cheat_signal(
+                rules,
+                "evidence_backdating_or_stale_report_reuse",
+                reason="verification evidence manifest does not match the current head commit",
+                evidence_refs=evidence_refs,
+                confidence="high",
+                detected_by="compute_user_scorecard.py",
+                provenance=provenance,
+            )
+        )
+
+    for waiver in manifest.get("waivers", []):
+        if not isinstance(waiver, dict) or str(waiver.get("reason", "")).strip():
+            continue
+        signals.append(
+            _anti_cheat_signal(
+                rules,
+                "waiver_without_reason",
+                reason=f"waiver '{str(waiver.get('id', '')).strip() or 'unknown'}' is missing a reason",
+                evidence_refs=evidence_refs,
+                confidence="high",
+                detected_by="compute_user_scorecard.py",
+                provenance=provenance,
+            )
+        )
+
+    current_hashes = current_policy_hashes()
+    manifest_hashes = dict(manifest.get("policy_hashes", {}).get("current", {}))
+    mismatched_hashes = [name for name, digest in current_hashes.items() if manifest_hashes.get(name) and manifest_hashes.get(name) != digest]
+    if mismatched_hashes:
+        signals.append(
+            _anti_cheat_signal(
+                rules,
+                "evidence_manifest_mismatch",
+                reason=f"policy hashes differ from the published evidence manifest: {', '.join(sorted(mismatched_hashes))}",
+                evidence_refs=evidence_refs,
+                confidence="high",
+                detected_by="compute_user_scorecard.py",
+                provenance=provenance,
+            )
+        )
+
+    protected_markers = [str(item).strip() for item in workorder.get("protected_paths", []) if str(item).strip()]
+    protected_markers.extend(["user_review.approved.json", "reviewer_verdict.log", "/reviewer-verdicts/"])
+    changed_files = [str(item).strip() for item in manifest.get("changed_files", []) if str(item).strip()]
+    confirmed_protected_writes = [path for path in changed_files if any(marker in path for marker in protected_markers)]
+    if confirmed_protected_writes:
+        signals.append(
+            _anti_cheat_signal(
+                rules,
+                "protected_path_access_attempt",
+                reason=f"published changed_files include protected authority surfaces: {', '.join(sorted(set(confirmed_protected_writes)))}",
+                evidence_refs=evidence_refs,
+                confidence="high",
+                detected_by="compute_user_scorecard.py",
+                provenance=provenance,
+            )
+        )
+    else:
+        command_texts = [
+            str(entry.get("cmd", "")).strip()
+            for entry in [*manifest.get("commands", []), *support.get("command_log", [])]
+            if isinstance(entry, dict)
+        ]
+        command_hits = [cmd for cmd in command_texts if any(marker in cmd for marker in protected_markers)]
+        if command_hits:
+            signals.append(
+                _anti_cheat_signal(
+                    rules,
+                    "protected_path_access_attempt",
+                    reason="command log referenced a protected authority surface without a confirmed write artifact",
+                    evidence_refs=evidence_refs,
+                    confidence="low",
+                    detected_by="compute_user_scorecard.py",
+                    provenance=provenance,
+                )
+            )
+
+    verification_commands = [str(item).strip() for item in workorder.get("verification_commands", []) if str(item).strip()]
+    observed_commands = [
+        str(entry.get("cmd", "")).strip()
+        for entry in [*manifest.get("commands", []), *support.get("command_log", [])]
+        if isinstance(entry, dict) and str(entry.get("cmd", "")).strip()
+    ]
+    if verification_commands and observed_commands:
+        missing = [cmd for cmd in verification_commands if not any(cmd in observed or observed in cmd for observed in observed_commands)]
+        if missing:
+            signals.append(
+                _anti_cheat_signal(
+                    rules,
+                    "verification_command_substitution",
+                    reason=f"required verification commands were not observed in the evidence manifest: {', '.join(missing)}",
+                    evidence_refs=evidence_refs,
+                    confidence="high",
+                    detected_by="compute_user_scorecard.py",
+                    provenance=provenance,
+                )
+            )
+
+    return signals
+
+
 def _credit_user_awards(
-    policy: dict[str, Any], user_awards: list[dict[str, Any]]
+    policy: dict[str, Any],
+    user_awards: list[dict[str, Any]],
+    *,
+    evidence_manifest_ok: bool,
+    support: dict[str, Any],
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]]]:
     anti_cheat = policy.get("anti_cheat_layer", {})
     rules = _anti_cheat_rules(policy)
@@ -575,8 +911,14 @@ def _credit_user_awards(
                     reason=f"user award tried to use reserved category '{category}' on axis '{entry['axis']}'",
                     evidence_refs=[str(ref) for ref in entry.get("evidence_refs", []) if str(ref).strip()],
                     details={"axis": entry["axis"], "category": category},
+                    confidence="high",
+                    detected_by="compute_user_scorecard.py",
+                    provenance=_build_signal_provenance(support),
                 )
             )
+            continue
+        if not evidence_manifest_ok:
+            entry["credit_block_reason"] = "missing_or_stale_evidence_manifest"
             continue
         if entry["source"] == "agent_request":
             entry["credit_block_reason"] = "requested_only_source"
@@ -588,6 +930,9 @@ def _credit_user_awards(
                         reason=f"user award for axis '{entry['axis']}' came from non-user source '{reported_by or 'unknown'}'",
                         evidence_refs=[str(ref) for ref in entry.get("evidence_refs", []) if str(ref).strip()],
                         details={"axis": entry["axis"], "reported_by": reported_by or "unknown"},
+                        confidence="high",
+                        detected_by="compute_user_scorecard.py",
+                        provenance=_build_signal_provenance(support),
                     )
                 )
             continue
@@ -603,6 +948,9 @@ def _credit_user_awards(
                     "excessive_bonus_request",
                     reason=f"user awards on axis '{axis}' are not allowed by the anti-cheat budget",
                     details={"axis": axis, "requested_points": requested_total, "budget": budget},
+                    confidence="high",
+                    detected_by="compute_user_scorecard.py",
+                    provenance=_build_signal_provenance(support),
                 )
             )
             for item in items:
@@ -625,6 +973,9 @@ def _credit_user_awards(
                     "excessive_bonus_request",
                     reason=f"user awards on axis '{axis}' requested {requested_total} points above budget {budget}",
                     details={"axis": axis, "requested_points": requested_total, "budget": budget, "excess_points": requested_total - budget},
+                    confidence="high",
+                    detected_by="compute_user_scorecard.py",
+                    provenance=_build_signal_provenance(support),
                 )
             )
 
@@ -658,10 +1009,14 @@ def compute_scorecard(policy: dict[str, Any], review: dict[str, Any], mode: str)
     authority_review, context_path = _load_context(review, snapshot_workspace_root)
     context = dict(authority_review.get("task_context", {}))
     workspace_root = resolve_path(authority_review.get("workspace_root", "")) if str(authority_review.get("workspace_root", "")).strip() else snapshot_workspace_root
+    support = _load_support_artifacts(authority_review, workspace_root)
     authority_audit = _load_authority_audit(authority_review, workspace_root)
     disqualifier_policy = load_json(DEFAULT_DISQUALIFIER_FILE)
     disqualifier_result = evaluate_disqualifiers(disqualifier_policy, authority_review)
     trace = _load_trace_payload(authority_review, workspace_root)
+    trace.update({key: value for key, value in dict(support.get("evidence_manifest", {}).get("trace", {})).items() if key in {"otel_enabled", "trace_ref", "tool_decision_count", "tool_result_count", "approval_denied_count"}})
+    if "otel_enabled" not in trace:
+        trace["otel_enabled"] = False
     existing_readiness = _load_stage_payload(
         authority_review.get("existing_readiness", {}),
         authority_review.get("evidence_inputs", {}).get("existing_readiness_report_path", ""),
@@ -674,6 +1029,8 @@ def compute_scorecard(policy: dict[str, Any], review: dict[str, Any], mode: str)
     )
     context["existing_readiness_passed"] = normalize_status(existing_readiness.get("status"), "UNKNOWN") in {"PASS", "WAIVED"}
     context["clean_room_verify_passed"] = normalize_status(clean_room_verify.get("status"), "UNKNOWN") in {"PASS", "WAIVED"}
+    context["evidence_manifest_present"] = bool(support.get("evidence_manifest_path"))
+    context["evidence_manifest_current"] = bool(support.get("is_current", False))
 
     required_roles: list[str] = []
     missing_required_roles: list[str] = []
@@ -716,12 +1073,26 @@ def compute_scorecard(policy: dict[str, Any], review: dict[str, Any], mode: str)
         elif normalized_award is not None:
             user_awards.append(normalized_award)
 
-    scored_user_awards, requested_credit, credited_credit, award_signals = _credit_user_awards(policy, user_awards)
+    scored_user_awards, requested_credit, credited_credit, award_signals = _credit_user_awards(
+        policy,
+        user_awards,
+        evidence_manifest_ok=bool(support.get("is_current", False)),
+        support=support,
+    )
     anti_cheat_signals = [
-        *_audit_anti_cheat_signals(policy, authority_audit),
-        *_raw_user_review_score_signals(policy, authority_review),
+        *_audit_anti_cheat_signals(policy, authority_audit, support),
+        *_raw_user_review_score_signals(policy, authority_review, support),
+        *_manifest_anti_cheat_signals(
+            policy,
+            support,
+            mode=mode,
+            existing_readiness=existing_readiness,
+            clean_room_verify=clean_room_verify,
+        ),
         *award_signals,
     ]
+    anti_cheat_signals = [_finalize_anti_cheat_signal(policy, signal) for signal in anti_cheat_signals]
+    decision_summary = _decision_summary(anti_cheat_signals)
     disqualifier_result = _append_disqualifier_matches(
         disqualifier_result,
         _disqualifier_rules(),
@@ -732,7 +1103,7 @@ def compute_scorecard(policy: dict[str, Any], review: dict[str, Any], mode: str)
                 "evidence_refs": signal.get("evidence_refs", []),
             }
             for signal in anti_cheat_signals
-            if str(signal.get("disqualifier_id", "")).strip()
+            if str(signal.get("disqualifier_id", "")).strip() and str(signal.get("decision", "")).strip() == "dq"
         ],
     )
     context["legacy_hardcoding_violation"] = any(
@@ -763,7 +1134,12 @@ def compute_scorecard(policy: dict[str, Any], review: dict[str, Any], mode: str)
         reviewer_axis = [item for penalties in reviewer_penalties.values() for item in penalties if item["axis"] == axis_name]
         user_axis = [item for item in user_penalties if item["axis"] == axis_name]
         award_axis = [item for item in scored_user_awards if item["axis"] == axis_name]
-        derived_axis, derived_errors = _derived_awards_for_axis(axis_name, axis_policy, context)
+        derived_axis, derived_errors = _derived_awards_for_axis(
+            axis_name,
+            axis_policy,
+            context,
+            evidence_manifest_ok=bool(support.get("is_current", False)),
+        )
         errors.extend(derived_errors)
         derived_awards.extend(derived_axis)
         reviewer_deductions = sum(item["points"] for item in reviewer_axis)
@@ -819,22 +1195,19 @@ def compute_scorecard(policy: dict[str, Any], review: dict[str, Any], mode: str)
         failed_axes.append("total_score")
 
     anti_cheat_signal_points = sum(int(signal.get("points", 0)) for signal in anti_cheat_signals)
-    anti_cheat_penalty_points = min(int(policy.get("anti_cheat_layer", {}).get("penalty_cap", 0)), anti_cheat_signal_points)
+    penalty_signal_points = sum(int(signal.get("points", 0)) for signal in anti_cheat_signals if str(signal.get("decision", "")).strip() in {"penalty", "cap", "dq"})
+    cap_signal_points = sum(int(signal.get("points", 0)) for signal in anti_cheat_signals if str(signal.get("decision", "")).strip() in {"cap", "dq"})
+    anti_cheat_penalty_points = min(int(policy.get("anti_cheat_layer", {}).get("penalty_cap", 0)), penalty_signal_points)
     anti_cheat_guarded_total = max(raw_total - anti_cheat_penalty_points, 0)
-    anti_cheat_caps = _anti_cheat_caps(policy, anti_cheat_signal_points)
+    anti_cheat_caps = _anti_cheat_caps(policy, cap_signal_points)
     active_caps = _materialize_caps(_caps_for_context(policy, context), total_floor) + anti_cheat_caps
     cap_limit = min([int(cap["effective_max_total_score"]) for cap in active_caps if "effective_max_total_score" in cap], default=anti_cheat_guarded_total)
     capped_total = min(anti_cheat_guarded_total, cap_limit)
     platform_cap_status = "PASS" if capped_total >= total_floor else "BLOCKED"
     anti_cheat_status = "PASS"
-    if any(
-        str(signal.get("disqualifier_id", "")).strip()
-        or str(signal.get("severity", "")).strip().lower() == "critical"
-        or str(signal.get("code", "")).strip() == "score_policy_tamper_without_policy_update_workorder"
-        for signal in anti_cheat_signals
-    ):
+    if decision_summary["highest_decision"] == "dq":
         anti_cheat_status = "FAIL"
-    elif anti_cheat_signals:
+    elif decision_summary["highest_decision"] in {"penalty", "cap"}:
         anti_cheat_status = "GUARDED"
 
     anti_cheat_public_signals = [_public_anti_cheat_signal(signal) for signal in anti_cheat_signals]
@@ -858,6 +1231,8 @@ def compute_scorecard(policy: dict[str, Any], review: dict[str, Any], mode: str)
         "disqualifier_result": disqualifier_result,
         "authoritative_context_path": str(context_path) if context_path is not None else "",
         "trace": trace,
+        "evidence_manifest_path": str(support.get("evidence_manifest_path")) if support.get("evidence_manifest_path") else "",
+        "workorder_path": str(support.get("workorder_path")) if support.get("workorder_path") else "",
         "scores": axis_results,
         "applicable_axes": [axis for axis, payload in axis_results.items() if payload["applicable"]],
         "raw_total_score": raw_total,
@@ -874,7 +1249,10 @@ def compute_scorecard(policy: dict[str, Any], review: dict[str, Any], mode: str)
         "anti_cheat_layer": {
             "status": anti_cheat_status,
             "signals": anti_cheat_signals,
+            "decision_summary": decision_summary,
             "signal_points": anti_cheat_signal_points,
+            "penalty_signal_points": penalty_signal_points,
+            "cap_signal_points": cap_signal_points,
             "penalty_points": anti_cheat_penalty_points,
             "guarded_total_score": anti_cheat_guarded_total,
             "active_caps": anti_cheat_caps,

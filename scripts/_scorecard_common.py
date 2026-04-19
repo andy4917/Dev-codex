@@ -239,6 +239,52 @@ def load_fresh_evidence_manifest(workspace_root: Path) -> dict[str, Any]:
     return load_json(fresh_evidence_manifest_path(workspace_root))
 
 
+def agent_runs_root(workspace_root: Path) -> Path:
+    return workspace_root / ".agent-runs"
+
+
+def latest_agent_run_file(workspace_root: Path, filename: str) -> Path | None:
+    root = agent_runs_root(workspace_root)
+    if not root.exists():
+        return None
+    candidates = sorted(path for path in root.glob(f"*/{filename}") if path.is_file())
+    if not candidates:
+        return None
+    return candidates[-1]
+
+
+def published_evidence_manifest_path(workspace_root: Path) -> Path:
+    return latest_agent_run_file(workspace_root, "EVIDENCE_MANIFEST.json") or fresh_evidence_manifest_path(workspace_root)
+
+
+def load_published_evidence_manifest(workspace_root: Path) -> dict[str, Any]:
+    return load_json(published_evidence_manifest_path(workspace_root))
+
+
+def published_workorder_path(workspace_root: Path, evidence_manifest_path: Path | None = None) -> Path | None:
+    if evidence_manifest_path is not None and evidence_manifest_path.name == "EVIDENCE_MANIFEST.json":
+        candidate = evidence_manifest_path.parent / "WORKORDER.json"
+        if candidate.exists():
+            return candidate
+    return latest_agent_run_file(workspace_root, "WORKORDER.json")
+
+
+def published_command_log_path(workspace_root: Path, evidence_manifest_path: Path | None = None) -> Path | None:
+    if evidence_manifest_path is not None and evidence_manifest_path.name == "EVIDENCE_MANIFEST.json":
+        candidate = evidence_manifest_path.parent / "COMMAND_LOG.jsonl"
+        if candidate.exists():
+            return candidate
+    return latest_agent_run_file(workspace_root, "COMMAND_LOG.jsonl")
+
+
+def current_policy_hashes() -> dict[str, str]:
+    hashes: dict[str, str] = {}
+    for path in (DEFAULT_POLICY_FILE, DEFAULT_DISQUALIFIER_FILE):
+        if path.exists():
+            hashes[path.name] = file_hash(path)
+    return hashes
+
+
 def fresh_trace_id(workspace_root: Path) -> str:
     manifest = load_fresh_evidence_manifest(workspace_root)
     return str(manifest.get("trace_id", "")).strip()

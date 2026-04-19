@@ -24,6 +24,10 @@ def _anti_cheat_signals(payload: dict) -> list[dict]:
             {
                 "code": signal.get("code", signal.get("id", "")),
                 "severity": signal.get("severity", "medium"),
+                "confidence": signal.get("confidence", "medium"),
+                "decision": signal.get("decision", "warn"),
+                "detected_by": signal.get("detected_by", "compute_user_scorecard.py"),
+                "provenance": signal.get("provenance", {}),
                 "points": signal.get("points", 0),
                 "reason": signal.get("reason", ""),
                 "evidence_ref": signal.get("evidence_ref", ""),
@@ -87,12 +91,20 @@ def main() -> int:
         print("- none")
 
     anti_cheat = payload.get("anti_cheat_layer", {})
+    decision_summary = anti_cheat.get("decision_summary", {})
     print(
         f"10. anti-cheat guard: {anti_cheat.get('status', 'UNKNOWN')} "
         f"(signals={anti_cheat.get('signal_points', 0)}, penalty={anti_cheat.get('penalty_points', 0)}, guarded_total={anti_cheat.get('guarded_total_score', payload.get('raw_total_score', ''))})"
     )
+    print(
+        f"- decision summary: highest={decision_summary.get('highest_decision', 'warn')} "
+        f"counts={decision_summary.get('counts', {})}"
+    )
     for signal in _anti_cheat_signals(payload):
-        print(f"- signal: {signal['code']} +{signal['points']} ({signal['reason']})")
+        print(
+            f"- signal: {signal['code']} decision={signal.get('decision', 'warn')} "
+            f"confidence={signal.get('confidence', 'medium')} +{signal['points']} ({signal['reason']})"
+        )
 
     cap = payload.get("platform_cap", {})
     if cap.get("cap_applied"):

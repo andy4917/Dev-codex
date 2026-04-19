@@ -285,7 +285,7 @@ remote_connections = true
             )
             self.assertIn("DQ-010", tamper_events[0]["disqualifier_ids"])
 
-    def test_detect_score_policy_tamper_requires_workorder_marker(self) -> None:
+    def test_detect_score_policy_tamper_requires_structured_policy_update_workorder(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             tmp = Path(tmpdir)
             management = tmp / "Dev-Management"
@@ -296,9 +296,17 @@ remote_connections = true
             (workflow / ".git").mkdir()
             (management / "contracts").mkdir()
             (management / "contracts" / "user_score_policy.json").write_text('{"version": 2}\n', encoding="utf-8")
+            (workflow / ".agent-runs" / "2026-04-19-run").mkdir(parents=True)
 
             original_git_lines = self.module.git_lines
-            self.module.git_lines = lambda _repo_root, *args: ["contracts/user_score_policy.json"]
+            def fake_git_lines(_repo_root, *args):
+                if args[:4] == ("diff", "--name-only", "HEAD", "--"):
+                    return ["contracts/user_score_policy.json"]
+                if args[:3] == ("diff", "--name-only", "HEAD"):
+                    return ["contracts/user_score_policy.json", "tests/test_prepare_user_scorecard_review.py", "reports/user-scorecard.json"]
+                return []
+
+            self.module.git_lines = fake_git_lines
             self.addCleanup(setattr, self.module, "git_lines", original_git_lines)
 
             events = self.module.detect_score_policy_tamper_events(management, workflow)
@@ -306,6 +314,50 @@ remote_connections = true
             self.assertEqual(events[0]["disqualifier_ids"], ["DQ-011"])
 
             (workflow / "DESIGN_REVIEW.md").write_text("Policy Update Workorder:\nallowed\n", encoding="utf-8")
+            (workflow / ".agent-runs" / "2026-04-19-run" / "WORKORDER.json").write_text(
+                json.dumps(
+                    {
+                        "schema_version": 1,
+                        "run_id": "2026-04-19-run",
+                        "canonical_repo": str(management),
+                        "support_repo": str(workflow),
+                        "objective": "policy update",
+                        "allowed_change_zones": [str(management)],
+                        "protected_paths": ["user_score_policy.json"],
+                        "acceptance_criteria": ["policy update path"],
+                        "verification_commands": ["pytest"],
+                        "rollback_plan_required": True,
+                    },
+                    ensure_ascii=False,
+                    indent=2,
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            (workflow / ".agent-runs" / "2026-04-19-run" / "EVIDENCE_MANIFEST.json").write_text(
+                json.dumps(
+                    {
+                        "schema_version": 1,
+                        "run_id": "2026-04-19-run",
+                        "base_commit": "abc",
+                        "head_commit": "def",
+                        "changed_files": ["contracts/user_score_policy.json"],
+                        "commands": [],
+                        "artifacts": [],
+                        "waivers": [],
+                        "policy_hashes": {
+                            "current": {},
+                            "before": {"user_score_policy.json": "old"},
+                            "after": {"user_score_policy.json": "new"},
+                        },
+                        "state_history": [{"state": "SCORING", "entered_at": "2026-04-19T00:00:00Z"}],
+                    },
+                    ensure_ascii=False,
+                    indent=2,
+                )
+                + "\n",
+                encoding="utf-8",
+            )
             self.assertEqual(self.module.detect_score_policy_tamper_events(management, workflow), [])
 
 

@@ -338,16 +338,57 @@ def policy_update_workorder_present(*paths: Path) -> bool:
     return False
 
 
+def latest_agent_run_file(workflow_root: Path, filename: str) -> Path | None:
+    runs_root = workflow_root / ".agent-runs"
+    if not runs_root.exists():
+        return None
+    candidates = sorted(path for path in runs_root.glob(f"*/{filename}") if path.is_file())
+    if not candidates:
+        return None
+    return candidates[-1]
+
+
+def structured_policy_update_workorder_present(management_root: Path, workflow_root: Path, changed: list[str]) -> bool:
+    if not policy_update_workorder_present(management_root / "DESIGN_REVIEW.md", workflow_root / "DESIGN_REVIEW.md"):
+        return False
+
+    workorder_path = latest_agent_run_file(workflow_root, "WORKORDER.json")
+    manifest_path = latest_agent_run_file(workflow_root, "EVIDENCE_MANIFEST.json")
+    if workorder_path is None or manifest_path is None:
+        return False
+
+    workorder = load_json(workorder_path, default={})
+    manifest = load_json(manifest_path, default={})
+    if not isinstance(workorder, dict) or not isinstance(manifest, dict):
+        return False
+    if not bool(workorder.get("rollback_plan_required", False)):
+        return False
+
+    policy_hashes = manifest.get("policy_hashes", {})
+    before_hashes = dict(policy_hashes.get("before", {})) if isinstance(policy_hashes, dict) else {}
+    after_hashes = dict(policy_hashes.get("after", {})) if isinstance(policy_hashes, dict) else {}
+    changed_names = {Path(path).name for path in changed}
+    if not changed_names:
+        return False
+    if any(name not in before_hashes or name not in after_hashes for name in changed_names):
+        return False
+
+    diff_paths = set(git_lines(management_root, "diff", "--name-only", "HEAD"))
+    has_fixture_test_update = any(path.startswith("tests/") for path in diff_paths)
+    has_snapshot_update = "reports/user-scorecard.json" in diff_paths
+    return has_fixture_test_update and has_snapshot_update
+
+
 def detect_score_policy_tamper_events(management_root: Path, workflow_root: Path) -> list[dict[str, object]]:
     changed = git_lines(management_root, "diff", "--name-only", "HEAD", "--", *PROTECTED_SCORE_POLICY_FILES)
     if not changed:
         return []
-    if policy_update_workorder_present(management_root / "DESIGN_REVIEW.md", workflow_root / "DESIGN_REVIEW.md"):
+    if structured_policy_update_workorder_present(management_root, workflow_root, changed):
         return []
     return [
         {
             "category": "score_policy_tamper_without_policy_update_workorder",
-            "reason": "protected score policy changed without a policy update workorder marker",
+            "reason": "protected score policy changed without a valid policy update workorder, hashes, fixture coverage, and snapshot update",
             "path": str(management_root / changed[0]),
             "disqualifier_ids": ["DQ-011"],
             "evidence_refs": [str(management_root / path) for path in changed],
@@ -511,6 +552,7 @@ def main() -> int:
             and not forbidden_feature_findings
             and not runtime_restore_seed_violations
             and not old_path_refs
+            and not tamper_events
         )
         else "FAIL",
     }

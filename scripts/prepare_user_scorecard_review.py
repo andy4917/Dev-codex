@@ -28,6 +28,9 @@ from _scorecard_common import (
     user_review_update_authorized,
     verify_truth_signature,
     worktree_id,
+    published_command_log_path,
+    published_evidence_manifest_path,
+    published_workorder_path,
 )
 
 REVIEWER_ROLES = (
@@ -315,6 +318,9 @@ def build_context_payload(workspace_root: Path, mode: str, base: dict[str, Any])
 
     trace_id = current_trace_id(workspace_root, mode)
     user_review = authorized_user_review(base)
+    evidence_manifest_path = published_evidence_manifest_path(workspace_root)
+    workorder_path = published_workorder_path(workspace_root, evidence_manifest_path)
+    command_log_path = published_command_log_path(workspace_root, evidence_manifest_path)
     return {
         "context_version": 1,
         "status": "READY",
@@ -328,6 +334,9 @@ def build_context_payload(workspace_root: Path, mode: str, base: dict[str, Any])
         "fresh_evidence_manifest_path": str(fresh_evidence_manifest_path(workspace_root)),
         "task_context": derive_task_context(mode, dict(base.get("task_context", {})), context7),
         "evidence_inputs": {
+            "evidence_manifest_path": str(evidence_manifest_path) if evidence_manifest_path.exists() else "",
+            "workorder_path": str(workorder_path) if workorder_path is not None and workorder_path.exists() else "",
+            "command_log_path": str(command_log_path) if command_log_path is not None and command_log_path.exists() else "",
             "trace_report_path": str(trace_path) if trace_path.exists() else "",
             "existing_readiness_report_path": str(readiness_path) if readiness_path.exists() else "",
             "clean_room_verify_report_path": str(acceptance_path) if acceptance_path.exists() else "",

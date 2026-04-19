@@ -45,20 +45,28 @@ Canonical gate truth now comes from runtime state outside the repo.
 - `completion_score` now uses automatic verified-work awards plus optional user additions. Clean-room verify PASS grants the baseline `24` points automatically, and the user can add more awards up to the axis max.
 - only `completion_score` has a user-award budget, currently `6` points. Other axes default to `0` user-award budget and are treated as score stuffing if a write is attempted.
 - `prepare_user_scorecard_review.py` ignores snapshot/base `user_review` changes unless the payload carries an explicit `user_review_update_request` or `user_review_update_authorized: true`.
-- official anti-cheat codes are `unauthorized_user_review_modification`, `reserved_derived_award_spoofing`, `non_user_source_award`, `excessive_bonus_request`, `reviewer_truth_tamper`, `writer_self_score_attempt`, `claimed_verification_without_evidence`, `test_deletion_or_weakening_without_rationale`, and `score_policy_tamper_without_policy_update_workorder`.
-- unauthorized `user_review` writes, reserved derived-award categories, non-user award sources, unbacked verification claims, and over-budget award requests are all recorded by the anti-cheat layer and can trigger score penalties, caps, or `DQ-011`.
+- official anti-cheat codes are `unauthorized_user_review_modification`, `reserved_derived_award_spoofing`, `non_user_source_award`, `excessive_bonus_request`, `reviewer_truth_tamper`, `writer_self_score_attempt`, `claimed_verification_without_evidence`, `test_deletion_or_weakening_without_rationale`, `score_policy_tamper_without_policy_update_workorder`, `evidence_backdating_or_stale_report_reuse`, `waiver_without_reason`, `gate_order_drift`, `protected_path_access_attempt`, `verification_command_substitution`, and `evidence_manifest_mismatch`.
+- unauthorized `user_review` writes, reserved derived-award categories, non-user award sources, stale verification claims, and over-budget award requests are all recorded by the anti-cheat layer and can trigger warn, penalty, cap, or `DQ-011`.
 - `user_review.awards[]` uses the schema `axis`, `points`, `reason`, and optional `category`, `evidence_refs`.
 - `user_review.penalties[]` uses the same schema.
 - `requested_credit[]` uses `axis`, `requested_points`, `source`, `reason`, `evidence_ref`.
 - `credited_credit[]` uses `axis`, `requested_points`, `credited_points`, `source`, `capped`, `blocked`, `block_reason`.
-- `anti_cheat_signals[]` uses `code`, `severity`, `points`, `reason`, `evidence_ref`.
+- `anti_cheat_signals[]` uses `code`, `severity`, `confidence`, `decision`, `detected_by`, `provenance`, `points`, `reason`, `evidence_ref`.
 - `disqualifiers[]` accepts `id`, `reason`, and optional `evidence_refs`.
+- `anti_cheat_layer.decision_summary` records `highest_decision`, `counts`, and `auto_dq_signals`.
+- published run evidence can come from `.agent-runs/<run_id>/EVIDENCE_MANIFEST.json`; legacy `reports/authority/fresh-evidence.json` remains a compatibility input.
 - reward function:
   `raw_total_score = sum(axis_scores)`
   `guarded_total_score = max(raw_total_score - anti_cheat_penalty_points, 0)`
   `capped_total_score = min(guarded_total_score, all active caps)`
 - `existing_readiness` carries upstream gate status and remaining manual close-out.
 - `clean_room_verify` carries final verify status.
+- default anti-cheat decision rules are:
+  - low confidence -> warn
+  - high confidence + medium severity -> penalty
+  - high confidence + high severity -> cap
+  - high confidence + critical severity + allowed auto-DQ code -> dq
+- DQ-011 stays narrow. writer self-score attempts are blocked and visible, but do not auto-disqualify by themselves in v1.1.
 
 Reviewer verdict events must include:
 

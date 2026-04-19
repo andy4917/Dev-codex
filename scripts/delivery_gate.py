@@ -25,6 +25,68 @@ def _stage_gate_status(stage: dict[str, Any]) -> tuple[str, list[str]]:
     return "BLOCKED", reasons or [f"stage status is {status}"]
 
 
+def _normalized_gate_steps(gate_checks: dict[str, Any]) -> list[str]:
+    steps: list[str] = []
+    for key in gate_checks:
+        text = str(key).strip()
+        if text and text[0].isdigit() and "_" in text:
+            steps.append(text.split("_", 1)[1])
+        else:
+            steps.append(text)
+    return steps
+
+
+def _append_gate_order_signal(scorecard: dict[str, Any], gate_checks: dict[str, Any]) -> None:
+    expected = list(scorecard.get("gate_order", []))
+    emitted = _normalized_gate_steps(gate_checks)
+    if not expected or emitted == expected:
+        return
+    signal = {
+        "id": "gate_order_drift",
+        "code": "gate_order_drift",
+        "severity": "high",
+        "confidence": "high",
+        "decision": "cap",
+        "detected_by": "delivery_gate.py",
+        "provenance": {
+            "source_file": str(DEFAULT_POLICY_FILE),
+            "source_hash": "",
+            "base_commit": "",
+            "head_commit": "",
+        },
+        "points": 20,
+        "reason": "delivery gate emitted checks in an order that does not match the canonical policy order",
+        "evidence_refs": [str(DEFAULT_POLICY_FILE)],
+        "evidence_ref": str(DEFAULT_POLICY_FILE),
+        "details": {"expected": expected, "emitted": emitted},
+    }
+    scorecard.setdefault("anti_cheat_signals", []).append(
+        {
+            "code": signal["code"],
+            "severity": signal["severity"],
+            "confidence": signal["confidence"],
+            "decision": signal["decision"],
+            "detected_by": signal["detected_by"],
+            "provenance": signal["provenance"],
+            "points": signal["points"],
+            "reason": signal["reason"],
+            "evidence_ref": signal["evidence_ref"],
+        }
+    )
+    anti_cheat = scorecard.setdefault("anti_cheat_layer", {})
+    anti_cheat.setdefault("signals", []).append(signal)
+    summary = anti_cheat.setdefault(
+        "decision_summary",
+        {"highest_decision": "warn", "counts": {"warn": 0, "penalty": 0, "cap": 0, "dq": 0}, "auto_dq_signals": []},
+    )
+    counts = summary.setdefault("counts", {"warn": 0, "penalty": 0, "cap": 0, "dq": 0})
+    counts["cap"] = int(counts.get("cap", 0)) + 1
+    if summary.get("highest_decision") != "dq":
+        summary["highest_decision"] = "cap"
+    if anti_cheat.get("status") != "FAIL":
+        anti_cheat["status"] = "GUARDED"
+
+
 def run_delivery_gate(review: dict[str, Any], mode: str) -> dict[str, Any]:
     scorecard = compute_scorecard(load_json(DEFAULT_POLICY_FILE), review, mode)
     disqualifier = scorecard["disqualifier_result"]
@@ -96,11 +158,17 @@ def run_delivery_gate(review: dict[str, Any], mode: str) -> dict[str, Any]:
             first_failure("BLOCKED", "4_axis_floor_check", axis_floor_reasons)
 
         anti_cheat = scorecard.get("anti_cheat_layer", {})
+        decision_summary = anti_cheat.get("decision_summary", {})
+        highest_decision = str(decision_summary.get("highest_decision", "warn")).strip().lower() or "warn"
         anti_cheat_reasons = [str(signal.get("reason", "")).strip() for signal in anti_cheat.get("signals", []) if str(signal.get("reason", "")).strip()]
         anti_cheat_status = "PASS"
-        if anti_cheat.get("status") == "FAIL":
+        if highest_decision == "dq" or anti_cheat.get("status") == "FAIL":
             anti_cheat_status = "FAIL"
-        elif any(str(signal.get("code", signal.get("id", ""))).strip() == "claimed_verification_without_evidence" for signal in anti_cheat.get("signals", [])):
+        elif any(
+            str(signal.get("code", signal.get("id", ""))).strip()
+            in {"claimed_verification_without_evidence", "evidence_backdating_or_stale_report_reuse", "evidence_manifest_mismatch"}
+            for signal in anti_cheat.get("signals", [])
+        ):
             anti_cheat_status = "BLOCKED"
         gate_checks["5_anti_cheat_guard_check"] = {"status": anti_cheat_status, "reasons": anti_cheat_reasons}
         if anti_cheat_status != "PASS":
@@ -131,6 +199,8 @@ def run_delivery_gate(review: dict[str, Any], mode: str) -> dict[str, Any]:
         gate_checks["8_clean_room_verify_check"] = {"status": verify_status, "reasons": verify_reasons}
         if verify_status != "PASS":
             first_failure("FAIL" if verify_status == "FAIL" else "BLOCKED", "8_clean_room_verify_check", verify_reasons)
+
+    _append_gate_order_signal(scorecard, gate_checks)
 
     remaining_manual_close_out = [
         *scorecard["existing_readiness"].get("manual_close_out", []),

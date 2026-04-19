@@ -3,7 +3,7 @@
   "scorecard_schema_version": 2,
   "scope": "codex-global",
   "policy_version": 2,
-  "generated_at": "2026-04-19T12:44:38.964037+00:00",
+  "generated_at": "2026-04-19T13:49:03.322558+00:00",
   "workspace_root": "/home/andy4917/Dev-Product/reservation-system",
   "mode": "verify",
   "disqualifier_result": {
@@ -13,7 +13,7 @@
     "reasons": [
       "no disqualifiers recorded"
     ],
-    "generated_at": "2026-04-19T12:44:38.961339+00:00"
+    "generated_at": "2026-04-19T13:49:03.313373+00:00"
   },
   "authoritative_context_path": "/mnt/c/Users/anise/.codex/state/scorecard-context/reservation-system/trace-0d51c24d6c80b096.json",
   "trace": {
@@ -27,8 +27,11 @@
     "acceptance_count": 8,
     "traceability_count": 8,
     "report_path": "/home/andy4917/Dev-Product/reservation-system/reports/traceability-report.json",
-    "present": true
+    "present": true,
+    "otel_enabled": false
   },
+  "evidence_manifest_path": "/home/andy4917/Dev-Product/reservation-system/reports/authority/fresh-evidence.json",
+  "workorder_path": "",
   "scores": {
     "trust_score": {
       "applicable": true,
@@ -152,7 +155,19 @@
   "anti_cheat_layer": {
     "status": "PASS",
     "signals": [],
+    "decision_summary": {
+      "highest_decision": "warn",
+      "counts": {
+        "warn": 0,
+        "penalty": 0,
+        "cap": 0,
+        "dq": 0
+      },
+      "auto_dq_signals": []
+    },
     "signal_points": 0,
+    "penalty_signal_points": 0,
+    "cap_signal_points": 0,
     "penalty_points": 0,
     "guarded_total_score": 84,
     "active_caps": []
