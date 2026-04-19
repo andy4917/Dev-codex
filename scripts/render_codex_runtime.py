@@ -11,6 +11,34 @@ from typing import Any
 
 
 AUTHORITY_PATH = Path("/home/andy4917/Dev-Management/contracts/workspace_authority.json")
+DEFAULT_MCP_SERVERS = ("context7", "serena")
+DEFAULT_MCP_TRANSPORTS = {
+    "context7": "remote_http",
+    "serena": "stdio",
+}
+HTTP_ONLY_KEYS = {"url", "bearer_token_env_var", "http_headers", "env_http_headers"}
+STDIO_ONLY_KEYS = {"command", "args", "env", "env_vars", "cwd"}
+NESTED_MCP_KEYS = ("env_http_headers", "http_headers", "env", "env_vars")
+HTTP_RENDER_ORDER = (
+    "url",
+    "enabled",
+    "required",
+    "startup_timeout_sec",
+    "tool_timeout_sec",
+    "enabled_tools",
+    "disabled_tools",
+)
+STDIO_RENDER_ORDER = (
+    "enabled",
+    "required",
+    "startup_timeout_sec",
+    "tool_timeout_sec",
+    "command",
+    "args",
+    "cwd",
+    "enabled_tools",
+    "disabled_tools",
+)
 
 
 def load_authority() -> dict:
@@ -98,6 +126,11 @@ def render_agents(authority: dict, windows: bool) -> str:
         f"- Runtime restore seed is derived-only, preserves named threads, drops stale projectless restore refs, removes stale remote environment state, and prefers `{restore['preferred_windows_access_host']}` UNC roots.\n"
         f"- Terminal restore must stay in `{restore['terminal_restore_policy']}` mode and conversation detail should default to `{restore['conversation_detail_mode']}` while stabilization is in progress.\n"
         f"- Use `.git` as the only project root marker.\n"
+        f"- Before code work, activate the current project or worktree with Serena when it is available.\n"
+        f"- Check Serena onboarding and project memories before major code changes.\n"
+        f"- Prefer Serena symbol and reference tools over repeated whole-file reads when Serena is available.\n"
+        f"- Use Context7 before changing external libraries, frameworks, APIs, configuration, or migration behavior.\n"
+        f"- If Serena or Context7 is unavailable, report the failure and use a clearly stated fallback.\n"
         f"- Hooks are not a primary enforcement surface; run deterministic verification before finishing work.\n"
         f"- User penalty scorecard is global and canonical at `{scorecard['policy']}` and `{scorecard['disqualifiers']}`.\n"
         f"- Writer self-scoring, writer bonus scores, shadow scores, and fallback scores are forbidden. User review is a protected layer and cannot change without explicit user approval or task request; confirmed work/performance awards are derived automatically, users may add extra awards mid-task only within budget, and the anti-cheat layer denies, penalizes, caps, or disqualifies score manipulation attempts.\n"
@@ -117,12 +150,19 @@ def render_agents(authority: dict, windows: bool) -> str:
     )
 
 
-def load_context7_template() -> dict:
-    policy_path = AUTHORITY_PATH.parent / "context7_policy.json"
+def load_mcp_policy(server_name: str) -> dict[str, Any]:
+    policy_path = AUTHORITY_PATH.parent / f"{server_name}_policy.json"
     if not policy_path.exists():
         return {}
-    payload = json.loads(policy_path.read_text(encoding="utf-8"))
-    return payload.get("remote_template", {})
+    return json.loads(policy_path.read_text(encoding="utf-8"))
+
+
+def load_context7_template() -> dict[str, Any]:
+    return load_mcp_policy("context7").get("remote_template", {})
+
+
+def load_serena_template() -> dict[str, Any]:
+    return load_mcp_policy("serena").get("template", {})
 
 
 def user_override_config_paths(authority: dict) -> list[Path]:
@@ -161,6 +201,68 @@ def blocked_feature_overrides(authority: dict) -> set[str]:
     return {str(item) for item in override.get("blocked_feature_overrides", [])}
 
 
+def mcp_server_key_policies(authority: dict) -> dict[str, dict[str, Any]]:
+    override = authority.get("runtime_layering", {}).get("user_override_policy", {})
+    raw = override.get("mcp_server_key_policies", {})
+    if not isinstance(raw, dict):
+        return {}
+    return {str(name): value for name, value in raw.items() if isinstance(value, dict)}
+
+
+def known_mcp_servers(authority: dict) -> list[str]:
+    names = list(DEFAULT_MCP_SERVERS)
+    for server_name in sorted(mcp_server_key_policies(authority)):
+        if server_name not in names:
+            names.append(server_name)
+    return names
+
+
+def server_transport(authority: dict, server_name: str) -> str:
+    policy = mcp_server_key_policies(authority).get(server_name, {})
+    transport = str(policy.get("transport", "")).strip()
+    if transport:
+        return transport
+    return DEFAULT_MCP_TRANSPORTS.get(server_name, "")
+
+
+def sanitize_mcp_server_config(server_name: str, payload: dict[str, Any], authority: dict) -> dict[str, Any]:
+    if not isinstance(payload, dict):
+        return {}
+    key_policy = mcp_server_key_policies(authority).get(server_name, {})
+    allowed = {str(item) for item in key_policy.get("allowed_override_keys", [])}
+    forbidden = {str(item) for item in key_policy.get("forbidden_keys", [])}
+    transport = server_transport(authority, server_name)
+    if transport == "remote_http":
+        forbidden.update(STDIO_ONLY_KEYS)
+    elif transport == "stdio":
+        forbidden.update(HTTP_ONLY_KEYS)
+    sanitized: dict[str, Any] = {}
+    for key, value in payload.items():
+        key_text = str(key)
+        if key_text in forbidden:
+            continue
+        if allowed and key_text not in allowed:
+            continue
+        sanitized[key_text] = copy.deepcopy(value)
+    return sanitized
+
+
+def load_mcp_server_templates(authority: dict) -> dict[str, dict[str, Any]]:
+    templates: dict[str, dict[str, Any]] = {}
+    loaders = {
+        "context7": load_context7_template,
+        "serena": load_serena_template,
+    }
+    for server_name in known_mcp_servers(authority):
+        loader = loaders.get(server_name)
+        if loader is None:
+            continue
+        template = sanitize_mcp_server_config(server_name, loader(), authority)
+        if template:
+            templates[server_name] = template
+    return templates
+
+
 def merge_nested_dict(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any]:
     merged = copy.deepcopy(base)
     for key, value in override.items():
@@ -194,7 +296,7 @@ def build_effective_global_config(authority: dict, override_paths: list[Path] | 
         for feature in cfg.get("enabled_features", [])
         if str(feature) not in blocked_features
     }
-    base_context7 = copy.deepcopy(load_context7_template())
+    base_mcp_servers = load_mcp_server_templates(authority)
     effective: dict[str, Any] = {
         "model": cfg["model"],
         "model_reasoning_effort": cfg["model_reasoning_effort"],
@@ -202,11 +304,13 @@ def build_effective_global_config(authority: dict, override_paths: list[Path] | 
         "sandbox_mode": cfg["sandbox_mode"],
         "web_search": cfg["web_search"],
         "network_access": bool(cfg["network_access"]),
-        "context7": copy.deepcopy(base_context7),
+        "mcp_servers": copy.deepcopy(base_mcp_servers),
         "features": copy.deepcopy(base_features),
         "trusted_projects": list(dict.fromkeys(str(project) for project in cfg.get("trusted_projects", []))),
         "enabled_plugins": [str(plugin) for plugin in cfg.get("enabled_plugins", [])],
     }
+    for server_name, template in base_mcp_servers.items():
+        effective[server_name] = copy.deepcopy(template)
     for key in ("ux", "workspace_preference", "memories"):
         if key in cfg:
             effective[key] = copy.deepcopy(cfg[key])
@@ -228,11 +332,16 @@ def build_effective_global_config(authority: dict, override_paths: list[Path] | 
 
         mcp_servers = payload.get("mcp_servers", {})
         if isinstance(mcp_servers, dict):
-            context7_cfg = mcp_servers.get("context7", {})
-            if isinstance(context7_cfg, dict):
-                context7_override = nested_diff_from_base(base_context7, context7_cfg)
-                if context7_override:
-                    effective["context7"] = merge_nested_dict(effective.get("context7", {}), context7_override)
+            for server_name in known_mcp_servers(authority):
+                server_payload = mcp_servers.get(server_name, {})
+                if not isinstance(server_payload, dict):
+                    continue
+                server_override = sanitize_mcp_server_config(server_name, server_payload, authority)
+                if not server_override:
+                    continue
+                merged = merge_nested_dict(effective["mcp_servers"].get(server_name, {}), server_override)
+                effective["mcp_servers"][server_name] = merged
+                effective[server_name] = copy.deepcopy(merged)
 
         feature_cfg = payload.get("features", {})
         if isinstance(feature_cfg, dict):
@@ -262,6 +371,10 @@ def build_effective_global_config(authority: dict, override_paths: list[Path] | 
             value = payload.get(key)
             if isinstance(value, dict) and value != cfg.get(key):
                 effective[key] = copy.deepcopy(value)
+
+    for server_name in known_mcp_servers(authority):
+        if server_name in effective["mcp_servers"]:
+            effective[server_name] = copy.deepcopy(effective["mcp_servers"][server_name])
 
     return effective
 
@@ -295,25 +408,27 @@ def append_table(lines: list[str], header: str, payload: dict[str, Any]) -> None
         append_table(lines, f"{header}.{key}", value)
 
 
-def render_context7_lines(context7: dict[str, Any]) -> list[str]:
-    if not context7:
+def render_mcp_server_lines(authority: dict, server_name: str, payload: dict[str, Any]) -> list[str]:
+    if not payload:
         return []
-    lines = ["[mcp_servers.context7]"]
-    ordered_keys = ("url", "bearer_token_env_var", "enabled", "required", "startup_timeout_sec", "tool_timeout_sec")
-    handled: set[str] = {"env_http_headers"}
+    lines = [f"[mcp_servers.{server_name}]"]
+    transport = server_transport(authority, server_name)
+    ordered_keys = HTTP_RENDER_ORDER if transport == "remote_http" else STDIO_RENDER_ORDER
+    handled: set[str] = set(NESTED_MCP_KEYS)
     for key in ordered_keys:
-        if key not in context7:
+        if key not in payload or isinstance(payload[key], dict):
             continue
-        lines.append(f"{key} = {toml_literal(context7[key])}")
+        lines.append(f"{key} = {toml_literal(payload[key])}")
         handled.add(key)
-    for key in sorted(context7):
-        if key in handled or isinstance(context7[key], dict):
+    for key in sorted(payload):
+        if key in handled or isinstance(payload[key], dict):
             continue
-        lines.append(f"{key} = {toml_literal(context7[key])}")
+        lines.append(f"{key} = {toml_literal(payload[key])}")
     lines.append("")
-    headers = context7.get("env_http_headers", {})
-    if isinstance(headers, dict) and headers:
-        append_table(lines, "mcp_servers.context7.env_http_headers", headers)
+    for nested_key in NESTED_MCP_KEYS:
+        nested_payload = payload.get(nested_key, {})
+        if isinstance(nested_payload, dict) and nested_payload:
+            append_table(lines, f"mcp_servers.{server_name}.{nested_key}", nested_payload)
     return lines
 
 
@@ -337,9 +452,10 @@ def render_config(authority: dict, windows: bool, effective_cfg: dict[str, Any] 
             "",
         ]
     )
-    context7_lines = render_context7_lines(cfg.get("context7", {}))
-    if context7_lines:
-        lines.extend(context7_lines + [""])
+    for server_name in known_mcp_servers(authority):
+        mcp_lines = render_mcp_server_lines(authority, server_name, cfg.get("mcp_servers", {}).get(server_name, {}))
+        if mcp_lines:
+            lines.extend(mcp_lines + [""])
     features = cfg.get("features", {})
     if features:
         lines.append("[features]")

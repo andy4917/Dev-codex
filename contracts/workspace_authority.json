@@ -164,6 +164,7 @@
         "web_search",
         "network_access",
         "mcp_servers.context7",
+        "mcp_servers.serena",
         "features",
         "ux",
         "workspace_preference",
@@ -174,6 +175,51 @@
         "js_repl_tools_only",
         "remote_control"
       ],
+      "mcp_server_key_policies": {
+        "context7": {
+          "transport": "remote_http",
+          "allowed_override_keys": [
+            "enabled",
+            "required",
+            "tool_timeout_sec",
+            "startup_timeout_sec",
+            "enabled_tools",
+            "disabled_tools",
+            "url",
+            "env_http_headers"
+          ],
+          "forbidden_keys": [
+            "bearer_token_env_var",
+            "command",
+            "args",
+            "env",
+            "env_vars",
+            "cwd"
+          ]
+        },
+        "serena": {
+          "transport": "stdio",
+          "allowed_override_keys": [
+            "enabled",
+            "required",
+            "tool_timeout_sec",
+            "startup_timeout_sec",
+            "enabled_tools",
+            "disabled_tools",
+            "command",
+            "args",
+            "env",
+            "env_vars",
+            "cwd"
+          ],
+          "forbidden_keys": [
+            "url",
+            "bearer_token_env_var",
+            "http_headers",
+            "env_http_headers"
+          ]
+        }
+      },
       "protected_fields": [
         "canonical_roots",
         "workspace_authority",

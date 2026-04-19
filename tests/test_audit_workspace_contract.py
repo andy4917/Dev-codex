@@ -41,8 +41,11 @@ class AuditWorkspaceContractTests(unittest.TestCase):
     def test_rendered_global_config_includes_model_reasoning_and_features_and_mirrors_match(self) -> None:
         render = _load_render_module()
         original_template_loader = render.load_context7_template
+        original_serena_loader = render.load_serena_template
         render.load_context7_template = lambda: {}
+        render.load_serena_template = lambda: {}
         self.addCleanup(setattr, render, "load_context7_template", original_template_loader)
+        self.addCleanup(setattr, render, "load_serena_template", original_serena_loader)
 
         authority = {
             "generation_targets": {
@@ -105,8 +108,25 @@ class AuditWorkspaceContractTests(unittest.TestCase):
     def test_manual_overrides_are_merged_but_structural_features_stay_locked(self) -> None:
         render = _load_render_module()
         original_template_loader = render.load_context7_template
-        render.load_context7_template = lambda: {"url": "https://example.com/mcp", "enabled": True}
+        original_serena_loader = render.load_serena_template
+        render.load_context7_template = lambda: {
+            "url": "https://example.com/mcp",
+            "enabled": True,
+            "required": False,
+            "tool_timeout_sec": 30,
+            "env_http_headers": {"CONTEXT7_API_KEY": "CONTEXT7_API_KEY"},
+        }
+        render.load_serena_template = lambda: {
+            "enabled": True,
+            "required": False,
+            "startup_timeout_sec": 15,
+            "tool_timeout_sec": 120,
+            "command": "serena",
+            "args": ["start-mcp-server", "--project-from-cwd", "--context=codex"],
+            "disabled_tools": ["execute_shell_command", "remove_project"],
+        }
         self.addCleanup(setattr, render, "load_context7_template", original_template_loader)
+        self.addCleanup(setattr, render, "load_serena_template", original_serena_loader)
 
         with tempfile.TemporaryDirectory() as tmpdir:
             tmp = Path(tmpdir)
@@ -129,6 +149,16 @@ class AuditWorkspaceContractTests(unittest.TestCase):
 [mcp_servers.context7]
 enabled = false
 bearer_token_env_var = "CTX7_TOKEN"
+command = "npx"
+tool_timeout_sec = 45
+
+[mcp_servers.context7.env_http_headers]
+CONTEXT7_API_KEY = "CTX7_OVERRIDE"
+
+[mcp_servers.serena]
+command = "custom-serena"
+startup_timeout_sec = 20
+url = "https://invalid.example/mcp"
 
 [features]
 js_repl = false
@@ -165,8 +195,53 @@ trust_level = "trusted"
                 },
                 "runtime_layering": {
                     "user_override_policy": {
-                        "allowed_fields": ["model", "model_reasoning_effort", "features"],
+                        "allowed_fields": ["model", "model_reasoning_effort", "features", "mcp_servers.context7", "mcp_servers.serena"],
                         "blocked_feature_overrides": ["js_repl_tools_only", "remote_control"],
+                        "mcp_server_key_policies": {
+                            "context7": {
+                                "transport": "remote_http",
+                                "allowed_override_keys": [
+                                    "enabled",
+                                    "required",
+                                    "tool_timeout_sec",
+                                    "startup_timeout_sec",
+                                    "enabled_tools",
+                                    "disabled_tools",
+                                    "url",
+                                    "env_http_headers",
+                                ],
+                                "forbidden_keys": [
+                                    "bearer_token_env_var",
+                                    "command",
+                                    "args",
+                                    "env",
+                                    "env_vars",
+                                    "cwd",
+                                ],
+                            },
+                            "serena": {
+                                "transport": "stdio",
+                                "allowed_override_keys": [
+                                    "enabled",
+                                    "required",
+                                    "tool_timeout_sec",
+                                    "startup_timeout_sec",
+                                    "enabled_tools",
+                                    "disabled_tools",
+                                    "command",
+                                    "args",
+                                    "env",
+                                    "env_vars",
+                                    "cwd",
+                                ],
+                                "forbidden_keys": [
+                                    "url",
+                                    "bearer_token_env_var",
+                                    "http_headers",
+                                    "env_http_headers",
+                                ],
+                            },
+                        },
                         "protected_fields": ["canonical_roots"],
                     }
                 },
@@ -210,7 +285,14 @@ trust_level = "trusted"
             self.assertNotIn(str(extra_project), effective["trusted_projects"])
             self.assertNotIn(str(external_project), effective["trusted_projects"])
             self.assertFalse(effective["context7"]["enabled"])
-            self.assertEqual(effective["context7"]["bearer_token_env_var"], "CTX7_TOKEN")
+            self.assertEqual(effective["context7"]["tool_timeout_sec"], 45)
+            self.assertEqual(effective["context7"]["env_http_headers"]["CONTEXT7_API_KEY"], "CTX7_OVERRIDE")
+            self.assertNotIn("bearer_token_env_var", effective["context7"])
+            self.assertNotIn("command", effective["context7"])
+            self.assertEqual(effective["serena"]["command"], "custom-serena")
+            self.assertEqual(effective["serena"]["startup_timeout_sec"], 20)
+            self.assertEqual(effective["serena"]["disabled_tools"], ["execute_shell_command", "remove_project"])
+            self.assertNotIn("url", effective["serena"])
             self.assertEqual(effective["memories"]["no_memories_if_mcp_or_web_search"], False)
 
             self.assertIn('approval_policy = "on-request"', linux_config)
@@ -221,7 +303,12 @@ trust_level = "trusted"
             self.assertNotIn("remote_control", linux_config)
             self.assertNotIn(f'[projects."{extra_project}"]', linux_config)
             self.assertNotIn(f'[projects."{external_project}"]', linux_config)
-            self.assertIn('bearer_token_env_var = "CTX7_TOKEN"', linux_config)
+            self.assertNotIn('bearer_token_env_var = "CTX7_TOKEN"', linux_config)
+            self.assertNotIn('command = "npx"', linux_config)
+            self.assertIn('[mcp_servers.serena]', linux_config)
+            self.assertIn('command = "custom-serena"', linux_config)
+            self.assertIn('disabled_tools = ["execute_shell_command", "remove_project"]', linux_config)
+            self.assertNotIn('url = "https://invalid.example/mcp"', linux_config)
             self.assertIn("[memories]", linux_config)
             self.assertEqual(self.module.strip_generated_header(linux_config), self.module.strip_generated_header(windows_config))
 
@@ -285,6 +372,8 @@ trust_level = "trusted"
         self.assertIn("binding instruction-level guidance", rendered_agents)
         self.assertIn("Canonical global close-out command", rendered_agents)
         self.assertIn("iaw_closeout.py --workspace-root <repo> --run-id <run_id> --profile <L1|L2|L3|L4> --mode verify", rendered_agents)
+        self.assertIn("activate the current project or worktree with Serena", rendered_agents)
+        self.assertIn("Use Context7 before changing external libraries", rendered_agents)
         self.assertEqual(set(linux_hooks["hooks"]), {"UserPromptSubmit"})
         self.assertEqual(
             linux_hooks["hooks"]["UserPromptSubmit"][0]["hooks"][0]["command"],

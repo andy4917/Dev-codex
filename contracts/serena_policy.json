@@ -1,0 +1,64 @@
+{
+  "version": 1,
+  "server_name": "serena",
+  "transport": "stdio",
+  "template": {
+    "enabled": true,
+    "required": false,
+    "startup_timeout_sec": 15,
+    "tool_timeout_sec": 120,
+    "command": "serena",
+    "args": [
+      "start-mcp-server",
+      "--project-from-cwd",
+      "--context=codex"
+    ],
+    "disabled_tools": [
+      "execute_shell_command",
+      "remove_project"
+    ]
+  },
+  "override_policy": {
+    "transport": "stdio",
+    "allowed_override_keys": [
+      "enabled",
+      "required",
+      "tool_timeout_sec",
+      "startup_timeout_sec",
+      "enabled_tools",
+      "disabled_tools",
+      "command",
+      "args",
+      "env",
+      "env_vars",
+      "cwd"
+    ],
+    "forbidden_keys": [
+      "url",
+      "bearer_token_env_var",
+      "http_headers",
+      "env_http_headers"
+    ]
+  },
+  "agent_targets": [
+    "/home/andy4917/.codex/AGENTS.md",
+    "/mnt/c/Users/anise/.codex/AGENTS.md"
+  ],
+  "required_actions": [
+    "uv tool install -p 3.13 serena-agent@latest --prerelease=allow",
+    "serena init",
+    "cd <repo> && serena project create --index"
+  ],
+  "tool_exposure_check": {
+    "status": "manual",
+    "instructions": [
+      "codex mcp list",
+      "Use /mcp in Codex if the CLI command is unavailable.",
+      "In Codex, ask Serena to activate the current project and report the active config."
+    ]
+  },
+  "gate_policy": {
+    "blocking": false,
+    "status_on_failure": "ADVISORY_BLOCKED"
+  }
+}

@@ -1,28 +1,41 @@
 {
   "version": 1,
   "server_name": "context7",
+  "transport": "remote_http",
   "remote_template": {
     "url": "https://mcp.context7.com/mcp",
+    "enabled": true,
+    "required": false,
+    "tool_timeout_sec": 30,
     "env_http_headers": {
       "CONTEXT7_API_KEY": "CONTEXT7_API_KEY"
-    },
-    "enabled": true,
-    "required": false,
-    "startup_timeout_sec": 40,
-    "tool_timeout_sec": 120
+    }
   },
-  "fallback_template": {
-    "command": "npx",
-    "args": [
-      "-y",
-      "@upstash/context7-mcp"
+  "override_policy": {
+    "transport": "remote_http",
+    "allowed_override_keys": [
+      "enabled",
+      "required",
+      "tool_timeout_sec",
+      "startup_timeout_sec",
+      "enabled_tools",
+      "disabled_tools",
+      "url",
+      "env_http_headers"
     ],
-    "enabled": true,
-    "required": false,
-    "startup_timeout_sec": 40,
-    "tool_timeout_sec": 120
+    "forbidden_keys": [
+      "bearer_token_env_var",
+      "command",
+      "args",
+      "env",
+      "env_vars",
+      "cwd"
+    ]
   },
-  "agent_targets": [],
+  "agent_targets": [
+    "/home/andy4917/.codex/AGENTS.md",
+    "/mnt/c/Users/anise/.codex/AGENTS.md"
+  ],
   "protected_change_globs": [
     "package.json",
     "package-lock.json",

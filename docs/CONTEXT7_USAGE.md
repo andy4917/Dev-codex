@@ -20,18 +20,32 @@ Use Context7 before changing:
 
 ## Selection Rule
 
-- if `CONTEXT7_API_KEY` exists:
-  - use remote HTTP mode
-  - the key may come from the current shell env or the Windows user/machine environment
-- else:
-  - use `npx -y @upstash/context7-mcp`
+- this workspace renders Context7 only in remote HTTP mode
+- the canonical config block is:
 
-Both modes keep:
+```toml
+[mcp_servers.context7]
+url = "https://mcp.context7.com/mcp"
+enabled = true
+required = false
+tool_timeout_sec = 30
+env_http_headers = { "CONTEXT7_API_KEY" = "CONTEXT7_API_KEY" }
+```
+
+- `CONTEXT7_API_KEY` may come from the current shell env or the Windows user/machine environment
+- `bearer_token_env_var` is not a valid Context7 transport field in this workspace and must be stripped from generated Codex configs
+
+The generated runtime keeps:
 
 - `enabled = true`
 - `required = false`
-- `startup_timeout_sec = 40`
-- `tool_timeout_sec = 120`
+- `tool_timeout_sec = 30`
+
+## Runtime Source
+
+- global config: `~/.codex/config.toml` is the runtime source of truth
+- repo config: `.codex/config.toml` is a parity and trusted-project support surface
+- Windows mirror is generated for parity and must not be mistaken for proven runtime readiness
 
 ## Evidence
 
