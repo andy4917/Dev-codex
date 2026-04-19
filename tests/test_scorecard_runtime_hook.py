@@ -52,6 +52,7 @@ class ScorecardRuntimeHookTests(unittest.TestCase):
             )
 
         self.assertIn("Global scorecard layer is binding for /home/andy4917/Dev-Workflow", notice)
+        self.assertIn("explicit verify chain remains the canonical enforcement path", notice)
         self.assertIn("prepare_user_scorecard_review.py --workspace-root /home/andy4917/Dev-Workflow --mode verify", notice)
 
     def test_emit_notice_is_empty_outside_canonical_roots(self) -> None:

@@ -289,6 +289,16 @@ trust_level = "trusted"
             "wsl.exe python3 /home/andy4917/Dev-Management/scripts/scorecard_runtime_hook.py --event UserPromptSubmit",
         )
 
+    def test_sync_generated_text_removes_stale_hooks_file(self) -> None:
+        render = _load_render_module()
+        with tempfile.TemporaryDirectory() as tmpdir:
+            hook_path = Path(tmpdir) / "hooks.json"
+            hook_path.write_text('{"hooks": {"SessionStart": []}}\n', encoding="utf-8")
+
+            render.sync_generated_text(hook_path, None)
+
+            self.assertFalse(hook_path.exists())
+
     def test_audit_detects_forbidden_feature_flags_and_active_runtime_restore_seed(self) -> None:
         authority = {
             "hardcoding_definition": {

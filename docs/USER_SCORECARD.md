@@ -24,7 +24,7 @@
 - the anti-cheat layer treats score-surface manipulation as negative reward: suspicious points are denied, then penalized, then capped, and critical cases escalate to disqualifiers
 - PASS is still determined by reviewer green, existing readiness, and clean-room verify
 - disqualifiers outrank score
-- generated global runtime elevates the scorecard layer into instruction-level guidance through `~/.codex/AGENTS.md`, and generated runtime hooks replay the close-out path at session start or prompt submit without replacing explicit verify commands
+- generated global runtime elevates the scorecard layer into instruction-level guidance through `~/.codex/AGENTS.md`, and generated runtime hooks replay a close-out reminder at session start or prompt submit without replacing the explicit verify chain
 
 ## Reviewer Roles
 
@@ -48,6 +48,9 @@ Canonical gate truth now comes from runtime state outside the repo.
 - only `completion_score` has a user-award budget, currently `6` points. Other axes default to `0` user-award budget and are treated as score stuffing if a write is attempted.
 - `prepare_user_scorecard_review.py` ignores snapshot/base `user_review` changes unless the payload carries an explicit `user_review_update_request` or `user_review_update_authorized: true`.
 - official anti-cheat codes are `unauthorized_user_review_modification`, `reserved_derived_award_spoofing`, `non_user_source_award`, `excessive_bonus_request`, `reviewer_truth_tamper`, `writer_self_score_attempt`, `claimed_verification_without_evidence`, `test_deletion_or_weakening_without_rationale`, `score_policy_tamper_without_policy_update_workorder`, `evidence_backdating_or_stale_report_reuse`, `waiver_without_reason`, `gate_order_drift`, `protected_path_access_attempt`, `verification_command_substitution`, and `evidence_manifest_mismatch`.
+- test-change rationale should be recorded under the canonical heading `## Test Change Rationale:`. `Test Change Notes`, inline-after-colon forms, and legacy plain-label variants remain compatibility inputs only.
+- placeholder-only entries such as `None`, `N/A`, `NA`, and `Not applicable` do not count as rationale, even when they include trailing punctuation.
+- generated `hooks.json` is derived runtime state. If authority disables `runtime_hook` or clears its events, the generated hook file should disappear instead of leaving stale reminders behind.
 - unauthorized `user_review` writes, reserved derived-award categories, non-user award sources, stale verification claims, and over-budget award requests are all recorded by the anti-cheat layer and can trigger warn, penalty, cap, or `DQ-011`.
 - `user_review.awards[]` uses the schema `axis`, `points`, `reason`, and optional `category`, `evidence_refs`.
 - `user_review.penalties[]` uses the same schema.

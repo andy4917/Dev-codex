@@ -123,6 +123,7 @@ def build_notice(authority: dict[str, Any], workspace_root: Path) -> str:
     return "\n".join(
         [
             f"[scorecard-hook] Global scorecard layer is binding for {workspace}. Do not ignore requested vs credited score, anti-cheat, gate, or audit output.",
+            "[scorecard-hook] Advisory reminder only. The explicit verify chain remains the canonical enforcement path.",
             "[scorecard-hook] Before finalizing run: "
             f"python {prepare} --workspace-root {workspace} --mode verify -> "
             f"python {delivery_gate} --mode verify --workspace-root {workspace} -> "

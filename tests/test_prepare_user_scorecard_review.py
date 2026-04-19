@@ -101,6 +101,80 @@ class PrepareUserScorecardReviewTests(unittest.TestCase):
         env["CODEX_HOME"] = str(codex_home)
         return env
 
+    def _scorecard_for_weakened_test_case(
+        self,
+        *,
+        summary_text: str | None = None,
+        design_review_text: str | None = None,
+    ) -> dict[str, object]:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp = Path(tmpdir)
+            workspace, _trace_id = self._build_workspace(tmp)
+            _git(workspace, "init")
+            _git(workspace, "config", "user.email", "codex@example.com")
+            _git(workspace, "config", "user.name", "Codex")
+            _write_text(workspace / "tests" / "test_sample.py", "def test_ok():\n    assert True\n")
+            _git(workspace, "add", ".")
+            _git(workspace, "commit", "-m", "baseline")
+            _write_text(
+                workspace / "tests" / "test_sample.py",
+                "import pytest\n\n@pytest.mark.skip(reason='temp')\ndef test_ok():\n    assert True\n",
+            )
+            if summary_text is not None:
+                _write_text(workspace / "SUMMARY.md", summary_text)
+            if design_review_text is not None:
+                _write_text(workspace / "DESIGN_REVIEW.md", design_review_text)
+
+            codex_home = tmp / "codex-home"
+            context_output = codex_home / "state" / "scorecard-context" / workspace.name / "trace-verify-001.json"
+            snapshot_output = tmp / "review-out.json"
+            compute_output = tmp / "scorecard.json"
+            base_review = tmp / "base-review.json"
+            _write_json(base_review, {"status": "TEMPLATE", "user_review": {"status": "PENDING", "awards": [], "penalties": [], "notes": ""}})
+
+            prepare = subprocess.run(
+                [
+                    sys.executable,
+                    str(PREPARE),
+                    "--workspace-root",
+                    str(workspace),
+                    "--mode",
+                    "verify",
+                    "--base-file",
+                    str(base_review),
+                    "--context-output-file",
+                    str(context_output),
+                    "--review-snapshot-output",
+                    str(snapshot_output),
+                ],
+                cwd=ROOT,
+                env=self._env(codex_home),
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+            )
+            self.assertEqual(prepare.returncode, 0, msg=prepare.stderr)
+
+            compute = subprocess.run(
+                [
+                    sys.executable,
+                    str(COMPUTE),
+                    "--review-file",
+                    str(snapshot_output),
+                    "--output-file",
+                    str(compute_output),
+                    "--mode",
+                    "verify",
+                ],
+                cwd=ROOT,
+                env=self._env(codex_home),
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+            )
+            self.assertIn(compute.returncode, {0, 1, 2}, msg=compute.stderr)
+            return json.loads(compute_output.read_text(encoding="utf-8"))
+
     def test_prepare_ignores_snapshot_reviewer_truth_without_authoritative_verdicts(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             tmp = Path(tmpdir)
@@ -1218,213 +1292,77 @@ class PrepareUserScorecardReviewTests(unittest.TestCase):
             self.assertEqual(scorecard["anti_cheat_layer"]["decision_summary"]["highest_decision"], "dq")
 
     def test_test_deletion_or_weakening_without_rationale_is_recorded(self) -> None:
-        with tempfile.TemporaryDirectory() as tmpdir:
-            tmp = Path(tmpdir)
-            workspace, _trace_id = self._build_workspace(tmp)
-            _git(workspace, "init")
-            _git(workspace, "config", "user.email", "codex@example.com")
-            _git(workspace, "config", "user.name", "Codex")
-            _write_text(workspace / "tests" / "test_sample.py", "def test_ok():\n    assert True\n")
-            _git(workspace, "add", ".")
-            _git(workspace, "commit", "-m", "baseline")
-            _write_text(
-                workspace / "tests" / "test_sample.py",
-                "import pytest\n\n@pytest.mark.skip(reason='temp')\ndef test_ok():\n    assert True\n",
-            )
-
-            codex_home = tmp / "codex-home"
-            context_output = codex_home / "state" / "scorecard-context" / workspace.name / "trace-verify-001.json"
-            snapshot_output = tmp / "review-out.json"
-            compute_output = tmp / "scorecard.json"
-            base_review = tmp / "base-review.json"
-            _write_json(base_review, {"status": "TEMPLATE", "user_review": {"status": "PENDING", "awards": [], "penalties": [], "notes": ""}})
-
-            prepare = subprocess.run(
-                [
-                    sys.executable,
-                    str(PREPARE),
-                    "--workspace-root",
-                    str(workspace),
-                    "--mode",
-                    "verify",
-                    "--base-file",
-                    str(base_review),
-                    "--context-output-file",
-                    str(context_output),
-                    "--review-snapshot-output",
-                    str(snapshot_output),
-                ],
-                cwd=ROOT,
-                env=self._env(codex_home),
-                capture_output=True,
-                text=True,
-                encoding="utf-8",
-            )
-            self.assertEqual(prepare.returncode, 0, msg=prepare.stderr)
-
-            compute = subprocess.run(
-                [
-                    sys.executable,
-                    str(COMPUTE),
-                    "--review-file",
-                    str(snapshot_output),
-                    "--output-file",
-                    str(compute_output),
-                    "--mode",
-                    "verify",
-                ],
-                cwd=ROOT,
-                env=self._env(codex_home),
-                capture_output=True,
-                text=True,
-                encoding="utf-8",
-            )
-            self.assertIn(compute.returncode, {0, 1, 2}, msg=compute.stderr)
-            scorecard = json.loads(compute_output.read_text(encoding="utf-8"))
-            self.assertTrue(
-                any(item["code"] == "test_deletion_or_weakening_without_rationale" for item in scorecard["anti_cheat_signals"])
-            )
+        scorecard = self._scorecard_for_weakened_test_case()
+        self.assertTrue(
+            any(item["code"] == "test_deletion_or_weakening_without_rationale" for item in scorecard["anti_cheat_signals"])
+        )
 
     def test_test_change_notes_with_rationale_suppresses_signal(self) -> None:
-        with tempfile.TemporaryDirectory() as tmpdir:
-            tmp = Path(tmpdir)
-            workspace, _trace_id = self._build_workspace(tmp)
-            _git(workspace, "init")
-            _git(workspace, "config", "user.email", "codex@example.com")
-            _git(workspace, "config", "user.name", "Codex")
-            _write_text(workspace / "tests" / "test_sample.py", "def test_ok():\n    assert True\n")
-            _git(workspace, "add", ".")
-            _git(workspace, "commit", "-m", "baseline")
-            _write_text(
-                workspace / "tests" / "test_sample.py",
-                "import pytest\n\n@pytest.mark.skip(reason='temp')\ndef test_ok():\n    assert True\n",
-            )
-            _write_text(
-                workspace / "SUMMARY.md",
-                "# Summary\n\n## Test Change Notes\n\nReplacement verification covers the temporary skip while the fixture is being rebuilt.\n",
-            )
-
-            codex_home = tmp / "codex-home"
-            context_output = codex_home / "state" / "scorecard-context" / workspace.name / "trace-verify-001.json"
-            snapshot_output = tmp / "review-out.json"
-            compute_output = tmp / "scorecard.json"
-            base_review = tmp / "base-review.json"
-            _write_json(base_review, {"status": "TEMPLATE", "user_review": {"status": "PENDING", "awards": [], "penalties": [], "notes": ""}})
-
-            prepare = subprocess.run(
-                [
-                    sys.executable,
-                    str(PREPARE),
-                    "--workspace-root",
-                    str(workspace),
-                    "--mode",
-                    "verify",
-                    "--base-file",
-                    str(base_review),
-                    "--context-output-file",
-                    str(context_output),
-                    "--review-snapshot-output",
-                    str(snapshot_output),
-                ],
-                cwd=ROOT,
-                env=self._env(codex_home),
-                capture_output=True,
-                text=True,
-                encoding="utf-8",
-            )
-            self.assertEqual(prepare.returncode, 0, msg=prepare.stderr)
-
-            compute = subprocess.run(
-                [
-                    sys.executable,
-                    str(COMPUTE),
-                    "--review-file",
-                    str(snapshot_output),
-                    "--output-file",
-                    str(compute_output),
-                    "--mode",
-                    "verify",
-                ],
-                cwd=ROOT,
-                env=self._env(codex_home),
-                capture_output=True,
-                text=True,
-                encoding="utf-8",
-            )
-            self.assertIn(compute.returncode, {0, 1, 2}, msg=compute.stderr)
-            scorecard = json.loads(compute_output.read_text(encoding="utf-8"))
-            self.assertFalse(
-                any(item["code"] == "test_deletion_or_weakening_without_rationale" for item in scorecard["anti_cheat_signals"])
-            )
+        scorecard = self._scorecard_for_weakened_test_case(
+            summary_text="# Summary\n\n## Test Change Notes\n\nReplacement verification covers the temporary skip while the fixture is being rebuilt.\n"
+        )
+        self.assertFalse(
+            any(item["code"] == "test_deletion_or_weakening_without_rationale" for item in scorecard["anti_cheat_signals"])
+        )
 
     def test_test_change_rationale_placeholder_does_not_suppress_signal(self) -> None:
-        with tempfile.TemporaryDirectory() as tmpdir:
-            tmp = Path(tmpdir)
-            workspace, _trace_id = self._build_workspace(tmp)
-            _git(workspace, "init")
-            _git(workspace, "config", "user.email", "codex@example.com")
-            _git(workspace, "config", "user.name", "Codex")
-            _write_text(workspace / "tests" / "test_sample.py", "def test_ok():\n    assert True\n")
-            _git(workspace, "add", ".")
-            _git(workspace, "commit", "-m", "baseline")
-            _write_text(
-                workspace / "tests" / "test_sample.py",
-                "import pytest\n\n@pytest.mark.skip(reason='temp')\ndef test_ok():\n    assert True\n",
-            )
-            _write_text(workspace / "SUMMARY.md", "# Summary\n\n## Test Change Rationale:\n\nNone.\n")
+        scorecard = self._scorecard_for_weakened_test_case(
+            summary_text="# Summary\n\n## Test Change Rationale:\n\nNone.\n"
+        )
+        self.assertTrue(
+            any(item["code"] == "test_deletion_or_weakening_without_rationale" for item in scorecard["anti_cheat_signals"])
+        )
 
-            codex_home = tmp / "codex-home"
-            context_output = codex_home / "state" / "scorecard-context" / workspace.name / "trace-verify-001.json"
-            snapshot_output = tmp / "review-out.json"
-            compute_output = tmp / "scorecard.json"
-            base_review = tmp / "base-review.json"
-            _write_json(base_review, {"status": "TEMPLATE", "user_review": {"status": "PENDING", "awards": [], "penalties": [], "notes": ""}})
+    def test_dotted_test_change_rationale_placeholders_do_not_suppress_signal(self) -> None:
+        placeholders = ("N/A.", "NA.", "Not applicable.")
+        for placeholder in placeholders:
+            with self.subTest(placeholder=placeholder):
+                scorecard = self._scorecard_for_weakened_test_case(
+                    summary_text=f"# Summary\n\n## Test Change Rationale:\n\n{placeholder}\n"
+                )
+                self.assertTrue(
+                    any(item["code"] == "test_deletion_or_weakening_without_rationale" for item in scorecard["anti_cheat_signals"])
+                )
 
-            prepare = subprocess.run(
-                [
-                    sys.executable,
-                    str(PREPARE),
-                    "--workspace-root",
-                    str(workspace),
-                    "--mode",
-                    "verify",
-                    "--base-file",
-                    str(base_review),
-                    "--context-output-file",
-                    str(context_output),
-                    "--review-snapshot-output",
-                    str(snapshot_output),
-                ],
-                cwd=ROOT,
-                env=self._env(codex_home),
-                capture_output=True,
-                text=True,
-                encoding="utf-8",
-            )
-            self.assertEqual(prepare.returncode, 0, msg=prepare.stderr)
+    def test_test_change_rationale_stops_before_top_level_heading(self) -> None:
+        scorecard = self._scorecard_for_weakened_test_case(
+            summary_text="# Summary\n\n## Test Change Rationale:\n\nNone.\n# Appendix\n\nReplacement verification lives outside the rationale section.\n"
+        )
+        self.assertTrue(
+            any(item["code"] == "test_deletion_or_weakening_without_rationale" for item in scorecard["anti_cheat_signals"])
+        )
 
-            compute = subprocess.run(
-                [
-                    sys.executable,
-                    str(COMPUTE),
-                    "--review-file",
-                    str(snapshot_output),
-                    "--output-file",
-                    str(compute_output),
-                    "--mode",
-                    "verify",
-                ],
-                cwd=ROOT,
-                env=self._env(codex_home),
-                capture_output=True,
-                text=True,
-                encoding="utf-8",
-            )
-            self.assertIn(compute.returncode, {0, 1, 2}, msg=compute.stderr)
-            scorecard = json.loads(compute_output.read_text(encoding="utf-8"))
-            self.assertTrue(
-                any(item["code"] == "test_deletion_or_weakening_without_rationale" for item in scorecard["anti_cheat_signals"])
-            )
+    def test_inline_test_change_rationale_suppresses_signal(self) -> None:
+        scorecard = self._scorecard_for_weakened_test_case(
+            summary_text="# Summary\n\n## Test Change Rationale: Replacement verification covers the temporary skip while the fixture is being rebuilt.\n"
+        )
+        self.assertFalse(
+            any(item["code"] == "test_deletion_or_weakening_without_rationale" for item in scorecard["anti_cheat_signals"])
+        )
+
+    def test_legacy_plain_label_rationale_suppresses_signal(self) -> None:
+        scorecard = self._scorecard_for_weakened_test_case(
+            summary_text="# Summary\n\nTest Change Rationale: Replacement verification covers the temporary skip while the fixture is being rebuilt.\n"
+        )
+        self.assertFalse(
+            any(item["code"] == "test_deletion_or_weakening_without_rationale" for item in scorecard["anti_cheat_signals"])
+        )
+
+    def test_nested_test_change_subsection_rationale_suppresses_signal(self) -> None:
+        scorecard = self._scorecard_for_weakened_test_case(
+            summary_text="# Summary\n\n## Test Change Rationale:\n\n### Why\n\nReplacement verification covers the temporary skip while the fixture is being rebuilt.\n"
+        )
+        self.assertFalse(
+            any(item["code"] == "test_deletion_or_weakening_without_rationale" for item in scorecard["anti_cheat_signals"])
+        )
+
+    def test_nested_test_change_subsection_heading_only_does_not_suppress_signal(self) -> None:
+        scorecard = self._scorecard_for_weakened_test_case(
+            summary_text="# Summary\n\n## Test Change Rationale:\n\n### Why\n"
+        )
+        self.assertTrue(
+            any(item["code"] == "test_deletion_or_weakening_without_rationale" for item in scorecard["anti_cheat_signals"])
+        )
 
 
 if __name__ == "__main__":

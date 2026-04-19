@@ -31,6 +31,16 @@ def write_text(path: Path, text: str) -> None:
     path.write_text(text, encoding="utf-8")
 
 
+def sync_generated_text(path: Path, text: str | None) -> None:
+    if text is None:
+        if path.is_dir() and not path.is_symlink():
+            shutil.rmtree(path)
+        elif path.exists() or path.is_symlink():
+            path.unlink()
+        return
+    write_text(path, text)
+
+
 def relink(link: Path, target: Path) -> None:
     ensure_parent(link)
     if link.is_symlink() or link.exists():
@@ -86,7 +96,7 @@ def render_agents(authority: dict, windows: bool) -> str:
         f"- The global scorecard layer is binding instruction-level guidance across canonical roots. Do not ignore requested vs credited score, anti-cheat output, gate status, summary export, or final audit results.\n"
         f"- Product-local `python scripts/delivery_gate.py --mode verify` wrappers are valid close-out surfaces only when they produce fresh evidence, refresh the derived review snapshot, then call the global scorecard gate and summary export.\n"
         f"- Canonical global scorecard order: `python {roots['management']}/scripts/prepare_user_scorecard_review.py --workspace-root <repo> --mode verify` -> `python {scorecard['delivery_gate']} --mode verify --workspace-root <repo>` -> `python {scorecard['summary_export']}`.\n"
-        f"- Generated runtime hooks may replay the scorecard close-out path at session start and prompt submit, but the canonical enforcement surface remains the explicit verify chain.\n"
+        f"- Generated runtime hooks may replay the scorecard close-out reminder at session start and prompt submit, but the canonical enforcement surface remains the explicit verify chain.\n"
         f"- Verify/release require fresh evidence manifests plus a signed workspace authority lease under `{scorecard['workspace_authority_root']}`.\n"
         f"- Required scorecard gate command: `python {scorecard['delivery_gate']} --mode verify`\n"
         f"- Required scorecard summary command: `python {scorecard['summary_export']}`\n"
@@ -392,14 +402,10 @@ def main() -> int:
     write_text(Path(runtime["windows_mirror"]["config"]), render_config(authority, windows=True, effective_cfg=effective_cfg))
     linux_hooks = runtime["linux"].get("hooks_config")
     if linux_hooks:
-        rendered = render_hooks(authority, windows=False)
-        if rendered is not None:
-            write_text(Path(linux_hooks), rendered)
+        sync_generated_text(Path(linux_hooks), render_hooks(authority, windows=False))
     windows_hooks = runtime["windows_mirror"].get("hooks_config")
     if windows_hooks:
-        rendered = render_hooks(authority, windows=True)
-        if rendered is not None:
-            write_text(Path(windows_hooks), rendered)
+        sync_generated_text(Path(windows_hooks), render_hooks(authority, windows=True))
     relink(Path.home() / ".codex" / "workspace_authority.json", AUTHORITY_PATH)
 
     if not args.skip_skills:
