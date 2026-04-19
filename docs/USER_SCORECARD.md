@@ -10,6 +10,7 @@
 - authoritative reviewer verdict root: `$CODEX_HOME/state/reviewer-verdicts/<codex_project_id>/<trace_id>/`
 - authoritative scorecard context: `$CODEX_HOME/state/scorecard-context/<codex_project_id>/<trace_id>.json`
 - authoritative workspace lease: `$CODEX_HOME/state/workspace-authority/<codex_project_id>.json`
+- authoritative gate receipt root: `$CODEX_HOME/state/gate-receipts/<codex_project_id>/<run_id>.json`
 - derived review snapshot: `reports/user-scorecard.review.json`
 - generated result: `reports/user-scorecard.json`
 
@@ -24,7 +25,8 @@
 - the anti-cheat layer treats score-surface manipulation as negative reward: suspicious points are denied, then penalized, then capped, and critical cases escalate to disqualifiers
 - PASS is still determined by reviewer green, existing readiness, and clean-room verify
 - disqualifiers outrank score
-- generated global runtime elevates the scorecard layer into instruction-level guidance through `~/.codex/AGENTS.md`, and the single generated runtime hook replays a close-out reminder on prompt submit without replacing the explicit verify chain
+- generated global runtime elevates the scorecard layer into instruction-level guidance through `~/.codex/AGENTS.md`, and the single generated runtime hook replays an `iaw-closeout` reminder on prompt submit without replacing the explicit verify chain
+- verify or release claims become authoritative only when a signed `gate_receipt.json` exists
 
 ## Reviewer Roles
 
@@ -44,12 +46,13 @@
 Canonical gate truth now comes from runtime state outside the repo.
 
 - `task_context` controls axis applicability, caps, and reviewer requirements.
-- `completion_score` now uses automatic verified-work awards plus optional user additions. Clean-room verify PASS grants the baseline `24` points automatically, and the user can add more awards up to the axis max.
+- `completion_score` now uses automatic verified-work awards plus optional user additions. Clean-room verify PASS grants the baseline `24` points automatically; WAIVED stays disclosure-only and grants `0`.
 - only `completion_score` has a user-award budget, currently `6` points. Other axes default to `0` user-award budget and are treated as score stuffing if a write is attempted.
 - `prepare_user_scorecard_review.py` ignores snapshot/base `user_review` changes unless the payload carries an explicit `user_review_update_request` or `user_review_update_authorized: true`.
 - official anti-cheat codes are `unauthorized_user_review_modification`, `reserved_derived_award_spoofing`, `non_user_source_award`, `excessive_bonus_request`, `reviewer_truth_tamper`, `writer_self_score_attempt`, `claimed_verification_without_evidence`, `test_deletion_or_weakening_without_rationale`, `score_policy_tamper_without_policy_update_workorder`, `evidence_backdating_or_stale_report_reuse`, `waiver_without_reason`, `gate_order_drift`, `protected_path_access_attempt`, `verification_command_substitution`, `evidence_manifest_mismatch`, `task_skip_or_merge_without_rationale`, `unsupported_transition_claim`, `verification_word_without_artifact`, `convention_drift`, `zombie_section_or_stale_claim`, `aesthetic_or_report_smoothing`, `cross_verification_disagreement_unresolved`, `result_fit_tweaking`, and `formula_or_code_simplification_without_case_check`.
 - v1.2 additive scorecard summaries include `taste_gate`, `task_tree`, `repeated_verify`, `cross_verification`, `convention_lock`, `summary_coverage`, and `evidence_manifest`.
 - `SUMMARY.md` should include a `## Negative Findings` section so fail, blocked, cap, penalty, waiver, and unresolved disagreement outcomes remain visible.
+- score, PASS, credited, clean-room reflected, DQ clear, and release-ready language should downgrade to `UNKNOWN`, `UNVERIFIED`, `BLOCKED pending evidence`, or `WAIVED with reason` when a signed gate receipt is absent.
 - test-change rationale should be recorded under the canonical heading `## Test Change Rationale:`. `Test Change Notes`, inline-after-colon forms, and legacy plain-label variants remain compatibility inputs only.
 - placeholder-only entries such as `None`, `N/A`, `NA`, and `Not applicable` do not count as rationale, even when they include trailing punctuation.
 - generated `hooks.json` is derived runtime state. If authority disables `runtime_hook` or clears its events, the generated hook file should disappear instead of leaving stale reminders behind.
@@ -86,15 +89,15 @@ Unsigned, wrong-signature, or wrong-provenance verdicts are ignored and recorded
 ## Commands
 
 ```bash
-python /home/andy4917/Dev-Management/scripts/prepare_user_scorecard_review.py --workspace-root /home/andy4917/Dev-Product/<project> --mode verify
+python /home/andy4917/Dev-Management/scripts/iaw_closeout.py --workspace-root /home/andy4917/Dev-Product/<project> --run-id <run_id> --profile <L1|L2|L3|L4> --mode verify
 python /home/andy4917/Dev-Management/scripts/record_reviewer_verdict.py --workspace-root /home/andy4917/Dev-Product/<project> --trace-id <trace_id> --role skeptic_reviewer --status APPROVED --green true --input-report <context.json>
-python /home/andy4917/Dev-Management/scripts/delivery_gate.py --mode verify --workspace-root /home/andy4917/Dev-Product/<project>
-python /home/andy4917/Dev-Management/scripts/export_user_score_summary.py
 ```
+
+`iaw_closeout.py` is the only accepted verify or release close-out entrypoint. It canonicalizes the workspace root, verifies the authority lease and evidence manifest, runs the global prepare/gate/export/audit sequence, then issues the signed gate receipt.
 
 `prepare_user_scorecard_review.py`는 reviewer truth를 생성하거나 수정하지 않습니다. workspace reports에서 context를 조립하고, signed verdict log를 읽어 snapshot에 렌더링만 합니다.
 
-제품 저장소의 `python scripts/delivery_gate.py --mode verify` wrapper는 로컬 project gate를 끝낸 뒤 위 3개 전역 scorecard 단계를 자동으로 이어서 실행해야 합니다. 로컬 project gate 결과는 `existing_readiness`와 `clean_room_verify`의 upstream evidence이며, global scorecard를 대체하지 않습니다.
+제품 저장소의 `python scripts/delivery_gate.py --mode verify` wrapper는 로컬 project gate를 끝낸 뒤 `iaw_closeout.py`를 호출해야 합니다. 로컬 project gate 결과는 `existing_readiness`와 `clean_room_verify`의 upstream evidence이며, global scorecard를 대체하지 않습니다.
 
 ## Gate Order
 

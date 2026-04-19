@@ -244,7 +244,7 @@
         {
           "id": "confirmed_work_execution",
           "points": 24,
-          "reason": "Clean-room verify passed, so confirmed work execution earns the baseline completion credit automatically.",
+          "reason": "Only a clean-room verify PASS earns the baseline completion credit automatically; WAIVED remains disclosure-only.",
           "category": "system_derived",
           "when_all": {
             "clean_room_verify_passed": true

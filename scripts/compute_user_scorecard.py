@@ -167,60 +167,63 @@ def _compat_evidence_manifest(
 
 def _load_support_artifacts(authority_review: dict[str, Any], workspace_root: Path | None) -> dict[str, Any]:
     evidence_inputs = authority_review.get("evidence_inputs", {})
+    requested_run_id = str(authority_review.get("run_id", "")).strip()
     manifest_path = resolve_path(evidence_inputs.get("evidence_manifest_path", ""), workspace_root)
     if manifest_path is None and workspace_root is not None:
-        manifest_path = published_evidence_manifest_path(workspace_root)
+        manifest_path = published_evidence_manifest_path(workspace_root, run_id=requested_run_id)
     manifest_payload = load_json(manifest_path) if manifest_path is not None and manifest_path.exists() else {}
     manifest = _compat_evidence_manifest(manifest_payload if isinstance(manifest_payload, dict) else {}, manifest_path=manifest_path, workspace_root=workspace_root)
+    if not requested_run_id:
+        requested_run_id = str(manifest.get("run_id", "")).strip()
 
     workorder_path = resolve_path(evidence_inputs.get("workorder_path", ""), workspace_root)
     if workorder_path is None and workspace_root is not None:
-        workorder_path = published_workorder_path(workspace_root, manifest_path)
+        workorder_path = published_workorder_path(workspace_root, manifest_path, run_id=requested_run_id)
     workorder = load_json(workorder_path) if workorder_path is not None and workorder_path.exists() else {}
 
     command_log_path = resolve_path(evidence_inputs.get("command_log_path", ""), workspace_root)
     if command_log_path is None and workspace_root is not None:
-        command_log_path = published_command_log_path(workspace_root, manifest_path)
+        command_log_path = published_command_log_path(workspace_root, manifest_path, run_id=requested_run_id)
     command_log = load_jsonl(command_log_path) if command_log_path is not None and command_log_path.exists() else []
 
     waivers_path = resolve_path(evidence_inputs.get("waivers_path", ""), workspace_root)
     if waivers_path is None and workspace_root is not None:
-        waivers_path = published_waivers_path(workspace_root, manifest_path)
+        waivers_path = published_waivers_path(workspace_root, manifest_path, run_id=requested_run_id)
     waivers = load_json(waivers_path) if waivers_path is not None and waivers_path.exists() else {}
 
     task_tree_path = resolve_path(evidence_inputs.get("task_tree_path", ""), workspace_root)
     if task_tree_path is None and workspace_root is not None:
-        task_tree_path = published_task_tree_path(workspace_root, manifest_path)
+        task_tree_path = published_task_tree_path(workspace_root, manifest_path, run_id=requested_run_id)
     task_tree = load_json(task_tree_path) if task_tree_path is not None and task_tree_path.exists() else {}
 
     repeated_verify_path = resolve_path(evidence_inputs.get("repeated_verify_path", ""), workspace_root)
     if repeated_verify_path is None and workspace_root is not None:
-        repeated_verify_path = published_repeated_verify_path(workspace_root, manifest_path)
+        repeated_verify_path = published_repeated_verify_path(workspace_root, manifest_path, run_id=requested_run_id)
     repeated_verify = load_json(repeated_verify_path) if repeated_verify_path is not None and repeated_verify_path.exists() else {}
 
     cross_verification_path = resolve_path(evidence_inputs.get("cross_verification_path", ""), workspace_root)
     if cross_verification_path is None and workspace_root is not None:
-        cross_verification_path = published_cross_verification_path(workspace_root, manifest_path)
+        cross_verification_path = published_cross_verification_path(workspace_root, manifest_path, run_id=requested_run_id)
     cross_verification = load_json(cross_verification_path) if cross_verification_path is not None and cross_verification_path.exists() else {}
 
     claim_ledger_path = resolve_path(evidence_inputs.get("claim_ledger_path", ""), workspace_root)
     if claim_ledger_path is None and workspace_root is not None:
-        claim_ledger_path = published_claim_ledger_path(workspace_root, manifest_path)
+        claim_ledger_path = published_claim_ledger_path(workspace_root, manifest_path, run_id=requested_run_id)
     claim_ledger = load_json(claim_ledger_path) if claim_ledger_path is not None and claim_ledger_path.exists() else {}
 
     summary_coverage_path = resolve_path(evidence_inputs.get("summary_coverage_path", ""), workspace_root)
     if summary_coverage_path is None and workspace_root is not None:
-        summary_coverage_path = published_summary_coverage_path(workspace_root, manifest_path)
+        summary_coverage_path = published_summary_coverage_path(workspace_root, manifest_path, run_id=requested_run_id)
     summary_coverage = load_json(summary_coverage_path) if summary_coverage_path is not None and summary_coverage_path.exists() else {}
 
     convention_lock_path = resolve_path(evidence_inputs.get("convention_lock_path", ""), workspace_root)
     if convention_lock_path is None and workspace_root is not None:
-        convention_lock_path = published_convention_lock_path(workspace_root, manifest_path)
+        convention_lock_path = published_convention_lock_path(workspace_root, manifest_path, run_id=requested_run_id)
     convention_lock = load_json(convention_lock_path) if convention_lock_path is not None and convention_lock_path.exists() else {}
 
     taste_gate_path = resolve_path(evidence_inputs.get("taste_gate_path", ""), workspace_root)
     if taste_gate_path is None and workspace_root is not None:
-        taste_gate_path = published_taste_gate_path(workspace_root, manifest_path)
+        taste_gate_path = published_taste_gate_path(workspace_root, manifest_path, run_id=requested_run_id)
     taste_gate = load_json(taste_gate_path) if taste_gate_path is not None and taste_gate_path.exists() else {}
 
     summary_path = resolve_path(evidence_inputs.get("summary_path", ""), workspace_root)
@@ -279,6 +282,7 @@ def _load_support_artifacts(authority_review: dict[str, Any], workspace_root: Pa
         "current_head_commit": current_head,
         "is_current": is_current,
         "run_root": run_root,
+        "requested_run_id": requested_run_id,
     }
 
 
@@ -324,9 +328,12 @@ def _waiver_entries(support: dict[str, Any]) -> list[dict[str, Any]]:
 def _waiver_reason(support: dict[str, Any], *waiver_ids: str) -> str:
     wanted = {str(item).strip().casefold() for item in waiver_ids if str(item).strip()}
     for entry in _waiver_entries(support):
-        entry_id = str(entry.get("id", "")).strip().casefold()
+        entry_id = str(entry.get("id", entry.get("affected_gate", ""))).strip().casefold()
         if entry_id and entry_id in wanted:
-            return str(entry.get("reason", "")).strip()
+            reason = str(entry.get("reason", "")).strip()
+            if reason:
+                return reason
+            return str(entry.get("reason_code", "")).strip()
     return ""
 
 
@@ -593,17 +600,59 @@ def _repeated_verify_summary(support: dict[str, Any]) -> dict[str, Any]:
         return _summary_stage("BLOCKED", "repeated verify artifact is missing for a v1.2 run", round_count=0, no_new_material_findings=False, waived=False)
     rounds = [dict(item) for item in payload.get("rounds", []) if isinstance(item, dict)]
     round_count = len(rounds)
+    distinct_modes = {
+        _normalized_text(item.get("mode", "")).casefold()
+        for item in rounds
+        if _normalized_text(item.get("mode", ""))
+    }
     waived = bool(payload.get("waived", False)) or bool(waiver_reason)
     no_new_material_findings = bool(rounds) and int(rounds[-1].get("new_material_findings", 1)) == 0
     if waived:
-        return _summary_stage("WAIVED", _normalized_text(payload.get("waiver_reason", "")) or waiver_reason, round_count=round_count, no_new_material_findings=no_new_material_findings, waived=True)
+        return _summary_stage(
+            "WAIVED",
+            _normalized_text(payload.get("waiver_reason", "")) or waiver_reason,
+            round_count=round_count,
+            no_new_material_findings=no_new_material_findings,
+            waived=True,
+            distinct_mode_count=len(distinct_modes),
+        )
     if round_count < 2:
-        return _summary_stage("BLOCKED", "repeated verify requires at least 2 rounds unless waived", round_count=round_count, no_new_material_findings=no_new_material_findings, waived=False)
+        return _summary_stage(
+            "BLOCKED",
+            "repeated verify requires at least 2 rounds unless waived",
+            round_count=round_count,
+            no_new_material_findings=no_new_material_findings,
+            waived=False,
+            distinct_mode_count=len(distinct_modes),
+        )
     if round_count > 5:
-        return _summary_stage("BLOCKED", "repeated verify allows at most 5 rounds", round_count=round_count, no_new_material_findings=no_new_material_findings, waived=False)
+        return _summary_stage(
+            "BLOCKED",
+            "repeated verify allows at most 5 rounds",
+            round_count=round_count,
+            no_new_material_findings=no_new_material_findings,
+            waived=False,
+            distinct_mode_count=len(distinct_modes),
+        )
+    if len(distinct_modes) < 2:
+        return _summary_stage(
+            "BLOCKED",
+            "repeated verify requires at least 2 distinct modes unless waived",
+            round_count=round_count,
+            no_new_material_findings=no_new_material_findings,
+            waived=False,
+            distinct_mode_count=len(distinct_modes),
+        )
     if not no_new_material_findings:
-        return _summary_stage("BLOCKED", "repeated verify must stop only when no new material findings remain", round_count=round_count, no_new_material_findings=False, waived=False)
-    return _summary_stage("PASS", "", round_count=round_count, no_new_material_findings=True, waived=False)
+        return _summary_stage(
+            "BLOCKED",
+            "repeated verify must stop only when no new material findings remain",
+            round_count=round_count,
+            no_new_material_findings=False,
+            waived=False,
+            distinct_mode_count=len(distinct_modes),
+        )
+    return _summary_stage("PASS", "", round_count=round_count, no_new_material_findings=True, waived=False, distinct_mode_count=len(distinct_modes))
 
 
 def _cross_verification_summary(support: dict[str, Any]) -> dict[str, Any]:
@@ -1112,6 +1161,8 @@ def _load_context(review: dict[str, Any], workspace_root: Path | None) -> tuple[
         payload["user_review"] = dict(review.get("user_review", {}))
     if "disqualifiers" in review:
         payload["disqualifiers"] = list(review.get("disqualifiers", []))
+    if "run_id" in review:
+        payload["run_id"] = str(review.get("run_id", "")).strip()
     payload["authority_audit_path"] = str(resolve_path(review.get("authority_audit_path", ""), workspace_root) or "")
     return payload, context_path
 
@@ -1414,7 +1465,9 @@ def _manifest_anti_cheat_signals(
         )
 
     for waiver in manifest.get("waivers", []):
-        if not isinstance(waiver, dict) or str(waiver.get("reason", "")).strip():
+        if not isinstance(waiver, dict):
+            continue
+        if str(waiver.get("reason", "")).strip() or str(waiver.get("reason_code", "")).strip():
             continue
         signals.append(
             _anti_cheat_signal(
@@ -1674,7 +1727,7 @@ def compute_scorecard(policy: dict[str, Any], review: dict[str, Any], mode: str)
         workspace_root,
     )
     context["existing_readiness_passed"] = normalize_status(existing_readiness.get("status"), "UNKNOWN") in {"PASS", "WAIVED"}
-    context["clean_room_verify_passed"] = normalize_status(clean_room_verify.get("status"), "UNKNOWN") in {"PASS", "WAIVED"}
+    context["clean_room_verify_passed"] = normalize_status(clean_room_verify.get("status"), "UNKNOWN") == "PASS"
     context["evidence_manifest_present"] = bool(support.get("evidence_manifest_path"))
     context["evidence_manifest_current"] = bool(support.get("is_current", False))
     claim_findings = _claim_phrase_findings(support)
@@ -1890,6 +1943,7 @@ def compute_scorecard(policy: dict[str, Any], review: dict[str, Any], mode: str)
         "policy_version": policy.get("version", 1),
         "generated_at": utc_timestamp(),
         "workspace_root": str(workspace_root) if workspace_root is not None else str(review.get("workspace_root", "")).strip(),
+        "run_id": str(support.get("evidence_manifest", {}).get("run_id", "")).strip(),
         "mode": mode,
         "disqualifier_result": disqualifier_result,
         "authoritative_context_path": str(context_path) if context_path is not None else "",

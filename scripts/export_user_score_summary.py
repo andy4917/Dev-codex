@@ -4,7 +4,7 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from _scorecard_common import DEFAULT_SCORECARD_FILE, load_json, resolve_path
+from _scorecard_common import DEFAULT_SCORECARD_FILE, load_json, resolve_path, signature_valid
 
 
 def _axis_score(payload: dict, key: str) -> str:
@@ -47,13 +47,36 @@ def _stage_line(payload: dict, key: str, default: str = "UNKNOWN") -> str:
     return status
 
 
+def _authoritative_receipt(payload: dict, receipt_file: str) -> dict:
+    candidate = resolve_path(receipt_file) if receipt_file else None
+    if candidate is None:
+        evidence_manifest_path = resolve_path(str(payload.get("evidence_manifest_path", "")))
+        if evidence_manifest_path is not None:
+            mirror = evidence_manifest_path.parent / "gate_receipt.json"
+            if mirror.exists():
+                candidate = mirror
+    if candidate is None or not candidate.exists():
+        return {}
+    receipt = load_json(candidate, default={})
+    if not isinstance(receipt, dict) or not signature_valid(receipt):
+        return {}
+    return receipt
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Export the ordered user scorecard summary.")
     parser.add_argument("--scorecard-file", default=str(DEFAULT_SCORECARD_FILE))
+    parser.add_argument("--receipt-file", default="")
+    parser.add_argument("--allow-pending-receipt", action="store_true")
     args = parser.parse_args()
 
     scorecard_path = resolve_path(args.scorecard_file) or Path(args.scorecard_file)
     payload = load_json(scorecard_path)
+    receipt = _authoritative_receipt(payload, str(args.receipt_file).strip())
+    authoritative = bool(receipt) or bool(args.allow_pending_receipt)
+    receipt_status = "PRESENT" if receipt else ("PENDING" if args.allow_pending_receipt else "MISSING")
+
+    print(f"0. authoritative receipt: {receipt_status}")
 
     print(f"1. disqualifier 결과: {payload.get('disqualifier_result', {}).get('status', 'UNKNOWN')}")
     print(f"2. trust_score: {_axis_score(payload, 'trust_score')}")
@@ -82,19 +105,22 @@ def main() -> int:
         for item in requested_credit:
             print(f"- requested: {item['source']} {item['axis']} +{item['requested_points']} ({item['reason']})")
     if credited_credit:
-        for item in credited_credit:
-            reason = requested_reason.get((item.get("axis", ""), item.get("requested_points", 0), item.get("source", "")), "")
-            suffix = f" ({reason})" if reason else ""
-            if item.get("blocked"):
-                print(
-                    f"- credited: {item['source']} {item['axis']} +0/{item['requested_points']} blocked={item.get('block_reason', '')}{suffix}"
-                )
-            elif item.get("capped"):
-                print(
-                    f"- credited: {item['source']} {item['axis']} +{item['credited_points']}/{item['requested_points']} capped{suffix}"
-                )
-            else:
-                print(f"- credited: {item['source']} {item['axis']} +{item['credited_points']}{suffix}")
+        if authoritative:
+            for item in credited_credit:
+                reason = requested_reason.get((item.get("axis", ""), item.get("requested_points", 0), item.get("source", "")), "")
+                suffix = f" ({reason})" if reason else ""
+                if item.get("blocked"):
+                    print(
+                        f"- credited: {item['source']} {item['axis']} +0/{item['requested_points']} blocked={item.get('block_reason', '')}{suffix}"
+                    )
+                elif item.get("capped"):
+                    print(
+                        f"- credited: {item['source']} {item['axis']} +{item['credited_points']}/{item['requested_points']} capped{suffix}"
+                    )
+                else:
+                    print(f"- credited: {item['source']} {item['axis']} +{item['credited_points']}{suffix}")
+        else:
+            print("- credited: UNVERIFIED pending gate_receipt")
     if payload.get("user_penalties"):
         for penalty in payload["user_penalties"]:
             print(f"- penalty: user {penalty['axis']} -{penalty['points']} ({penalty['reason']})")
@@ -142,7 +168,7 @@ def main() -> int:
             f"zombie_sections={summary_coverage.get('zombie_section_count', 0)}"
         )
 
-    print(f"19. gate 상태: {payload.get('gate_status', 'UNKNOWN')}")
+    print(f"19. gate 상태: {payload.get('gate_status', 'UNKNOWN') if authoritative else 'UNVERIFIED'}")
     manual = payload.get("remaining_manual_close_out", [])
     if manual:
         print(f"20. 남은 manual close-out: {'; '.join(str(item) for item in manual)}")
@@ -168,7 +194,7 @@ def main() -> int:
         print(f"21. Negative Findings: {', '.join(negative_findings)}")
     else:
         print("21. Negative Findings: none")
-    print(f"22. 최종 판정: {payload.get('final_decision', 'UNKNOWN')}")
+    print(f"22. 최종 판정: {payload.get('final_decision', 'UNKNOWN') if authoritative else 'UNVERIFIED'}")
     return 0
 
 

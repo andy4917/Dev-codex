@@ -30,6 +30,7 @@ class ScorecardRuntimeHookTests(unittest.TestCase):
             },
             "generation_targets": {
                 "scorecard": {
+                    "closeout": "/home/andy4917/Dev-Management/scripts/iaw_closeout.py",
                     "delivery_gate": "/home/andy4917/Dev-Management/scripts/delivery_gate.py",
                     "summary_export": "/home/andy4917/Dev-Management/scripts/export_user_score_summary.py",
                     "runtime_hook": {
@@ -52,7 +53,7 @@ class ScorecardRuntimeHookTests(unittest.TestCase):
             )
 
         self.assertIn("Binding scorecard layer for /home/andy4917/Dev-Workflow", notice)
-        self.assertIn("prepare_user_scorecard_review.py --workspace-root /home/andy4917/Dev-Workflow --mode verify", notice)
+        self.assertIn("iaw_closeout.py --workspace-root /home/andy4917/Dev-Workflow --run-id <run_id> --profile <L1|L2|L3|L4> --mode verify", notice)
 
     def test_emit_notice_is_empty_outside_canonical_roots(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

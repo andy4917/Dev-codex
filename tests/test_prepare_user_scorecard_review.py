@@ -265,6 +265,109 @@ class PrepareUserScorecardReviewTests(unittest.TestCase):
             self.assertFalse(scorecard["reviewer_requirements"]["reviewer_green"])
             self.assertIn("skeptic_reviewer", scorecard["reviewer_requirements"]["non_green_required_roles"])
 
+    def test_prepare_and_compute_honor_explicit_run_id_over_latest_agent_run(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp = Path(tmpdir)
+            workspace, _trace_id = self._build_workspace(tmp)
+            requested_run = "2026-04-20-a"
+            latest_run = "2026-04-20-z"
+            for run_id, objective in (
+                (requested_run, "requested run"),
+                (latest_run, "latest run"),
+            ):
+                run_root = workspace / ".agent-runs" / run_id
+                _write_json(
+                    run_root / "WORKORDER.json",
+                    {
+                        "schema_version": 1,
+                        "run_id": run_id,
+                        "canonical_repo": str(ROOT),
+                        "support_repo": str(workspace),
+                        "objective": objective,
+                        "allowed_change_zones": [str(workspace)],
+                        "protected_paths": ["user_review.approved.json"],
+                        "acceptance_criteria": ["run packet is bound by run id"],
+                        "verification_commands": ["pytest"],
+                        "rollback_plan_required": True,
+                    },
+                )
+                _write_json(
+                    run_root / "EVIDENCE_MANIFEST.json",
+                    {
+                        "schema_version": 1,
+                        "run_id": run_id,
+                        "workspace_root_realpath": str(workspace),
+                        "git_root": str(workspace),
+                        "base_commit": "nogit",
+                        "head_commit": "nogit",
+                        "changed_files": [],
+                        "changed_file_set_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed2c8fd1d3b724f3e5c5880cf8f4c8b7",
+                        "commands": [],
+                        "artifacts": [],
+                        "waivers": [],
+                        "policy_hashes": {"current": {}},
+                        "script_hashes": {},
+                        "state_history": [],
+                    },
+                )
+
+            codex_home = tmp / "codex-home"
+            context_output = codex_home / "state" / "scorecard-context" / workspace.name / "trace-verify-001.json"
+            snapshot_output = tmp / "review-out.json"
+            compute_output = tmp / "scorecard.json"
+            base_review = tmp / "base-review.json"
+            _write_json(base_review, {"status": "TEMPLATE", "user_review": {"status": "PENDING", "awards": [], "penalties": [], "notes": ""}})
+
+            prepare = subprocess.run(
+                [
+                    sys.executable,
+                    str(PREPARE),
+                    "--workspace-root",
+                    str(workspace),
+                    "--run-id",
+                    requested_run,
+                    "--mode",
+                    "verify",
+                    "--base-file",
+                    str(base_review),
+                    "--context-output-file",
+                    str(context_output),
+                    "--review-snapshot-output",
+                    str(snapshot_output),
+                ],
+                cwd=ROOT,
+                env=self._env(codex_home),
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+            )
+            self.assertEqual(prepare.returncode, 0, msg=prepare.stderr)
+            snapshot = json.loads(snapshot_output.read_text(encoding="utf-8"))
+            self.assertEqual(snapshot["run_id"], requested_run)
+            self.assertTrue(snapshot["evidence_inputs"]["evidence_manifest_path"].endswith(f"/{requested_run}/EVIDENCE_MANIFEST.json"))
+            self.assertTrue(snapshot["evidence_inputs"]["workorder_path"].endswith(f"/{requested_run}/WORKORDER.json"))
+
+            compute = subprocess.run(
+                [
+                    sys.executable,
+                    str(COMPUTE),
+                    "--review-file",
+                    str(snapshot_output),
+                    "--output-file",
+                    str(compute_output),
+                    "--mode",
+                    "verify",
+                ],
+                cwd=ROOT,
+                env=self._env(codex_home),
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+            )
+            self.assertIn(compute.returncode, {0, 1, 2}, msg=compute.stderr)
+            scorecard = json.loads(compute_output.read_text(encoding="utf-8"))
+            self.assertEqual(scorecard["run_id"], requested_run)
+
     def test_prepare_ignores_user_review_without_explicit_request_or_approval(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             tmp = Path(tmpdir)
@@ -911,7 +1014,7 @@ class PrepareUserScorecardReviewTests(unittest.TestCase):
             self.assertEqual(scorecard["anti_cheat_layer"]["decision_summary"]["highest_decision"], "cap")
             self.assertEqual(scorecard["disqualifier_result"]["status"], "PASS")
 
-    def test_clean_room_verify_waived_still_grants_system_derived_completion_credit(self) -> None:
+    def test_clean_room_verify_waived_no_longer_grants_system_derived_completion_credit(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             tmp = Path(tmpdir)
             workspace, _trace_id = self._build_workspace(tmp)
@@ -970,9 +1073,9 @@ class PrepareUserScorecardReviewTests(unittest.TestCase):
 
             scorecard = json.loads(compute_output.read_text(encoding="utf-8"))
             completion = scorecard["scores"]["completion_score"]
-            self.assertEqual(completion["derived_award_points"], 24)
-            self.assertEqual(scorecard["credited_credit"][-1]["source"], "system_derived")
-            self.assertEqual(scorecard["credited_credit"][-1]["credited_points"], 24)
+            self.assertEqual(completion["derived_award_points"], 0)
+            system_derived = [item for item in scorecard["credited_credit"] if item["source"] == "system_derived"]
+            self.assertEqual(system_derived, [])
 
     def test_claimed_verification_without_evidence_is_recorded(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

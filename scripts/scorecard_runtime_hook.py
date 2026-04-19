@@ -110,19 +110,13 @@ def should_emit(state_dir: Path, workspace_root: Path, event: str, throttle: int
 
 
 def build_notice(authority: dict[str, Any], workspace_root: Path) -> str:
-    management_root = canonical_roots(authority)["management"]
     scorecard = authority.get("generation_targets", {}).get("scorecard", {})
-    prepare = management_root / "scripts" / "prepare_user_scorecard_review.py"
-    delivery_gate = Path(scorecard["delivery_gate"])
-    summary_export = Path(scorecard["summary_export"])
-    audit = management_root / "scripts" / "audit_workspace.py"
+    closeout = Path(scorecard.get("closeout", "/home/andy4917/Dev-Management/scripts/iaw_closeout.py"))
     workspace = str(workspace_root)
     return (
         f"[scorecard-hook] Binding scorecard layer for {workspace}. "
-        f"Before finalizing run: python {prepare} --workspace-root {workspace} --mode verify -> "
-        f"python {delivery_gate} --mode verify --workspace-root {workspace} -> "
-        f"python {summary_export} -> "
-        f"python {audit} --write-report"
+        f"Before finalizing score, gate, or release claims: "
+        f"python {closeout} --workspace-root {workspace} --run-id <run_id> --profile <L1|L2|L3|L4> --mode verify"
     )
 
 

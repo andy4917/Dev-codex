@@ -315,6 +315,7 @@ def main() -> int:
     parser.add_argument("--review-file", default=str(DEFAULT_REVIEW_FILE))
     parser.add_argument("--output-file", default=str(DEFAULT_SCORECARD_FILE))
     parser.add_argument("--workspace-root", default="")
+    parser.add_argument("--run-id", default="")
     args = parser.parse_args()
 
     review_path = resolve_path(args.review_file) or Path(args.review_file)
@@ -322,6 +323,8 @@ def main() -> int:
     review = load_json(review_path)
     if args.workspace_root.strip():
         review["workspace_root"] = args.workspace_root.strip()
+    if args.run_id.strip():
+        review["run_id"] = args.run_id.strip()
 
     result = run_delivery_gate(review, args.mode)
     save_json(output_path, result)

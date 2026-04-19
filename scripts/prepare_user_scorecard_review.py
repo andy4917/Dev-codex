@@ -404,7 +404,7 @@ def current_trace_id(workspace_root: Path, mode: str) -> str:
     return fresh_trace_id(workspace_root) or f"{workspace_root.name}-{mode}"
 
 
-def build_context_payload(workspace_root: Path, mode: str, base: dict[str, Any]) -> dict[str, Any]:
+def build_context_payload(workspace_root: Path, mode: str, base: dict[str, Any], run_id: str = "") -> dict[str, Any]:
     reports = workspace_root / "reports"
     delivery_gate_path = reports / "delivery-gate.json"
     readiness_path = reports / "user-readiness.json"
@@ -425,17 +425,20 @@ def build_context_payload(workspace_root: Path, mode: str, base: dict[str, Any])
 
     trace_id = current_trace_id(workspace_root, mode)
     user_review = authorized_user_review(base)
-    evidence_manifest_path = published_evidence_manifest_path(workspace_root)
-    workorder_path = published_workorder_path(workspace_root, evidence_manifest_path)
-    command_log_path = published_command_log_path(workspace_root, evidence_manifest_path)
-    waivers_path = published_waivers_path(workspace_root, evidence_manifest_path)
-    task_tree_path = published_task_tree_path(workspace_root, evidence_manifest_path)
-    repeated_verify_path = published_repeated_verify_path(workspace_root, evidence_manifest_path)
-    cross_verification_path = published_cross_verification_path(workspace_root, evidence_manifest_path)
-    claim_ledger_path = published_claim_ledger_path(workspace_root, evidence_manifest_path)
-    summary_coverage_path = published_summary_coverage_path(workspace_root, evidence_manifest_path)
-    convention_lock_path = published_convention_lock_path(workspace_root, evidence_manifest_path)
-    taste_gate_path = published_taste_gate_path(workspace_root, evidence_manifest_path)
+    selected_run_id = str(run_id or base.get("run_id", "")).strip()
+    evidence_manifest_path = published_evidence_manifest_path(workspace_root, run_id=selected_run_id)
+    workorder_path = published_workorder_path(workspace_root, evidence_manifest_path, run_id=selected_run_id)
+    command_log_path = published_command_log_path(workspace_root, evidence_manifest_path, run_id=selected_run_id)
+    waivers_path = published_waivers_path(workspace_root, evidence_manifest_path, run_id=selected_run_id)
+    task_tree_path = published_task_tree_path(workspace_root, evidence_manifest_path, run_id=selected_run_id)
+    repeated_verify_path = published_repeated_verify_path(workspace_root, evidence_manifest_path, run_id=selected_run_id)
+    cross_verification_path = published_cross_verification_path(workspace_root, evidence_manifest_path, run_id=selected_run_id)
+    claim_ledger_path = published_claim_ledger_path(workspace_root, evidence_manifest_path, run_id=selected_run_id)
+    summary_coverage_path = published_summary_coverage_path(workspace_root, evidence_manifest_path, run_id=selected_run_id)
+    convention_lock_path = published_convention_lock_path(workspace_root, evidence_manifest_path, run_id=selected_run_id)
+    taste_gate_path = published_taste_gate_path(workspace_root, evidence_manifest_path, run_id=selected_run_id)
+    if not selected_run_id and evidence_manifest_path.exists() and evidence_manifest_path.name == "EVIDENCE_MANIFEST.json":
+        selected_run_id = evidence_manifest_path.parent.name
     summary_path = workspace_root / "SUMMARY.md"
     design_review_path = workspace_root / "DESIGN_REVIEW.md"
     return {
@@ -444,6 +447,7 @@ def build_context_payload(workspace_root: Path, mode: str, base: dict[str, Any])
         "task_id": str(base.get("task_id", "")).strip() or f"{workspace_root.name}-{mode}",
         "workspace_root": str(workspace_root),
         "delivery_mode": mode,
+        "run_id": selected_run_id,
         "trace_id": trace_id,
         "codex_project_id": project_id(workspace_root),
         "git_sha": git_sha(workspace_root),
@@ -624,6 +628,7 @@ def main() -> int:
     parser.add_argument("--output-file", default="", help="Deprecated alias for --review-snapshot-output.")
     parser.add_argument("--context-output-file", default="")
     parser.add_argument("--review-snapshot-output", default="")
+    parser.add_argument("--run-id", default="")
     args = parser.parse_args()
 
     workspace_root = resolve_path(args.workspace_root) or Path(args.workspace_root)
@@ -631,7 +636,7 @@ def main() -> int:
     base = load_json(base_path, default_review_payload())
     base_user_review_tamper_events = user_review_tamper_events(base, base_path)
 
-    context_payload = build_context_payload(workspace_root, args.mode, base)
+    context_payload = build_context_payload(workspace_root, args.mode, base, run_id=args.run_id)
     extra_tamper_events = [
         *base_user_review_tamper_events,
         *verification_claim_tamper_events(workspace_root, context_payload),

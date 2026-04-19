@@ -258,9 +258,11 @@ trust_level = "trusted"
                     "disqualifiers": "/home/andy4917/Dev-Management/contracts/disqualifier_policy.json",
                     "reviewer_verdict_root": "/home/andy4917/.codex/state/reviewer-verdicts",
                     "review_snapshot": "/home/andy4917/Dev-Management/reports/user-scorecard.review.json",
+                    "closeout": "/home/andy4917/Dev-Management/scripts/iaw_closeout.py",
                     "delivery_gate": "/home/andy4917/Dev-Management/scripts/delivery_gate.py",
                     "summary_export": "/home/andy4917/Dev-Management/scripts/export_user_score_summary.py",
                     "workspace_authority_root": "/home/andy4917/.codex/state/workspace-authority",
+                    "gate_receipt_root": "/home/andy4917/.codex/state/gate-receipts",
                     "runtime_hook": {
                         "script": "/home/andy4917/Dev-Management/scripts/scorecard_runtime_hook.py",
                         "linux_command_prefix": "python3",
@@ -281,6 +283,8 @@ trust_level = "trusted"
         wrapper = render.render_windows_hook_wrapper(authority)
 
         self.assertIn("binding instruction-level guidance", rendered_agents)
+        self.assertIn("Canonical global close-out command", rendered_agents)
+        self.assertIn("iaw_closeout.py --workspace-root <repo> --run-id <run_id> --profile <L1|L2|L3|L4> --mode verify", rendered_agents)
         self.assertEqual(set(linux_hooks["hooks"]), {"UserPromptSubmit"})
         self.assertEqual(
             linux_hooks["hooks"]["UserPromptSubmit"][0]["hooks"][0]["command"],

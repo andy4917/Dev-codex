@@ -283,9 +283,28 @@
       "reviewer_verdict_root": "/home/andy4917/.codex/state/reviewer-verdicts",
       "context_root": "/home/andy4917/.codex/state/scorecard-context",
       "workspace_authority_root": "/home/andy4917/.codex/state/workspace-authority",
+      "gate_receipt_root": "/home/andy4917/.codex/state/gate-receipts",
       "report": "/home/andy4917/Dev-Management/reports/user-scorecard.json",
+      "closeout": "/home/andy4917/Dev-Management/scripts/iaw_closeout.py",
       "delivery_gate": "/home/andy4917/Dev-Management/scripts/delivery_gate.py",
       "summary_export": "/home/andy4917/Dev-Management/scripts/export_user_score_summary.py",
+      "accepted_profiles": [
+        "L1",
+        "L2",
+        "L3",
+        "L4"
+      ],
+      "required_policy_hash_targets": [
+        "/home/andy4917/Dev-Management/contracts/workspace_authority.json",
+        "/home/andy4917/Dev-Management/contracts/user_score_policy.json",
+        "/home/andy4917/Dev-Management/contracts/disqualifier_policy.json"
+      ],
+      "required_script_hash_targets": [
+        "/home/andy4917/Dev-Management/scripts/prepare_user_scorecard_review.py",
+        "/home/andy4917/Dev-Management/scripts/delivery_gate.py",
+        "/home/andy4917/Dev-Management/scripts/export_user_score_summary.py",
+        "/home/andy4917/Dev-Management/scripts/audit_workspace.py"
+      ],
       "runtime_hook": {
         "script": "/home/andy4917/Dev-Management/scripts/scorecard_runtime_hook.py",
         "linux_command_prefix": "python3",

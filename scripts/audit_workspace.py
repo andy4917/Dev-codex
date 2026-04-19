@@ -12,7 +12,8 @@ from typing import Iterable
 
 
 AUTHORITY_PATH = Path("/home/andy4917/Dev-Management/contracts/workspace_authority.json")
-REPORT_PATH = Path("/home/andy4917/Dev-Management/reports/audit.final.json")
+REPORTS_ROOT = Path("/home/andy4917/Dev-Management/reports")
+REPORT_PATH = REPORTS_ROOT / "audit.final.json"
 WINDOWS_CODEX = Path("/mnt/c/Users/anise/.codex")
 HOME = Path("/home/andy4917")
 
@@ -396,8 +397,17 @@ def detect_score_policy_tamper_events(management_root: Path, workflow_root: Path
     ]
 
 
+def report_path_for_phase(phase: str) -> Path:
+    normalized = str(phase or "").strip().lower()
+    if not normalized:
+        return REPORT_PATH
+    return REPORTS_ROOT / f"audit.{normalized}.json"
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Audit the canonical Codex workspace layout.")
+    parser.add_argument("--phase", choices=["pre-gate", "pre-export", "post-export"], default="")
+    parser.add_argument("--blocking-only", action="store_true", help="Record the phase as blocking-only while keeping the same canonical checks.")
     parser.add_argument("--write-report", action="store_true", help="Write the audit report to the default report path.")
     args = parser.parse_args()
 
@@ -526,6 +536,8 @@ def main() -> int:
         product_rule_leaks.append(path_str)
 
     report = {
+        "phase": str(args.phase).strip() or "final",
+        "blocking_only": bool(args.blocking_only),
         "authority_path": str(AUTHORITY_PATH),
         "trusted_projects": trusted_projects,
         "agents_files": [str(p) for p in sorted(agents_files)],
@@ -559,8 +571,9 @@ def main() -> int:
 
     output = json.dumps(report, ensure_ascii=False, indent=2) + "\n"
     if args.write_report:
-        REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
-        REPORT_PATH.write_text(output, encoding="utf-8")
+        output_path = report_path_for_phase(args.phase)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        output_path.write_text(output, encoding="utf-8")
     print(output, end="")
     return 0 if report["status"] == "PASS" else 1
 

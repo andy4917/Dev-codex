@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 import sys
 import tempfile
 import unittest
@@ -26,6 +27,11 @@ def _load_module():
 def _write_text(path: Path, text: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(text, encoding="utf-8")
+
+
+def _write_json(path: Path, payload: object) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
 class ComputeUserScorecardV12Tests(unittest.TestCase):
@@ -128,6 +134,22 @@ class ComputeUserScorecardV12Tests(unittest.TestCase):
         self.assertEqual(summary["status"], "BLOCKED")
         self.assertEqual(summary["round_count"], 1)
 
+    def test_repeated_verify_requires_distinct_modes(self) -> None:
+        summary = self.module._repeated_verify_summary(
+            {
+                "workorder": {"taste_gate": {"problem_class": "G2_CHECKABLE_EXECUTION"}},
+                "repeated_verify": {
+                    "rounds": [
+                        {"round": 1, "mode": "artifact_presence", "status": "PASS", "new_material_findings": 1, "finding_refs": ["f1"]},
+                        {"round": 2, "mode": "artifact_presence", "status": "PASS", "new_material_findings": 0, "finding_refs": []},
+                    ]
+                },
+            }
+        )
+
+        self.assertEqual(summary["status"], "BLOCKED")
+        self.assertEqual(summary["distinct_mode_count"], 1)
+
     def test_cross_verification_blocks_unresolved_disagreement(self) -> None:
         summary = self.module._cross_verification_summary(
             {
@@ -167,6 +189,43 @@ class ComputeUserScorecardV12Tests(unittest.TestCase):
 
         self.assertEqual(summary["status"], "BLOCKED")
         self.assertFalse(summary["negative_findings_present"])
+
+    def test_load_support_artifacts_prefers_requested_run_id(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            workspace = Path(tmpdir) / "workspace"
+            workspace.mkdir(parents=True)
+
+            requested_run = "2026-04-20-a"
+            latest_run = "2026-04-20-z"
+            for run_id, objective in (
+                (requested_run, "requested run"),
+                (latest_run, "latest run"),
+            ):
+                run_root = workspace / ".agent-runs" / run_id
+                _write_json(
+                    run_root / "EVIDENCE_MANIFEST.json",
+                    {
+                        "schema_version": 1,
+                        "run_id": run_id,
+                        "base_commit": "nogit",
+                        "head_commit": "nogit",
+                        "changed_files": [],
+                        "commands": [],
+                        "artifacts": [],
+                        "waivers": [],
+                        "policy_hashes": {"current": {}},
+                        "script_hashes": {},
+                        "state_history": [],
+                    },
+                )
+                _write_json(run_root / "WORKORDER.json", {"schema_version": 1, "run_id": run_id, "objective": objective})
+
+            support = self.module._load_support_artifacts({"run_id": requested_run, "evidence_inputs": {}}, workspace)
+
+        self.assertEqual(support["evidence_manifest"]["run_id"], requested_run)
+        self.assertTrue(str(support["evidence_manifest_path"]).endswith(f"/{requested_run}/EVIDENCE_MANIFEST.json"))
+        self.assertTrue(str(support["workorder_path"]).endswith(f"/{requested_run}/WORKORDER.json"))
+        self.assertEqual(support["workorder"]["objective"], "requested run")
 
 
 if __name__ == "__main__":
