@@ -2,13 +2,16 @@
 from __future__ import annotations
 
 import argparse
+import difflib
+import hashlib
+import importlib.util
 import json
 import os
 import re
 import subprocess
 import tomllib
 from pathlib import Path
-from typing import Iterable
+from typing import Any, Iterable
 
 
 AUTHORITY_PATH = Path("/home/andy4917/Dev-Management/contracts/workspace_authority.json")
@@ -67,6 +70,30 @@ def load_toml(path: Path) -> dict:
         return {}
     with path.open("rb") as handle:
         return tomllib.load(handle)
+
+
+def file_hash(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(65536), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def text_hash(text: str) -> str:
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+def runtime_paths(authority: dict[str, Any]) -> dict[str, Path]:
+    runtime = authority.get("generation_targets", {}).get("global_runtime", {})
+    linux = runtime.get("linux", {})
+    windows = runtime.get("windows_mirror", {})
+    return {
+        "linux_agents": Path(str(linux.get("agents", HOME / ".codex" / "AGENTS.md"))).expanduser(),
+        "linux_config": Path(str(linux.get("config", HOME / ".codex" / "config.toml"))).expanduser(),
+        "windows_agents": Path(str(windows.get("agents", WINDOWS_CODEX / "AGENTS.md"))).expanduser(),
+        "windows_config": Path(str(windows.get("config", WINDOWS_CODEX / "config.toml"))).expanduser(),
+    }
 
 
 def git_lines(repo_root: Path, *args: str) -> list[str]:
@@ -326,6 +353,204 @@ def quarantine_root_policy_ok(quarantine_root: Path) -> bool:
     return not DATED_DIR_RE.fullmatch(quarantine_root.name)
 
 
+def first_nonempty_line(text: str) -> str:
+    for line in text.splitlines():
+        stripped = line.strip()
+        if stripped:
+            return stripped
+    return ""
+
+
+def diff_preview(left: str, right: str, *, left_label: str, right_label: str, limit: int = 20) -> list[str]:
+    if left == right:
+        return []
+    diff_lines = list(
+        difflib.unified_diff(
+            left.splitlines(),
+            right.splitlines(),
+            fromfile=left_label,
+            tofile=right_label,
+            lineterm="",
+        )
+    )
+    if len(diff_lines) <= limit:
+        return diff_lines
+    return [*diff_lines[:limit], "... diff truncated ..."]
+
+
+def load_script_function(script_name: str, function_name: str):
+    script_path = Path(__file__).resolve().with_name(script_name)
+    spec = importlib.util.spec_from_file_location(f"_audit_probe_{script_path.stem}", script_path)
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"failed to load {script_path}")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return getattr(module, function_name)
+
+
+def build_windows_source_of_truth_proof(authority: dict[str, Any], runtime: dict[str, Path]) -> dict[str, Any]:
+    linux_agents = runtime["linux_agents"].resolve()
+    linux_config = runtime["linux_config"].resolve()
+    windows_agents = runtime["windows_agents"].resolve()
+    windows_config = runtime["windows_config"].resolve()
+    authority_source = str(authority.get("_authority_path", AUTHORITY_PATH))
+
+    probe = {
+        "script": str(Path(__file__).resolve().with_name("render_codex_runtime.py")),
+        "function": "user_override_config_paths",
+        "linux_config_path": str(linux_config),
+        "windows_config_path": str(windows_config),
+        "returned_paths": [],
+        "linux_config_used_as_override_source": False,
+        "windows_config_used_as_override_source": False,
+        "reasons": [],
+        "status": "FAIL",
+    }
+    try:
+        user_override_paths = load_script_function("render_codex_runtime.py", "user_override_config_paths")
+        returned_paths = [str(Path(item).expanduser().resolve()) for item in user_override_paths(authority)]
+        probe["returned_paths"] = returned_paths
+        probe["linux_config_used_as_override_source"] = str(linux_config) in returned_paths
+        probe["windows_config_used_as_override_source"] = str(windows_config) in returned_paths
+        if not probe["linux_config_used_as_override_source"]:
+            probe["reasons"].append("render_codex_runtime.py did not treat the Linux config as an override input.")
+        if probe["windows_config_used_as_override_source"]:
+            probe["reasons"].append("render_codex_runtime.py treated the Windows mirror config as an override input.")
+        probe["status"] = "PASS" if not probe["reasons"] else "FAIL"
+    except Exception as exc:
+        probe["reasons"].append(f"unable to evaluate render_codex_runtime.py user_override_config_paths: {exc}")
+
+    targets_are_distinct = len({linux_agents, linux_config, windows_agents, windows_config}) == 4
+    reasons = list(probe["reasons"])
+    if not targets_are_distinct:
+        reasons.append("workspace authority does not keep Linux canonical runtime targets distinct from Windows mirror targets.")
+
+    status = "PASS" if targets_are_distinct and probe["status"] == "PASS" else "FAIL"
+    return {
+        "authority_path": authority_source,
+        "agents_generation_source": authority_source,
+        "linux_runtime_targets": {
+            "agents": str(linux_agents),
+            "config": str(linux_config),
+        },
+        "windows_runtime_targets": {
+            "agents": str(windows_agents),
+            "config": str(windows_config),
+        },
+        "linux_and_windows_targets_are_distinct": targets_are_distinct,
+        "config_override_probe": probe,
+        "reasons": reasons,
+        "status": status,
+    }
+
+
+def compare_generated_runtime_file(
+    *,
+    label: str,
+    linux_path: Path,
+    windows_path: Path,
+    expected_windows_headers: list[str],
+) -> dict[str, Any]:
+    linux_exists = linux_path.exists()
+    windows_exists = windows_path.exists()
+    linux_text = read_text(linux_path)
+    windows_text = read_text(windows_path)
+    linux_body = strip_generated_header(linux_text)
+    windows_body = strip_generated_header(windows_text)
+    header_ok = bool(windows_text) and any(windows_text.startswith(header) for header in expected_windows_headers)
+
+    divergence_reasons: list[str] = []
+    if not linux_exists:
+        divergence_reasons.append(f"Linux canonical runtime {label} file is missing: {linux_path}")
+    if not windows_exists:
+        divergence_reasons.append(f"Windows generated mirror {label} file is missing: {windows_path}")
+    if windows_exists and not header_ok:
+        divergence_reasons.append(
+            f"Windows generated mirror {label} file is missing the expected generated header: {expected_windows_headers[0]}"
+        )
+    if linux_exists and windows_exists and linux_body != windows_body:
+        divergence_reasons.append(f"Windows {label} generation diverges from the Linux canonical runtime output.")
+
+    status = "PASS" if not divergence_reasons else "FAIL"
+    return {
+        "label": label,
+        "linux_path": str(linux_path),
+        "windows_path": str(windows_path),
+        "linux_exists": linux_exists,
+        "windows_exists": windows_exists,
+        "linux_sha256": file_hash(linux_path) if linux_exists else "",
+        "windows_sha256": file_hash(windows_path) if windows_exists else "",
+        "linux_body_sha256": text_hash(linux_body) if linux_exists else "",
+        "windows_body_sha256": text_hash(windows_body) if windows_exists else "",
+        "expected_windows_headers": expected_windows_headers,
+        "windows_generated_header_ok": header_ok,
+        "body_matches_linux": linux_exists and windows_exists and linux_body == windows_body,
+        "linux_first_content_line": first_nonempty_line(linux_body),
+        "windows_first_content_line": first_nonempty_line(windows_body),
+        "divergence_reasons": divergence_reasons,
+        "diff_preview": diff_preview(
+            linux_body,
+            windows_body,
+            left_label=str(linux_path),
+            right_label=str(windows_path),
+        ),
+        "status": status,
+    }
+
+
+def build_windows_runtime_mirror_check(
+    authority: dict[str, Any],
+    runtime: dict[str, Path] | None = None,
+    source_of_truth_proof: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    runtime_paths_map = runtime or runtime_paths(authority)
+    generated_header = str(
+        authority.get("generation_targets", {})
+        .get("global_runtime", {})
+        .get("windows_mirror", {})
+        .get("generated_header", "GENERATED - DO NOT EDIT")
+    ).strip() or "GENERATED - DO NOT EDIT"
+
+    files = {
+        "agents": compare_generated_runtime_file(
+            label="AGENTS.md",
+            linux_path=runtime_paths_map["linux_agents"],
+            windows_path=runtime_paths_map["windows_agents"],
+            expected_windows_headers=[generated_header],
+        ),
+        "config": compare_generated_runtime_file(
+            label="config.toml",
+            linux_path=runtime_paths_map["linux_config"],
+            windows_path=runtime_paths_map["windows_config"],
+            expected_windows_headers=[f"# {generated_header}", generated_header],
+        ),
+    }
+    proof = source_of_truth_proof or build_windows_source_of_truth_proof(authority, runtime_paths_map)
+    divergence_summary = [
+        f"{name}: {reason}"
+        for name, payload in files.items()
+        for reason in payload["divergence_reasons"]
+    ]
+    divergence_summary.extend(f"source_of_truth: {reason}" for reason in proof.get("reasons", []))
+
+    all_headers_ok = all(payload["windows_generated_header_ok"] for payload in files.values())
+    all_bodies_match_linux = all(payload["body_matches_linux"] for payload in files.values())
+    status = "PASS" if all(payload["status"] == "PASS" for payload in files.values()) and proof["status"] == "PASS" else "FAIL"
+    return {
+        "linux_runtime_root": str(runtime_paths_map["linux_agents"].parent),
+        "windows_runtime_root": str(runtime_paths_map["windows_agents"].parent),
+        "expected_generated_header": generated_header,
+        "mirror_role": "windows_generated_mirror",
+        "canonical_source": "linux_runtime_outputs",
+        "files": files,
+        "all_windows_headers_ok": all_headers_ok,
+        "all_windows_bodies_match_linux": all_bodies_match_linux,
+        "source_of_truth_proof": proof,
+        "divergence_summary": divergence_summary,
+        "status": status,
+    }
+
+
 def generated_runtime_mirror_matches_linux(
     *,
     linux_agents: Path,
@@ -421,13 +646,15 @@ def main() -> int:
     args = parser.parse_args()
 
     authority = load_authority()
+    authority["_authority_path"] = str(AUTHORITY_PATH)
     roots = authority["canonical_roots"]
     trusted_projects = authority["generation_targets"]["global_config"]["trusted_projects"]
     quarantine_root = Path(authority["cleanup_policy"]["quarantine_root"])
+    runtime = runtime_paths(authority)
 
     allowed_agents = {
-        str(Path("/home/andy4917/.codex/AGENTS.md")),
-        str(Path("/mnt/c/Users/anise/.codex/AGENTS.md")),
+        str(runtime["linux_agents"]),
+        str(runtime["windows_agents"]),
     }
     product_root = Path(roots["product"])
     scan_roots = [
@@ -438,7 +665,7 @@ def main() -> int:
     agents_files: list[Path] = []
     for base in scan_roots:
         agents_files.extend(find_paths(base, lambda p: p.name == "AGENTS.md", authority, quarantine_root))
-    for path in [Path("/home/andy4917/.codex/AGENTS.md"), Path("/mnt/c/Users/anise/.codex/AGENTS.md")]:
+    for path in [runtime["linux_agents"], runtime["windows_agents"]]:
         if path.exists():
             agents_files.append(path)
     agents_files = sorted(set(agents_files))
@@ -448,12 +675,12 @@ def main() -> int:
                 allowed_agents.add(str(child / "AGENTS.md"))
 
     allowed_configs = {
-        str(Path("/home/andy4917/.codex/config.toml")),
-        str(Path("/mnt/c/Users/anise/.codex/config.toml")),
+        str(runtime["linux_config"]),
+        str(runtime["windows_config"]),
     }
     config_files = [
         path
-        for path in [Path("/home/andy4917/.codex/config.toml"), Path("/mnt/c/Users/anise/.codex/config.toml")]
+        for path in [runtime["linux_config"], runtime["windows_config"]]
         if path.exists()
     ]
     if product_root.exists():
@@ -482,23 +709,14 @@ def main() -> int:
         "unexpected_contract_dirs": [str(p) for p in contracts_dirs if str(p) not in allowed_contract_dirs],
     }
 
-    linux_agents = Path("/home/andy4917/.codex/AGENTS.md")
-    global_config = Path("/home/andy4917/.codex/config.toml")
+    linux_agents = runtime["linux_agents"]
+    global_config = runtime["linux_config"]
     project_root_marker_ok = global_config.exists() and 'project_root_markers = [".git"]' in read_text(global_config)
-    windows_agents = Path("/mnt/c/Users/anise/.codex/AGENTS.md")
-    windows_config = Path("/mnt/c/Users/anise/.codex/config.toml")
-    windows_generated_header_ok = (
-        windows_agents.exists()
-        and windows_config.exists()
-        and read_text(windows_agents).startswith("GENERATED - DO NOT EDIT")
-        and read_text(windows_config).startswith("# GENERATED - DO NOT EDIT")
-    )
-    windows_generated_body_matches_linux = generated_runtime_mirror_matches_linux(
-        linux_agents=linux_agents,
-        linux_config=global_config,
-        windows_agents=windows_agents,
-        windows_config=windows_config,
-    )
+    windows_agents = runtime["windows_agents"]
+    windows_config = runtime["windows_config"]
+    windows_runtime_mirror_check = build_windows_runtime_mirror_check(authority, runtime=runtime)
+    windows_generated_header_ok = windows_runtime_mirror_check["all_windows_headers_ok"]
+    windows_generated_body_matches_linux = windows_runtime_mirror_check["all_windows_bodies_match_linux"]
     quarantine_root_ok = quarantine_root_policy_ok(quarantine_root)
 
     files_to_scan: list[Path] = []
@@ -558,6 +776,7 @@ def main() -> int:
         "project_root_markers_git_only": project_root_marker_ok,
         "windows_generated_mirror": windows_generated_header_ok,
         "windows_generated_mirror_matches_linux": windows_generated_body_matches_linux,
+        "windows_runtime_mirror_check": windows_runtime_mirror_check,
         "forbidden_feature_flags_enabled": forbidden_feature_findings,
         "runtime_restore_seed_violations": runtime_restore_seed_violations,
         "old_path_refs_outside_quarantine": sorted(set(old_path_refs)),
@@ -568,8 +787,7 @@ def main() -> int:
             and not product_rule_leaks
             and quarantine_root_ok
             and project_root_marker_ok
-            and windows_generated_header_ok
-            and windows_generated_body_matches_linux
+            and windows_runtime_mirror_check["status"] == "PASS"
             and not forbidden_feature_findings
             and not runtime_restore_seed_violations
             and not old_path_refs

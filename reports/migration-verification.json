@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-04-17T16:02:10.469994+00:00",
+  "generated_at": "2026-04-20T12:28:25.944447+00:00",
   "repo_root": "/home/andy4917/Dev-Management",
   "authority_path": "/home/andy4917/Dev-Management/contracts/workspace_authority.json",
-  "status": "BLOCKED",
+  "status": "FAIL",
   "command_results": {
     "delivery_gate_verify": {
       "name": "delivery_gate_verify",
@@ -19,19 +19,19 @@
       "name": "export_user_score_summary",
       "command": "/usr/bin/python3 /home/andy4917/Dev-Management/scripts/export_user_score_summary.py",
       "exit_code": 0,
-      "stdout": "1. disqualifier 결과: PASS\n2. trust_score: 30\n3. completion_score: 30\n4. compliance_score: 20\n5. reliability_score: N/A\n6. search_evidence_score: 10\n7. total_score: 90\n8. reviewer별 감점 근거:\n- skeptic_reviewer: none\n- correctness_verifier: none\n- contamination_monitor: none\n- final_auditor: none\n9. 사용자 감점 근거:\n- none\n10. cap 적용 여부와 이유: not applied\n11. gate 상태: BLOCKED\n12. 남은 manual close-out: none\n13. 최종 판정: BLOCKED\n",
+      "stdout": "0. authoritative receipt: MISSING\n1. disqualifier 결과: PASS\n2. trust_score: 30\n3. completion_score: 24\n4. compliance_score: 20\n5. reliability_score: N/A\n6. search_evidence_score: 10\n7. total_score: 84\n8. reviewer별 감점 근거:\n- skeptic_reviewer: none\n- correctness_verifier: none\n- contamination_monitor: none\n- final_auditor: none\n9. requested/credited credit:\n- requested: clean_room_verify completion_score +24 (reserved completion credit generated from clean_room_verify PASS evidence)\n- credited: UNVERIFIED pending gate_receipt\n10. anti-cheat guard: PASS (signals=0, penalty=0, guarded_total=84)\n- decision summary: highest=warn counts={'warn': 0, 'penalty': 0, 'cap': 0, 'dq': 0}\n11. cap 적용 여부와 이유: not applied\n12. taste gate: WAIVED (legacy run without taste gate)\n13. task tree: WAIVED (legacy run without task tree)\n14. evidence manifest: PASS\n15. repeated verify: WAIVED (legacy run without repeated verify)\n16. cross verification: WAIVED (legacy run without cross verification)\n17. convention lock: WAIVED (legacy run without convention lock)\n18. summary coverage: WAIVED (legacy run without summary coverage artifact)\n- negative findings present: False uncovered_claims=0 zombie_sections=0\n19. gate 상태: UNVERIFIED\n20. 남은 manual close-out: none\n21. Negative Findings: repeated_verify:waived\n22. 최종 판정: UNVERIFIED\n",
       "stderr": "",
       "status": "PASS"
     },
     "audit_workspace_write_report": {
       "name": "audit_workspace_write_report",
       "command": "/usr/bin/python3 /home/andy4917/Dev-Management/scripts/audit_workspace.py --write-report",
-      "exit_code": 0,
-      "stdout": "{\n  \"authority_path\": \"/home/andy4917/Dev-Management/contracts/workspace_authority.json\",\n  \"trusted_projects\": [\n    \"/home/andy4917/Dev-Management\",\n    \"/home/andy4917/Dev-Workflow\",\n    \"/home/andy4917/Dev-Product\"\n  ],\n  \"agents_files\": [\n    \"/home/andy4917/.codex/AGENTS.md\",\n    \"/home/andy4917/Dev-Product/reservation-system/AGENTS.md\",\n    \"/mnt/c/Users/anise/.codex/AGENTS.md\"\n  ],\n  \"config_files\": [\n    \"/home/andy4917/.codex/config.toml\",\n    \"/home/andy4917/Dev-Product/reservation-system/.codex/config.toml\",\n    \"/mnt/c/Users/anise/.codex/config.toml\"\n  ],\n  \"contracts_dirs\": [\n    \"/home/andy4917/Dev-Management/contracts\",\n    \"/home/andy4917/Dev-Product/reservation-system/contracts\"\n  ],\n  \"violations\": {\n    \"unexpected_agents\": [],\n    \"unexpected_configs\": [],\n    \"unexpected_contract_dirs\": []\n  },\n  \"project_rule_leaks\": [],\n  \"quarantine_root_policy_ok\": true,\n  \"project_root_markers_git_only\": true,\n  \"windows_generated_mirror\": true,\n  \"windows_generated_mirror_matches_linux\": true,\n  \"old_path_refs_outside_quarantine\": [],\n  \"status\": \"PASS\"\n}\n",
+      "exit_code": 1,
+      "stdout": "{\n  \"phase\": \"final\",\n  \"blocking_only\": false,\n  \"authority_path\": \"/home/andy4917/Dev-Management/contracts/workspace_authority.json\",\n  \"trusted_projects\": [\n    \"/home/andy4917/Dev-Management\",\n    \"/home/andy4917/Dev-Workflow\",\n    \"/home/andy4917/Dev-Product\"\n  ],\n  \"agents_files\": [\n    \"/home/andy4917/.codex/AGENTS.md\",\n    \"/home/andy4917/Dev-Product/reservation-system/AGENTS.md\",\n    \"/mnt/c/Users/anise/.codex/AGENTS.md\"\n  ],\n  \"config_files\": [\n    \"/home/andy4917/.codex/config.toml\",\n    \"/home/andy4917/Dev-Product/reservation-system/.codex/config.toml\",\n    \"/mnt/c/Users/anise/.codex/config.toml\"\n  ],\n  \"contracts_dirs\": [\n    \"/home/andy4917/Dev-Management/contracts\",\n    \"/home/andy4917/Dev-Product/reservation-system/contracts\"\n  ],\n  \"violations\": {\n    \"unexpected_agents\": [],\n    \"unexpected_configs\": [],\n    \"unexpected_contract_dirs\": []\n  },\n  \"project_rule_leaks\": [],\n  \"quarantine_root_policy_ok\": true,\n  \"project_root_markers_git_only\": true,\n  \"windows_generated_mirror\": true,\n  \"windows_generated_mirror_matches_linux\": true,\n  \"windows_runtime_mirror_check\": {\n    \"linux_runtime_root\": \"/home/andy4917/.codex\",\n    \"windows_runtime_root\": \"/mnt/c/Users/anise/.codex\",\n    \"expected_generated_header\": \"GENERATED - DO NOT EDIT\",\n    \"mirror_role\": \"windows_generated_mirror\",\n    \"canonical_source\": \"linux_runtime_outputs\",\n    \"files\": {\n      \"agents\": {\n        \"label\": \"AGENTS.md\",\n        \"linux_path\": \"/home/andy4917/.codex/AGENTS.md\",\n        \"windows_path\": \"/mnt/c/Users/anise/.codex/AGENTS.md\",\n        \"linux_exists\": true,\n        \"windows_exists\": true,\n        \"linux_sha256\": \"45ea0dd954230d4faac06b5f9ecf43ba5e200a69a45d360b2ea64e4dd5796b17\",\n        \"windows_sha256\": \"2b9935897fd8d56f506a0ce8fc71aa2d76ce78d4945dca386e2fb42d1c42ada1\",\n        \"linux_body_sha256\": \"63fb56efabfeb6c6a4cc8f731dc8805be2e39ec70b1acbbafa9eded6bbade7af\",\n        \"windows_body_sha256\": \"63fb56efabfeb6c6a4cc8f731dc8805be2e39ec70b1acbbafa9eded6bbade7af\",\n        \"expected_windows_headers\": [\n          \"GENERATED - DO NOT EDIT\"\n        ],\n        \"windows_generated_header_ok\": true,\n        \"body_matches_linux\": true,\n        \"linux_first_content_line\": \"# Generated Codex Workspace Contract\",\n        \"windows_first_content_line\": \"# Generated Codex Workspace Contract\",\n        \"divergence_reasons\": [],\n        \"diff_preview\": [],\n        \"status\": \"PASS\"\n      },\n      \"config\": {\n        \"label\": \"config.toml\",\n        \"linux_path\": \"/home/andy4917/.codex/config.toml\",\n        \"windows_path\": \"/mnt/c/Users/anise/.codex/config.toml\",\n        \"linux_exists\": true,\n        \"windows_exists\": true,\n        \"linux_sha256\": \"f68b740704d6525dc1abc3d8c666c648ad207aca2c5df327cd5bb6a9de297a6c\",\n        \"windows_sha256\": \"c53a8202d9e93ef95bfc3eec7c4eff689a9850ca6dca8a76dba45e88ba97322c\",\n        \"linux_body_sha256\": \"d8f3a831bc1a4e9ad5b545c2b18e88f6bdca67374c6e5093af53f8bdc4f5035a\",\n        \"windows_body_sha256\": \"d8f3a831bc1a4e9ad5b545c2b18e88f6bdca67374c6e5093af53f8bdc4f5035a\",\n        \"expected_windows_headers\": [\n          \"# GENERATED - DO NOT EDIT\",\n          \"GENERATED - DO NOT EDIT\"\n        ],\n        \"windows_generated_header_ok\": true,\n        \"body_matches_linux\": true,\n        \"linux_first_content_line\": \"model = \\\"gpt-5.4\\\"\",\n        \"windows_first_content_line\": \"model = \\\"gpt-5.4\\\"\",\n        \"divergence_reasons\": [],\n        \"diff_preview\": [],\n        \"status\": \"PASS\"\n      }\n    },\n    \"all_windows_headers_ok\": true,\n    \"all_windows_bodies_match_linux\": true,\n    \"source_of_truth_proof\": {\n      \"authority_path\": \"/home/andy4917/Dev-Management/contracts/workspace_authority.json\",\n      \"agents_generation_source\": \"/home/andy4917/Dev-Management/contracts/workspace_authority.json\",\n      \"linux_runtime_targets\": {\n        \"agents\": \"/home/andy4917/.codex/AGENTS.md\",\n        \"config\": \"/home/andy4917/.codex/config.toml\"\n      },\n      \"windows_runtime_targets\": {\n        \"agents\": \"/mnt/c/Users/anise/.codex/AGENTS.md\",\n        \"config\": \"/mnt/c/Users/anise/.codex/config.toml\"\n      },\n      \"linux_and_windows_targets_are_distinct\": true,\n      \"config_override_probe\": {\n        \"script\": \"/home/andy4917/Dev-Management/scripts/render_codex_runtime.py\",\n        \"function\": \"user_override_config_paths\",\n        \"linux_config_path\": \"/home/andy4917/.codex/config.toml\",\n        \"windows_config_path\": \"/mnt/c/Users/anise/.codex/config.toml\",\n        \"returned_paths\": [\n          \"/home/andy4917/.codex/config.toml\"\n        ],\n        \"linux_config_used_as_override_source\": true,\n        \"windows_config_used_as_override_source\": false,\n        \"reasons\": [],\n        \"status\": \"PASS\"\n      },\n      \"reasons\": [],\n      \"status\": \"PASS\"\n    },\n    \"divergence_summary\": [],\n    \"status\": \"PASS\"\n  },\n  \"forbidden_feature_flags_enabled\": [],\n  \"runtime_restore_seed_violations\": [\n    {\n      \"category\": \"projectless_restore_refs\",\n      \"path\": \"/mnt/c/Users/anise/.codex/.codex-global-state.json\",\n      \"reason\": \"projectless restore refs remain active: 7\",\n      \"disqualifier_ids\": [\n        \"DQ-010\"\n      ],\n      \"evidence_refs\": [\n        \"/mnt/c/Users/anise/.codex/.codex-global-state.json\"\n      ]\n    },\n    {\n      \"category\": \"thread_workspace_root_hints\",\n      \"path\": \"/mnt/c/Users/anise/.codex/.codex-global-state.json\",\n      \"reason\": \"thread workspace root hints remain active: 7\",\n      \"disqualifier_ids\": [\n        \"DQ-010\"\n      ],\n      \"evidence_refs\": [\n        \"/mnt/c/Users/anise/.codex/.codex-global-state.json\"\n      ]\n    }\n  ],\n  \"old_path_refs_outside_quarantine\": [],\n  \"tamper_events\": [\n    {\n      \"category\": \"projectless_restore_refs\",\n      \"path\": \"/mnt/c/Users/anise/.codex/.codex-global-state.json\",\n      \"reason\": \"projectless restore refs remain active: 7\",\n      \"disqualifier_ids\": [\n        \"DQ-010\"\n      ],\n      \"evidence_refs\": [\n        \"/mnt/c/Users/anise/.codex/.codex-global-state.json\"\n      ]\n    },\n    {\n      \"category\": \"thread_workspace_root_hints\",\n      \"path\": \"/mnt/c/Users/anise/.codex/.codex-global-state.json\",\n      \"reason\": \"thread workspace root hints remain active: 7\",\n      \"disqualifier_ids\": [\n        \"DQ-010\"\n      ],\n      \"evidence_refs\": [\n        \"/mnt/c/Users/anise/.codex/.codex-global-state.json\"\n      ]\n    }\n  ],\n  \"status\": \"FAIL\"\n}\n",
       "stderr": "",
-      "status": "PASS",
+      "status": "FAIL",
       "report_path": "/home/andy4917/Dev-Management/reports/audit.final.json",
-      "audit_status": "PASS"
+      "audit_status": "FAIL"
     }
   },
   "migration_evidence": {
@@ -140,6 +140,8 @@
         "top_level_entries": [
           "contracts",
           "docs",
+          "mermaid-diagram (4).png",
+          "mermaid-diagram (5).png",
           "migration_manifest.json",
           "quarantine",
           "reports",
@@ -151,11 +153,16 @@
         "root": "/home/andy4917/Dev-Workflow",
         "exists": true,
         "top_level_entries": [
+          "DESIGN_REVIEW.md",
+          "REPO_ATLAS.md",
+          "SUMMARY.md",
           "config",
+          "docs",
           "plugins",
           "reports",
           "scripts",
           "skills",
+          "templates",
           "tests"
         ]
       },
@@ -354,18 +361,93 @@
     "windows_mirror_proof": {
       "linux_agents_path": "/home/andy4917/.codex/AGENTS.md",
       "windows_agents_path": "/mnt/c/Users/anise/.codex/AGENTS.md",
-      "linux_agents_sha256": "900828d8a773510a309f795bb4841e74670564e3d0b2c346e3a3917297fa3453",
-      "windows_agents_sha256": "943e88ce7de967264c2583b325ea3890132ca97f33cb27b5fc3256ee36df01fa",
+      "linux_agents_sha256": "45ea0dd954230d4faac06b5f9ecf43ba5e200a69a45d360b2ea64e4dd5796b17",
+      "windows_agents_sha256": "2b9935897fd8d56f506a0ce8fc71aa2d76ce78d4945dca386e2fb42d1c42ada1",
       "linux_config_path": "/home/andy4917/.codex/config.toml",
       "windows_config_path": "/mnt/c/Users/anise/.codex/config.toml",
-      "linux_config_sha256": "244205e1b4f2fdb593cdaae2b4157e382fd65f4393a6443a8c6e851325d0b0ca",
-      "windows_config_sha256": "43d856c06f2e63be5a0040a637ff93d560f431c06a9b3abe148a4d86c9e5eb33",
+      "linux_config_sha256": "f68b740704d6525dc1abc3d8c666c648ad207aca2c5df327cd5bb6a9de297a6c",
+      "windows_config_sha256": "c53a8202d9e93ef95bfc3eec7c4eff689a9850ca6dca8a76dba45e88ba97322c",
       "expected_generated_header": "GENERATED - DO NOT EDIT",
       "agents_header_ok": true,
       "config_header_ok": true,
       "agents_body_matches_linux": true,
       "config_body_matches_linux": true,
       "audit_report_value": true,
+      "audit_report_matches_linux_value": true,
+      "audit_runtime_mirror_status": "PASS",
+      "audit_runtime_mirror_agrees_with_live_check": true,
+      "divergence_summary": [],
+      "agents": {
+        "label": "AGENTS.md",
+        "linux_path": "/home/andy4917/.codex/AGENTS.md",
+        "windows_path": "/mnt/c/Users/anise/.codex/AGENTS.md",
+        "linux_exists": true,
+        "windows_exists": true,
+        "linux_sha256": "45ea0dd954230d4faac06b5f9ecf43ba5e200a69a45d360b2ea64e4dd5796b17",
+        "windows_sha256": "2b9935897fd8d56f506a0ce8fc71aa2d76ce78d4945dca386e2fb42d1c42ada1",
+        "linux_body_sha256": "63fb56efabfeb6c6a4cc8f731dc8805be2e39ec70b1acbbafa9eded6bbade7af",
+        "windows_body_sha256": "63fb56efabfeb6c6a4cc8f731dc8805be2e39ec70b1acbbafa9eded6bbade7af",
+        "expected_windows_headers": [
+          "GENERATED - DO NOT EDIT"
+        ],
+        "windows_generated_header_ok": true,
+        "body_matches_linux": true,
+        "linux_first_content_line": "# Generated Codex Workspace Contract",
+        "windows_first_content_line": "# Generated Codex Workspace Contract",
+        "divergence_reasons": [],
+        "diff_preview": [],
+        "status": "PASS"
+      },
+      "config": {
+        "label": "config.toml",
+        "linux_path": "/home/andy4917/.codex/config.toml",
+        "windows_path": "/mnt/c/Users/anise/.codex/config.toml",
+        "linux_exists": true,
+        "windows_exists": true,
+        "linux_sha256": "f68b740704d6525dc1abc3d8c666c648ad207aca2c5df327cd5bb6a9de297a6c",
+        "windows_sha256": "c53a8202d9e93ef95bfc3eec7c4eff689a9850ca6dca8a76dba45e88ba97322c",
+        "linux_body_sha256": "d8f3a831bc1a4e9ad5b545c2b18e88f6bdca67374c6e5093af53f8bdc4f5035a",
+        "windows_body_sha256": "d8f3a831bc1a4e9ad5b545c2b18e88f6bdca67374c6e5093af53f8bdc4f5035a",
+        "expected_windows_headers": [
+          "# GENERATED - DO NOT EDIT",
+          "GENERATED - DO NOT EDIT"
+        ],
+        "windows_generated_header_ok": true,
+        "body_matches_linux": true,
+        "linux_first_content_line": "model = \"gpt-5.4\"",
+        "windows_first_content_line": "model = \"gpt-5.4\"",
+        "divergence_reasons": [],
+        "diff_preview": [],
+        "status": "PASS"
+      },
+      "source_of_truth_proof": {
+        "authority_path": "/home/andy4917/Dev-Management/contracts/workspace_authority.json",
+        "agents_generation_source": "/home/andy4917/Dev-Management/contracts/workspace_authority.json",
+        "linux_runtime_targets": {
+          "agents": "/home/andy4917/.codex/AGENTS.md",
+          "config": "/home/andy4917/.codex/config.toml"
+        },
+        "windows_runtime_targets": {
+          "agents": "/mnt/c/Users/anise/.codex/AGENTS.md",
+          "config": "/mnt/c/Users/anise/.codex/config.toml"
+        },
+        "linux_and_windows_targets_are_distinct": true,
+        "config_override_probe": {
+          "script": "/home/andy4917/Dev-Management/scripts/render_codex_runtime.py",
+          "function": "user_override_config_paths",
+          "linux_config_path": "/home/andy4917/.codex/config.toml",
+          "windows_config_path": "/mnt/c/Users/anise/.codex/config.toml",
+          "returned_paths": [
+            "/home/andy4917/.codex/config.toml"
+          ],
+          "linux_config_used_as_override_source": true,
+          "windows_config_used_as_override_source": false,
+          "reasons": [],
+          "status": "PASS"
+        },
+        "reasons": [],
+        "status": "PASS"
+      },
       "status": "PASS"
     },
     "hardcoding_legacy_duplicate_audit": {

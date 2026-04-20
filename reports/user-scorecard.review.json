@@ -2,13 +2,14 @@
   "context_version": 2,
   "status": "READY",
   "task_id": "reservation-system-verify",
-  "workspace_root": "/home/andy4917/Dev-Workflow",
+  "workspace_root": "/home/andy4917/Dev-Product/reservation-system",
   "delivery_mode": "verify",
-  "trace_id": "trace-be062f827e1dadbd",
-  "codex_project_id": "Dev-Workflow",
-  "git_sha": "d3b600a4b01e3ff1ac116bb8f012b263a07c66ff",
-  "worktree_id": "/home/andy4917/Dev-Workflow",
-  "fresh_evidence_manifest_path": "/home/andy4917/Dev-Workflow/reports/authority/fresh-evidence.json",
+  "run_id": "",
+  "trace_id": "trace-0d51c24d6c80b096",
+  "codex_project_id": "reservation-system",
+  "git_sha": "0cd7efd81604c282df53a5f67ae77d5bf25228de",
+  "worktree_id": "/home/andy4917/Dev-Product/reservation-system",
+  "fresh_evidence_manifest_path": "/home/andy4917/Dev-Product/reservation-system/reports/authority/fresh-evidence.json",
   "task_context": {
     "small_l0": false,
     "completion_review_required": true,
@@ -29,37 +30,39 @@
     "legacy_hardcoding_violation": false
   },
   "evidence_inputs": {
-    "evidence_manifest_path": "/home/andy4917/Dev-Workflow/.agent-runs/2026-04-20-vibe-physics-iaw/EVIDENCE_MANIFEST.json",
-    "workorder_path": "/home/andy4917/Dev-Workflow/.agent-runs/2026-04-20-vibe-physics-iaw/WORKORDER.json",
-    "command_log_path": "/home/andy4917/Dev-Workflow/.agent-runs/2026-04-20-vibe-physics-iaw/COMMAND_LOG.jsonl",
-    "waivers_path": "/home/andy4917/Dev-Workflow/.agent-runs/2026-04-20-vibe-physics-iaw/WAIVERS.json",
-    "task_tree_path": "/home/andy4917/Dev-Workflow/.agent-runs/2026-04-20-vibe-physics-iaw/TASK_TREE.json",
-    "repeated_verify_path": "/home/andy4917/Dev-Workflow/.agent-runs/2026-04-20-vibe-physics-iaw/REPEATED_VERIFY.json",
-    "cross_verification_path": "/home/andy4917/Dev-Workflow/.agent-runs/2026-04-20-vibe-physics-iaw/CROSS_VERIFICATION.json",
-    "claim_ledger_path": "/home/andy4917/Dev-Workflow/.agent-runs/2026-04-20-vibe-physics-iaw/CLAIM_LEDGER.json",
-    "summary_coverage_path": "/home/andy4917/Dev-Workflow/.agent-runs/2026-04-20-vibe-physics-iaw/SUMMARY_COVERAGE.json",
-    "convention_lock_path": "/home/andy4917/Dev-Workflow/.agent-runs/2026-04-20-vibe-physics-iaw/CONVENTION_LOCK.json",
+    "evidence_manifest_path": "/home/andy4917/Dev-Product/reservation-system/reports/authority/fresh-evidence.json",
+    "workorder_path": "",
+    "command_log_path": "",
+    "waivers_path": "",
+    "task_tree_path": "",
+    "repeated_verify_path": "",
+    "cross_verification_path": "",
+    "claim_ledger_path": "",
+    "summary_coverage_path": "",
+    "convention_lock_path": "",
     "taste_gate_path": "",
-    "summary_path": "/home/andy4917/Dev-Workflow/SUMMARY.md",
-    "design_review_path": "/home/andy4917/Dev-Workflow/DESIGN_REVIEW.md",
-    "trace_report_path": "",
-    "existing_readiness_report_path": "/home/andy4917/Dev-Workflow/reports/user-readiness.json",
-    "clean_room_verify_report_path": ""
+    "summary_path": "",
+    "design_review_path": "",
+    "trace_report_path": "/home/andy4917/Dev-Product/reservation-system/reports/traceability-report.json",
+    "existing_readiness_report_path": "/home/andy4917/Dev-Product/reservation-system/reports/user-readiness.json",
+    "clean_room_verify_report_path": "/home/andy4917/Dev-Product/reservation-system/reports/acceptance-report.json"
   },
   "trace": {
     "required": true,
-    "status": "UNKNOWN",
-    "evidence_refs": [],
+    "status": "PASS",
+    "evidence_refs": [
+      "/home/andy4917/Dev-Product/reservation-system/reports/traceability-report.json"
+    ],
     "notes": ""
   },
   "existing_readiness": {
-    "status": "FAIL",
-    "reason": "user readiness is not_ready",
+    "status": "PASS",
+    "reason": "",
     "manual_close_out": [],
     "evidence_refs": []
   },
   "clean_room_verify": {
-    "status": "UNKNOWN",
+    "status": "PASS",
     "reason": "",
     "manual_close_out": [],
     "evidence_refs": []
@@ -97,7 +100,7 @@
       "notes": ""
     }
   },
-  "authoritative_context_path": "/mnt/c/Users/anise/.codex/state/scorecard-context/Dev-Workflow/trace-be062f827e1dadbd.json",
-  "authoritative_context_hash": "4c18ff676b03e153c6edafb0b22f4a68f437e8337a0937d91259af7f21a102a2",
-  "authority_audit_path": "/home/andy4917/Dev-Workflow/reports/scorecard-authority-audit.json"
+  "authoritative_context_path": "/home/andy4917/.codex/state/scorecard-context/reservation-system/trace-0d51c24d6c80b096.json",
+  "authoritative_context_hash": "64749b4ceb91d7434cf75458c822848f105fc10b1244b9ea1f87880c321464bb",
+  "authority_audit_path": "/home/andy4917/Dev-Product/reservation-system/reports/scorecard-authority-audit.json"
 }

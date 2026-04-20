@@ -17,6 +17,7 @@ from _scorecard_common import (
     load_json,
     load_jsonl,
     normalize_status,
+    normalize_user_review,
     project_id,
     published_command_log_path,
     published_evidence_manifest_path,
@@ -48,6 +49,8 @@ REVIEWER_ROLES = (
 )
 
 WRITER_OR_AGENT_REPORTERS = {"writer", "main_writer", "actor", "agent", "assistant", "codex"}
+ENGINE_OWNED_CREDIT_SOURCES = {"verified_execution", "clean_room_verify", "reviewer_penalty", "system_derived"}
+ENGINE_OWNED_CREDIT_INPUT_FIELDS = ("requested_credit", "credited_credit")
 LEGACY_SIGNAL_CODE_ALIASES = {
     "unauthorized_user_review_update": "unauthorized_user_review_modification",
     "derived_award_spoof_attempt": "reserved_derived_award_spoofing",
@@ -969,16 +972,19 @@ def _decision_summary(signals: list[dict[str, Any]]) -> dict[str, Any]:
 def _load_stage_payload(raw_stage: dict[str, Any], report_path_raw: str, workspace_root: Path | None) -> dict[str, Any]:
     report_path = resolve_path(report_path_raw, workspace_root)
     stage = dict(raw_stage)
+    report_present = False
     if report_path is not None and report_path.exists():
         external = load_json(report_path)
         if isinstance(external, dict):
             stage = {**stage, **external}
         stage["report_path"] = str(report_path)
+        report_present = True
     elif report_path is not None:
         stage["report_path"] = str(report_path)
     stage["status"] = normalize_status(stage.get("status"), "UNKNOWN")
     stage["manual_close_out"] = list(stage.get("manual_close_out", []))
     stage["evidence_refs"] = list(stage.get("evidence_refs", []))
+    stage["report_present"] = report_present
     return stage
 
 
@@ -1063,12 +1069,39 @@ def _derived_awards_for_axis(
                 "reason": reason,
                 "category": str(award.get("category", "")).strip() or "verified_work",
                 "evidence_refs": list(award.get("evidence_refs", [])),
-                "reported_by": "system_derived",
-                "source": "system_derived",
+                "reported_by": str(award.get("source", "")).strip() or "system_derived",
+                "source": str(award.get("source", "")).strip() or "system_derived",
                 "credit_block_reason": "",
             }
         )
     return awards, errors
+
+
+def _apply_clean_room_credit_metadata(awards: list[dict[str, Any]], clean_room_verify: dict[str, Any]) -> list[dict[str, Any]]:
+    status = normalize_status(clean_room_verify.get("status"), "UNKNOWN")
+    report_path = str(clean_room_verify.get("report_path", "")).strip()
+    report_present = bool(clean_room_verify.get("report_present", False))
+    evidence_refs: list[str] = []
+    if report_present and report_path:
+        evidence_refs.append(report_path)
+    for ref in clean_room_verify.get("evidence_refs", []):
+        text = str(ref).strip()
+        if text and text not in evidence_refs:
+            evidence_refs.append(text)
+
+    updated: list[dict[str, Any]] = []
+    for award in awards:
+        entry = dict(award)
+        if str(entry.get("source", "")).strip() != "clean_room_verify":
+            updated.append(entry)
+            continue
+        entry["reserved"] = True
+        entry["credit_status"] = status
+        entry["reason"] = f"reserved completion credit generated from clean_room_verify {status} evidence"
+        if evidence_refs:
+            entry["evidence_refs"] = evidence_refs
+        updated.append(entry)
+    return updated
 
 
 def _materialize_caps(active_caps: list[dict[str, Any]], total_floor: int) -> list[dict[str, Any]]:
@@ -1157,8 +1190,6 @@ def _load_context(review: dict[str, Any], workspace_root: Path | None) -> tuple[
     if context_path is None or not context_path.exists():
         return dict(review), None
     payload = load_json(context_path)
-    if "user_review" in review:
-        payload["user_review"] = dict(review.get("user_review", {}))
     if "disqualifiers" in review:
         payload["disqualifiers"] = list(review.get("disqualifiers", []))
     if "run_id" in review:
@@ -1431,6 +1462,108 @@ def _raw_user_review_score_signals(policy: dict[str, Any], authority_review: dic
     return signals
 
 
+def _normalized_reviewer_snapshot(entry: dict[str, Any] | None) -> dict[str, Any]:
+    payload = entry if isinstance(entry, dict) else {}
+    return {
+        "status": normalize_status(payload.get("status"), "PENDING"),
+        "green": bool(payload.get("green", False)),
+        "penalties": list(payload.get("penalties", [])),
+        "notes": str(payload.get("notes", "")).strip(),
+    }
+
+
+def _protected_review_input_signals(
+    policy: dict[str, Any],
+    review: dict[str, Any],
+    authority_review: dict[str, Any],
+    authoritative_reviewers: dict[str, Any],
+    *,
+    context_present: bool,
+    support: dict[str, Any],
+) -> list[dict[str, Any]]:
+    if not context_present:
+        return []
+
+    rules = _anti_cheat_rules(policy)
+    signals: list[dict[str, Any]] = []
+    context_path = str(authority_review.get("authoritative_context_path", "")).strip()
+
+    if "user_review" in review:
+        authoritative_user_review = normalize_user_review(authority_review.get("user_review", {}))
+        snapshot_user_review = normalize_user_review(review.get("user_review", {}))
+        if snapshot_user_review != authoritative_user_review:
+            signals.append(
+                _anti_cheat_signal(
+                    rules,
+                    "unauthorized_user_review_modification",
+                    reason="review snapshot tried to override the authoritative approved user-review data",
+                    evidence_refs=[context_path] if context_path else [],
+                    details={"section": "user_review"},
+                    confidence="high",
+                    detected_by="compute_user_scorecard.py",
+                    provenance=_build_signal_provenance(support, source_path=context_path),
+                )
+            )
+
+    snapshot_reviewers = review.get("reviewers", {})
+    if isinstance(snapshot_reviewers, dict):
+        for role in REVIEWER_ROLES:
+            if role not in snapshot_reviewers:
+                continue
+            if _normalized_reviewer_snapshot(snapshot_reviewers.get(role)) != _normalized_reviewer_snapshot(authoritative_reviewers.get(role)):
+                signals.append(
+                    _anti_cheat_signal(
+                        rules,
+                        "reviewer_truth_tamper",
+                        reason=f"review snapshot reviewer '{role}' does not match reviewer truth",
+                        evidence_refs=[context_path] if context_path else [],
+                        details={"role": role},
+                        confidence="high",
+                        detected_by="compute_user_scorecard.py",
+                        provenance=_build_signal_provenance(support, source_path=context_path),
+                    )
+                )
+    return signals
+
+
+def _credit_input_spoof_signals(policy: dict[str, Any], review: dict[str, Any], support: dict[str, Any]) -> list[dict[str, Any]]:
+    rules = _anti_cheat_rules(policy)
+    source_path = str(review.get("authoritative_context_path", "")).strip()
+    evidence_refs = [source_path] if source_path else []
+    provenance = _build_signal_provenance(support, source_path=source_path)
+    signals: list[dict[str, Any]] = []
+
+    for field in ENGINE_OWNED_CREDIT_INPUT_FIELDS:
+        raw_entries = review.get(field, [])
+        if not isinstance(raw_entries, list) or not raw_entries:
+            continue
+        spoof_entries: list[dict[str, Any]] = []
+        for item in raw_entries:
+            if not isinstance(item, dict):
+                continue
+            spoof_entries.append(
+                {
+                    "axis": str(item.get("axis", "")).strip(),
+                    "source": str(item.get("source", "")).strip(),
+                    "requested_points": int(item.get("requested_points", item.get("points", 0)) or 0),
+                    "credited_points": int(item.get("credited_points", item.get("points", 0)) or 0),
+                }
+            )
+        signals.append(
+            _anti_cheat_signal(
+                rules,
+                "reserved_derived_award_spoofing",
+                reason=f"review payload tried to inject engine-owned {field} entries",
+                evidence_refs=evidence_refs,
+                details={"field": field, "entries": spoof_entries},
+                confidence="high",
+                detected_by="compute_user_scorecard.py",
+                provenance=provenance,
+            )
+        )
+    return signals
+
+
 def _manifest_anti_cheat_signals(
     policy: dict[str, Any],
     support: dict[str, Any],
@@ -1571,6 +1704,7 @@ def _credit_user_awards(
         for axis, points in anti_cheat.get("per_axis_user_award_budgets", {}).items()
         if str(axis).strip()
     }
+    reserved_sources = set(ENGINE_OWNED_CREDIT_SOURCES)
     reserved_categories = {
         str(item).strip()
         for item in anti_cheat.get("reserved_award_categories", [])
@@ -1616,12 +1750,27 @@ def _credit_user_awards(
                 )
             )
             continue
+        if entry["source"] in reserved_sources:
+            entry["credit_block_reason"] = "reserved_credit_source"
+            signals.append(
+                _anti_cheat_signal(
+                    rules,
+                    "reserved_derived_award_spoofing",
+                    reason=f"user award tried to use reserved credit source '{entry['source']}' on axis '{entry['axis']}'",
+                    evidence_refs=[str(ref) for ref in entry.get("evidence_refs", []) if str(ref).strip()],
+                    details={"axis": entry["axis"], "source": entry["source"]},
+                    confidence="high",
+                    detected_by="compute_user_scorecard.py",
+                    provenance=_build_signal_provenance(support),
+                )
+            )
+            continue
         if not evidence_manifest_ok:
             entry["credit_block_reason"] = "missing_or_stale_evidence_manifest"
             continue
-        if entry["source"] == "agent_request":
-            entry["credit_block_reason"] = "requested_only_source"
-            if not _is_writer_or_agent_reporter(reported_by):
+        if entry["source"] != "user_approved_review":
+            entry["credit_block_reason"] = "requested_only_source" if entry["source"] == "agent_request" else "non_user_source_award"
+            if entry["source"] != "agent_request" or not _is_writer_or_agent_reporter(reported_by):
                 signals.append(
                     _anti_cheat_signal(
                         rules,
@@ -1726,8 +1875,10 @@ def compute_scorecard(policy: dict[str, Any], review: dict[str, Any], mode: str)
         authority_review.get("evidence_inputs", {}).get("clean_room_verify_report_path", ""),
         workspace_root,
     )
+    clean_room_verify_status = normalize_status(clean_room_verify.get("status"), "UNKNOWN")
     context["existing_readiness_passed"] = normalize_status(existing_readiness.get("status"), "UNKNOWN") in {"PASS", "WAIVED"}
-    context["clean_room_verify_passed"] = normalize_status(clean_room_verify.get("status"), "UNKNOWN") == "PASS"
+    context["clean_room_verify_passed"] = clean_room_verify_status == "PASS"
+    context["clean_room_verify_credit_eligible"] = clean_room_verify_status in {"PASS", "WAIVED"} and bool(clean_room_verify.get("report_present", False))
     context["evidence_manifest_present"] = bool(support.get("evidence_manifest_path"))
     context["evidence_manifest_current"] = bool(support.get("is_current", False))
     claim_findings = _claim_phrase_findings(support)
@@ -1788,7 +1939,16 @@ def compute_scorecard(policy: dict[str, Any], review: dict[str, Any], mode: str)
     )
     anti_cheat_signals = [
         *_audit_anti_cheat_signals(policy, authority_audit, support),
+        *_protected_review_input_signals(
+            policy,
+            review,
+            authority_review,
+            authoritative_reviewers,
+            context_present=context_path is not None,
+            support=support,
+        ),
         *_raw_user_review_score_signals(policy, authority_review, support),
+        *_credit_input_spoof_signals(policy, review, support),
         *_manifest_anti_cheat_signals(
             policy,
             support,
@@ -1856,6 +2016,7 @@ def compute_scorecard(policy: dict[str, Any], review: dict[str, Any], mode: str)
             context,
             evidence_manifest_ok=bool(support.get("is_current", False)),
         )
+        derived_axis = _apply_clean_room_credit_metadata(derived_axis, clean_room_verify)
         errors.extend(derived_errors)
         derived_awards.extend(derived_axis)
         reviewer_deductions = sum(item["points"] for item in reviewer_axis)

@@ -12,6 +12,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from audit_workspace import build_windows_runtime_mirror_check
+
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -184,46 +186,36 @@ def build_git_root_marker_proof(authority: dict[str, Any], runtime: dict[str, Pa
 
 
 def build_windows_mirror_proof(authority: dict[str, Any], runtime: dict[str, Path], audit: dict[str, Any]) -> dict[str, Any]:
-    windows_cfg = authority.get("generation_targets", {}).get("global_runtime", {}).get("windows_mirror", {})
-    expected_header = str(windows_cfg.get("generated_header", "GENERATED - DO NOT EDIT")).strip()
+    live_check = build_windows_runtime_mirror_check(authority, runtime=runtime)
+    audit_check = audit.get("windows_runtime_mirror_check", {})
+    agents = live_check.get("files", {}).get("agents", {})
+    config = live_check.get("files", {}).get("config", {})
+    audit_status = str(audit_check.get("status", "")).strip().upper() if isinstance(audit_check, dict) else ""
+    audit_agrees_with_live_check = None if not audit_status else audit_status == live_check["status"]
 
-    linux_agents_text = read_text(runtime["linux_agents"])
-    windows_agents_text = read_text(runtime["windows_agents"])
-    linux_config_text = read_text(runtime["linux_config"])
-    windows_config_text = read_text(runtime["windows_config"])
-
-    agents_header_ok = windows_agents_text.startswith(expected_header)
-    config_header_ok = windows_config_text.startswith(f"# {expected_header}") or windows_config_text.startswith(expected_header)
-    agents_body_matches = strip_generated_header(windows_agents_text) == strip_generated_header(linux_agents_text)
-    config_body_matches = strip_generated_header(windows_config_text) == strip_generated_header(linux_config_text)
-    files_exist = all(path.exists() for path in runtime.values())
-
-    status = (
-        "PASS"
-        if files_exist
-        and agents_header_ok
-        and config_header_ok
-        and agents_body_matches
-        and config_body_matches
-        and audit.get("windows_generated_mirror") is True
-        else "FAIL"
-    )
     return {
-        "linux_agents_path": str(runtime["linux_agents"]),
-        "windows_agents_path": str(runtime["windows_agents"]),
-        "linux_agents_sha256": file_hash(runtime["linux_agents"]) if runtime["linux_agents"].exists() else "",
-        "windows_agents_sha256": file_hash(runtime["windows_agents"]) if runtime["windows_agents"].exists() else "",
-        "linux_config_path": str(runtime["linux_config"]),
-        "windows_config_path": str(runtime["windows_config"]),
-        "linux_config_sha256": file_hash(runtime["linux_config"]) if runtime["linux_config"].exists() else "",
-        "windows_config_sha256": file_hash(runtime["windows_config"]) if runtime["windows_config"].exists() else "",
-        "expected_generated_header": expected_header,
-        "agents_header_ok": agents_header_ok,
-        "config_header_ok": config_header_ok,
-        "agents_body_matches_linux": agents_body_matches,
-        "config_body_matches_linux": config_body_matches,
+        "linux_agents_path": agents.get("linux_path", str(runtime["linux_agents"])),
+        "windows_agents_path": agents.get("windows_path", str(runtime["windows_agents"])),
+        "linux_agents_sha256": agents.get("linux_sha256", file_hash(runtime["linux_agents"]) if runtime["linux_agents"].exists() else ""),
+        "windows_agents_sha256": agents.get("windows_sha256", file_hash(runtime["windows_agents"]) if runtime["windows_agents"].exists() else ""),
+        "linux_config_path": config.get("linux_path", str(runtime["linux_config"])),
+        "windows_config_path": config.get("windows_path", str(runtime["windows_config"])),
+        "linux_config_sha256": config.get("linux_sha256", file_hash(runtime["linux_config"]) if runtime["linux_config"].exists() else ""),
+        "windows_config_sha256": config.get("windows_sha256", file_hash(runtime["windows_config"]) if runtime["windows_config"].exists() else ""),
+        "expected_generated_header": live_check.get("expected_generated_header", "GENERATED - DO NOT EDIT"),
+        "agents_header_ok": agents.get("windows_generated_header_ok", False),
+        "config_header_ok": config.get("windows_generated_header_ok", False),
+        "agents_body_matches_linux": agents.get("body_matches_linux", False),
+        "config_body_matches_linux": config.get("body_matches_linux", False),
         "audit_report_value": audit.get("windows_generated_mirror"),
-        "status": status,
+        "audit_report_matches_linux_value": audit.get("windows_generated_mirror_matches_linux"),
+        "audit_runtime_mirror_status": audit_status,
+        "audit_runtime_mirror_agrees_with_live_check": audit_agrees_with_live_check,
+        "divergence_summary": live_check.get("divergence_summary", []),
+        "agents": agents,
+        "config": config,
+        "source_of_truth_proof": live_check.get("source_of_truth_proof", {}),
+        "status": live_check["status"],
     }
 
 
@@ -346,6 +338,8 @@ def main() -> int:
     )
 
     authority = load_json(authority_path)
+    if isinstance(authority, dict):
+        authority["_authority_path"] = str(authority_path)
     manifest = load_json(manifest_path)
     cleanup = load_json(cleanup_path)
     inventory_after = load_json(inventory_after_path)
@@ -354,12 +348,16 @@ def main() -> int:
     runtime = runtime_paths(authority, linux_codex_home, windows_codex_home)
 
     hardcoding_audit = build_hardcoding_audit(audit)
+    git_root_marker_proof = build_git_root_marker_proof(authority, runtime, audit)
+    windows_mirror_proof = build_windows_mirror_proof(authority, runtime, audit)
     report_status = collapse_statuses(
         [
             scorecard.get("gate_status") or delivery_gate_result["status"],
             command_status(summary_result["exit_code"]),
             audit.get("status") or audit_result["status"],
             hardcoding_audit["status"],
+            git_root_marker_proof["status"],
+            windows_mirror_proof["status"],
         ]
     )
 
@@ -393,8 +391,8 @@ def main() -> int:
                 **cleanup,
                 "counts": cleanup_counts(cleanup),
             },
-            "git_root_marker_proof": build_git_root_marker_proof(authority, runtime, audit),
-            "windows_mirror_proof": build_windows_mirror_proof(authority, runtime, audit),
+            "git_root_marker_proof": git_root_marker_proof,
+            "windows_mirror_proof": windows_mirror_proof,
             "hardcoding_legacy_duplicate_audit": hardcoding_audit,
         },
     }

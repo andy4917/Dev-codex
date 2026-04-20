@@ -280,6 +280,9 @@ class VerifyMigrationEvidenceTests(unittest.TestCase):
             self.assertEqual(cleanup["counts"]["deleted"], 1)
             self.assertTrue(payload["migration_evidence"]["git_root_marker_proof"]["status"] == "PASS")
             self.assertTrue(payload["migration_evidence"]["windows_mirror_proof"]["status"] == "PASS")
+            self.assertEqual(payload["migration_evidence"]["windows_mirror_proof"]["agents"]["status"], "PASS")
+            self.assertEqual(payload["migration_evidence"]["windows_mirror_proof"]["config"]["status"], "PASS")
+            self.assertEqual(payload["migration_evidence"]["windows_mirror_proof"]["source_of_truth_proof"]["status"], "PASS")
             self.assertEqual(payload["migration_evidence"]["hardcoding_legacy_duplicate_audit"]["status"], "PASS")
 
     def test_entrypoint_continues_after_blocked_gate_and_returns_blocked(self) -> None:
@@ -314,6 +317,50 @@ class VerifyMigrationEvidenceTests(unittest.TestCase):
             self.assertEqual(payload["command_results"]["delivery_gate_verify"]["exit_code"], 2)
             self.assertEqual(payload["command_results"]["export_user_score_summary"]["exit_code"], 0)
             self.assertEqual(payload["command_results"]["audit_workspace_write_report"]["exit_code"], 0)
+
+    def test_entrypoint_fails_when_windows_runtime_mirror_diverges(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo_root, linux_codex, windows_codex = self._build_workspace(Path(tmpdir))
+            output_path = repo_root / "reports" / "migration-verification.json"
+            (windows_codex / "config.toml").write_text(
+                '# GENERATED - DO NOT EDIT\napproval_policy = "never"\nproject_root_markers = [".git"]\n',
+                encoding="utf-8",
+            )
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(ENTRYPOINT),
+                    "--repo-root",
+                    str(repo_root),
+                    "--linux-codex-home",
+                    str(linux_codex),
+                    "--windows-codex-home",
+                    str(windows_codex),
+                    "--output-file",
+                    str(output_path),
+                ],
+                cwd=ROOT,
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+            )
+
+            self.assertEqual(result.returncode, 1, msg=result.stderr)
+            payload = json.loads(output_path.read_text(encoding="utf-8"))
+            proof = payload["migration_evidence"]["windows_mirror_proof"]
+            self.assertEqual(payload["status"], "FAIL")
+            self.assertEqual(proof["status"], "FAIL")
+            self.assertEqual(proof["config"]["status"], "FAIL")
+            self.assertIn(
+                "Windows config.toml generation diverges from the Linux canonical runtime output.",
+                proof["config"]["divergence_reasons"],
+            )
+            self.assertIn(
+                "config: Windows config.toml generation diverges from the Linux canonical runtime output.",
+                proof["divergence_summary"],
+            )
+            self.assertEqual(proof["source_of_truth_proof"]["status"], "PASS")
 
 
 if __name__ == "__main__":

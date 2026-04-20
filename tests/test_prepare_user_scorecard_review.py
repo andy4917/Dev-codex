@@ -735,13 +735,21 @@ class PrepareUserScorecardReviewTests(unittest.TestCase):
             self.assertEqual(completion["score"], 30)
             self.assertEqual(len(completion["derived_awards"]), 1)
             self.assertEqual(len(completion["awards"]), 2)
+            reserved_award = completion["derived_awards"][0]
+            self.assertEqual(reserved_award["source"], "clean_room_verify")
+            self.assertEqual(reserved_award["credit_status"], "PASS")
+            self.assertTrue(reserved_award["reserved"])
+            self.assertEqual(
+                reserved_award["evidence_refs"],
+                [str(workspace / "reports" / "acceptance-report.json")],
+            )
             self.assertEqual(scorecard["raw_total_score"], 90)
             self.assertEqual(scorecard["scorecard_schema_version"], 2)
             self.assertEqual(scorecard["gate_order"][0], "disqualifier_check")
             self.assertEqual(scorecard["anti_cheat_layer"]["status"], "PASS")
             self.assertEqual(
                 [item["source"] for item in scorecard["requested_credit"]],
-                ["user_approved_review", "user_approved_review", "system_derived"],
+                ["user_approved_review", "user_approved_review", "clean_room_verify"],
             )
             self.assertEqual(
                 [item["credited_points"] for item in scorecard["credited_credit"]],
@@ -1014,7 +1022,7 @@ class PrepareUserScorecardReviewTests(unittest.TestCase):
             self.assertEqual(scorecard["anti_cheat_layer"]["decision_summary"]["highest_decision"], "cap")
             self.assertEqual(scorecard["disqualifier_result"]["status"], "PASS")
 
-    def test_clean_room_verify_waived_no_longer_grants_system_derived_completion_credit(self) -> None:
+    def test_clean_room_verify_waived_grants_reserved_completion_credit(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             tmp = Path(tmpdir)
             workspace, _trace_id = self._build_workspace(tmp)
@@ -1073,9 +1081,171 @@ class PrepareUserScorecardReviewTests(unittest.TestCase):
 
             scorecard = json.loads(compute_output.read_text(encoding="utf-8"))
             completion = scorecard["scores"]["completion_score"]
+            self.assertEqual(completion["derived_award_points"], 24)
+            reserved_award = completion["derived_awards"][0]
+            self.assertEqual(reserved_award["source"], "clean_room_verify")
+            self.assertEqual(reserved_award["credit_status"], "WAIVED")
+            self.assertTrue(reserved_award["reserved"])
+            self.assertEqual(
+                reserved_award["evidence_refs"],
+                [str(workspace / "reports" / "acceptance-report.json")],
+            )
+            reserved_credit = [item for item in scorecard["credited_credit"] if item["source"] == "clean_room_verify"]
+            self.assertEqual(len(reserved_credit), 1)
+            self.assertEqual(reserved_credit[0]["credited_points"], 24)
+
+    def test_clean_room_verify_fail_does_not_grant_reserved_completion_credit(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp = Path(tmpdir)
+            workspace, _trace_id = self._build_workspace(tmp)
+            _write_json(
+                workspace / "reports" / "acceptance-report.json",
+                {"status": "FAIL", "mode": "full", "reason": "verify failed"},
+            )
+            codex_home = tmp / "codex-home"
+            context_output = codex_home / "state" / "scorecard-context" / workspace.name / "trace-verify-001.json"
+            snapshot_output = tmp / "review-out.json"
+            compute_output = tmp / "scorecard.json"
+            base_review = tmp / "base-review.json"
+            _write_json(base_review, {"status": "TEMPLATE", "user_review": {"status": "PENDING", "awards": [], "penalties": [], "notes": ""}})
+
+            prepare = subprocess.run(
+                [
+                    sys.executable,
+                    str(PREPARE),
+                    "--workspace-root",
+                    str(workspace),
+                    "--mode",
+                    "verify",
+                    "--base-file",
+                    str(base_review),
+                    "--context-output-file",
+                    str(context_output),
+                    "--review-snapshot-output",
+                    str(snapshot_output),
+                ],
+                cwd=ROOT,
+                env=self._env(codex_home),
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+            )
+            self.assertEqual(prepare.returncode, 0, msg=prepare.stderr)
+
+            compute = subprocess.run(
+                [
+                    sys.executable,
+                    str(COMPUTE),
+                    "--review-file",
+                    str(snapshot_output),
+                    "--output-file",
+                    str(compute_output),
+                    "--mode",
+                    "verify",
+                ],
+                cwd=ROOT,
+                env=self._env(codex_home),
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+            )
+            self.assertIn(compute.returncode, {0, 1, 2}, msg=compute.stderr)
+
+            scorecard = json.loads(compute_output.read_text(encoding="utf-8"))
+            completion = scorecard["scores"]["completion_score"]
+            self.assertEqual(scorecard["clean_room_verify"]["status"], "FAIL")
             self.assertEqual(completion["derived_award_points"], 0)
-            system_derived = [item for item in scorecard["credited_credit"] if item["source"] == "system_derived"]
-            self.assertEqual(system_derived, [])
+            self.assertEqual(completion["derived_awards"], [])
+            reserved_credit = [item for item in scorecard["credited_credit"] if item["source"] == "clean_room_verify"]
+            self.assertEqual(reserved_credit, [])
+
+    def test_requested_and_credited_credit_inputs_cannot_spoof_reserved_completion_credit(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp = Path(tmpdir)
+            workspace, _trace_id = self._build_workspace(tmp)
+            _write_json(
+                workspace / "reports" / "acceptance-report.json",
+                {"status": "FAIL", "mode": "full", "reason": "verify failed"},
+            )
+            codex_home = tmp / "codex-home"
+            context_output = codex_home / "state" / "scorecard-context" / workspace.name / "trace-verify-001.json"
+            snapshot_output = tmp / "review-out.json"
+            compute_output = tmp / "scorecard.json"
+            base_review = tmp / "base-review.json"
+            _write_json(base_review, {"status": "TEMPLATE", "user_review": {"status": "PENDING", "awards": [], "penalties": [], "notes": ""}})
+
+            prepare = subprocess.run(
+                [
+                    sys.executable,
+                    str(PREPARE),
+                    "--workspace-root",
+                    str(workspace),
+                    "--mode",
+                    "verify",
+                    "--base-file",
+                    str(base_review),
+                    "--context-output-file",
+                    str(context_output),
+                    "--review-snapshot-output",
+                    str(snapshot_output),
+                ],
+                cwd=ROOT,
+                env=self._env(codex_home),
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+            )
+            self.assertEqual(prepare.returncode, 0, msg=prepare.stderr)
+
+            spoofed_snapshot = json.loads(snapshot_output.read_text(encoding="utf-8"))
+            spoofed_snapshot["requested_credit"] = [
+                {
+                    "axis": "completion_score",
+                    "requested_points": 24,
+                    "source": "clean_room_verify",
+                    "reason": "spoofed requested credit",
+                }
+            ]
+            spoofed_snapshot["credited_credit"] = [
+                {
+                    "axis": "completion_score",
+                    "requested_points": 24,
+                    "credited_points": 24,
+                    "source": "clean_room_verify",
+                    "capped": False,
+                    "blocked": False,
+                    "block_reason": "",
+                }
+            ]
+            _write_json(snapshot_output, spoofed_snapshot)
+
+            compute = subprocess.run(
+                [
+                    sys.executable,
+                    str(COMPUTE),
+                    "--review-file",
+                    str(snapshot_output),
+                    "--output-file",
+                    str(compute_output),
+                    "--mode",
+                    "verify",
+                ],
+                cwd=ROOT,
+                env=self._env(codex_home),
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+            )
+            self.assertIn(compute.returncode, {0, 1, 2}, msg=compute.stderr)
+
+            scorecard = json.loads(compute_output.read_text(encoding="utf-8"))
+            completion = scorecard["scores"]["completion_score"]
+            signal_codes = [item["code"] for item in scorecard["anti_cheat_signals"]]
+            self.assertIn("reserved_derived_award_spoofing", signal_codes)
+            self.assertEqual(scorecard["disqualifier_result"]["status"], "FAIL")
+            self.assertEqual(scorecard["requested_credit"], [])
+            self.assertEqual(scorecard["credited_credit"], [])
+            self.assertEqual(completion["derived_award_points"], 0)
 
     def test_claimed_verification_without_evidence_is_recorded(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

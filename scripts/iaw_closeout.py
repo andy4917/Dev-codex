@@ -2,8 +2,10 @@
 from __future__ import annotations
 
 import argparse
+import os
 import subprocess
 import sys
+from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -14,8 +16,12 @@ from _scorecard_common import (
     DEFAULT_POLICY_FILE,
     DEFAULT_REVIEW_FILE,
     DEFAULT_SCORECARD_FILE,
+    atomic_save_json,
     file_hash,
     gate_receipt_mirror_path,
+    gate_receipt_lock_path,
+    gate_receipts_root,
+    gate_receipt_signature_policy,
     gate_receipt_state_path,
     git_lines,
     git_sha,
@@ -24,7 +30,7 @@ from _scorecard_common import (
     normalize_status,
     project_id,
     resolve_path,
-    save_json,
+    stable_json_hash,
     scorecard_targets,
     signed_payload,
     stable_sequence_hash,
@@ -137,6 +143,24 @@ def _current_changed_files(workspace_root: Path) -> list[str]:
         for item in changed
         if item.strip() and item.strip() not in IGNORED_WORKSPACE_CHANGED_FILES
     )
+
+
+def _changed_file_content_hash(workspace_root: Path, changed_files: list[str]) -> str:
+    entries: list[dict[str, Any]] = []
+    for item in changed_files:
+        relative_path = str(item).strip()
+        if not relative_path:
+            continue
+        path = workspace_root / relative_path
+        entry: dict[str, Any] = {"path": relative_path}
+        if path.is_file():
+            entry["sha256"] = file_hash(path)
+        elif path.exists():
+            entry["kind"] = "directory"
+        else:
+            entry["missing"] = True
+        entries.append(entry)
+    return stable_json_hash(entries)
 
 
 def _path_within(path: Path, root: Path) -> bool:
@@ -272,7 +296,9 @@ def _validate_manifest(
             reasons.append(f"evidence manifest artifact command_id mismatch: {artifact_path.name}")
 
     return reasons, manifest, {
+        "changed_files": actual_changed_files,
         "changed_file_set_hash": changed_file_set_hash,
+        "changed_file_content_hash": _changed_file_content_hash(workspace_root, actual_changed_files),
         "policy_hashes": required_policy_hashes,
         "script_hashes": required_script_hashes,
         "evidence_manifest_hash": file_hash(paths["manifest"]) if paths["manifest"].exists() else "",
@@ -321,6 +347,7 @@ def _report_path(phase: str) -> Path:
 
 def _build_receipt(
     *,
+    authority: dict[str, Any],
     workspace_root: Path,
     run_id: str,
     profile: str,
@@ -334,8 +361,14 @@ def _build_receipt(
     preflight_reasons: list[str],
     step_failures: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
+    normalized_gate_status = normalize_status(gate_status, "UNKNOWN")
+    state_path = gate_receipt_state_path(workspace_root, run_id, authority)
+    mirror_path = gate_receipt_mirror_path(workspace_root, run_id)
+    changed_files = [str(item).strip() for item in manifest_meta.get("changed_files", []) if str(item).strip()]
+    release_mode = mode == "release"
+    release_scope_authoritative = release_mode and profile == "L4"
     payload = {
-        "schema_version": 1,
+        "schema_version": 2,
         "run_id": run_id,
         "profile": profile,
         "mode": mode,
@@ -344,10 +377,11 @@ def _build_receipt(
         "base_commit": str(manifest.get("base_commit", "")).strip(),
         "head_commit": str(manifest.get("head_commit", "")).strip(),
         "changed_file_set_hash": str(manifest_meta.get("changed_file_set_hash", "")).strip(),
+        "changed_file_content_hash": str(manifest_meta.get("changed_file_content_hash", "")).strip(),
         "policy_hashes": dict(manifest_meta.get("policy_hashes", {})),
         "script_hashes": dict(manifest_meta.get("script_hashes", {})),
         "evidence_manifest_hash": str(manifest_meta.get("evidence_manifest_hash", "")).strip(),
-        "gate_status": gate_status,
+        "gate_status": normalized_gate_status,
         "scorecard_ref": str(scorecard_ref),
         "audit_refs": audit_refs,
         "summary_ref": str(summary_ref),
@@ -357,15 +391,68 @@ def _build_receipt(
         "preflight_reasons": preflight_reasons,
         "step_failures": list(step_failures or []),
         "authoritative": True,
+        "signature_policy": gate_receipt_signature_policy(),
+        "authority_layer": {
+            "kind": "signed_gate_receipt",
+            "state_root": str(gate_receipts_root(authority)),
+            "state_path": str(state_path),
+            "mirror_path": str(mirror_path),
+        },
+        "workspace_identity": {
+            "workspace_root_realpath": str(workspace_root),
+            "git_root": str(workspace_git_root(workspace_root)),
+            "codex_project_id": project_id(workspace_root),
+            "worktree_id": worktree_id(workspace_root),
+        },
+        "evidence_binding": {
+            "changed_files": changed_files,
+            "changed_file_count": len(changed_files),
+            "changed_file_set_hash": str(manifest_meta.get("changed_file_set_hash", "")).strip(),
+            "changed_file_content_hash": str(manifest_meta.get("changed_file_content_hash", "")).strip(),
+            "evidence_manifest_hash": str(manifest_meta.get("evidence_manifest_hash", "")).strip(),
+            "policy_hashes": dict(manifest_meta.get("policy_hashes", {})),
+            "script_hashes": dict(manifest_meta.get("script_hashes", {})),
+        },
+        "release_semantics": {
+            "scope": "release" if release_mode else "verification",
+            "release_mode": release_mode,
+            "release_profile_required": "L4",
+            "release_scope_authoritative": release_scope_authoritative,
+            "release_ready": release_scope_authoritative and normalized_gate_status == "PASS",
+            "verify_claims_authoritative": True,
+        },
     }
-    return signed_payload(payload)
+    return signed_payload(payload, authority=authority, create=mode != "release")
+
+
+@contextmanager
+def _receipt_lock(lock_path: Path):
+    lock_path.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        fd = os.open(lock_path, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+    except FileExistsError as exc:
+        raise RuntimeError(f"gate receipt lock is already held: {lock_path}") from exc
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as handle:
+            handle.write(f"pid={os.getpid()}\n")
+            handle.write(f"created_at={datetime.now(timezone.utc).isoformat()}\n")
+            handle.flush()
+            os.fsync(handle.fileno())
+        yield
+    finally:
+        try:
+            lock_path.unlink()
+        except FileNotFoundError:
+            pass
 
 
 def _save_receipt(authority: dict[str, Any], workspace_root: Path, run_id: str, receipt: dict[str, Any]) -> tuple[Path, Path]:
     state_path = gate_receipt_state_path(workspace_root, run_id, authority)
     mirror_path = gate_receipt_mirror_path(workspace_root, run_id)
-    save_json(state_path, receipt)
-    save_json(mirror_path, receipt)
+    lock_path = gate_receipt_lock_path(workspace_root, run_id, authority)
+    with _receipt_lock(lock_path):
+        atomic_save_json(state_path, receipt)
+        atomic_save_json(mirror_path, receipt)
     return state_path, mirror_path
 
 
@@ -412,21 +499,29 @@ def main() -> int:
     preflight_reasons.extend(_validate_waivers(paths))
 
     if preflight_reasons:
-        receipt = _build_receipt(
-            workspace_root=workspace_root,
-            run_id=run_id,
-            profile=profile,
-            mode=mode,
-            manifest=manifest,
-            manifest_meta=manifest_meta,
-            gate_status="BLOCKED",
-            scorecard_ref=scorecard_file,
-            audit_refs={},
-            summary_ref=paths["summary"],
-            preflight_reasons=preflight_reasons,
-            step_failures=[],
-        )
-        state_path, mirror_path = _save_receipt(authority, workspace_root, run_id, receipt)
+        try:
+            receipt = _build_receipt(
+                authority=authority,
+                workspace_root=workspace_root,
+                run_id=run_id,
+                profile=profile,
+                mode=mode,
+                manifest=manifest,
+                manifest_meta=manifest_meta,
+                gate_status="BLOCKED",
+                scorecard_ref=scorecard_file,
+                audit_refs={},
+                summary_ref=paths["summary"],
+                preflight_reasons=preflight_reasons,
+                step_failures=[],
+            )
+            state_path, mirror_path = _save_receipt(authority, workspace_root, run_id, receipt)
+        except (FileNotFoundError, RuntimeError) as exc:
+            print(f"BLOCKED: preflight failed for {workspace_root}")
+            for reason in preflight_reasons:
+                print(f"- {reason}")
+            print(f"- receipt issuance blocked: {exc}")
+            return status_exit_code("BLOCKED")
         print(f"BLOCKED: preflight failed for {workspace_root}")
         for reason in preflight_reasons:
             print(f"- {reason}")
@@ -555,21 +650,29 @@ def main() -> int:
     if gate_status == "UNKNOWN":
         gate_status = "BLOCKED"
 
-    receipt = _build_receipt(
-        workspace_root=workspace_root,
-        run_id=run_id,
-        profile=profile,
-        mode=mode,
-        manifest=manifest,
-        manifest_meta=manifest_meta,
-        gate_status=gate_status,
-        scorecard_ref=scorecard_file,
-        audit_refs=audit_refs,
-        summary_ref=paths["summary"],
-        preflight_reasons=[],
-        step_failures=step_failures,
-    )
-    state_path, mirror_path = _save_receipt(authority, workspace_root, run_id, receipt)
+    try:
+        receipt = _build_receipt(
+            authority=authority,
+            workspace_root=workspace_root,
+            run_id=run_id,
+            profile=profile,
+            mode=mode,
+            manifest=manifest,
+            manifest_meta=manifest_meta,
+            gate_status=gate_status,
+            scorecard_ref=scorecard_file,
+            audit_refs=audit_refs,
+            summary_ref=paths["summary"],
+            preflight_reasons=[],
+            step_failures=step_failures,
+        )
+        state_path, mirror_path = _save_receipt(authority, workspace_root, run_id, receipt)
+    except (FileNotFoundError, RuntimeError) as exc:
+        print(f"## gate_receipt")
+        print(f"- closeout command: python {closeout_script} --workspace-root {workspace_root} --run-id {run_id} --profile {profile} --mode {mode}")
+        print(f"- gate status: BLOCKED")
+        print(f"- receipt issuance blocked: {exc}")
+        return status_exit_code("BLOCKED")
     print(f"## gate_receipt")
     print(f"- closeout command: python {closeout_script} --workspace-root {workspace_root} --run-id {run_id} --profile {profile} --mode {mode}")
     print(f"- gate status: {gate_status}")

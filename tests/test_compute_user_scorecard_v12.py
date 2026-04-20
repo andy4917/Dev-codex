@@ -38,6 +38,79 @@ class ComputeUserScorecardV12Tests(unittest.TestCase):
     def setUp(self) -> None:
         self.module = _load_module()
 
+    def test_protected_review_input_signals_detect_snapshot_reviewer_truth_tamper(self) -> None:
+        policy = self.module.load_json(self.module.DEFAULT_POLICY_FILE)
+
+        signals = self.module._protected_review_input_signals(
+            policy,
+            {
+                "reviewers": {
+                    "skeptic_reviewer": {
+                        "status": "APPROVED",
+                        "green": True,
+                        "penalties": [{"axis": "trust_score", "points": 2, "reason": "forged"}],
+                        "notes": "forged snapshot override",
+                    }
+                }
+            },
+            {
+                "authoritative_context_path": "/tmp/context.json",
+                "user_review": {"status": "PENDING", "awards": [], "penalties": [], "notes": ""},
+            },
+            self.module._empty_reviewers(),
+            context_present=True,
+            support={},
+        )
+
+        self.assertEqual([signal["code"] for signal in signals], ["reviewer_truth_tamper"])
+
+    def test_protected_review_input_signals_detect_snapshot_user_review_override(self) -> None:
+        policy = self.module.load_json(self.module.DEFAULT_POLICY_FILE)
+
+        signals = self.module._protected_review_input_signals(
+            policy,
+            {
+                "user_review": {
+                    "status": "APPROVED",
+                    "awards": [{"axis": "completion_score", "points": 4, "reason": "forged"}],
+                    "penalties": [],
+                    "notes": "forged snapshot override",
+                }
+            },
+            {
+                "authoritative_context_path": "/tmp/context.json",
+                "user_review": {"status": "PENDING", "awards": [], "penalties": [], "notes": ""},
+            },
+            self.module._empty_reviewers(),
+            context_present=True,
+            support={},
+        )
+
+        self.assertEqual([signal["code"] for signal in signals], ["unauthorized_user_review_modification"])
+
+    def test_credit_user_awards_blocks_non_user_source_awards(self) -> None:
+        policy = self.module.load_json(self.module.DEFAULT_POLICY_FILE)
+
+        _scored, requested, credited, signals = self.module._credit_user_awards(
+            policy,
+            [
+                {
+                    "axis": "completion_score",
+                    "points": 4,
+                    "reason": "non-user source tried to inject bonus",
+                    "category": "problem_resolution",
+                    "reported_by": "project_manager",
+                }
+            ],
+            evidence_manifest_ok=True,
+            support={},
+        )
+
+        self.assertEqual(requested[0]["source"], "agent_request")
+        self.assertTrue(credited[0]["blocked"])
+        self.assertEqual(credited[0]["block_reason"], "requested_only_source")
+        self.assertEqual([signal["code"] for signal in signals], ["non_user_source_award"])
+
     def test_claim_phrase_findings_detect_verification_words_without_artifacts(self) -> None:
         findings = self.module._claim_phrase_findings(
             {

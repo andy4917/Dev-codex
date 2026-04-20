@@ -4,7 +4,7 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from _scorecard_common import DEFAULT_SCORECARD_FILE, load_json, resolve_path, signature_valid
+from _scorecard_common import DEFAULT_SCORECARD_FILE, gate_receipt_state_path, load_json, resolve_path, validate_gate_receipt
 
 
 def _axis_score(payload: dict, key: str) -> str:
@@ -47,18 +47,31 @@ def _stage_line(payload: dict, key: str, default: str = "UNKNOWN") -> str:
     return status
 
 
+def _credit_outcome_label(item: dict) -> str:
+    block_reason = str(item.get("block_reason", "")).strip()
+    if item.get("blocked"):
+        return f"blocked={block_reason}" if block_reason else "blocked"
+    if item.get("capped"):
+        return f"capped={block_reason}" if block_reason else "capped"
+    return ""
+
+
 def _authoritative_receipt(payload: dict, receipt_file: str) -> dict:
+    workspace_root = resolve_path(str(payload.get("workspace_root", "")))
+    run_id = str(payload.get("run_id", "")).strip()
     candidate = resolve_path(receipt_file) if receipt_file else None
-    if candidate is None:
-        evidence_manifest_path = resolve_path(str(payload.get("evidence_manifest_path", "")))
-        if evidence_manifest_path is not None:
-            mirror = evidence_manifest_path.parent / "gate_receipt.json"
-            if mirror.exists():
-                candidate = mirror
+    if candidate is None and workspace_root is not None and run_id:
+        candidate = gate_receipt_state_path(workspace_root, run_id)
     if candidate is None or not candidate.exists():
         return {}
     receipt = load_json(candidate, default={})
-    if not isinstance(receipt, dict) or not signature_valid(receipt):
+    verdict = validate_gate_receipt(
+        receipt,
+        receipt_path=candidate,
+        workspace_root=workspace_root,
+        run_id=run_id,
+    )
+    if not verdict["ok"]:
         return {}
     return receipt
 
@@ -109,13 +122,10 @@ def main() -> int:
             for item in credited_credit:
                 reason = requested_reason.get((item.get("axis", ""), item.get("requested_points", 0), item.get("source", "")), "")
                 suffix = f" ({reason})" if reason else ""
-                if item.get("blocked"):
+                outcome = _credit_outcome_label(item)
+                if outcome:
                     print(
-                        f"- credited: {item['source']} {item['axis']} +0/{item['requested_points']} blocked={item.get('block_reason', '')}{suffix}"
-                    )
-                elif item.get("capped"):
-                    print(
-                        f"- credited: {item['source']} {item['axis']} +{item['credited_points']}/{item['requested_points']} capped{suffix}"
+                        f"- credited: {item['source']} {item['axis']} +{item['credited_points']}/{item['requested_points']} {outcome}{suffix}"
                     )
                 else:
                     print(f"- credited: {item['source']} {item['axis']} +{item['credited_points']}{suffix}")
@@ -169,6 +179,11 @@ def main() -> int:
         )
 
     print(f"19. gate 상태: {payload.get('gate_status', 'UNKNOWN') if authoritative else 'UNVERIFIED'}")
+    if authoritative:
+        for reason in payload.get("gate_reasons", []):
+            text = str(reason).strip()
+            if text:
+                print(f"- gate reason: {text}")
     manual = payload.get("remaining_manual_close_out", [])
     if manual:
         print(f"20. 남은 manual close-out: {'; '.join(str(item) for item in manual)}")
@@ -186,12 +201,17 @@ def main() -> int:
     repeated_verify = payload.get("repeated_verify", {})
     if isinstance(repeated_verify, dict) and repeated_verify.get("status") == "WAIVED":
         negative_findings.append("repeated_verify:waived")
+    clean_room_verify = payload.get("clean_room_verify", {})
+    if isinstance(clean_room_verify, dict) and str(clean_room_verify.get("status", "")).strip().upper() == "WAIVED":
+        negative_findings.append("clean_room_verify:waived")
     if manual:
         negative_findings.append("manual_close_out:open")
     if isinstance(cross, dict) and int(cross.get("unresolved_disagreement_count", 0)) > 0:
         negative_findings.append("cross_verification:unresolved")
     if negative_findings:
         print(f"21. Negative Findings: {', '.join(negative_findings)}")
+        if "clean_room_verify:waived" in negative_findings:
+            print("- clean_room_verify:waived credit_effect=+24_by_runtime_policy readiness_effect=gate_policy_dependent note=WAIVED_remains_disclosed_and_is_not_PASS")
     else:
         print("21. Negative Findings: none")
     print(f"22. 최종 판정: {payload.get('final_decision', 'UNKNOWN') if authoritative else 'UNVERIFIED'}")

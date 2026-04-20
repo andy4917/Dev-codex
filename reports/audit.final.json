@@ -1,4 +1,6 @@
 {
+  "phase": "final",
+  "blocking_only": false,
   "authority_path": "/home/andy4917/Dev-Management/contracts/workspace_authority.json",
   "trusted_projects": [
     "/home/andy4917/Dev-Management",
@@ -29,6 +31,90 @@
   "project_root_markers_git_only": true,
   "windows_generated_mirror": true,
   "windows_generated_mirror_matches_linux": true,
+  "windows_runtime_mirror_check": {
+    "linux_runtime_root": "/home/andy4917/.codex",
+    "windows_runtime_root": "/mnt/c/Users/anise/.codex",
+    "expected_generated_header": "GENERATED - DO NOT EDIT",
+    "mirror_role": "windows_generated_mirror",
+    "canonical_source": "linux_runtime_outputs",
+    "files": {
+      "agents": {
+        "label": "AGENTS.md",
+        "linux_path": "/home/andy4917/.codex/AGENTS.md",
+        "windows_path": "/mnt/c/Users/anise/.codex/AGENTS.md",
+        "linux_exists": true,
+        "windows_exists": true,
+        "linux_sha256": "45ea0dd954230d4faac06b5f9ecf43ba5e200a69a45d360b2ea64e4dd5796b17",
+        "windows_sha256": "2b9935897fd8d56f506a0ce8fc71aa2d76ce78d4945dca386e2fb42d1c42ada1",
+        "linux_body_sha256": "63fb56efabfeb6c6a4cc8f731dc8805be2e39ec70b1acbbafa9eded6bbade7af",
+        "windows_body_sha256": "63fb56efabfeb6c6a4cc8f731dc8805be2e39ec70b1acbbafa9eded6bbade7af",
+        "expected_windows_headers": [
+          "GENERATED - DO NOT EDIT"
+        ],
+        "windows_generated_header_ok": true,
+        "body_matches_linux": true,
+        "linux_first_content_line": "# Generated Codex Workspace Contract",
+        "windows_first_content_line": "# Generated Codex Workspace Contract",
+        "divergence_reasons": [],
+        "diff_preview": [],
+        "status": "PASS"
+      },
+      "config": {
+        "label": "config.toml",
+        "linux_path": "/home/andy4917/.codex/config.toml",
+        "windows_path": "/mnt/c/Users/anise/.codex/config.toml",
+        "linux_exists": true,
+        "windows_exists": true,
+        "linux_sha256": "f68b740704d6525dc1abc3d8c666c648ad207aca2c5df327cd5bb6a9de297a6c",
+        "windows_sha256": "c53a8202d9e93ef95bfc3eec7c4eff689a9850ca6dca8a76dba45e88ba97322c",
+        "linux_body_sha256": "d8f3a831bc1a4e9ad5b545c2b18e88f6bdca67374c6e5093af53f8bdc4f5035a",
+        "windows_body_sha256": "d8f3a831bc1a4e9ad5b545c2b18e88f6bdca67374c6e5093af53f8bdc4f5035a",
+        "expected_windows_headers": [
+          "# GENERATED - DO NOT EDIT",
+          "GENERATED - DO NOT EDIT"
+        ],
+        "windows_generated_header_ok": true,
+        "body_matches_linux": true,
+        "linux_first_content_line": "model = \"gpt-5.4\"",
+        "windows_first_content_line": "model = \"gpt-5.4\"",
+        "divergence_reasons": [],
+        "diff_preview": [],
+        "status": "PASS"
+      }
+    },
+    "all_windows_headers_ok": true,
+    "all_windows_bodies_match_linux": true,
+    "source_of_truth_proof": {
+      "authority_path": "/home/andy4917/Dev-Management/contracts/workspace_authority.json",
+      "agents_generation_source": "/home/andy4917/Dev-Management/contracts/workspace_authority.json",
+      "linux_runtime_targets": {
+        "agents": "/home/andy4917/.codex/AGENTS.md",
+        "config": "/home/andy4917/.codex/config.toml"
+      },
+      "windows_runtime_targets": {
+        "agents": "/mnt/c/Users/anise/.codex/AGENTS.md",
+        "config": "/mnt/c/Users/anise/.codex/config.toml"
+      },
+      "linux_and_windows_targets_are_distinct": true,
+      "config_override_probe": {
+        "script": "/home/andy4917/Dev-Management/scripts/render_codex_runtime.py",
+        "function": "user_override_config_paths",
+        "linux_config_path": "/home/andy4917/.codex/config.toml",
+        "windows_config_path": "/mnt/c/Users/anise/.codex/config.toml",
+        "returned_paths": [
+          "/home/andy4917/.codex/config.toml"
+        ],
+        "linux_config_used_as_override_source": true,
+        "windows_config_used_as_override_source": false,
+        "reasons": [],
+        "status": "PASS"
+      },
+      "reasons": [],
+      "status": "PASS"
+    },
+    "divergence_summary": [],
+    "status": "PASS"
+  },
   "forbidden_feature_flags_enabled": [],
   "runtime_restore_seed_violations": [
     {
@@ -46,36 +132,6 @@
       "category": "thread_workspace_root_hints",
       "path": "/mnt/c/Users/anise/.codex/.codex-global-state.json",
       "reason": "thread workspace root hints remain active: 7",
-      "disqualifier_ids": [
-        "DQ-010"
-      ],
-      "evidence_refs": [
-        "/mnt/c/Users/anise/.codex/.codex-global-state.json"
-      ]
-    },
-    {
-      "category": "active_workspace_roots",
-      "path": "/mnt/c/Users/anise/.codex/.codex-global-state.json",
-      "reason": "active-workspace-roots contains stale or non-canonical runtime roots",
-      "values": [
-        "\\\\wsl$\\Ubuntu\\home\\andy4917\\Dev-Workflow"
-      ],
-      "disqualifier_ids": [
-        "DQ-010"
-      ],
-      "evidence_refs": [
-        "/mnt/c/Users/anise/.codex/.codex-global-state.json"
-      ]
-    },
-    {
-      "category": "electron_saved_workspace_roots",
-      "path": "/mnt/c/Users/anise/.codex/.codex-global-state.json",
-      "reason": "electron-saved-workspace-roots contains stale or non-canonical runtime roots",
-      "values": [
-        "\\\\wsl$\\Ubuntu\\home\\andy4917\\Dev-Workflow",
-        "\\\\wsl$\\Ubuntu\\home\\andy4917\\Dev-Product\\reservation-system",
-        "\\\\wsl$\\Ubuntu\\home\\andy4917\\Dev-Management"
-      ],
       "disqualifier_ids": [
         "DQ-010"
       ],
@@ -101,36 +157,6 @@
       "category": "thread_workspace_root_hints",
       "path": "/mnt/c/Users/anise/.codex/.codex-global-state.json",
       "reason": "thread workspace root hints remain active: 7",
-      "disqualifier_ids": [
-        "DQ-010"
-      ],
-      "evidence_refs": [
-        "/mnt/c/Users/anise/.codex/.codex-global-state.json"
-      ]
-    },
-    {
-      "category": "active_workspace_roots",
-      "path": "/mnt/c/Users/anise/.codex/.codex-global-state.json",
-      "reason": "active-workspace-roots contains stale or non-canonical runtime roots",
-      "values": [
-        "\\\\wsl$\\Ubuntu\\home\\andy4917\\Dev-Workflow"
-      ],
-      "disqualifier_ids": [
-        "DQ-010"
-      ],
-      "evidence_refs": [
-        "/mnt/c/Users/anise/.codex/.codex-global-state.json"
-      ]
-    },
-    {
-      "category": "electron_saved_workspace_roots",
-      "path": "/mnt/c/Users/anise/.codex/.codex-global-state.json",
-      "reason": "electron-saved-workspace-roots contains stale or non-canonical runtime roots",
-      "values": [
-        "\\\\wsl$\\Ubuntu\\home\\andy4917\\Dev-Workflow",
-        "\\\\wsl$\\Ubuntu\\home\\andy4917\\Dev-Product\\reservation-system",
-        "\\\\wsl$\\Ubuntu\\home\\andy4917\\Dev-Management"
-      ],
       "disqualifier_ids": [
         "DQ-010"
       ],

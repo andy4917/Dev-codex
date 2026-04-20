@@ -244,10 +244,11 @@
         {
           "id": "confirmed_work_execution",
           "points": 24,
-          "reason": "Only a clean-room verify PASS earns the baseline completion credit automatically; WAIVED remains disclosure-only.",
+          "reason": "Reserved completion credit is generated only from clean-room verify PASS or WAIVED evidence.",
           "category": "system_derived",
+          "source": "clean_room_verify",
           "when_all": {
-            "clean_room_verify_passed": true
+            "clean_room_verify_credit_eligible": true
           }
         }
       ],

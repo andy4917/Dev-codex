@@ -38,6 +38,110 @@ class AuditWorkspaceContractTests(unittest.TestCase):
         self.assertFalse(self.module.quarantine_root_policy_ok(Path("/home/andy4917/Dev-Management/quarantine/2026-04-16")))
         self.assertTrue(self.module.quarantine_root_policy_ok(Path("/home/andy4917/Dev-Management/quarantine")))
 
+    def test_windows_source_of_truth_proof_uses_linux_override_input_only(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp = Path(tmpdir)
+            linux_agents = tmp / "linux" / "AGENTS.md"
+            linux_config = tmp / "linux" / "config.toml"
+            windows_agents = tmp / "windows" / "AGENTS.md"
+            windows_config = tmp / "windows" / "config.toml"
+
+            linux_agents.parent.mkdir(parents=True)
+            windows_agents.parent.mkdir(parents=True)
+            linux_agents.write_text("# Generated Codex Workspace Contract\n", encoding="utf-8")
+            linux_config.write_text('approval_policy = "on-request"\n', encoding="utf-8")
+            windows_agents.write_text("GENERATED - DO NOT EDIT\n\n# Generated Codex Workspace Contract\n", encoding="utf-8")
+            windows_config.write_text('# GENERATED - DO NOT EDIT\napproval_policy = "on-request"\n', encoding="utf-8")
+
+            authority = {
+                "generation_targets": {
+                    "global_runtime": {
+                        "linux": {
+                            "agents": str(linux_agents),
+                            "config": str(linux_config),
+                        },
+                        "windows_mirror": {
+                            "agents": str(windows_agents),
+                            "config": str(windows_config),
+                            "generated_header": "GENERATED - DO NOT EDIT",
+                        },
+                    }
+                }
+            }
+            runtime = {
+                "linux_agents": linux_agents,
+                "linux_config": linux_config,
+                "windows_agents": windows_agents,
+                "windows_config": windows_config,
+            }
+
+            proof = self.module.build_windows_source_of_truth_proof(authority, runtime)
+
+            self.assertEqual(proof["status"], "PASS")
+            self.assertTrue(proof["linux_and_windows_targets_are_distinct"])
+            self.assertTrue(proof["config_override_probe"]["linux_config_used_as_override_source"])
+            self.assertFalse(proof["config_override_probe"]["windows_config_used_as_override_source"])
+
+    def test_windows_runtime_mirror_check_reports_divergence_per_file(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp = Path(tmpdir)
+            linux_agents = tmp / "linux" / "AGENTS.md"
+            linux_config = tmp / "linux" / "config.toml"
+            windows_agents = tmp / "windows" / "AGENTS.md"
+            windows_config = tmp / "windows" / "config.toml"
+
+            linux_agents.parent.mkdir(parents=True)
+            windows_agents.parent.mkdir(parents=True)
+            linux_agents.write_text("# Generated Codex Workspace Contract\n", encoding="utf-8")
+            linux_config.write_text('approval_policy = "on-request"\n', encoding="utf-8")
+            windows_agents.write_text("GENERATED - DO NOT EDIT\n\n# Generated Codex Workspace Contract\n", encoding="utf-8")
+            windows_config.write_text('# GENERATED - DO NOT EDIT\napproval_policy = "never"\n', encoding="utf-8")
+
+            authority = {
+                "generation_targets": {
+                    "global_runtime": {
+                        "linux": {
+                            "agents": str(linux_agents),
+                            "config": str(linux_config),
+                        },
+                        "windows_mirror": {
+                            "agents": str(windows_agents),
+                            "config": str(windows_config),
+                            "generated_header": "GENERATED - DO NOT EDIT",
+                        },
+                    }
+                }
+            }
+            runtime = {
+                "linux_agents": linux_agents,
+                "linux_config": linux_config,
+                "windows_agents": windows_agents,
+                "windows_config": windows_config,
+            }
+            source_of_truth_proof = {
+                "status": "PASS",
+                "reasons": [],
+            }
+
+            check = self.module.build_windows_runtime_mirror_check(
+                authority,
+                runtime=runtime,
+                source_of_truth_proof=source_of_truth_proof,
+            )
+
+            self.assertEqual(check["status"], "FAIL")
+            self.assertEqual(check["files"]["agents"]["status"], "PASS")
+            self.assertEqual(check["files"]["config"]["status"], "FAIL")
+            self.assertIn(
+                "Windows config.toml generation diverges from the Linux canonical runtime output.",
+                check["files"]["config"]["divergence_reasons"],
+            )
+            self.assertTrue(check["files"]["config"]["diff_preview"])
+            self.assertIn(
+                "config: Windows config.toml generation diverges from the Linux canonical runtime output.",
+                check["divergence_summary"],
+            )
+
     def test_rendered_global_config_includes_model_reasoning_and_features_and_mirrors_match(self) -> None:
         render = _load_render_module()
         original_template_loader = render.load_context7_template
@@ -349,6 +453,7 @@ trust_level = "trusted"
                     "delivery_gate": "/home/andy4917/Dev-Management/scripts/delivery_gate.py",
                     "summary_export": "/home/andy4917/Dev-Management/scripts/export_user_score_summary.py",
                     "workspace_authority_root": "/home/andy4917/.codex/state/workspace-authority",
+                    "receipt_state_root": "/home/andy4917/.codex/state/iaw",
                     "gate_receipt_root": "/home/andy4917/.codex/state/gate-receipts",
                     "runtime_hook": {
                         "script": "/home/andy4917/Dev-Management/scripts/scorecard_runtime_hook.py",
@@ -374,6 +479,7 @@ trust_level = "trusted"
         self.assertIn("iaw_closeout.py --workspace-root <repo> --run-id <run_id> --profile <L1|L2|L3|L4> --mode verify", rendered_agents)
         self.assertIn("activate the current project or worktree with Serena", rendered_agents)
         self.assertIn("Use Context7 before changing external libraries", rendered_agents)
+        self.assertIn("/home/andy4917/.codex/state/iaw/gate-receipts", rendered_agents)
         self.assertEqual(set(linux_hooks["hooks"]), {"UserPromptSubmit"})
         self.assertEqual(
             linux_hooks["hooks"]["UserPromptSubmit"][0]["hooks"][0]["command"],

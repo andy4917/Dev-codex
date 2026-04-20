@@ -19,6 +19,16 @@ DEFAULT_DISQUALIFIER_FILE = CONTRACTS / "disqualifier_policy.json"
 DEFAULT_AUTHORITY_FILE = CONTRACTS / "workspace_authority.json"
 DEFAULT_REVIEW_FILE = REPORTS / "user-scorecard.review.json"
 DEFAULT_SCORECARD_FILE = REPORTS / "user-scorecard.json"
+GATE_RECEIPT_SIGNATURE_POLICY = {
+    "policy_id": "scorecard-gate-receipt-v1.3",
+    "algorithm": "hmac-sha256",
+    "authority_layer": "signed_gate_receipt",
+    "state_root_required": True,
+    "workspace_identity_required": True,
+    "project_identity_required": True,
+    "changed_file_hash_required": True,
+    "release_profile": "L4",
+}
 
 
 def utc_timestamp() -> str:
@@ -77,6 +87,24 @@ def save_json(path: Path, payload: Any) -> None:
     with path.open("w", encoding="utf-8") as handle:
         json.dump(payload, handle, indent=2, ensure_ascii=False)
         handle.write("\n")
+
+
+def atomic_save_json(path: Path, payload: Any) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temp_path = path.parent / f".{path.name}.{os.getpid()}.{secrets.token_hex(8)}.tmp"
+    try:
+        with temp_path.open("w", encoding="utf-8") as handle:
+            json.dump(payload, handle, indent=2, ensure_ascii=False)
+            handle.write("\n")
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temp_path, path)
+    finally:
+        if temp_path.exists():
+            try:
+                temp_path.unlink()
+            except OSError:
+                pass
 
 
 def load_jsonl(path: Path) -> list[dict[str, Any]]:
@@ -233,14 +261,50 @@ def workspace_git_root(repo_root: Path) -> Path:
     return repo_root.resolve()
 
 
-def truth_secret_path() -> Path:
-    return state_root() / "truth-hmac.key"
+def _legacy_gate_receipts_root(authority: dict[str, Any] | None = None) -> Path | None:
+    scorecard = scorecard_targets(authority)
+    raw = str(scorecard.get("gate_receipt_root", "")).strip()
+    if not raw:
+        return None
+    return Path(raw).expanduser().resolve()
 
 
-def truth_secret() -> bytes:
-    path = truth_secret_path()
-    if path.exists():
-        return path.read_bytes()
+def resolve_iaw_state_home(authority: dict[str, Any] | None = None) -> Path:
+    override = os.environ.get("IAW_STATE_HOME", "").strip()
+    if override:
+        return Path(override).expanduser().resolve()
+    scorecard = scorecard_targets(authority)
+    raw = str(scorecard.get("receipt_state_root", "")).strip()
+    if raw:
+        return Path(raw).expanduser().resolve()
+    legacy_root = _legacy_gate_receipts_root(authority)
+    if legacy_root is not None:
+        return legacy_root.parent
+    return state_root() / "iaw"
+
+
+def truth_secret_path(authority: dict[str, Any] | None = None) -> Path:
+    return resolve_iaw_state_home(authority) / "truth-hmac.key"
+
+
+def _truth_secret_candidate_paths(authority: dict[str, Any] | None = None) -> list[Path]:
+    preferred = truth_secret_path(authority)
+    legacy = state_root() / "truth-hmac.key"
+    ordered: list[Path] = []
+    for path in (preferred, legacy):
+        resolved = path.expanduser().resolve()
+        if resolved not in ordered:
+            ordered.append(resolved)
+    return ordered
+
+
+def truth_secret(authority: dict[str, Any] | None = None, *, create: bool = True) -> bytes | None:
+    for path in _truth_secret_candidate_paths(authority):
+        if path.exists():
+            return path.read_bytes()
+    if not create:
+        return None
+    path = truth_secret_path(authority)
     path.parent.mkdir(parents=True, exist_ok=True)
     secret = secrets.token_hex(32).encode("utf-8")
     path.write_bytes(secret)
@@ -251,19 +315,31 @@ def truth_secret() -> bytes:
     return secret
 
 
-def truth_signature(payload: dict[str, Any]) -> str:
+def truth_signature(payload: dict[str, Any], authority: dict[str, Any] | None = None, *, create: bool = True) -> str:
     serialized = json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
-    return hmac.new(truth_secret(), serialized.encode("utf-8"), hashlib.sha256).hexdigest()
+    secret = truth_secret(authority, create=create)
+    if secret is None:
+        raise FileNotFoundError(f"truth-hmac.key is missing: {truth_secret_path(authority)}")
+    return hmac.new(secret, serialized.encode("utf-8"), hashlib.sha256).hexdigest()
 
 
-def verify_truth_signature(payload: dict[str, Any], signature: str) -> bool:
-    expected = truth_signature(payload)
-    return hmac.compare_digest(expected, str(signature or ""))
+def verify_truth_signature(payload: dict[str, Any], signature: str, authority: dict[str, Any] | None = None) -> bool:
+    serialized = json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    provided = str(signature or "")
+    if not provided:
+        return False
+    for path in _truth_secret_candidate_paths(authority):
+        if not path.exists():
+            continue
+        expected = hmac.new(path.read_bytes(), serialized, hashlib.sha256).hexdigest()
+        if hmac.compare_digest(expected, provided):
+            return True
+    return False
 
 
-def signed_payload(payload: dict[str, Any]) -> dict[str, Any]:
+def signed_payload(payload: dict[str, Any], authority: dict[str, Any] | None = None, *, create: bool = True) -> dict[str, Any]:
     data = dict(payload)
-    data["signature"] = truth_signature(data)
+    data["signature"] = truth_signature(data, authority, create=create)
     return data
 
 
@@ -271,9 +347,13 @@ def strip_signature(payload: dict[str, Any]) -> dict[str, Any]:
     return {key: value for key, value in payload.items() if key != "signature"}
 
 
-def signature_valid(payload: dict[str, Any]) -> bool:
+def signature_valid(payload: dict[str, Any], authority: dict[str, Any] | None = None) -> bool:
     signature = str(payload.get("signature", "")).strip()
-    return bool(signature) and verify_truth_signature(strip_signature(payload), signature)
+    return bool(signature) and verify_truth_signature(strip_signature(payload), signature, authority)
+
+
+def gate_receipt_signature_policy() -> dict[str, Any]:
+    return dict(GATE_RECEIPT_SIGNATURE_POLICY)
 
 
 def fresh_evidence_manifest_path(workspace_root: Path) -> Path:
@@ -446,11 +526,15 @@ def scorecard_targets(authority: dict[str, Any] | None = None) -> dict[str, Any]
 
 
 def gate_receipts_root(authority: dict[str, Any] | None = None) -> Path:
+    if os.environ.get("IAW_STATE_HOME", "").strip():
+        return resolve_iaw_state_home(authority) / "gate-receipts"
     scorecard = scorecard_targets(authority)
-    raw = str(scorecard.get("gate_receipt_root", "")).strip()
-    if raw:
-        return Path(raw).expanduser().resolve()
-    return state_root() / "gate-receipts"
+    if str(scorecard.get("receipt_state_root", "")).strip():
+        return resolve_iaw_state_home(authority) / "gate-receipts"
+    legacy_root = _legacy_gate_receipts_root(authority)
+    if legacy_root is not None:
+        return legacy_root
+    return resolve_iaw_state_home(authority) / "gate-receipts"
 
 
 def gate_receipt_state_path(workspace_root: Path, run_id: str, authority: dict[str, Any] | None = None) -> Path:
@@ -459,3 +543,168 @@ def gate_receipt_state_path(workspace_root: Path, run_id: str, authority: dict[s
 
 def gate_receipt_mirror_path(workspace_root: Path, run_id: str) -> Path:
     return agent_runs_root(workspace_root) / run_id / "gate_receipt.json"
+
+
+def gate_receipt_lock_path(workspace_root: Path, run_id: str, authority: dict[str, Any] | None = None) -> Path:
+    return resolve_iaw_state_home(authority) / "locks" / project_id(workspace_root) / f"{run_id}.lock"
+
+
+def _project_id_collision_warnings(expected_state_root: Path, resolved_workspace: Path | None) -> list[str]:
+    if not isinstance(resolved_workspace, Path):
+        return []
+    project_root = expected_state_root / project_id(resolved_workspace)
+    if not project_root.exists():
+        return []
+    other_roots: set[str] = set()
+    for path in project_root.glob("*.json"):
+        receipt = load_json(path, default={})
+        if not isinstance(receipt, dict):
+            continue
+        candidate = str(receipt.get("workspace_root_realpath", "")).strip()
+        if candidate and candidate != str(resolved_workspace):
+            other_roots.add(candidate)
+    if not other_roots:
+        return []
+    return [
+        "codex_project_id collision warning: "
+        + ", ".join(sorted(other_roots))
+    ]
+
+
+def validate_gate_receipt(
+    receipt: dict[str, Any],
+    *,
+    receipt_path: Path | None = None,
+    authority: dict[str, Any] | None = None,
+    workspace_root: Path | None = None,
+    run_id: str = "",
+) -> dict[str, Any]:
+    if not isinstance(receipt, dict) or not receipt:
+        return {"ok": False, "reasons": ["gate receipt is missing"], "warnings": [], "state_path": "", "state_root": ""}
+
+    reasons: list[str] = []
+    warnings: list[str] = []
+    if not signature_valid(receipt, authority):
+        reasons.append("gate receipt signature is invalid")
+
+    try:
+        schema_version = int(receipt.get("schema_version", 0))
+    except (TypeError, ValueError):
+        schema_version = 0
+    if schema_version < 2:
+        reasons.append("gate receipt schema_version is unsupported")
+
+    if receipt.get("authoritative") is not True:
+        reasons.append("gate receipt is not authoritative")
+
+    signature_policy = receipt.get("signature_policy", {})
+    expected_policy = gate_receipt_signature_policy()
+    if not isinstance(signature_policy, dict):
+        reasons.append("gate receipt signature_policy is missing")
+    else:
+        for key, expected_value in expected_policy.items():
+            if signature_policy.get(key) != expected_value:
+                reasons.append(f"gate receipt signature_policy {key} mismatch")
+
+    resolved_workspace = workspace_root.resolve() if isinstance(workspace_root, Path) else None
+    if resolved_workspace is None:
+        resolved_workspace = resolve_path(str(receipt.get("workspace_root_realpath", "")))
+    resolved_run_id = str(run_id).strip() or str(receipt.get("run_id", "")).strip()
+    expected_state_root = gate_receipts_root(authority)
+    expected_state_path = (
+        gate_receipt_state_path(resolved_workspace, resolved_run_id, authority)
+        if isinstance(resolved_workspace, Path) and resolved_run_id
+        else None
+    )
+    warnings.extend(_project_id_collision_warnings(expected_state_root, resolved_workspace))
+
+    authority_layer = receipt.get("authority_layer", {})
+    if not isinstance(authority_layer, dict):
+        reasons.append("gate receipt authority_layer is missing")
+    else:
+        if str(authority_layer.get("kind", "")).strip() != "signed_gate_receipt":
+            reasons.append("gate receipt authority_layer kind mismatch")
+        if str(authority_layer.get("state_root", "")).strip() != str(expected_state_root):
+            reasons.append("gate receipt authority state_root mismatch")
+        if expected_state_path is not None and str(authority_layer.get("state_path", "")).strip() != str(expected_state_path):
+            reasons.append("gate receipt authority state_path mismatch")
+        if not str(authority_layer.get("mirror_path", "")).strip():
+            reasons.append("gate receipt authority mirror_path is missing")
+
+    if receipt_path is not None and expected_state_path is not None and receipt_path.expanduser().resolve() != expected_state_path:
+        reasons.append("gate receipt must be loaded from the authoritative state root")
+
+    workspace_identity = receipt.get("workspace_identity", {})
+    if not isinstance(workspace_identity, dict):
+        reasons.append("gate receipt workspace_identity is missing")
+    elif isinstance(resolved_workspace, Path):
+        if str(workspace_identity.get("workspace_root_realpath", "")).strip() != str(resolved_workspace):
+            reasons.append("gate receipt workspace_root_realpath mismatch")
+        if str(workspace_identity.get("git_root", "")).strip() != str(workspace_git_root(resolved_workspace)):
+            reasons.append("gate receipt git_root mismatch")
+        if str(workspace_identity.get("codex_project_id", "")).strip() != project_id(resolved_workspace):
+            reasons.append("gate receipt codex_project_id mismatch")
+        if str(workspace_identity.get("worktree_id", "")).strip() != worktree_id(resolved_workspace):
+            reasons.append("gate receipt worktree_id mismatch")
+
+    if isinstance(workspace_identity, dict):
+        if str(receipt.get("workspace_root_realpath", "")).strip() != str(workspace_identity.get("workspace_root_realpath", "")).strip():
+            reasons.append("gate receipt top-level workspace_root_realpath mismatch")
+        if str(receipt.get("git_root", "")).strip() != str(workspace_identity.get("git_root", "")).strip():
+            reasons.append("gate receipt top-level git_root mismatch")
+        if str(receipt.get("codex_project_id", "")).strip() != str(workspace_identity.get("codex_project_id", "")).strip():
+            reasons.append("gate receipt top-level codex_project_id mismatch")
+        if str(receipt.get("worktree_id", "")).strip() != str(workspace_identity.get("worktree_id", "")).strip():
+            reasons.append("gate receipt top-level worktree_id mismatch")
+
+    evidence_binding = receipt.get("evidence_binding", {})
+    if not isinstance(evidence_binding, dict):
+        reasons.append("gate receipt evidence_binding is missing")
+    else:
+        if not str(evidence_binding.get("changed_file_set_hash", "")).strip():
+            reasons.append("gate receipt changed_file_set_hash is missing")
+        if not str(evidence_binding.get("changed_file_content_hash", "")).strip():
+            reasons.append("gate receipt changed_file_content_hash is missing")
+        if not str(evidence_binding.get("evidence_manifest_hash", "")).strip():
+            reasons.append("gate receipt evidence_manifest_hash is missing")
+        if not isinstance(evidence_binding.get("policy_hashes", {}), dict):
+            reasons.append("gate receipt policy_hashes are missing")
+        if not isinstance(evidence_binding.get("script_hashes", {}), dict):
+            reasons.append("gate receipt script_hashes are missing")
+        if str(receipt.get("changed_file_set_hash", "")).strip() != str(evidence_binding.get("changed_file_set_hash", "")).strip():
+            reasons.append("gate receipt top-level changed_file_set_hash mismatch")
+        if str(receipt.get("evidence_manifest_hash", "")).strip() != str(evidence_binding.get("evidence_manifest_hash", "")).strip():
+            reasons.append("gate receipt top-level evidence_manifest_hash mismatch")
+
+    receipt_mode = normalize_status(receipt.get("mode"), "")
+    receipt_profile = str(receipt.get("profile", "")).strip()
+    gate_status = normalize_status(receipt.get("gate_status"), "UNKNOWN")
+    release_semantics = receipt.get("release_semantics", {})
+    if not isinstance(release_semantics, dict):
+        reasons.append("gate receipt release_semantics are missing")
+    else:
+        expected_scope = "release" if receipt_mode == "RELEASE" else "verification"
+        if str(release_semantics.get("scope", "")).strip() != expected_scope:
+            reasons.append("gate receipt release_semantics scope mismatch")
+        if bool(release_semantics.get("release_mode", False)) != (receipt_mode == "RELEASE"):
+            reasons.append("gate receipt release_semantics release_mode mismatch")
+        if str(release_semantics.get("release_profile_required", "")).strip() != "L4":
+            reasons.append("gate receipt release_semantics release_profile_required mismatch")
+        expected_scope_authoritative = receipt_mode == "RELEASE" and receipt_profile == "L4"
+        if bool(release_semantics.get("release_scope_authoritative", False)) != expected_scope_authoritative:
+            reasons.append("gate receipt release_semantics release_scope_authoritative mismatch")
+        expected_release_ready = expected_scope_authoritative and gate_status == "PASS"
+        if bool(release_semantics.get("release_ready", False)) != expected_release_ready:
+            reasons.append("gate receipt release_semantics release_ready mismatch")
+        if bool(release_semantics.get("verify_claims_authoritative", False)) is not True:
+            reasons.append("gate receipt release_semantics verify_claims_authoritative mismatch")
+    if receipt_mode == "RELEASE" and receipt_profile != "L4":
+        reasons.append("gate receipt release mode requires the L4 profile")
+
+    return {
+        "ok": not reasons,
+        "reasons": reasons,
+        "warnings": warnings,
+        "state_path": str(expected_state_path) if expected_state_path is not None else "",
+        "state_root": str(expected_state_root),
+    }

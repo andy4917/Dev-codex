@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import argparse
 import json
+import shutil
 import sqlite3
 import sys
 import tomllib
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -19,6 +22,7 @@ if str(WORKFLOW_SCRIPTS) not in sys.path:
     sys.path.insert(0, str(WORKFLOW_SCRIPTS))
 
 from _common import current_wsl_distro  # noqa: E402
+from _scorecard_common import codex_home as resolve_codex_home  # noqa: E402
 
 
 def load_json(path: Path, default: Any | None = None) -> Any:
@@ -130,10 +134,45 @@ def effective_default_effort(authority: dict[str, Any]) -> str:
     return fallback
 
 
-def known_linux_roots(authority: dict[str, Any], codex_home: Path) -> dict[str, str]:
+def runtime_restore_homes(authority: dict[str, Any]) -> list[Path]:
+    runtime = authority.get("generation_targets", {}).get("global_runtime", {})
+    paths: list[Path] = []
+    for surface in ("windows_mirror", "linux"):
+        payload = runtime.get(surface, {})
+        if not isinstance(payload, dict):
+            continue
+        for key in ("agents", "config", "hooks_config"):
+            raw_path = payload.get(key)
+            if not raw_path:
+                continue
+            paths.append(Path(str(raw_path)).expanduser().resolve().parent)
+    fallback = resolve_codex_home()
+    if fallback not in paths:
+        paths.append(fallback)
+    ordered: list[Path] = []
+    seen: set[Path] = set()
+    for path in paths:
+        if path in seen:
+            continue
+        seen.add(path)
+        ordered.append(path)
+    return ordered
+
+
+def runtime_restore_codex_home(authority: dict[str, Any]) -> Path:
+    candidates = runtime_restore_homes(authority)
+    for path in candidates:
+        if (path / ".codex-global-state.json").exists() or (path / "state_5.sqlite").exists() or (path / "sessions").exists():
+            return path
+    return candidates[0]
+
+
+def known_linux_roots(authority: dict[str, Any], codex_homes: list[Path]) -> dict[str, str]:
     roots = dict(authority.get("canonical_roots", {}))
-    lease_root = codex_home / "state" / "workspace-authority"
-    if lease_root.exists():
+    for codex_home in codex_homes:
+        lease_root = codex_home / "state" / "workspace-authority"
+        if not lease_root.exists():
+            continue
         for lease_file in sorted(lease_root.glob("*.json")):
             payload = load_json(lease_file, default={})
             workspace_root = str(payload.get("workspace_root", "")).strip()
@@ -142,9 +181,303 @@ def known_linux_roots(authority: dict[str, Any], codex_home: Path) -> dict[str, 
     return roots
 
 
-def canonical_root_map(authority: dict[str, Any], policy: dict[str, Any], codex_home: Path) -> dict[str, str]:
+def canonical_root_map(authority: dict[str, Any], policy: dict[str, Any], codex_homes: list[Path]) -> dict[str, str]:
     host = preferred_host(authority, policy)
-    return {name: to_unc_path(path, host) for name, path in known_linux_roots(authority, codex_home).items()}
+    return {name: to_unc_path(path, host) for name, path in known_linux_roots(authority, codex_homes).items()}
+
+
+def canonical_root_name_for_path(
+    value: str,
+    *,
+    linux_roots: dict[str, str],
+    root_map: dict[str, str],
+    allowed_unc_hosts: tuple[str, ...],
+    stale_markers: tuple[str, ...],
+) -> str | None:
+    repaired = canonicalize_root_value(
+        value,
+        linux_roots=linux_roots,
+        root_map=root_map,
+        allowed_unc_hosts=allowed_unc_hosts,
+        stale_markers=stale_markers,
+    )
+    if not repaired:
+        return None
+    normalized = repaired.replace("\\", "/").replace("\\", "/").lower()
+    for name, linux_root in linux_roots.items():
+        candidates = {
+            str(Path(linux_root).resolve()).replace("\\", "/").lower(),
+        }
+        unc_root = root_map.get(name)
+        if unc_root:
+            candidates.add(unc_root.replace("\\", "/").lower())
+        for host in allowed_unc_hosts:
+            candidates.add(to_unc_path(linux_root, host).replace("\\", "/").lower())
+        if normalized in candidates:
+            return name
+    return None
+
+
+def root_string_candidates(
+    linux_roots: dict[str, str],
+    root_map: dict[str, str],
+    allowed_unc_hosts: tuple[str, ...],
+) -> dict[str, tuple[str, ...]]:
+    candidates: dict[str, tuple[str, ...]] = {}
+    for name, linux_root in linux_roots.items():
+        values = {
+            str(Path(linux_root).resolve()).replace("\\", "/").lower(),
+        }
+        unc_root = root_map.get(name)
+        if unc_root:
+            values.add(unc_root.replace("\\", "/").lower())
+        for host in allowed_unc_hosts:
+            values.add(to_unc_path(linux_root, host).replace("\\", "/").lower())
+        candidates[name] = tuple(sorted((value for value in values if value), key=len, reverse=True))
+    return candidates
+
+
+def iter_session_text_items(path: Path) -> list[dict[str, str]]:
+    items: list[dict[str, str]] = []
+    if not path.exists():
+        return items
+    for raw_line in path.read_text(encoding="utf-8", errors="ignore").splitlines():
+        try:
+            record = json.loads(raw_line)
+        except json.JSONDecodeError:
+            continue
+        payload = record.get("payload")
+        record_type = str(record.get("type", "")).strip()
+        kind = record_type
+        text_value = ""
+        if record_type == "session_meta" and isinstance(payload, dict):
+            cwd = str(payload.get("cwd", "")).strip()
+            if cwd:
+                kind = "session_meta_cwd"
+                text_value = cwd
+        elif record_type == "turn_context" and isinstance(payload, dict):
+            cwd = str(payload.get("cwd", "")).strip()
+            if cwd:
+                kind = "turn_context_cwd"
+                text_value = cwd
+        elif record_type == "event_msg" and isinstance(payload, dict):
+            kind = str(payload.get("type", "")).strip() or "event_msg"
+            for key in ("text", "message", "delta"):
+                value = payload.get(key)
+                if isinstance(value, str) and value.strip():
+                    text_value = value.strip()
+                    break
+        elif record_type == "response_item" and isinstance(payload, dict):
+            item_type = str(payload.get("type", "")).strip()
+            if item_type == "message":
+                parts: list[str] = []
+                for item in payload.get("content", []):
+                    if isinstance(item, dict) and isinstance(item.get("text"), str) and item.get("text", "").strip():
+                        parts.append(item["text"].strip())
+                if parts:
+                    kind = "assistant_message"
+                    text_value = "\n".join(parts)
+            elif item_type == "function_call_output":
+                output = payload.get("output")
+                if isinstance(output, str) and output.strip():
+                    kind = "function_output"
+                    text_value = output.strip()
+        if text_value:
+            items.append({"kind": kind, "text": text_value})
+    return items
+
+
+def concise_text(value: str, *, limit: int = 280) -> str:
+    collapsed = " ".join(str(value).split())
+    if len(collapsed) <= limit:
+        return collapsed
+    return collapsed[: limit - 1].rstrip() + "…"
+
+
+def extract_bullet_lines(message: str) -> list[str]:
+    bullets: list[str] = []
+    for line in str(message).splitlines():
+        stripped = line.strip()
+        if stripped.startswith("- "):
+            bullet = stripped[2:].strip()
+            if bullet:
+                bullets.append(bullet)
+    return bullets
+
+
+def extract_resume_position(message: str) -> list[str]:
+    bullets = extract_bullet_lines(message)
+    selected = [
+        concise_text(bullet, limit=220)
+        for bullet in bullets
+        if any(token in bullet.lower() for token in ("resume", "위치", "작업 위치", "완료 위치"))
+    ]
+    if selected:
+        return list(dict.fromkeys(selected[:3]))
+    lines = [line.strip() for line in str(message).splitlines() if line.strip()]
+    for index, line in enumerate(lines):
+        lowered = line.lower()
+        if "다시 시작할 위치" not in lowered and "resume" not in lowered:
+            continue
+        follow_up: list[str] = []
+        for candidate in lines[index + 1 :]:
+            if not candidate.startswith("- "):
+                if follow_up:
+                    break
+                continue
+            follow_up.append(concise_text(candidate[2:].strip(), limit=220))
+        if follow_up:
+            return list(dict.fromkeys(follow_up[:3]))
+    return []
+
+
+def extract_remaining_work_briefing(message: str) -> str:
+    bullets = extract_bullet_lines(message)
+    for bullet in bullets:
+        lowered = bullet.lower()
+        if "남은" in bullet or "remaining" in lowered or "next step" in lowered:
+            if ":" in bullet:
+                return concise_text(bullet.split(":", 1)[1].strip(), limit=240)
+            return concise_text(bullet, limit=240)
+    for line in str(message).splitlines():
+        stripped = line.strip()
+        lowered = stripped.lower()
+        if "남은" in stripped or "remaining" in lowered:
+            return concise_text(stripped.lstrip("- ").strip(), limit=240)
+    sentences = [chunk.strip() for chunk in str(message).replace("\n", " ").split(".") if chunk.strip()]
+    if sentences:
+        return concise_text(sentences[-1], limit=240)
+    return concise_text(message, limit=240)
+
+
+def format_timestamp(value: int | None) -> str | None:
+    if not value:
+        return None
+    return datetime.fromtimestamp(value, tz=timezone.utc).isoformat()
+
+
+def recover_thread_resume_candidates(
+    *,
+    codex_home: Path,
+    affected_thread_ids: list[str],
+    linux_roots: dict[str, str],
+    root_map: dict[str, str],
+    allowed_unc_hosts: tuple[str, ...],
+    stale_markers: tuple[str, ...],
+    default_root_name: str,
+) -> list[dict[str, Any]]:
+    if not affected_thread_ids:
+        return []
+    db_path = codex_home / "state_5.sqlite"
+    if not db_path.exists():
+        return []
+    conn = sqlite3.connect(db_path)
+    conn.row_factory = sqlite3.Row
+    try:
+        placeholders = ", ".join("?" for _ in affected_thread_ids)
+        rows = conn.execute(
+            f"""
+            SELECT id, title, cwd, first_user_message, updated_at, updated_at_ms, archived
+            FROM threads
+            WHERE id IN ({placeholders})
+            """,
+            affected_thread_ids,
+        ).fetchall()
+    finally:
+        conn.close()
+
+    root_tokens = root_string_candidates(linux_roots, root_map, allowed_unc_hosts)
+    candidates: list[dict[str, Any]] = []
+    for row in rows:
+        thread_id = str(row["id"])
+        session_paths = sorted((codex_home / "sessions").rglob(f"*{thread_id}.jsonl"))
+        session_path = session_paths[-1] if session_paths else None
+        session_items = iter_session_text_items(session_path) if session_path else []
+        relevant_items = session_items[-80:] if len(session_items) > 80 else session_items
+        scores: dict[str, float] = {name: 0.0 for name in linux_roots}
+
+        def add_score(root_name: str | None, amount: float) -> None:
+            if not root_name:
+                return
+            scores[root_name] = scores.get(root_name, 0.0) + amount
+
+        add_score(
+            canonical_root_name_for_path(
+                str(row["cwd"] or ""),
+                linux_roots=linux_roots,
+                root_map=root_map,
+                allowed_unc_hosts=allowed_unc_hosts,
+                stale_markers=stale_markers,
+            ),
+            3.0,
+        )
+        for item in relevant_items:
+            root_name = canonical_root_name_for_path(
+                item["text"],
+                linux_roots=linux_roots,
+                root_map=root_map,
+                allowed_unc_hosts=allowed_unc_hosts,
+                stale_markers=stale_markers,
+            )
+            if root_name:
+                add_score(root_name, 4.0 if item["kind"].endswith("_cwd") else 2.0)
+                continue
+            normalized = item["text"].replace("\\", "/").lower()
+            for root_name, token_values in root_tokens.items():
+                if any(token in normalized for token in token_values):
+                    weight = 2.5 if item["kind"] in {"assistant_message", "function_output", "agent_message"} else 1.5
+                    add_score(root_name, weight)
+        ranked = sorted(
+            scores.items(),
+            key=lambda item: (
+                item[1],
+                len(Path(linux_roots.get(item[0], "/")).parts),
+                item[0] == default_root_name,
+            ),
+            reverse=True,
+        )
+        root_name = ranked[0][0] if ranked and ranked[0][1] > 0 else default_root_name
+        workspace_root = linux_roots.get(root_name, "")
+        last_user_message = next(
+            (item["text"] for item in reversed(relevant_items) if item["kind"] == "user_message"),
+            str(row["first_user_message"] or "").strip(),
+        )
+        assistant_messages = [
+            item["text"]
+            for item in relevant_items
+            if item["kind"] in {"assistant_message", "agent_message"} and item["text"].strip()
+        ]
+        last_assistant_message = assistant_messages[-1] if assistant_messages else ""
+        resume_position = extract_resume_position(last_assistant_message)
+        remaining_work = extract_remaining_work_briefing(last_assistant_message) if last_assistant_message else ""
+        candidates.append(
+            {
+                "thread_id": thread_id,
+                "title": str(row["title"] or "").strip(),
+                "workspace_root_name": root_name,
+                "workspace_root": workspace_root,
+                "workspace_unc_root": root_map.get(root_name, ""),
+                "updated_at": int(row["updated_at"] or 0),
+                "updated_at_iso": format_timestamp(int(row["updated_at"] or 0)),
+                "updated_at_ms": int(row["updated_at_ms"] or 0),
+                "archived": bool(row["archived"]),
+                "session_path": str(session_path) if session_path else "",
+                "resume_position": resume_position,
+                "remaining_work_briefing": remaining_work,
+                "last_user_request": concise_text(last_user_message, limit=220),
+                "last_agent_message_excerpt": concise_text(last_assistant_message, limit=320),
+            }
+        )
+    return sorted(
+        candidates,
+        key=lambda item: (
+            int(item.get("updated_at_ms") or 0),
+            int(item.get("updated_at") or 0),
+            bool(item.get("remaining_work_briefing")),
+            bool(item.get("resume_position")),
+        ),
+        reverse=True,
+    )
 
 
 def canonicalize_root_value(
@@ -191,6 +524,7 @@ def repair_local_environments(
     root_map: dict[str, str],
     allowed_unc_hosts: tuple[str, ...],
     stale_markers: tuple[str, ...],
+    apply: bool = True,
 ) -> list[str]:
     changed: list[str] = []
     local_env_root = codex_home / "local-environments"
@@ -208,7 +542,8 @@ def repair_local_environments(
         )
         if repaired and repaired != workspace_root:
             payload["workspace_root"] = repaired
-            save_json(path, payload)
+            if apply:
+                save_json(path, payload)
             changed.append(str(path))
     return changed
 
@@ -244,12 +579,19 @@ def has_localhost_remote_connection(state: dict[str, Any]) -> bool:
     return False
 
 
-def repair_global_state(authority: dict[str, Any], policy: dict[str, Any], codex_home: Path) -> dict[str, Any]:
+def repair_global_state(
+    authority: dict[str, Any],
+    policy: dict[str, Any],
+    codex_home: Path,
+    *,
+    preferred_active_root: str | None = None,
+    apply: bool = True,
+) -> dict[str, Any]:
     state_path = codex_home / ".codex-global-state.json"
     state = load_json(state_path, default={})
     restore = authority.get("runtime_layering", {}).get("restore_seed_policy", {})
-    roots = known_linux_roots(authority, codex_home)
-    root_map = canonical_root_map(authority, policy, codex_home)
+    roots = known_linux_roots(authority, runtime_restore_homes(authority))
+    root_map = canonical_root_map(authority, policy, runtime_restore_homes(authority))
     allowed_unc_hosts = allowed_hosts(authority, policy)
     stale_markers = stale_path_markers(policy, authority)
     default_root_name = str(restore.get("default_active_workspace_root", "management"))
@@ -275,7 +617,9 @@ def repair_global_state(authority: dict[str, Any], policy: dict[str, Any], codex
     active_roots = [root for root in active_roots if root]
     active_roots = list(dict.fromkeys(active_roots))
     if not active_roots:
-        active_roots = [default_active_root]
+        active_roots = [preferred_active_root or default_active_root]
+    elif preferred_active_root and (previous_projectless or previous_hints):
+        active_roots = list(dict.fromkeys([preferred_active_root, *active_roots]))
     if active_roots != state.get("active-workspace-roots", []):
         state["active-workspace-roots"] = active_roots
         changed = True
@@ -293,6 +637,8 @@ def repair_global_state(authority: dict[str, Any], policy: dict[str, Any], codex
     saved_roots = [root for root in saved_roots if root]
     if not saved_roots:
         saved_roots = list(dict.fromkeys([*active_roots, *root_map.values()]))
+    elif preferred_active_root and (previous_projectless or previous_hints):
+        saved_roots = list(dict.fromkeys([preferred_active_root, *saved_roots]))
     saved_roots = list(dict.fromkeys(saved_roots))
     if saved_roots != state.get("electron-saved-workspace-roots", []):
         state["electron-saved-workspace-roots"] = saved_roots
@@ -309,7 +655,10 @@ def repair_global_state(authority: dict[str, Any], policy: dict[str, Any], codex
         for root in state.get("project-order", [])
     ]
     project_order = [root for root in project_order if root]
-    project_order = list(dict.fromkeys([*project_order, *root_map.values()]))
+    if preferred_active_root and (previous_projectless or previous_hints):
+        project_order = list(dict.fromkeys([preferred_active_root, *project_order, *root_map.values()]))
+    else:
+        project_order = list(dict.fromkeys([*project_order, *root_map.values()]))
     if project_order != state.get("project-order", []):
         state["project-order"] = project_order
         changed = True
@@ -343,7 +692,7 @@ def repair_global_state(authority: dict[str, Any], policy: dict[str, Any], codex
         state["thread-workspace-root-hints"] = {}
         changed = True
 
-    if changed:
+    if changed and apply:
         save_json(state_path, state)
 
     return {
@@ -381,9 +730,11 @@ def repair_sessions(
     *,
     codex_home: Path,
     affected_thread_ids: list[str],
+    recovered_thread_roots: dict[str, str],
     default_linux_root: str,
     default_effort: str,
     stale_markers: tuple[str, ...],
+    apply: bool = True,
 ) -> list[str]:
     changed_files: list[str] = []
     sessions_root = codex_home / "sessions"
@@ -411,8 +762,9 @@ def repair_sessions(
             if isinstance(payload, dict):
                 cwd = str(payload.get("cwd", "")).strip()
                 cwd_normalized = cwd.replace("\\", "/").lower()
+                repaired_root = recovered_thread_roots.get(session_thread_id, default_linux_root)
                 if cwd and (session_relevant or any(marker in cwd_normalized for marker in stale_markers)):
-                    payload["cwd"] = default_linux_root
+                    payload["cwd"] = repaired_root
                     file_changed = True
                 if update_nested_reasoning(payload, default_effort):
                     file_changed = True
@@ -420,7 +772,8 @@ def repair_sessions(
             updated_lines.append(json.dumps(record, ensure_ascii=False))
 
         if file_changed:
-            path.write_text("\n".join(updated_lines) + "\n", encoding="utf-8")
+            if apply:
+                path.write_text("\n".join(updated_lines) + "\n", encoding="utf-8")
             changed_files.append(str(path))
     return changed_files
 
@@ -429,10 +782,12 @@ def repair_threads_db(
     *,
     db_path: Path,
     affected_thread_ids: list[str],
+    recovered_thread_roots: dict[str, str],
     default_linux_root: str,
     default_effort: str,
     reservation_root: str,
     legacy_linux_roots: tuple[str, ...],
+    apply: bool = True,
 ) -> dict[str, Any]:
     if not db_path.exists():
         return {"path": str(db_path), "changed_rows": 0}
@@ -442,63 +797,307 @@ def repair_threads_db(
         changed_rows = 0
         if affected_thread_ids:
             placeholders = ", ".join("?" for _ in affected_thread_ids)
-            params = [default_linux_root, default_effort, *affected_thread_ids]
             cur.execute(
                 f"""
-                UPDATE threads
-                SET cwd = CASE WHEN cwd LIKE '/mnt/c/%' THEN ? ELSE cwd END,
-                    reasoning_effort = CASE WHEN reasoning_effort = 'xhigh' THEN ? ELSE reasoning_effort END
+                SELECT id, cwd, reasoning_effort
+                FROM threads
                 WHERE id IN ({placeholders})
                 """,
-                params,
+                affected_thread_ids,
             )
-            changed_rows += cur.rowcount
+            for thread_id, cwd, reasoning_effort in cur.fetchall():
+                target_root = recovered_thread_roots.get(thread_id, default_linux_root)
+                next_cwd = cwd
+                if target_root and cwd != target_root:
+                    next_cwd = target_root
+                elif isinstance(cwd, str) and cwd.startswith("/mnt/c/"):
+                    next_cwd = default_linux_root
+                next_effort = default_effort if reasoning_effort == "xhigh" else reasoning_effort
+                if next_cwd == cwd and next_effort == reasoning_effort:
+                    continue
+                if apply:
+                    cur.execute(
+                        "UPDATE threads SET cwd = ?, reasoning_effort = ? WHERE id = ?",
+                        (next_cwd, next_effort, thread_id),
+                    )
+                    changed_rows += cur.rowcount
+                else:
+                    changed_rows += 1
         for legacy_root in legacy_linux_roots:
-            cur.execute(
-                """
-                UPDATE threads
-                SET cwd = ?,
-                    reasoning_effort = CASE WHEN reasoning_effort = 'xhigh' THEN ? ELSE reasoning_effort END
-                WHERE cwd = ?
-                """,
-                (reservation_root, default_effort, legacy_root),
-            )
-            changed_rows += cur.rowcount
-        conn.commit()
+            if apply:
+                cur.execute(
+                    """
+                    UPDATE threads
+                    SET cwd = ?,
+                        reasoning_effort = CASE WHEN reasoning_effort = 'xhigh' THEN ? ELSE reasoning_effort END
+                    WHERE cwd = ?
+                    """,
+                    (reservation_root, default_effort, legacy_root),
+                )
+                changed_rows += cur.rowcount
+            else:
+                cur.execute("SELECT COUNT(*) FROM threads WHERE cwd = ?", (legacy_root,))
+                row = cur.fetchone()
+                changed_rows += int(row[0] or 0) if row else 0
+        if apply:
+            conn.commit()
         return {"path": str(db_path), "changed_rows": changed_rows}
     finally:
         conn.close()
 
 
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Safely repair Codex desktop runtime restore state.")
+    mode_group = parser.add_mutually_exclusive_group()
+    mode_group.add_argument("--dry-run", action="store_true", help="Preview runtime changes without mutating live state (default).")
+    mode_group.add_argument("--apply", action="store_true", help="Apply runtime repairs after capturing backups.")
+    parser.add_argument("--runtime-codex-home", default="", help="Override the target Codex home to inspect or repair.")
+    parser.add_argument("--report-file", default=str(REPORT_PATH), help="Write the runtime repair report to this path.")
+    return parser.parse_args()
+
+
+def resolve_runtime_codex_home(authority: dict[str, Any], override: str) -> Path:
+    raw = str(override).strip()
+    if raw:
+        return Path(raw).expanduser().resolve()
+    return runtime_restore_codex_home(authority)
+
+
+def capture_baseline_snapshot() -> dict[str, Any]:
+    audit_candidates = [
+        MANAGEMENT_ROOT / "reports" / "audit.post-export.json",
+        MANAGEMENT_ROOT / "reports" / "audit.final.json",
+        MANAGEMENT_ROOT / "reports" / "audit.pre-export.json",
+        MANAGEMENT_ROOT / "reports" / "audit.pre-gate.json",
+    ]
+    payload: dict[str, Any] = {}
+    source = ""
+    for path in audit_candidates:
+        if not path.exists():
+            continue
+        candidate = load_json(path, default={})
+        if isinstance(candidate, dict):
+            payload = candidate
+            source = str(path)
+            break
+    windows_check = payload.get("windows_runtime_mirror_check", {}) if isinstance(payload, dict) else {}
+    violations = payload.get("runtime_restore_seed_violations", []) if isinstance(payload, dict) else []
+    return {
+        "captured_at": datetime.now(timezone.utc).isoformat(),
+        "audit_report": source,
+        "audit_status": str(payload.get("status", "UNKNOWN")).strip() if isinstance(payload, dict) else "UNKNOWN",
+        "windows_runtime_mirror_check_status": str(windows_check.get("status", "UNKNOWN")).strip() if isinstance(windows_check, dict) else "UNKNOWN",
+        "runtime_restore_seed_violations_count": len(violations) if isinstance(violations, list) else 0,
+    }
+
+
+def load_thread_rows(db_path: Path, thread_ids: list[str]) -> dict[str, dict[str, Any]]:
+    if not thread_ids or not db_path.exists():
+        return {}
+    conn = sqlite3.connect(db_path)
+    try:
+        conn.row_factory = sqlite3.Row
+        placeholders = ", ".join("?" for _ in thread_ids)
+        rows = conn.execute(
+            f"""
+            SELECT id, cwd, reasoning_effort
+            FROM threads
+            WHERE id IN ({placeholders})
+            """,
+            thread_ids,
+        ).fetchall()
+    finally:
+        conn.close()
+    return {
+        str(row["id"]): {
+            "cwd": str(row["cwd"] or ""),
+            "reasoning_effort": str(row["reasoning_effort"] or ""),
+        }
+        for row in rows
+    }
+
+
+def build_change_entries(
+    *,
+    global_state_result: dict[str, Any],
+    local_env_changed: list[str],
+    sessions_changed: list[str],
+    threads_result: dict[str, Any],
+    threads_before: dict[str, dict[str, Any]],
+    recovered_thread_roots: dict[str, str],
+    default_linux_root: str,
+    default_effort: str,
+    known_roots: dict[str, str],
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    changes: list[dict[str, Any]] = []
+    unexpected: list[dict[str, Any]] = []
+    known_root_values = {str(Path(path).resolve()) for path in known_roots.values()}
+
+    if global_state_result.get("changed"):
+        changes.append(
+            {
+                "type": "global_state_restore_seed_repair",
+                "path": str(global_state_result.get("path", "")).strip(),
+                "projectless_thread_ids_removed": len(global_state_result.get("removed_projectless_thread_ids", [])),
+                "thread_workspace_hints_removed": len(global_state_result.get("removed_thread_hints", [])),
+            }
+        )
+
+    for thread_id in global_state_result.get("removed_projectless_thread_ids", []):
+        previous = threads_before.get(str(thread_id), {})
+        before_cwd = str(previous.get("cwd", "")).strip()
+        after_cwd = str(recovered_thread_roots.get(str(thread_id), default_linux_root)).strip()
+        if before_cwd != after_cwd:
+            entry = {
+                "type": "thread_resume_root_recovery",
+                "thread_id": str(thread_id),
+                "from": before_cwd,
+                "to": after_cwd,
+            }
+            changes.append(entry)
+            if before_cwd in known_root_values and after_cwd in known_root_values and before_cwd != after_cwd:
+                unexpected.append(dict(entry))
+        if str(previous.get("reasoning_effort", "")).strip() == "xhigh":
+            changes.append(
+                {
+                    "type": "thread_reasoning_effort_reset",
+                    "thread_id": str(thread_id),
+                    "from": "xhigh",
+                    "to": default_effort,
+                }
+            )
+
+    for path in local_env_changed:
+        changes.append({"type": "local_environment_root_canonicalize", "path": str(path)})
+    for path in sessions_changed:
+        changes.append({"type": "session_restore_seed_rewrite", "path": str(path)})
+    if int(threads_result.get("changed_rows", 0) or 0) > 0:
+        changes.append(
+            {
+                "type": "threads_db_repair",
+                "path": str(threads_result.get("path", "")).strip(),
+                "changed_rows": int(threads_result.get("changed_rows", 0) or 0),
+            }
+        )
+    return changes, unexpected
+
+
+def collect_backup_targets(
+    *,
+    global_state_result: dict[str, Any],
+    local_env_changed: list[str],
+    sessions_changed: list[str],
+    threads_result: dict[str, Any],
+) -> list[Path]:
+    targets: list[Path] = []
+    if global_state_result.get("changed"):
+        targets.append(Path(str(global_state_result.get("path", "")).strip()))
+    targets.extend(Path(path) for path in local_env_changed if str(path).strip())
+    targets.extend(Path(path) for path in sessions_changed if str(path).strip())
+    if int(threads_result.get("changed_rows", 0) or 0) > 0:
+        targets.append(Path(str(threads_result.get("path", "")).strip()))
+    ordered: list[Path] = []
+    seen: set[Path] = set()
+    for path in targets:
+        resolved = path.expanduser().resolve()
+        if resolved in seen or not resolved.exists():
+            continue
+        seen.add(resolved)
+        ordered.append(resolved)
+    return ordered
+
+
+def backup_targets(targets: list[Path], codex_home: Path) -> dict[str, Any]:
+    if not targets:
+        return {"created": False, "root": "", "files": []}
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
+    backup_root = codex_home / "repair-backups" / timestamp
+    files: list[dict[str, str]] = []
+    for path in targets:
+        try:
+            relative = path.relative_to(codex_home)
+        except ValueError:
+            relative = Path(path.name)
+        destination = backup_root / relative
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(path, destination)
+        files.append({"source": str(path), "backup_path": str(destination)})
+    save_json(
+        backup_root / "backup-index.json",
+        {
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "files": files,
+        },
+    )
+    return {"created": True, "root": str(backup_root), "files": files}
+
+
 def main() -> int:
+    args = parse_args()
+    report_path = Path(args.report_file).expanduser().resolve()
     authority = load_json(AUTHORITY_PATH)
     policy = load_json(ENV_SYNC_POLICY_PATH)
-    codex_home = Path("/mnt/c/Users/anise/.codex")
+    codex_home = resolve_runtime_codex_home(authority, args.runtime_codex_home)
+    lease_homes = runtime_restore_homes(authority)
+    if codex_home not in lease_homes:
+        lease_homes = [codex_home, *lease_homes]
     restore = authority.get("runtime_layering", {}).get("restore_seed_policy", {})
-    roots = known_linux_roots(authority, codex_home)
+    roots = known_linux_roots(authority, lease_homes)
     default_root_name = str(restore.get("default_active_workspace_root", "management"))
     default_linux_root = roots.get(default_root_name, authority["canonical_roots"]["management"])
     default_effort = effective_default_effort(authority)
     stale_markers = stale_path_markers(policy, authority)
+    root_map = canonical_root_map(authority, policy, lease_homes)
+    allowed_unc_hosts = allowed_hosts(authority, policy)
+    state_snapshot = load_json(codex_home / ".codex-global-state.json", default={})
+    affected_thread_ids = list(state_snapshot.get("projectless-thread-ids", []))
+    threads_before = load_thread_rows(codex_home / "state_5.sqlite", affected_thread_ids)
+    resume_candidates = recover_thread_resume_candidates(
+        codex_home=codex_home,
+        affected_thread_ids=affected_thread_ids,
+        linux_roots=roots,
+        root_map=root_map,
+        allowed_unc_hosts=allowed_unc_hosts,
+        stale_markers=stale_markers,
+        default_root_name=default_root_name,
+    )
+    recovered_thread_roots = {
+        str(item["thread_id"]): str(item["workspace_root"])
+        for item in resume_candidates
+        if str(item.get("thread_id", "")).strip() and str(item.get("workspace_root", "")).strip()
+    }
+    latest_resume = resume_candidates[0] if resume_candidates else None
+    preferred_active_root = str((latest_resume or {}).get("workspace_unc_root", "")).strip() or None
+    mode = "apply" if args.apply else "dry-run"
 
-    global_state_result = repair_global_state(authority, policy, codex_home)
+    global_state_result = repair_global_state(
+        authority,
+        policy,
+        codex_home,
+        preferred_active_root=preferred_active_root,
+        apply=False,
+    )
     local_env_changed = repair_local_environments(
         codex_home=codex_home,
         linux_roots=roots,
-        root_map=global_state_result["root_map"],
-        allowed_unc_hosts=tuple(global_state_result["allowed_unc_hosts"]),
+        root_map=root_map,
+        allowed_unc_hosts=allowed_unc_hosts,
         stale_markers=stale_markers,
+        apply=False,
     )
     sessions_changed = repair_sessions(
         codex_home=codex_home,
         affected_thread_ids=global_state_result["removed_projectless_thread_ids"],
+        recovered_thread_roots=recovered_thread_roots,
         default_linux_root=default_linux_root,
         default_effort=default_effort,
         stale_markers=stale_markers,
+        apply=False,
     )
     threads_result = repair_threads_db(
         db_path=codex_home / "state_5.sqlite",
         affected_thread_ids=global_state_result["removed_projectless_thread_ids"],
+        recovered_thread_roots=recovered_thread_roots,
         default_linux_root=default_linux_root,
         default_effort=default_effort,
         reservation_root=roots.get("reservation-system", default_linux_root),
@@ -509,21 +1108,98 @@ def main() -> int:
             .get("legacy_repo_paths_to_remove", [])
             if str(path).startswith("/")
         ),
+        apply=False,
     )
+    predicted_changes, unexpected_resume_root_rewrites = build_change_entries(
+        global_state_result=global_state_result,
+        local_env_changed=local_env_changed,
+        sessions_changed=sessions_changed,
+        threads_result=threads_result,
+        threads_before=threads_before,
+        recovered_thread_roots=recovered_thread_roots,
+        default_linux_root=default_linux_root,
+        default_effort=default_effort,
+        known_roots=roots,
+    )
+
+    applied_changes: list[dict[str, Any]] = []
+    backup = {"created": False, "root": "", "files": []}
+    if args.apply:
+        backup = backup_targets(
+            collect_backup_targets(
+                global_state_result=global_state_result,
+                local_env_changed=local_env_changed,
+                sessions_changed=sessions_changed,
+                threads_result=threads_result,
+            ),
+            codex_home,
+        )
+        applied_global_state_result = repair_global_state(
+            authority,
+            policy,
+            codex_home,
+            preferred_active_root=preferred_active_root,
+            apply=True,
+        )
+        applied_local_env_changed = repair_local_environments(
+            codex_home=codex_home,
+            linux_roots=roots,
+            root_map=root_map,
+            allowed_unc_hosts=allowed_unc_hosts,
+            stale_markers=stale_markers,
+            apply=True,
+        )
+        applied_sessions_changed = repair_sessions(
+            codex_home=codex_home,
+            affected_thread_ids=applied_global_state_result["removed_projectless_thread_ids"],
+            recovered_thread_roots=recovered_thread_roots,
+            default_linux_root=default_linux_root,
+            default_effort=default_effort,
+            stale_markers=stale_markers,
+            apply=True,
+        )
+        applied_threads_result = repair_threads_db(
+            db_path=codex_home / "state_5.sqlite",
+            affected_thread_ids=applied_global_state_result["removed_projectless_thread_ids"],
+            recovered_thread_roots=recovered_thread_roots,
+            default_linux_root=default_linux_root,
+            default_effort=default_effort,
+            reservation_root=roots.get("reservation-system", default_linux_root),
+            legacy_linux_roots=tuple(
+                path
+                for path in authority.get("hardcoding_definition", {})
+                .get("path_rules", {})
+                .get("legacy_repo_paths_to_remove", [])
+                if str(path).startswith("/")
+            ),
+            apply=True,
+        )
+        applied_changes, unexpected_resume_root_rewrites = build_change_entries(
+            global_state_result=applied_global_state_result,
+            local_env_changed=applied_local_env_changed,
+            sessions_changed=applied_sessions_changed,
+            threads_result=applied_threads_result,
+            threads_before=threads_before,
+            recovered_thread_roots=recovered_thread_roots,
+            default_linux_root=default_linux_root,
+            default_effort=default_effort,
+            known_roots=roots,
+        )
 
     report = {
         "status": "PASS",
-        "global_state": global_state_result,
-        "local_environments_changed": local_env_changed,
-        "sessions_changed": sessions_changed,
-        "threads_db": threads_result,
-        "codex_dev_db": {
-            "path": str(codex_home / "sqlite" / "codex-dev.db"),
-            "changed_rows": 0,
-            "note": "No live restore seed rows were identified in codex-dev.db for this repair pass.",
-        },
+        "schema_version": 1,
+        "mode": mode,
+        "runtime_codex_home": str(codex_home),
+        "baseline": capture_baseline_snapshot(),
+        "predicted_changes": predicted_changes,
+        "applied_changes": applied_changes,
+        "resume_candidates": resume_candidates,
+        "latest_resume": latest_resume,
+        "unexpected_resume_root_rewrites": unexpected_resume_root_rewrites,
+        "backup": backup,
     }
-    save_json(REPORT_PATH, report)
+    save_json(report_path, report)
     print(json.dumps(report, ensure_ascii=False, indent=2))
     return 0
 

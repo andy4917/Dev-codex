@@ -89,6 +89,12 @@ def render_agents(authority: dict, windows: bool) -> str:
     roots = authority["canonical_roots"]
     cleanup = authority["cleanup_policy"]
     scorecard = authority["generation_targets"]["scorecard"]
+    receipt_state_root = scorecard.get("receipt_state_root", "")
+    receipt_root_text = (
+        f"{receipt_state_root}/gate-receipts"
+        if isinstance(receipt_state_root, str) and receipt_state_root.strip()
+        else scorecard.get("gate_receipt_root", "")
+    )
     layering = authority["runtime_layering"]
     restore = layering["restore_seed_policy"]
     override = layering["user_override_policy"]
@@ -141,7 +147,7 @@ def render_agents(authority: dict, windows: bool) -> str:
         f"- Canonical global close-out command: `python {scorecard['closeout']} --workspace-root <repo> --run-id <run_id> --profile <L1|L2|L3|L4> --mode verify`.\n"
         f"- Canonical global scorecard internals remain: `python {roots['management']}/scripts/prepare_user_scorecard_review.py --workspace-root <repo> --mode verify` -> `python {scorecard['delivery_gate']} --mode verify --workspace-root <repo>` -> `python {scorecard['summary_export']}` -> `python {roots['management']}/scripts/audit_workspace.py --phase post-export --write-report`.\n"
         f"{hook_notice}"
-        f"- Verify/release require fresh evidence manifests plus a signed workspace authority lease under `{scorecard['workspace_authority_root']}` and a signed gate receipt under `{scorecard['gate_receipt_root']}`.\n"
+        f"- Verify/release require fresh evidence manifests plus a signed workspace authority lease under `{scorecard['workspace_authority_root']}` and a signed gate receipt under `{receipt_root_text}`.\n"
         f"- Required scorecard close-out command: `python {scorecard['closeout']} --workspace-root <repo> --run-id <run_id> --profile <L1|L2|L3|L4> --mode verify`\n"
         f"- Required scorecard gate command: `python {scorecard['delivery_gate']} --mode verify`\n"
         f"- Required scorecard summary command: `python {scorecard['summary_export']}`\n"

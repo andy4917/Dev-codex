@@ -50,6 +50,55 @@ class IAWCloseoutTests(unittest.TestCase):
     def setUp(self) -> None:
         self.module = _load_module()
 
+    def test_build_receipt_encodes_release_mode_semantics(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            temp = Path(tmpdir)
+            workspace = temp / "workspace"
+            workspace.mkdir(parents=True)
+            authority = {
+                "generation_targets": {
+                    "scorecard": {
+                        "receipt_state_root": str(temp / "codex-home" / "state" / "iaw"),
+                    }
+                }
+            }
+
+            receipt = self.module._build_receipt(
+                authority=authority,
+                workspace_root=workspace.resolve(),
+                run_id="run-release",
+                profile="L4",
+                mode="release",
+                manifest={"base_commit": "base", "head_commit": "head"},
+                manifest_meta={
+                    "changed_files": ["tracked.txt"],
+                    "changed_file_set_hash": "set-hash",
+                    "changed_file_content_hash": "content-hash",
+                    "policy_hashes": {"workspace_authority.json": "policy-hash"},
+                    "script_hashes": {"iaw_closeout.py": "script-hash"},
+                    "evidence_manifest_hash": "manifest-hash",
+                },
+                gate_status="PASS",
+                scorecard_ref=workspace / "reports" / "user-scorecard.json",
+                audit_refs={},
+                summary_ref=workspace / "SUMMARY.md",
+                preflight_reasons=[],
+                step_failures=[],
+            )
+
+        self.assertEqual(receipt["schema_version"], 2)
+        self.assertEqual(receipt["signature_policy"]["policy_id"], "scorecard-gate-receipt-v1.3")
+        self.assertEqual(receipt["authority_layer"]["kind"], "signed_gate_receipt")
+        self.assertEqual(receipt["authority_layer"]["state_root"], str(temp / "codex-home" / "state" / "iaw" / "gate-receipts"))
+        self.assertEqual(receipt["release_semantics"]["scope"], "release")
+        self.assertTrue(receipt["release_semantics"]["release_mode"])
+        self.assertTrue(receipt["release_semantics"]["release_scope_authoritative"])
+        self.assertTrue(receipt["release_semantics"]["release_ready"])
+        self.assertEqual(receipt["changed_file_content_hash"], "content-hash")
+        self.assertEqual(receipt["evidence_binding"]["changed_file_count"], 1)
+        self.assertEqual(receipt["workspace_identity"]["codex_project_id"], workspace.name)
+        self.assertTrue(receipt.get("signature"))
+
     def test_validate_profile_artifacts_requires_convention_lock_for_l2(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             workspace = Path(tmpdir) / "workspace"
@@ -159,7 +208,7 @@ class IAWCloseoutTests(unittest.TestCase):
                     "generation_targets": {
                         "scorecard": {
                             "accepted_profiles": ["L2"],
-                            "gate_receipt_root": str(codex_home / "state" / "gate-receipts"),
+                            "receipt_state_root": str(codex_home / "state" / "iaw"),
                             "closeout": str(ROOT / "scripts" / "iaw_closeout.py"),
                             "delivery_gate": str(ROOT / "scripts" / "delivery_gate.py"),
                             "summary_export": str(ROOT / "scripts" / "export_user_score_summary.py"),
@@ -178,7 +227,9 @@ class IAWCloseoutTests(unittest.TestCase):
                 "head_commit": _git_output(workspace, "rev-parse", "HEAD"),
             }
             manifest_meta = {
+                "changed_files": ["README.md"],
                 "changed_file_set_hash": "empty",
+                "changed_file_content_hash": "content-hash",
                 "policy_hashes": {"workspace_authority.json": "hash"},
                 "script_hashes": {"iaw_closeout.py": "hash"},
                 "evidence_manifest_hash": "manifest-hash",
@@ -242,7 +293,7 @@ class IAWCloseoutTests(unittest.TestCase):
             finally:
                 sys.argv = argv
 
-            state_receipt = codex_home / "state" / "gate-receipts" / workspace.name / f"{run_id}.json"
+            state_receipt = codex_home / "state" / "iaw" / "gate-receipts" / workspace.name / f"{run_id}.json"
             mirror_receipt = run_root / "gate_receipt.json"
 
             self.assertEqual(exit_code, 0)
@@ -251,6 +302,221 @@ class IAWCloseoutTests(unittest.TestCase):
             receipt = json.loads(state_receipt.read_text(encoding="utf-8"))
             self.assertEqual(receipt["gate_status"], "PASS")
             self.assertEqual(receipt["run_id"], run_id)
+            self.assertEqual(receipt["schema_version"], 2)
+            self.assertEqual(receipt["signature_policy"]["policy_id"], "scorecard-gate-receipt-v1.3")
+            self.assertEqual(receipt["authority_layer"]["state_root"], str(codex_home / "state" / "iaw" / "gate-receipts"))
+            self.assertEqual(receipt["authority_layer"]["state_path"], str(state_receipt))
+            self.assertEqual(receipt["authority_layer"]["mirror_path"], str(mirror_receipt))
+            self.assertEqual(receipt["workspace_identity"]["workspace_root_realpath"], str(workspace.resolve()))
+            self.assertEqual(receipt["workspace_identity"]["codex_project_id"], workspace.name)
+            self.assertEqual(receipt["evidence_binding"]["changed_file_content_hash"], "content-hash")
+            self.assertEqual(receipt["release_semantics"]["scope"], "verification")
+            self.assertFalse(receipt["release_semantics"]["release_mode"])
+            self.assertFalse(receipt["release_semantics"]["release_scope_authoritative"])
+            self.assertFalse(receipt["release_semantics"]["release_ready"])
+            self.assertTrue(receipt.get("signature"))
+
+    def test_save_receipt_uses_atomic_write_for_state_and_mirror(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            temp = Path(tmpdir)
+            workspace = temp / "workspace"
+            workspace.mkdir(parents=True)
+            authority = {
+                "generation_targets": {
+                    "scorecard": {
+                        "receipt_state_root": str(temp / "codex-home" / "state" / "iaw"),
+                    }
+                }
+            }
+            receipt = {"schema_version": 2, "run_id": "run-atomic"}
+
+            with patch.object(self.module, "atomic_save_json") as atomic_save_json:
+                state_path, mirror_path = self.module._save_receipt(authority, workspace.resolve(), "run-atomic", receipt)
+
+        self.assertEqual(state_path, temp / "codex-home" / "state" / "iaw" / "gate-receipts" / workspace.name / "run-atomic.json")
+        self.assertEqual(mirror_path, workspace / ".agent-runs" / "run-atomic" / "gate_receipt.json")
+        self.assertEqual(atomic_save_json.call_count, 2)
+        self.assertEqual(atomic_save_json.call_args_list[0].args[0], state_path)
+        self.assertEqual(atomic_save_json.call_args_list[0].args[1], receipt)
+        self.assertEqual(atomic_save_json.call_args_list[1].args[0], mirror_path)
+        self.assertEqual(atomic_save_json.call_args_list[1].args[1], receipt)
+
+    def test_gate_receipts_root_uses_receipt_state_root(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            temp = Path(tmpdir)
+            authority = {
+                "generation_targets": {
+                    "scorecard": {
+                        "receipt_state_root": str(temp / "iaw-home"),
+                    }
+                }
+            }
+
+            resolved = self.module.gate_receipts_root(authority)
+
+        self.assertEqual(resolved, temp / "iaw-home" / "gate-receipts")
+
+    def test_gate_receipts_root_falls_back_to_codex_home_state_iaw(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            temp = Path(tmpdir)
+            env = os.environ.copy()
+            env["CODEX_HOME"] = str(temp / "codex-home")
+            with patch.dict(os.environ, env, clear=False):
+                resolved = self.module.gate_receipts_root({})
+
+        self.assertEqual(resolved, temp / "codex-home" / "state" / "iaw" / "gate-receipts")
+
+    def test_gate_receipts_root_falls_back_to_home_codex_state_iaw(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            temp = Path(tmpdir)
+            original_codex_home = self.module.gate_receipts_root.__globals__["codex_home"]
+            try:
+                self.module.gate_receipts_root.__globals__["codex_home"] = lambda: temp / "home" / ".codex"
+                resolved = self.module.gate_receipts_root({})
+            finally:
+                self.module.gate_receipts_root.__globals__["codex_home"] = original_codex_home
+
+        self.assertEqual(resolved, temp / "home" / ".codex" / "state" / "iaw" / "gate-receipts")
+
+    def test_verify_mode_creates_hmac_key_and_writes_blocked_receipt_under_new_root(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            temp = Path(tmpdir)
+            codex_home = temp / "codex-home"
+            workspace = temp / "workspace"
+            workspace.mkdir(parents=True)
+            authority_file = temp / "workspace_authority.json"
+            _write_json(
+                authority_file,
+                {
+                    "generation_targets": {
+                        "scorecard": {
+                            "accepted_profiles": ["L2"],
+                            "receipt_state_root": str(codex_home / "state" / "iaw"),
+                            "closeout": str(ROOT / "scripts" / "iaw_closeout.py"),
+                            "delivery_gate": str(ROOT / "scripts" / "delivery_gate.py"),
+                            "summary_export": str(ROOT / "scripts" / "export_user_score_summary.py"),
+                        }
+                    }
+                },
+            )
+            env = os.environ.copy()
+            env["CODEX_HOME"] = str(codex_home)
+            argv = sys.argv[:]
+            try:
+                sys.argv = [
+                    "iaw_closeout.py",
+                    "--workspace-root",
+                    str(workspace),
+                    "--run-id",
+                    "run-blocked",
+                    "--profile",
+                    "L2",
+                    "--mode",
+                    "verify",
+                    "--authority-file",
+                    str(authority_file),
+                ]
+                with patch.dict(os.environ, env, clear=False), patch.object(
+                    self.module, "validate_workspace_authority_lease", return_value={"ok": True, "reasons": [], "lease": {}, "path": ""}
+                ), patch.object(self.module, "_validate_profile_artifacts", return_value=["missing summary"]), patch.object(
+                    self.module, "_validate_manifest", return_value=([], {"base_commit": "base", "head_commit": "head"}, {"changed_files": [], "changed_file_set_hash": "set-hash", "changed_file_content_hash": "content-hash", "policy_hashes": {}, "script_hashes": {}, "evidence_manifest_hash": "manifest-hash"})
+                ), patch.object(
+                    self.module, "_validate_waivers", return_value=[]
+                ):
+                    exit_code = self.module.main()
+            finally:
+                sys.argv = argv
+
+            state_receipt = codex_home / "state" / "iaw" / "gate-receipts" / workspace.name / "run-blocked.json"
+            receipt = json.loads(state_receipt.read_text(encoding="utf-8"))
+            key_exists = (codex_home / "state" / "iaw" / "truth-hmac.key").exists()
+
+        self.assertEqual(exit_code, 2)
+        self.assertTrue(key_exists)
+        self.assertEqual(receipt["gate_status"], "BLOCKED")
+
+    def test_release_mode_blocks_when_hmac_key_is_missing(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            temp = Path(tmpdir)
+            codex_home = temp / "codex-home"
+            workspace = temp / "workspace"
+            workspace.mkdir(parents=True)
+            authority_file = temp / "workspace_authority.json"
+            _write_json(
+                authority_file,
+                {
+                    "generation_targets": {
+                        "scorecard": {
+                            "accepted_profiles": ["L4"],
+                            "receipt_state_root": str(codex_home / "state" / "iaw"),
+                            "closeout": str(ROOT / "scripts" / "iaw_closeout.py"),
+                            "delivery_gate": str(ROOT / "scripts" / "delivery_gate.py"),
+                            "summary_export": str(ROOT / "scripts" / "export_user_score_summary.py"),
+                        }
+                    }
+                },
+            )
+
+            review_file = temp / "user-scorecard.review.json"
+            scorecard_file = temp / "user-scorecard.json"
+            _write_json(scorecard_file, {"gate_status": "PASS", "final_decision": "PASS"})
+            audit_dir = temp / "audit"
+            pre_gate = audit_dir / "audit.pre-gate.json"
+            pre_export = audit_dir / "audit.pre-export.json"
+            post_export = audit_dir / "audit.post-export.json"
+            for report in (pre_gate, pre_export, post_export):
+                _write_json(report, {"status": "PASS"})
+
+            def fake_run_step(label: str, argv: list[str], cwd: Path) -> dict[str, object]:
+                return {"label": label, "argv": argv, "returncode": 0, "stdout": f"{label} ok\n", "stderr": ""}
+
+            def fake_report_path(phase: str) -> Path:
+                mapping = {"pre-gate": pre_gate, "pre-export": pre_export, "post-export": post_export}
+                return mapping[phase]
+
+            argv = sys.argv[:]
+            env = os.environ.copy()
+            env["CODEX_HOME"] = str(codex_home)
+            try:
+                sys.argv = [
+                    "iaw_closeout.py",
+                    "--workspace-root",
+                    str(workspace),
+                    "--run-id",
+                    "run-release-missing-key",
+                    "--profile",
+                    "L4",
+                    "--mode",
+                    "release",
+                    "--review-file",
+                    str(review_file),
+                    "--scorecard-file",
+                    str(scorecard_file),
+                    "--authority-file",
+                    str(authority_file),
+                ]
+                with patch.dict(os.environ, env, clear=False), patch.object(
+                    self.module, "validate_workspace_authority_lease", return_value={"ok": True, "reasons": [], "lease": {}, "path": ""}
+                ), patch.object(
+                    self.module, "_validate_profile_artifacts", return_value=[]
+                ), patch.object(
+                    self.module, "_validate_manifest", return_value=([], {"base_commit": "base", "head_commit": "head"}, {"changed_files": [], "changed_file_set_hash": "set-hash", "changed_file_content_hash": "content-hash", "policy_hashes": {}, "script_hashes": {}, "evidence_manifest_hash": "manifest-hash"})
+                ), patch.object(
+                    self.module, "_validate_waivers", return_value=[]
+                ), patch.object(
+                    self.module, "_run_step", side_effect=fake_run_step
+                ), patch.object(
+                    self.module, "_report_path", side_effect=fake_report_path
+                ):
+                    exit_code = self.module.main()
+            finally:
+                sys.argv = argv
+            key_exists = (codex_home / "state" / "iaw" / "truth-hmac.key").exists()
+            receipt_exists = (codex_home / "state" / "iaw" / "gate-receipts" / workspace.name / "run-release-missing-key.json").exists()
+
+        self.assertEqual(exit_code, 2)
+        self.assertFalse(key_exists)
+        self.assertFalse(receipt_exists)
 
 
 if __name__ == "__main__":
