@@ -23,6 +23,14 @@
       "summary": "Generated config, wrapper, and mirror files must not be manually edited."
     },
     {
+      "id": "generated_mirror_self_feed",
+      "summary": "Generated mirrors must never be used as render input, user override input, or authority input."
+    },
+    {
+      "id": "stale_active_config_flag",
+      "summary": "Stale active config flags such as telepathy, workspace_dependencies, approval_policy=never, or sandbox_mode=danger-full-access are blocked."
+    },
+    {
       "id": "serena_gate_before_code_change",
       "summary": "Normal code modification requests are blocked while Serena startup activation is incomplete."
     },
@@ -45,6 +53,22 @@
     {
       "id": "mixed_git_surfaces",
       "summary": "Instructions must not force mixed Windows Git and WSL Git execution."
+    },
+    {
+      "id": "projectless_code_modification_without_repo_root",
+      "summary": "Projectless chat or app state cannot authorize code modification without a repo root."
+    },
+    {
+      "id": "app_memory_not_authority",
+      "summary": "Codex App memory, context, or restore state can hint but cannot authorize changes."
+    },
+    {
+      "id": "hook_only_enforcement_claim",
+      "summary": "Hooks may trigger checks, but hooks alone cannot be claimed as the final enforcement boundary."
+    },
+    {
+      "id": "plugin_mcp_drift_unaudited",
+      "summary": "Plugin-provided MCP or config drift must be audited before code modification."
     }
   ],
   "warning_rules": [
@@ -74,11 +98,13 @@
     }
   ],
   "required_reminders": {
-    "runtime_authority_conflict": "runtime authority conflict: Codex App and Windows launcher are not execution authority surfaces.",
+    "runtime_authority_conflict": "runtime authority conflict: Codex App is the primary user control surface, but execution authority belongs to devmgmt-wsl and Linux-native Codex CLI.",
     "serena_first_unmet": "Serena-first is unmet: activate the canonical project and complete onboarding before normal code changes.",
     "context7_missing": "Context7 evidence is missing for a protected change.",
     "unrelated_dirty_present": "Unrelated dirty changes exist and must remain untouched.",
     "destructive_blocked": "Destructive or system-changing commands are blocked by authority.",
-    "sandbox_blocked": "Sandbox or approval weakening is blocked by authority."
+    "sandbox_blocked": "Sandbox or approval weakening is blocked by authority.",
+    "generated_mirror_blocked": "Generated mirrors are outputs only and cannot be treated as authority or override sources.",
+    "hooks_trigger_only": "Hooks may trigger checks, but audit, tests, and score layer remain the final gates."
   }
 }

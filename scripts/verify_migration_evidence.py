@@ -54,12 +54,14 @@ def runtime_paths(authority: dict[str, Any], linux_codex_home: Path | None, wind
 
     linux_agents = (linux_root / "AGENTS.md") if linux_root else Path(linux.get("agents", ""))
     linux_config = (linux_root / "config.toml") if linux_root else Path(linux.get("config", ""))
+    linux_user_override_config = (linux_root / "user-config.toml") if linux_root else Path(linux.get("user_override_config", ""))
     windows_agents = (windows_root / "AGENTS.md") if windows_root else Path(windows.get("agents", ""))
     windows_config = (windows_root / "config.toml") if windows_root else Path(windows.get("config", ""))
 
     return {
         "linux_agents": linux_agents,
         "linux_config": linux_config,
+        "linux_user_override_config": linux_user_override_config,
         "windows_agents": windows_agents,
         "windows_config": windows_config,
     }
@@ -395,6 +397,13 @@ def main() -> int:
             "windows_mirror_proof": windows_mirror_proof,
             "startup_workflow_proof": audit.get("startup_workflow_check", {}),
             "global_runtime_proof": audit.get("global_runtime_surface", {}),
+            "config_provenance_proof": audit.get("config_provenance", {}),
+            "toolchain_surface_proof": audit.get("toolchain_surface", {}),
+            "hook_readiness_proof": audit.get("hook_readiness", {}),
+            "artifact_hygiene_proof": audit.get("artifact_hygiene", {}),
+            "score_layer_proof": audit.get("score_layer", {}),
+            "windows_app_ssh_readiness_proof": audit.get("windows_app_ssh_readiness", {}),
+            "linux_native_codex_cli_proof": audit.get("linux_native_codex_cli", {}),
             "git_surface_proof": audit.get("git_surface_drift", {}),
             "instruction_guard_proof": audit.get("instruction_guard_policy", {}),
             "context7_proof": audit.get("startup_workflow_check", {}).get("context7", {}),

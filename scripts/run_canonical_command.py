@@ -38,7 +38,7 @@ def main() -> int:
             print(detail, file=sys.stderr)
         return 2
 
-    surface = runtime.get("canonical_execution_surface", {})
+    surface = runtime.get("canonical_remote_execution_surface", runtime.get("canonical_execution_surface", {}))
     host_alias = str(surface.get("host_alias", "devmgmt-wsl")).strip() or "devmgmt-wsl"
     repo_root = str(surface.get("repo_root", ROOT))
     remote_command = build_remote_command(repo_root, command)

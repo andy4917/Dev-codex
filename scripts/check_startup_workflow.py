@@ -464,7 +464,7 @@ def expected_sequence() -> list[str]:
 
 
 def selected_startup_mode(authority: dict[str, Any], requested_mode: str) -> str:
-    canonical = authority.get("canonical_execution_surface", {})
+    canonical = authority.get("canonical_remote_execution_surface", authority.get("canonical_execution_surface", {}))
     if requested_mode == "auto" and str(canonical.get("id", "")).strip() == "ssh-devmgmt-wsl":
         return "ssh-managed"
     return requested_mode

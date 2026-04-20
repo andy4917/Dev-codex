@@ -356,6 +356,7 @@ def _build_receipt(
     manifest_meta: dict[str, Any],
     gate_status: str,
     scorecard_ref: Path,
+    score_layer_ref: Path,
     audit_refs: dict[str, str],
     summary_ref: Path,
     preflight_reasons: list[str],
@@ -383,6 +384,7 @@ def _build_receipt(
         "evidence_manifest_hash": str(manifest_meta.get("evidence_manifest_hash", "")).strip(),
         "gate_status": normalized_gate_status,
         "scorecard_ref": str(scorecard_ref),
+        "score_layer_ref": str(score_layer_ref),
         "audit_refs": audit_refs,
         "summary_ref": str(summary_ref),
         "issued_at": datetime.now(timezone.utc).isoformat(),
@@ -477,6 +479,10 @@ def main() -> int:
     paths = _artifact_paths(workspace_root, run_id)
     review_file = resolve_path(args.review_file, ROOT) or Path(args.review_file)
     scorecard_file = resolve_path(args.scorecard_file, ROOT) or Path(args.scorecard_file)
+    score_layer_file = resolve_path(
+        scorecard_cfg.get("score_layer_report", str(ROOT / "reports" / "score-layer.unified-phase.json")),
+        ROOT,
+    ) or (ROOT / "reports" / "score-layer.unified-phase.json")
     closeout_script = Path(scorecard_cfg.get("closeout", __file__)).expanduser().resolve()
 
     preflight_reasons: list[str] = []
@@ -510,6 +516,7 @@ def main() -> int:
                 manifest_meta=manifest_meta,
                 gate_status="BLOCKED",
                 scorecard_ref=scorecard_file,
+                score_layer_ref=score_layer_file,
                 audit_refs={},
                 summary_ref=paths["summary"],
                 preflight_reasons=preflight_reasons,
@@ -612,6 +619,16 @@ def main() -> int:
             ],
             ROOT,
         ),
+        _run_step(
+            "score_layer",
+            [
+                sys.executable,
+                str(SCRIPTS / "run_score_layer.py"),
+                "--output-file",
+                str(score_layer_file),
+            ],
+            ROOT,
+        ),
     ]
 
     for step in steps:
@@ -634,6 +651,8 @@ def main() -> int:
         if label == "delivery_gate":
             gate_status = "FAIL" if returncode == status_exit_code("FAIL") else "BLOCKED"
             break
+        if label == "score_layer":
+            continue
         if label in {"prepare", "export_summary"}:
             gate_status = "BLOCKED"
             break
@@ -647,6 +666,18 @@ def main() -> int:
         if normalize_status(audit_payload.get("status"), "UNKNOWN") == "FAIL":
             gate_status = "FAIL"
             break
+    score_layer_payload = load_json(score_layer_file, default={})
+    score_layer_status = normalize_status(score_layer_payload.get("status"), "UNKNOWN")
+    score_layer_step = next((step for step in steps if str(step.get("label")) == "score_layer"), None)
+    score_layer_returncode = int(score_layer_step.get("returncode", 0)) if isinstance(score_layer_step, dict) else 0
+    if score_layer_status == "BLOCKED":
+        gate_status = "BLOCKED"
+    elif score_layer_returncode == status_exit_code("BLOCKED"):
+        gate_status = "BLOCKED"
+    elif score_layer_returncode not in {0, status_exit_code("WARN")}:
+        gate_status = "BLOCKED"
+    elif not score_layer_file.exists():
+        gate_status = "BLOCKED"
     if gate_status == "UNKNOWN":
         gate_status = "BLOCKED"
 
@@ -661,6 +692,7 @@ def main() -> int:
             manifest_meta=manifest_meta,
             gate_status=gate_status,
             scorecard_ref=scorecard_file,
+            score_layer_ref=score_layer_file,
             audit_refs=audit_refs,
             summary_ref=paths["summary"],
             preflight_reasons=[],

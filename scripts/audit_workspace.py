@@ -9,9 +9,20 @@ import json
 import os
 import re
 import subprocess
+import sys
 import tomllib
 from pathlib import Path
 from typing import Any, Iterable
+
+SCRIPTS_DIR = Path(__file__).resolve().parent
+if str(SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS_DIR))
+
+from check_artifact_hygiene import evaluate_artifact_hygiene
+from check_config_provenance import evaluate_config_provenance
+from check_hook_readiness import evaluate_hook_readiness
+from check_toolchain_surface import evaluate_toolchain_surface
+from check_windows_app_ssh_readiness import evaluate_windows_app_ssh_readiness
 
 
 AUTHORITY_PATH = Path("/home/andy4917/Dev-Management/contracts/workspace_authority.json")
@@ -302,6 +313,25 @@ def detect_runtime_restore_seed_violations(state_path: Path, authority: dict) ->
     return violations
 
 
+RUNTIME_RESTORE_WARNING_ONLY_CATEGORIES = {
+    "projectless_restore_refs",
+    "thread_workspace_root_hints",
+}
+
+
+def partition_runtime_restore_seed_violations(
+    violations: Iterable[dict[str, object]],
+) -> tuple[list[dict[str, object]], list[dict[str, object]]]:
+    blocking: list[dict[str, object]] = []
+    warning_only: list[dict[str, object]] = []
+    for violation in violations:
+        if str(violation.get("category", "")) in RUNTIME_RESTORE_WARNING_ONLY_CATEGORIES:
+            warning_only.append(dict(violation))
+        else:
+            blocking.append(dict(violation))
+    return blocking, warning_only
+
+
 def build_tamper_events(
     *,
     old_path_refs: Iterable[str],
@@ -346,7 +376,7 @@ def read_text(path: Path) -> str:
 
 def strip_generated_header(text: str) -> str:
     lines = text.splitlines()
-    while lines and lines[0].strip() in {"GENERATED - DO NOT EDIT", "# GENERATED - DO NOT EDIT"}:
+    while lines and (lines[0].strip() in {"GENERATED - DO NOT EDIT", "# GENERATED - DO NOT EDIT"} or lines[0].startswith("# GENERATED") or lines[0].startswith("# source_") or lines[0].startswith("# generated_") or lines[0].startswith("# role=") or lines[0].startswith("# read_by_") or lines[0].startswith("# user_override_source=") or lines[0].startswith("# optional_user_override=") or lines[0].startswith("# manual_edit=")):
         lines = lines[1:]
     while lines and not lines[0].strip():
         lines = lines[1:]
@@ -821,6 +851,8 @@ def main() -> int:
     parser.add_argument("--phase", choices=["pre-gate", "pre-export", "post-export"], default="")
     parser.add_argument("--blocking-only", action="store_true", help="Record the phase as blocking-only while keeping the same canonical checks.")
     parser.add_argument("--write-report", action="store_true", help="Write the audit report to the default report path.")
+    parser.add_argument("--json", action="store_true", help="Print JSON to stdout.")
+    parser.add_argument("--output-file", default="", help="Optional explicit report output path.")
     args = parser.parse_args()
 
     authority = load_authority()
@@ -901,6 +933,19 @@ def main() -> int:
     workspace_dependency_surface = build_workspace_dependency_surface_check(Path(roots["management"]), runtime)
     instruction_guard_policy = build_instruction_guard_policy_check(Path(roots["management"]))
     repair_boundary = build_repair_boundary_check(authority)
+    config_provenance = evaluate_config_provenance(Path(roots["management"]))
+    toolchain_surface = evaluate_toolchain_surface(Path(roots["management"]))
+    hook_readiness = evaluate_hook_readiness(Path(roots["management"]))
+    artifact_hygiene = evaluate_artifact_hygiene(Path(roots["management"]))
+    windows_app_ssh_readiness = evaluate_windows_app_ssh_readiness(Path(roots["management"]))
+    release_report = load_json(REPORTS_ROOT / "codex-app-installed-release-impact.unified-phase.json", default={})
+    score_layer = load_json(
+        REPORTS_ROOT / "score-layer.unified-phase.final.json",
+        load_json(
+            REPORTS_ROOT / "score-layer.unified-phase.json",
+            default={"status": "PASS", "missing": True, "warnings": ["run_score_layer.py after audit to finalize score evidence"]},
+        ),
+    )
     quarantine_root_ok = quarantine_root_policy_ok(quarantine_root)
 
     files_to_scan: list[Path] = []
@@ -929,12 +974,15 @@ def main() -> int:
     ]
     forbidden_feature_findings = detect_forbidden_feature_flags(config_files, authority)
     runtime_restore_seed_violations = detect_runtime_restore_seed_violations(WINDOWS_CODEX / ".codex-global-state.json", authority)
+    blocking_runtime_restore_seed_violations, warning_runtime_restore_seed_violations = partition_runtime_restore_seed_violations(
+        runtime_restore_seed_violations
+    )
     score_policy_tamper_events = detect_score_policy_tamper_events(Path(roots["management"]), Path(roots["workflow"]))
     startup_workflow_check = build_startup_workflow_check(Path(roots["management"]))
     tamper_events = build_tamper_events(
         old_path_refs=old_path_refs,
         forbidden_features=forbidden_feature_findings,
-        runtime_restore_seed_violations=runtime_restore_seed_violations,
+        runtime_restore_seed_violations=blocking_runtime_restore_seed_violations,
         score_policy_tamper_events=score_policy_tamper_events,
     )
 
@@ -959,6 +1007,9 @@ def main() -> int:
     serena_startup = startup_workflow_check.get("serena", {})
     context7_evidence = startup_workflow_check.get("context7", {})
     repair_readiness = global_runtime_surface.get("wrapper_apply_readiness", {})
+    linux_native_codex_cli = global_runtime_surface.get("ssh_canonical_runtime", {}).get("remote_native_codex_status", {})
+    legacy_feature_scan = {"status": "BLOCKED" if forbidden_feature_findings else "PASS", "findings": forbidden_feature_findings}
+    hardcoding_fallback_scan = {"status": "BLOCKED" if old_path_refs else "PASS", "findings": sorted(set(old_path_refs))}
 
     blocking_conditions = [
         bool(any(violations.values())),
@@ -967,10 +1018,15 @@ def main() -> int:
         not project_root_marker_ok,
         windows_runtime_mirror_check["status"] != "PASS",
         canonical_execution_surface["status"] != "PASS",
+        config_provenance.get("gate_status", config_provenance.get("status")) == "BLOCKED",
+        toolchain_surface["status"] == "BLOCKED",
+        hook_readiness["status"] == "BLOCKED",
+        artifact_hygiene["status"] == "BLOCKED",
+        windows_app_ssh_readiness["status"] == "BLOCKED",
+        str(score_layer.get("status", "PASS")) == "BLOCKED" and not bool(score_layer.get("missing", False)),
         startup_workflow_check["status"] != "PASS",
         instruction_guard_policy["status"] != "PASS",
         bool(forbidden_feature_findings),
-        bool(runtime_restore_seed_violations),
         bool(old_path_refs),
         bool(tamper_events),
     ]
@@ -978,6 +1034,12 @@ def main() -> int:
         global_runtime_surface.get("status") == "WARN",
         wsl_launcher_check["status"] == "WARN",
         git_surface_drift["status"] == "WARN",
+        windows_app_ssh_readiness["status"] == "WARN",
+        hook_readiness["status"] == "WARN",
+        artifact_hygiene["status"] == "WARN",
+        bool(warning_runtime_restore_seed_violations),
+        str(score_layer.get("status", "PASS")) == "WARN" and not bool(score_layer.get("missing", False)),
+        str((release_report or {}).get("status", "PASS")) == "WARN",
         repair_readiness.get("status") != "PASS",
     ]
     gate_status = "BLOCKED" if any(blocking_conditions) else "WARN" if any(warning_conditions) else "PASS"
@@ -997,7 +1059,18 @@ def main() -> int:
         "windows_generated_mirror": windows_generated_header_ok,
         "windows_generated_mirror_matches_linux": windows_generated_body_matches_linux,
         "windows_runtime_mirror_check": windows_runtime_mirror_check,
+        "codex_app_installed_release": release_report or {"status": "WARN", "reason": "installed app release evidence report is missing"},
+        "config_provenance": config_provenance,
+        "generated_mirror_contract": config_provenance.get("generated_mirror_contract", {}),
+        "toolchain_surface": toolchain_surface,
+        "hook_readiness": hook_readiness,
+        "score_layer": score_layer,
+        "artifact_hygiene": artifact_hygiene,
+        "legacy_feature_scan": legacy_feature_scan,
+        "hardcoding_fallback_scan": hardcoding_fallback_scan,
         "canonical_execution_surface": canonical_execution_surface,
+        "windows_app_ssh_readiness": windows_app_ssh_readiness,
+        "linux_native_codex_cli": linux_native_codex_cli,
         "client_surface": client_surface,
         "local_shell_surface": local_shell_surface,
         "codex_resolution": codex_resolution,
@@ -1025,6 +1098,8 @@ def main() -> int:
         "startup_workflow_check": startup_workflow_check,
         "forbidden_feature_flags_enabled": forbidden_feature_findings,
         "runtime_restore_seed_violations": runtime_restore_seed_violations,
+        "runtime_restore_seed_warning_only": warning_runtime_restore_seed_violations,
+        "runtime_restore_seed_blocking": blocking_runtime_restore_seed_violations,
         "old_path_refs_outside_quarantine": sorted(set(old_path_refs)),
         "tamper_events": tamper_events,
         "gate_status": gate_status,
@@ -1032,8 +1107,8 @@ def main() -> int:
     }
 
     output = json.dumps(report, ensure_ascii=False, indent=2) + "\n"
-    if args.write_report:
-        output_path = report_path_for_phase(args.phase)
+    if args.write_report or args.output_file:
+        output_path = Path(args.output_file).expanduser().resolve() if args.output_file else report_path_for_phase(args.phase)
         output_path.parent.mkdir(parents=True, exist_ok=True)
         output_path.write_text(output, encoding="utf-8")
     print(output, end="")

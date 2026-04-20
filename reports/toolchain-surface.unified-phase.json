@@ -1,0 +1,92 @@
+{
+  "status": "PASS",
+  "runtime_status": "WARN",
+  "remote_codex_resolution_status": "PASS",
+  "workspace_dependency_tools": "DISABLED_IN_APP_SETTINGS",
+  "plugins": [
+    "github@openai-curated"
+  ],
+  "features": [
+    "apply_patch_freeform",
+    "artifact",
+    "child_agents_md",
+    "chronicle",
+    "code_mode",
+    "code_mode_only",
+    "codex_git_commit",
+    "codex_hooks",
+    "default_mode_request_user_input",
+    "enable_fanout",
+    "exec_permission_approvals",
+    "guardian_approval",
+    "image_generation",
+    "js_repl",
+    "memories",
+    "multi_agent_v2",
+    "prevent_idle_sleep",
+    "realtime_conversation",
+    "remote_connections",
+    "request_permissions_tool",
+    "runtime_metrics",
+    "shell_zsh_fork",
+    "skill_env_var_dependency_prompt",
+    "tool_search",
+    "undo"
+  ],
+  "mcp_servers": [
+    "context7",
+    "serena"
+  ],
+  "session_usage_provenance": {
+    "skills_used": [
+      {
+        "name": "env-audit",
+        "path": "/mnt/c/Users/anise/.codex/skills/dev-workflow/env-audit/SKILL.md",
+        "purpose": "Audit Windows and WSL execution surfaces before runtime hardening and release validation."
+      },
+      {
+        "name": "anti-cheat-auditor",
+        "path": "/mnt/c/Users/anise/.codex/skills/dev-workflow/anti-cheat-auditor/SKILL.md",
+        "purpose": "Check for hardcoded success paths, dead fallback, and score-gaming style drift."
+      },
+      {
+        "name": "openai-docs",
+        "path": "/mnt/c/Users/anise/.codex/skills/.system/openai-docs/SKILL.md",
+        "purpose": "Use official OpenAI docs as the reference source for Codex app, remote connections, config, sandbox, and Windows behavior."
+      }
+    ],
+    "subagents_used": [
+      {
+        "name": "contracts_docs_scan",
+        "role": "legacy wording and contract/doc scan"
+      },
+      {
+        "name": "hook_score_scan",
+        "role": "hook and score-layer crosscheck"
+      },
+      {
+        "name": "tests_gap_scan",
+        "role": "test gap discovery"
+      },
+      {
+        "name": "legacy_crosscheck",
+        "role": "post-patch legacy and self-feed cross-validation"
+      },
+      {
+        "name": "score_gate_crosscheck",
+        "role": "post-patch score/hook/integration cross-validation"
+      }
+    ],
+    "plugins_used": [],
+    "workspace_dependency_tools": {
+      "used": false,
+      "reason": "App-side workspace dependency tools are disabled and were not required for this hardening pass."
+    },
+    "hooks_surface": {
+      "used_as_enforcement_boundary": false,
+      "reason": "Hooks were audited as trigger-only surfaces; audit, tests, and score layer remain the final gates."
+    }
+  },
+  "warnings": [],
+  "blocked_reasons": []
+}

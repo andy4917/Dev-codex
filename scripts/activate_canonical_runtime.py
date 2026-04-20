@@ -78,7 +78,7 @@ def load_authority() -> dict[str, Any]:
 
 
 def authority_surface(authority: dict[str, Any]) -> dict[str, Any]:
-    return authority.get("canonical_execution_surface", {})
+    return authority.get("canonical_remote_execution_surface", authority.get("canonical_execution_surface", {}))
 
 
 def ssh_paths() -> dict[str, Path]:

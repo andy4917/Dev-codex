@@ -44,10 +44,10 @@
         "windows_path": "/mnt/c/Users/anise/.codex/AGENTS.md",
         "linux_exists": true,
         "windows_exists": true,
-        "linux_sha256": "579fe08a0c49aed24362bcc776a45bbc2ac0924a9af326ea06ef94d048431e62",
-        "windows_sha256": "0ab4ea024b7f7616fef343823de5031e14e526eee847464f730fcc023f43c9f0",
-        "linux_body_sha256": "22543126ad21f3ac36a85affbc7d83d2609b600dd3f29422774a6a99ee496254",
-        "windows_body_sha256": "22543126ad21f3ac36a85affbc7d83d2609b600dd3f29422774a6a99ee496254",
+        "linux_sha256": "0dfd0dfb733cdd463f55d94b1ef363dd44c6f8383779320d8ff00abe67d1d392",
+        "windows_sha256": "0dfd0dfb733cdd463f55d94b1ef363dd44c6f8383779320d8ff00abe67d1d392",
+        "linux_body_sha256": "c6509b63bcca51d10bc52e2c1ad5dfcd4fdf695b12cb78346365b89931fa0ba7",
+        "windows_body_sha256": "c6509b63bcca51d10bc52e2c1ad5dfcd4fdf695b12cb78346365b89931fa0ba7",
         "expected_windows_headers": [
           "GENERATED - DO NOT EDIT"
         ],
@@ -65,8 +65,8 @@
         "windows_path": "/mnt/c/Users/anise/.codex/config.toml",
         "linux_exists": true,
         "windows_exists": true,
-        "linux_sha256": "517f0baad0a7659ff7be7c2d48286df31f42954273eda41f0b522a4fd966b301",
-        "windows_sha256": "668860944354e6028686835b2c68954cdbbb9f83daa216447bafee0513ca02b6",
+        "linux_sha256": "3b4b123f928bafa18ddb1a068ae78c421dd19bc6f9ac4a95829fc5ff84eac619",
+        "windows_sha256": "8d74baf6c5e54aa60d0ea980cc2f3d5deecedd4e0953b29a0e4de0b930641252",
         "linux_body_sha256": "eb7a2aca8c52dada6b9ba26a14f7a72839089dc3df67b063b23ea2ff275c5ce9",
         "windows_body_sha256": "eb7a2aca8c52dada6b9ba26a14f7a72839089dc3df67b063b23ea2ff275c5ce9",
         "expected_windows_headers": [
@@ -116,6 +116,512 @@
     "divergence_summary": [],
     "status": "PASS"
   },
+  "codex_app_installed_release": {
+    "status": "PASS",
+    "installed_app_name": "OpenAI.Codex",
+    "installed_app_version": "26.417.4842.0",
+    "installed_package_full_name": "OpenAI.Codex_26.417.4842.0_x64__2p2nqsd0c76g0",
+    "installed_location": "C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.417.4842.0_x64__2p2nqsd0c76g0",
+    "installed_modified_time": "2026-04-21 ���� 3:57:27",
+    "install_or_update_date": "2026-04-21",
+    "installed_build_corresponds_to_2026_04_21": true,
+    "public_documented_release_date": "unversioned official reference pages",
+    "public_documented_release_version": "not pinned in current public docs pages",
+    "installed_app_release_date": "2026-04-21",
+    "installed_app_release_version": "26.417.4842.0",
+    "installed_app_release_wins": true,
+    "installed_evidence": {
+      "get_appx_package_codex": {
+        "ok": true,
+        "exit_code": 0,
+        "stdout": "Name            : OpenAI.Codex\nVersion         : 26.417.4842.0\nPackageFullName : OpenAI.Codex_26.417.4842.0_x64__2p2nqsd0c76g0\nInstallLocation : C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.417.4842.0_x64__2p2nqsd0c76g0",
+        "stderr": ""
+      },
+      "get_appx_package_openai": {
+        "ok": true,
+        "exit_code": 0,
+        "stdout": "Name            : OpenAI.Codex\nVersion         : 26.417.4842.0\nPackageFullName : OpenAI.Codex_26.417.4842.0_x64__2p2nqsd0c76g0\nInstallLocation : C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.417.4842.0_x64__2p2nqsd0c76g0",
+        "stderr": ""
+      },
+      "winget_list": {
+        "ok": false,
+        "exit_code": 1,
+        "stdout": "",
+        "stderr": "winget : 'winget' �� cmdlet, �Լ�, ��ũ��Ʈ ���� �Ǵ� ������ �� �ִ� ���α׷� �̸����� �νĵ��� �ʽ��ϴ�. �̸��� ��\nȮ���� Ȯ���ϰ� ��ΰ� ���Ե� ��� ��ΰ� �ùٸ��� ������ ���� �ٽ� �õ��Ͻʽÿ�.\n��ġ ��:1 ����:1\n+ winget list --name Codex --source msstore\n+ ~~~~~~\n    + CategoryInfo          : ObjectNotFound: (winget:String) [], CommandNotFoundException\n    + FullyQualifiedErrorId : CommandNotFoundException"
+      },
+      "uninstall_registry_query": {
+        "ok": true,
+        "exit_code": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "install_location_item": {
+        "ok": true,
+        "exit_code": 0,
+        "stdout": "FullName      : C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.417.4842.0_x64__2p2nqsd0c76g0\nLastWriteTime : 2026-04-21 ���� 3:57:27",
+        "stderr": ""
+      }
+    },
+    "official_reference_urls": [
+      "https://developers.openai.com/codex/remote-connections#codex-app",
+      "https://developers.openai.com/codex/app/windows#windows-subsystem-for-linux-wsl",
+      "https://developers.openai.com/codex/config-reference#configtoml",
+      "https://developers.openai.com/codex/app#plugins",
+      "https://developers.openai.com/codex/quickstart#setup",
+      "https://developers.openai.com/codex/agent-approvals-security#os-level-sandbox"
+    ],
+    "feature_surface_analysis": [
+      {
+        "feature": "remote connections",
+        "installed_4_21_evidence": "Installed Windows app build on 2026-04-21 and generated config keeps remote_connections enabled.",
+        "official_reference_summary": "OpenAI remote connections docs require remote_connections=true and require codex on the remote login-shell PATH.",
+        "how_it_affects_dev_management": "Codex App is the main UI for opening devmgmt-wsl remote projects while Dev-Management remains authority.",
+        "guard_impact": "Windows-side SSH alias and remote codex PATH must be verified.",
+        "audit_impact": "Remote readiness and remote codex PATH are audit sections.",
+        "repair_impact": "User-level Windows SSH config repair is allowed; system SSH and portproxy remain manual.",
+        "test_impact": "Windows app-side SSH readiness and remote codex classification tests are required.",
+        "status": "PASS"
+      },
+      {
+        "feature": "Windows WSL agent selection",
+        "installed_4_21_evidence": "Current app model supports Windows UI with Linux execution.",
+        "official_reference_summary": "OpenAI Windows docs describe Windows-native and WSL agents as separate execution choices.",
+        "how_it_affects_dev_management": "Windows host stays app_host/ssh_client_surface and devmgmt-wsl stays canonical_remote_execution_surface.",
+        "guard_impact": "App cannot redefine execution or policy authority.",
+        "audit_impact": "Surface-role drift is audited.",
+        "repair_impact": "Docs/contracts/AGENTS encode the split; no binary modification.",
+        "test_impact": "Codex App not execution authority tests remain required.",
+        "status": "PASS"
+      },
+      {
+        "feature": "integrated terminal and multiple terminals",
+        "installed_4_21_evidence": "Terminal surface exists separately from the selected agent surface.",
+        "official_reference_summary": "OpenAI Windows docs note the integrated terminal is independent from the agent configuration.",
+        "how_it_affects_dev_management": "Terminal-specific PATH drift becomes evidence, not default authority.",
+        "guard_impact": "Selected execution terminal with contaminated PATH is blocked only when used as execution authority.",
+        "audit_impact": "Terminal mismatch and PATH contamination are warn-or-block evidence.",
+        "repair_impact": "Report-only unless authority-managed helpers are in scope.",
+        "test_impact": "PATH mismatch tests remain required.",
+        "status": "WARN"
+      },
+      {
+        "feature": "plugins / skills / plugin-provided MCP",
+        "installed_4_21_evidence": "Current session exposes the GitHub plugin, MCP servers, skills, and subagents.",
+        "official_reference_summary": "OpenAI plugin docs describe plugins as bundles of skills, apps, and MCP servers that do not bypass approvals.",
+        "how_it_affects_dev_management": "Plugins and MCP are toolchain surfaces with provenance, not authority sources.",
+        "guard_impact": "Plugin MCP drift affecting Serena or Context7 must be audited before code modification.",
+        "audit_impact": "Toolchain surface report records plugin, MCP, skill, and subagent provenance.",
+        "repair_impact": "Report-only unless authority-managed config is in scope.",
+        "test_impact": "plugin MCP and provenance tests remain required.",
+        "status": "PASS"
+      },
+      {
+        "feature": "projectless chats / memories / chronicle",
+        "installed_4_21_evidence": "Chronicle is enabled; app memory and projectless chat state exist as runtime evidence.",
+        "official_reference_summary": "OpenAI docs treat memories and related app state as context surfaces.",
+        "how_it_affects_dev_management": "App memory is a hint only and projectless code modification without repo root stays blocked.",
+        "guard_impact": "Chronicle allowed; telepathy forbidden; app memory cannot authorize code changes.",
+        "audit_impact": "Stale inactive app state is WARN evidence only.",
+        "repair_impact": "No automatic repair beyond drift reporting.",
+        "test_impact": "projectless-chat and memory-not-authority tests remain required.",
+        "status": "WARN"
+      },
+      {
+        "feature": "automations / worktrees / local environments / browser / computer use / settings sync / app server",
+        "installed_4_21_evidence": "These app surfaces exist and can influence local runtime state or review flow.",
+        "official_reference_summary": "OpenAI app feature pages list automations, worktrees, local environments, browser, and related UI surfaces.",
+        "how_it_affects_dev_management": "They are audit surfaces but cannot replace authority or canonical runtime.",
+        "guard_impact": "App update or settings sync cannot reintroduce Windows launcher as primary runtime.",
+        "audit_impact": "Surface presence is recorded in release-impact and toolchain reports.",
+        "repair_impact": "Mostly report-only; authority-managed generated surfaces may be rerendered.",
+        "test_impact": "release-driven surface coverage tests remain required.",
+        "status": "WARN"
+      }
+    ],
+    "operational_conclusion": {
+      "codex_app_role": [
+        "primary_user_control_surface",
+        "remote_session_control_surface"
+      ],
+      "windows_host_role": [
+        "app_host",
+        "ssh_client_surface"
+      ],
+      "devmgmt_wsl_role": [
+        "canonical_remote_execution_surface"
+      ],
+      "linux_native_codex_cli_role": [
+        "canonical_agent_binary"
+      ],
+      "dev_management_role": [
+        "policy_authority",
+        "runtime_authority"
+      ],
+      "blocked_relation": "Codex App on Windows -> /mnt/c/Users/anise/.codex/bin/wsl/codex -> primary execution runtime"
+    }
+  },
+  "config_provenance": {
+    "status": "WARN",
+    "gate_status": "PASS",
+    "checked_at": "2026-04-20T21:38:23.478599+00:00",
+    "authority_path": "/home/andy4917/Dev-Management/contracts/workspace_authority.json",
+    "authority_hash": "93d7e5ce0b41f4379f2f92b6c78a75b61d09aab1ad7e54265d2cb93c46324977",
+    "allowed_optional_user_override_source": "/home/andy4917/.codex/user-config.toml",
+    "override_source_paths": [],
+    "generated_mirror_contract": {
+      "status": "PASS",
+      "self_feed_reasons": [],
+      "mirrors_are_outputs_only": true
+    },
+    "classifications": {
+      "/home/andy4917/.codex/config.toml": "generated_mirror",
+      "/mnt/c/Users/anise/.codex/config.toml": "generated_mirror",
+      "/home/andy4917/.codex/AGENTS.md": "generated_mirror",
+      "/mnt/c/Users/anise/.codex/AGENTS.md": "generated_mirror",
+      "/home/andy4917/.codex/hooks.json": "generated_mirror",
+      "/mnt/c/Users/anise/.codex/hooks.json": "generated_mirror",
+      "/home/andy4917/.codex/user-config.toml": "optional_user_override_source",
+      "/home/andy4917/Dev-Management/contracts/workspace_authority.json": "source_of_truth"
+    },
+    "generated_headers": {
+      "/home/andy4917/.codex/config.toml": {
+        "status": "PASS",
+        "exists": true,
+        "checks": {
+          "marker": true,
+          "source_authority": true,
+          "source_hash": true,
+          "role": true,
+          "read_by_renderer": true,
+          "user_override_source": true,
+          "optional_user_override": true
+        },
+        "reasons": []
+      },
+      "/mnt/c/Users/anise/.codex/config.toml": {
+        "status": "PASS",
+        "exists": true,
+        "checks": {
+          "marker": true,
+          "source_authority": true,
+          "source_hash": true,
+          "role": true,
+          "read_by_renderer": true,
+          "user_override_source": true,
+          "optional_user_override": true
+        },
+        "reasons": []
+      },
+      "/home/andy4917/.codex/AGENTS.md": {
+        "status": "PASS",
+        "exists": true,
+        "checks": {
+          "generated_banner": true,
+          "authority_file_line": true,
+          "outputs_only_line": true,
+          "user_override_line": true
+        },
+        "reasons": []
+      },
+      "/mnt/c/Users/anise/.codex/AGENTS.md": {
+        "status": "PASS",
+        "exists": true,
+        "checks": {
+          "generated_banner": true,
+          "authority_file_line": true,
+          "outputs_only_line": true,
+          "user_override_line": true
+        },
+        "reasons": []
+      },
+      "/home/andy4917/.codex/hooks.json": {
+        "status": "PASS",
+        "exists": true,
+        "checks": {
+          "expected_generation": true,
+          "matches_render": true
+        },
+        "reasons": []
+      },
+      "/mnt/c/Users/anise/.codex/hooks.json": {
+        "status": "PASS",
+        "exists": true,
+        "checks": {
+          "expected_generation": true,
+          "matches_render": true
+        },
+        "reasons": []
+      }
+    },
+    "active_config_findings": {
+      "/home/andy4917/.codex/config.toml": {
+        "status": "PASS",
+        "blocked_reasons": [],
+        "features": {
+          "apply_patch_freeform": true,
+          "artifact": true,
+          "child_agents_md": true,
+          "code_mode": true,
+          "code_mode_only": true,
+          "codex_git_commit": true,
+          "codex_hooks": true,
+          "default_mode_request_user_input": true,
+          "enable_fanout": true,
+          "exec_permission_approvals": true,
+          "guardian_approval": true,
+          "image_generation": true,
+          "js_repl": true,
+          "memories": true,
+          "multi_agent_v2": true,
+          "prevent_idle_sleep": true,
+          "realtime_conversation": true,
+          "remote_connections": true,
+          "request_permissions_tool": true,
+          "runtime_metrics": true,
+          "shell_zsh_fork": true,
+          "skill_env_var_dependency_prompt": true,
+          "chronicle": true,
+          "tool_search": true,
+          "undo": true
+        },
+        "approval_policy": "on-request",
+        "sandbox_mode": "workspace-write"
+      },
+      "/mnt/c/Users/anise/.codex/config.toml": {
+        "status": "PASS",
+        "blocked_reasons": [],
+        "features": {
+          "apply_patch_freeform": true,
+          "artifact": true,
+          "child_agents_md": true,
+          "code_mode": true,
+          "code_mode_only": true,
+          "codex_git_commit": true,
+          "codex_hooks": true,
+          "default_mode_request_user_input": true,
+          "enable_fanout": true,
+          "exec_permission_approvals": true,
+          "guardian_approval": true,
+          "image_generation": true,
+          "js_repl": true,
+          "memories": true,
+          "multi_agent_v2": true,
+          "prevent_idle_sleep": true,
+          "realtime_conversation": true,
+          "remote_connections": true,
+          "request_permissions_tool": true,
+          "runtime_metrics": true,
+          "shell_zsh_fork": true,
+          "skill_env_var_dependency_prompt": true,
+          "chronicle": true,
+          "tool_search": true,
+          "undo": true
+        },
+        "approval_policy": "on-request",
+        "sandbox_mode": "workspace-write"
+      },
+      "/home/andy4917/.codex/user-config.toml": {
+        "status": "PASS",
+        "blocked_reasons": [],
+        "features": {},
+        "approval_policy": "",
+        "sandbox_mode": ""
+      }
+    },
+    "app_state_surface": {
+      "status": "WARN",
+      "path": "/mnt/c/Users/anise/.codex",
+      "classification": "app_state"
+    },
+    "blocked_reasons": [],
+    "warnings": [
+      "Windows Codex app state exists as evidence only and must not be treated as authority"
+    ]
+  },
+  "generated_mirror_contract": {
+    "status": "PASS",
+    "self_feed_reasons": [],
+    "mirrors_are_outputs_only": true
+  },
+  "toolchain_surface": {
+    "status": "PASS",
+    "runtime_status": "WARN",
+    "remote_codex_resolution_status": "PASS",
+    "workspace_dependency_tools": "DISABLED_IN_APP_SETTINGS",
+    "plugins": [
+      "github@openai-curated"
+    ],
+    "features": [
+      "apply_patch_freeform",
+      "artifact",
+      "child_agents_md",
+      "chronicle",
+      "code_mode",
+      "code_mode_only",
+      "codex_git_commit",
+      "codex_hooks",
+      "default_mode_request_user_input",
+      "enable_fanout",
+      "exec_permission_approvals",
+      "guardian_approval",
+      "image_generation",
+      "js_repl",
+      "memories",
+      "multi_agent_v2",
+      "prevent_idle_sleep",
+      "realtime_conversation",
+      "remote_connections",
+      "request_permissions_tool",
+      "runtime_metrics",
+      "shell_zsh_fork",
+      "skill_env_var_dependency_prompt",
+      "tool_search",
+      "undo"
+    ],
+    "mcp_servers": [
+      "context7",
+      "serena"
+    ],
+    "session_usage_provenance": {
+      "skills_used": [
+        {
+          "name": "env-audit",
+          "path": "/mnt/c/Users/anise/.codex/skills/dev-workflow/env-audit/SKILL.md",
+          "purpose": "Audit Windows and WSL execution surfaces before runtime hardening and release validation."
+        },
+        {
+          "name": "anti-cheat-auditor",
+          "path": "/mnt/c/Users/anise/.codex/skills/dev-workflow/anti-cheat-auditor/SKILL.md",
+          "purpose": "Check for hardcoded success paths, dead fallback, and score-gaming style drift."
+        },
+        {
+          "name": "openai-docs",
+          "path": "/mnt/c/Users/anise/.codex/skills/.system/openai-docs/SKILL.md",
+          "purpose": "Use official OpenAI docs as the reference source for Codex app, remote connections, config, sandbox, and Windows behavior."
+        }
+      ],
+      "subagents_used": [
+        {
+          "name": "contracts_docs_scan",
+          "role": "legacy wording and contract/doc scan"
+        },
+        {
+          "name": "hook_score_scan",
+          "role": "hook and score-layer crosscheck"
+        },
+        {
+          "name": "tests_gap_scan",
+          "role": "test gap discovery"
+        },
+        {
+          "name": "legacy_crosscheck",
+          "role": "post-patch legacy and self-feed cross-validation"
+        },
+        {
+          "name": "score_gate_crosscheck",
+          "role": "post-patch score/hook/integration cross-validation"
+        },
+        {
+          "name": "release_surface_scan",
+          "role": "installed-app and release-impact crosscheck"
+        }
+      ],
+      "plugins_used": [],
+      "workspace_dependency_tools": {
+        "used": false,
+        "reason": "App-side workspace dependency tools are disabled and were not required for this hardening pass."
+      },
+      "hooks_surface": {
+        "used_as_enforcement_boundary": false,
+        "reason": "Hooks were audited as trigger-only surfaces; audit, tests, and score layer remain the final gates."
+      }
+    },
+    "warnings": [],
+    "blocked_reasons": []
+  },
+  "hook_readiness": {
+    "status": "PASS",
+    "runtime_hook_role": "trigger_only",
+    "trigger_only": true,
+    "hook_only_enforcement_claim": false,
+    "linux_hooks": {
+      "path": "/home/andy4917/.codex/hooks.json",
+      "matches_generated": true
+    },
+    "windows_hooks": {
+      "path": "/mnt/c/Users/anise/.codex/hooks.json",
+      "matches_generated": true
+    },
+    "windows_wrapper": {
+      "path": "/mnt/c/Users/anise/.codex/bin/scorecard-hook-wrapper.ps1",
+      "configured": true,
+      "matches_generated": true
+    },
+    "warnings": [
+      "Hooks are trigger-only. Audit, tests, and score layer remain the final enforcement gates.",
+      "Windows hook behavior may be unsupported or degraded and must not be treated as authoritative enforcement."
+    ]
+  },
+  "score_layer": {
+    "status": "BLOCKED",
+    "numeric_score": 50,
+    "disqualifiers": [
+      "workspace audit final gate blocked"
+    ],
+    "warnings": [
+      "Serena activation remains blocked for general code modification",
+      "client surface PATH contamination remains a warning"
+    ],
+    "report_sources": {
+      "config_provenance": "/home/andy4917/Dev-Management/reports/config-provenance.unified-phase.final.json",
+      "global_runtime": "/home/andy4917/Dev-Management/reports/global-runtime.unified-phase.final.json",
+      "startup_workflow": "/home/andy4917/Dev-Management/reports/startup-workflow.unified-phase.final.json",
+      "toolchain_surface": "/home/andy4917/Dev-Management/reports/toolchain-surface.unified-phase.final.json",
+      "hook_readiness": "/home/andy4917/Dev-Management/reports/hook-readiness.unified-phase.final.json",
+      "audit": "/home/andy4917/Dev-Management/reports/audit.unified-phase.final.json",
+      "artifact_hygiene": "/home/andy4917/Dev-Management/reports/artifact-hygiene.unified-phase.final.json"
+    },
+    "missing_reports": {
+      "config_provenance": false,
+      "global_runtime": false,
+      "startup_workflow": false,
+      "toolchain_surface": false,
+      "hook_readiness": false,
+      "audit": false,
+      "artifact_hygiene": false
+    },
+    "cleanup_actions": [],
+    "required_tests": [
+      "python3 -m unittest tests.test_audit_workspace_contract tests.test_repair_codex_desktop_runtime tests.test_verify_migration_evidence tests.test_check_startup_workflow",
+      "python3 -m unittest tests.test_check_global_runtime tests.test_check_agent_instruction tests.test_git_surface",
+      "python3 -m unittest tests.test_check_config_provenance tests.test_check_toolchain_surface tests.test_check_hook_readiness tests.test_windows_app_ssh_readiness tests.test_artifact_hygiene tests.test_score_layer"
+    ],
+    "evidence_files": [
+      "/home/andy4917/Dev-Management/reports/config-provenance.unified-phase.final.json",
+      "/home/andy4917/Dev-Management/reports/toolchain-surface.unified-phase.final.json",
+      "/home/andy4917/Dev-Management/reports/artifact-hygiene.unified-phase.final.json",
+      "/home/andy4917/Dev-Management/reports/global-runtime.unified-phase.final.json",
+      "/home/andy4917/Dev-Management/reports/audit.unified-phase.final.json"
+    ]
+  },
+  "artifact_hygiene": {
+    "status": "PASS",
+    "stale_draft_reports": [],
+    "remediation_reports": [
+      "/home/andy4917/Dev-Management/reports/manual-system-remediation-20260421-063444.md"
+    ],
+    "stale_preview_files": [],
+    "transient_files": [],
+    "cleanup_allowed_only_with_explicit_apply": true
+  },
+  "legacy_feature_scan": {
+    "status": "PASS",
+    "findings": []
+  },
+  "hardcoding_fallback_scan": {
+    "status": "PASS",
+    "findings": []
+  },
   "canonical_execution_surface": {
     "status": "PASS",
     "details": {
@@ -124,23 +630,35 @@
       "ssh_available": true,
       "stderr": "",
       "type_a": [
+        "codex is /home/andy4917/.local/share/dev-management/codex-npm/bin/codex",
         "codex is /home/andy4917/.local/bin/codex"
       ],
       "type_a_paths": [
+        "/home/andy4917/.local/share/dev-management/codex-npm/bin/codex",
         "/home/andy4917/.local/bin/codex"
       ],
       "type_a_candidates": [
         {
+          "path": "/home/andy4917/.local/share/dev-management/codex-npm/bin/codex",
+          "classification": "linux_native_candidate",
+          "status": "PASS",
+          "exists": true,
+          "native_candidate": true,
+          "target": "",
+          "reason": ""
+        },
+        {
           "path": "/home/andy4917/.local/bin/codex",
-          "classification": "forbidden_wrapper",
-          "status": "BLOCKED",
+          "classification": "repo_generated_ssh_wrapper",
+          "status": "WARN",
           "exists": true,
           "native_candidate": false,
-          "target": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
-          "reason": "wrapper target resolves to the forbidden Windows-mounted Codex launcher"
+          "target": "",
+          "reason": "repo-generated SSH wrapper is not a Linux-native codex target"
         }
       ],
       "path_entries": [
+        "/home/andy4917/.local/share/dev-management/codex-npm/bin",
         "/home/andy4917/.nvm/versions/node/v24.14.1/bin",
         "/home/andy4917/.local/bin",
         "/usr/local/sbin",
@@ -165,24 +683,34 @@
         "observed_repo_root": "/home/andy4917/Dev-Management"
       },
       "remote_codex_resolution_status": {
-        "status": "BLOCKED",
-        "reason": "wrapper target resolves to the forbidden Windows-mounted Codex launcher",
-        "command_v": "/home/andy4917/.local/bin/codex",
+        "status": "PASS",
+        "reason": "",
+        "command_v": "/home/andy4917/.local/share/dev-management/codex-npm/bin/codex",
         "command_v_candidate": {
-          "path": "/home/andy4917/.local/bin/codex",
-          "classification": "forbidden_wrapper",
-          "status": "BLOCKED",
+          "path": "/home/andy4917/.local/share/dev-management/codex-npm/bin/codex",
+          "classification": "linux_native_candidate",
+          "status": "PASS",
           "exists": true,
-          "native_candidate": false,
-          "target": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
-          "reason": "wrapper target resolves to the forbidden Windows-mounted Codex launcher"
+          "native_candidate": true,
+          "target": "",
+          "reason": ""
         }
       },
       "remote_native_codex_status": {
-        "status": "WARN",
-        "reason": "no Linux-native codex absolute path was confirmed in the canonical SSH runtime",
-        "candidates": [],
-        "selected_path": ""
+        "status": "PASS",
+        "reason": "",
+        "candidates": [
+          {
+            "path": "/home/andy4917/.local/share/dev-management/codex-npm/bin/codex",
+            "classification": "linux_native_candidate",
+            "status": "PASS",
+            "exists": true,
+            "native_candidate": true,
+            "target": "",
+            "reason": ""
+          }
+        ],
+        "selected_path": "/home/andy4917/.local/share/dev-management/codex-npm/bin/codex"
       },
       "remote_path_contamination_status": {
         "status": "PASS",
@@ -191,10 +719,43 @@
       }
     }
   },
+  "windows_app_ssh_readiness": {
+    "status": "PASS",
+    "host_alias": "devmgmt-wsl",
+    "windows_ssh_config": "/mnt/c/Users/anise/.ssh/config",
+    "alias_present": true,
+    "identity_file": "~/.ssh/codex_wsl_ed25519",
+    "probe": {
+      "ok": true,
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    "applied": false,
+    "backups": [],
+    "warnings": []
+  },
+  "linux_native_codex_cli": {
+    "status": "PASS",
+    "reason": "",
+    "candidates": [
+      {
+        "path": "/home/andy4917/.local/share/dev-management/codex-npm/bin/codex",
+        "classification": "linux_native_candidate",
+        "status": "PASS",
+        "exists": true,
+        "native_candidate": true,
+        "target": "",
+        "reason": ""
+      }
+    ],
+    "selected_path": "/home/andy4917/.local/share/dev-management/codex-npm/bin/codex"
+  },
   "client_surface": {
     "status": "WARN",
     "path_entries": [
       "/home/andy4917/.local/bin",
+      "/home/andy4917/.local/share/dev-management/codex-npm/bin",
       "/mnt/c/Users/anise/.codex/tmp/arg0/codex-arg0YMNT1f",
       "/mnt/c/Users/anise/.codex/bin/wsl",
       "/home/andy4917/.nvm/versions/node/v24.14.1/bin",
@@ -217,27 +778,38 @@
     ]
   },
   "local_shell_surface": {
-    "status": "BLOCKED",
+    "status": "PASS",
     "command_v": "/home/andy4917/.local/bin/codex",
     "type_a": [
       "codex is /home/andy4917/.local/bin/codex",
+      "codex is /home/andy4917/.local/share/dev-management/codex-npm/bin/codex",
       "codex is /mnt/c/Users/anise/.codex/bin/wsl/codex",
       "codex is /home/andy4917/.local/bin/codex"
     ],
     "wrapper_probe": {
       "path": "/home/andy4917/.local/bin/codex",
       "exists": true,
-      "target": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
+      "target": "",
       "failure_mode": "exit 127",
-      "status": "BLOCKED",
-      "reason": "local wrapper still targets the forbidden Windows-mounted launcher"
+      "status": "PASS",
+      "reason": ""
     }
   },
   "codex_resolution": {
-    "status": "BLOCKED",
-    "remote_command_v": "/home/andy4917/.local/bin/codex",
-    "remote_native_codex_path": "",
-    "remote_native_candidates": [],
+    "status": "PASS",
+    "remote_command_v": "/home/andy4917/.local/share/dev-management/codex-npm/bin/codex",
+    "remote_native_codex_path": "/home/andy4917/.local/share/dev-management/codex-npm/bin/codex",
+    "remote_native_candidates": [
+      {
+        "path": "/home/andy4917/.local/share/dev-management/codex-npm/bin/codex",
+        "classification": "linux_native_candidate",
+        "status": "PASS",
+        "exists": true,
+        "native_candidate": true,
+        "target": "",
+        "reason": ""
+      }
+    ],
     "local_command_v": "/home/andy4917/.local/bin/codex"
   },
   "path_contamination": {
@@ -305,9 +877,9 @@
     "activation": {
       "status": "BLOCKED",
       "reason": "latest Serena MCP log shows the session started without activating a project",
-      "log_path": "/home/andy4917/.serena/logs/2026-04-21/mcp_20260421-043336_53720.txt",
+      "log_path": "/home/andy4917/.serena/logs/2026-04-21/mcp_20260421-060114_272121.txt",
       "matched_lines": [
-        "WARNING 2026-04-21 04:33:36,477 [MainThread] serena.cli:start_mcp_server:326 - No project root found from /mnt/c/Program Files/WindowsApps/OpenAI.Codex_26.417.4842.0_x64__2p2nqsd0c76g0/app/resources; not activating any project"
+        "WARNING 2026-04-21 06:01:14,606 [MainThread] serena.cli:start_mcp_server:326 - No project root found from /mnt/c/Program Files/WindowsApps/OpenAI.Codex_26.417.4842.0_x64__2p2nqsd0c76g0/app/resources; not activating any project"
       ]
     },
     "steps": [
@@ -340,7 +912,7 @@
         "status": "BLOCKED",
         "reason": "latest Serena MCP log shows the session started without activating a project",
         "evidence_refs": [
-          "/home/andy4917/.serena/logs/2026-04-21/mcp_20260421-043336_53720.txt"
+          "/home/andy4917/.serena/logs/2026-04-21/mcp_20260421-060114_272121.txt"
         ]
       }
     ]
@@ -372,18 +944,87 @@
         "repo_root": "/home/andy4917/Dev-Management",
         "status": "present",
         "dirty": [
+          " M contracts/execution_surfaces.json",
+          " M contracts/instruction_guard_policy.json",
           " M contracts/workspace_authority.json",
           " M docs/AGENT_GUARDRAILS.md",
           " M docs/GLOBAL_RUNTIME_ARCHITECTURE.md",
+          " M docs/HOOKS_WSL.md",
           " M docs/RUNBOOK.md",
+          " M docs/SERENA_USAGE.md",
+          " M docs/USER_SCORECARD.md",
+          " M reports/generated-runtime-preview/codex-ssh-wrapper.sh",
           " M reports/global-runtime.json",
+          " D reports/manual-system-remediation-20260421-041812.md",
+          " D reports/manual-system-remediation-20260421-044434.md",
+          " M reports/startup-workflow.json",
+          " M reports/user-scorecard.json",
+          " M scripts/activate_canonical_runtime.py",
           " M scripts/audit_workspace.py",
+          " M scripts/check_agent_instruction.py",
           " M scripts/check_global_runtime.py",
+          " M scripts/check_startup_workflow.py",
+          " M scripts/iaw_closeout.py",
           " M scripts/render_codex_runtime.py",
+          " M scripts/repair_codex_desktop_runtime.py",
+          " M scripts/run_canonical_command.py",
+          " M scripts/verify_migration_evidence.py",
           " M tests/test_audit_workspace_contract.py",
-          " M tests/test_check_global_runtime.py",
-          "?? reports/manual-system-remediation-20260421-044138.md",
-          "?? reports/workspace-dependency-surface.json"
+          " M tests/test_check_agent_instruction.py",
+          " M tests/test_iaw_closeout.py",
+          " M tests/test_repair_codex_desktop_runtime.py",
+          "?? quarantine/artifact-hygiene/",
+          "?? quarantine/runtime-wrapper-backups/",
+          "?? reports/artifact-hygiene.unified-phase.final.json",
+          "?? reports/artifact-hygiene.unified-phase.final.md",
+          "?? reports/artifact-hygiene.unified-phase.json",
+          "?? reports/artifact-hygiene.unified-phase.md",
+          "?? reports/audit.unified-phase.final.json",
+          "?? reports/codex-app-installed-release-impact.unified-phase.json",
+          "?? reports/codex-app-installed-release-impact.unified-phase.md",
+          "?? reports/codex-runtime-repair.unified-phase.pre-apply.json",
+          "?? reports/config-provenance.unified-phase.final.json",
+          "?? reports/config-provenance.unified-phase.final.md",
+          "?? reports/config-provenance.unified-phase.json",
+          "?? reports/config-provenance.unified-phase.md",
+          "?? reports/git-surface.pre-unified-phase.json",
+          "?? reports/git-surface.unified-phase.final.json",
+          "?? reports/global-runtime.pre-unified-phase.json",
+          "?? reports/global-runtime.unified-phase.final.json",
+          "?? reports/global-runtime.unified-phase.json",
+          "?? reports/hook-readiness.unified-phase.final.json",
+          "?? reports/hook-readiness.unified-phase.final.md",
+          "?? reports/hook-readiness.unified-phase.json",
+          "?? reports/hook-readiness.unified-phase.md",
+          "?? reports/instruction-guard.pre-unified-phase.json",
+          "?? reports/instruction-guard.unified-phase.final.json",
+          "?? reports/linux-native-codex-cli-activation.unified-phase.json",
+          "?? reports/linux-native-codex-cli-activation.unified-phase.md",
+          "?? reports/manual-system-remediation-20260421-063444.md",
+          "?? reports/score-layer.unified-phase.final.json",
+          "?? reports/score-layer.unified-phase.final.md",
+          "?? reports/serena-startup.unified-phase.dry-run.json",
+          "?? reports/startup-workflow.pre-unified-phase.json",
+          "?? reports/startup-workflow.unified-phase.final.json",
+          "?? reports/toolchain-surface.unified-phase.final.json",
+          "?? reports/toolchain-surface.unified-phase.final.md",
+          "?? reports/toolchain-surface.unified-phase.json",
+          "?? reports/toolchain-surface.unified-phase.md",
+          "?? reports/toolchain-usage.session.json",
+          "?? reports/windows-app-ssh-remote-readiness.unified-phase.json",
+          "?? reports/windows-app-ssh-remote-readiness.unified-phase.md",
+          "?? scripts/check_artifact_hygiene.py",
+          "?? scripts/check_config_provenance.py",
+          "?? scripts/check_hook_readiness.py",
+          "?? scripts/check_toolchain_surface.py",
+          "?? scripts/check_windows_app_ssh_readiness.py",
+          "?? scripts/run_score_layer.py",
+          "?? tests/test_artifact_hygiene.py",
+          "?? tests/test_check_config_provenance.py",
+          "?? tests/test_check_hook_readiness.py",
+          "?? tests/test_check_toolchain_surface.py",
+          "?? tests/test_score_layer.py",
+          "?? tests/test_windows_app_ssh_readiness.py"
         ],
         "local_config": {
           "available": true,
@@ -750,19 +1391,20 @@
     "status": "PASS"
   },
   "repair_readiness": {
-    "status": "BLOCKED",
-    "ready": false,
+    "status": "PASS",
+    "ready": true,
     "gates": {
       "canonical_execution_status": "PASS",
       "remote_repo_root_status": "PASS",
-      "remote_codex_resolution_status": "BLOCKED",
-      "remote_native_codex_status": "WARN",
+      "remote_codex_resolution_status": "PASS",
+      "remote_native_codex_status": "PASS",
       "remote_path_contamination_status": "PASS",
-      "local_path_precedence_status": "PASS",
+      "windows_app_ssh_readiness": "PASS",
+      "config_provenance": "PASS",
       "wrapper_target_safety_status": "PASS"
     },
-    "remote_native_codex_path": "",
-    "reason": "live wrapper apply remains gated on canonical SSH readiness, remote codex safety, native codex detection, and local PATH precedence"
+    "remote_native_codex_path": "/home/andy4917/.local/share/dev-management/codex-npm/bin/codex",
+    "reason": ""
   },
   "global_runtime_surface": {
     "status": "WARN",
@@ -772,24 +1414,219 @@
     "fail_closed": false,
     "canonical_execution_status": "PASS",
     "client_surface_status": "WARN",
-    "local_shell_status": "BLOCKED",
+    "local_shell_status": "PASS",
     "ssh_runtime_status": "PASS",
-    "codex_resolution_status": "BLOCKED",
+    "windows_app_ssh_readiness": {
+      "status": "PASS",
+      "host_alias": "devmgmt-wsl",
+      "windows_ssh_config": "/mnt/c/Users/anise/.ssh/config",
+      "alias_present": true,
+      "identity_file": "~/.ssh/codex_wsl_ed25519",
+      "probe": {
+        "ok": true,
+        "exit_code": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "applied": false,
+      "backups": [],
+      "warnings": []
+    },
+    "config_provenance": {
+      "status": "WARN",
+      "gate_status": "PASS",
+      "checked_at": "2026-04-20T21:38:20.204053+00:00",
+      "authority_path": "/home/andy4917/Dev-Management/contracts/workspace_authority.json",
+      "authority_hash": "93d7e5ce0b41f4379f2f92b6c78a75b61d09aab1ad7e54265d2cb93c46324977",
+      "allowed_optional_user_override_source": "/home/andy4917/.codex/user-config.toml",
+      "override_source_paths": [],
+      "generated_mirror_contract": {
+        "status": "PASS",
+        "self_feed_reasons": [],
+        "mirrors_are_outputs_only": true
+      },
+      "classifications": {
+        "/home/andy4917/.codex/config.toml": "generated_mirror",
+        "/mnt/c/Users/anise/.codex/config.toml": "generated_mirror",
+        "/home/andy4917/.codex/AGENTS.md": "generated_mirror",
+        "/mnt/c/Users/anise/.codex/AGENTS.md": "generated_mirror",
+        "/home/andy4917/.codex/hooks.json": "generated_mirror",
+        "/mnt/c/Users/anise/.codex/hooks.json": "generated_mirror",
+        "/home/andy4917/.codex/user-config.toml": "optional_user_override_source",
+        "/home/andy4917/Dev-Management/contracts/workspace_authority.json": "source_of_truth"
+      },
+      "generated_headers": {
+        "/home/andy4917/.codex/config.toml": {
+          "status": "PASS",
+          "exists": true,
+          "checks": {
+            "marker": true,
+            "source_authority": true,
+            "source_hash": true,
+            "role": true,
+            "read_by_renderer": true,
+            "user_override_source": true,
+            "optional_user_override": true
+          },
+          "reasons": []
+        },
+        "/mnt/c/Users/anise/.codex/config.toml": {
+          "status": "PASS",
+          "exists": true,
+          "checks": {
+            "marker": true,
+            "source_authority": true,
+            "source_hash": true,
+            "role": true,
+            "read_by_renderer": true,
+            "user_override_source": true,
+            "optional_user_override": true
+          },
+          "reasons": []
+        },
+        "/home/andy4917/.codex/AGENTS.md": {
+          "status": "PASS",
+          "exists": true,
+          "checks": {
+            "generated_banner": true,
+            "authority_file_line": true,
+            "outputs_only_line": true,
+            "user_override_line": true
+          },
+          "reasons": []
+        },
+        "/mnt/c/Users/anise/.codex/AGENTS.md": {
+          "status": "PASS",
+          "exists": true,
+          "checks": {
+            "generated_banner": true,
+            "authority_file_line": true,
+            "outputs_only_line": true,
+            "user_override_line": true
+          },
+          "reasons": []
+        },
+        "/home/andy4917/.codex/hooks.json": {
+          "status": "PASS",
+          "exists": true,
+          "checks": {
+            "expected_generation": true,
+            "matches_render": true
+          },
+          "reasons": []
+        },
+        "/mnt/c/Users/anise/.codex/hooks.json": {
+          "status": "PASS",
+          "exists": true,
+          "checks": {
+            "expected_generation": true,
+            "matches_render": true
+          },
+          "reasons": []
+        }
+      },
+      "active_config_findings": {
+        "/home/andy4917/.codex/config.toml": {
+          "status": "PASS",
+          "blocked_reasons": [],
+          "features": {
+            "apply_patch_freeform": true,
+            "artifact": true,
+            "child_agents_md": true,
+            "code_mode": true,
+            "code_mode_only": true,
+            "codex_git_commit": true,
+            "codex_hooks": true,
+            "default_mode_request_user_input": true,
+            "enable_fanout": true,
+            "exec_permission_approvals": true,
+            "guardian_approval": true,
+            "image_generation": true,
+            "js_repl": true,
+            "memories": true,
+            "multi_agent_v2": true,
+            "prevent_idle_sleep": true,
+            "realtime_conversation": true,
+            "remote_connections": true,
+            "request_permissions_tool": true,
+            "runtime_metrics": true,
+            "shell_zsh_fork": true,
+            "skill_env_var_dependency_prompt": true,
+            "chronicle": true,
+            "tool_search": true,
+            "undo": true
+          },
+          "approval_policy": "on-request",
+          "sandbox_mode": "workspace-write"
+        },
+        "/mnt/c/Users/anise/.codex/config.toml": {
+          "status": "PASS",
+          "blocked_reasons": [],
+          "features": {
+            "apply_patch_freeform": true,
+            "artifact": true,
+            "child_agents_md": true,
+            "code_mode": true,
+            "code_mode_only": true,
+            "codex_git_commit": true,
+            "codex_hooks": true,
+            "default_mode_request_user_input": true,
+            "enable_fanout": true,
+            "exec_permission_approvals": true,
+            "guardian_approval": true,
+            "image_generation": true,
+            "js_repl": true,
+            "memories": true,
+            "multi_agent_v2": true,
+            "prevent_idle_sleep": true,
+            "realtime_conversation": true,
+            "remote_connections": true,
+            "request_permissions_tool": true,
+            "runtime_metrics": true,
+            "shell_zsh_fork": true,
+            "skill_env_var_dependency_prompt": true,
+            "chronicle": true,
+            "tool_search": true,
+            "undo": true
+          },
+          "approval_policy": "on-request",
+          "sandbox_mode": "workspace-write"
+        },
+        "/home/andy4917/.codex/user-config.toml": {
+          "status": "PASS",
+          "blocked_reasons": [],
+          "features": {},
+          "approval_policy": "",
+          "sandbox_mode": ""
+        }
+      },
+      "app_state_surface": {
+        "status": "WARN",
+        "path": "/mnt/c/Users/anise/.codex",
+        "classification": "app_state"
+      },
+      "blocked_reasons": [],
+      "warnings": [
+        "Windows Codex app state exists as evidence only and must not be treated as authority"
+      ]
+    },
+    "codex_resolution_status": "PASS",
     "path_contamination_status": "WARN",
     "wrapper_apply_readiness": {
-      "status": "BLOCKED",
-      "ready": false,
+      "status": "PASS",
+      "ready": true,
       "gates": {
         "canonical_execution_status": "PASS",
         "remote_repo_root_status": "PASS",
-        "remote_codex_resolution_status": "BLOCKED",
-        "remote_native_codex_status": "WARN",
+        "remote_codex_resolution_status": "PASS",
+        "remote_native_codex_status": "PASS",
         "remote_path_contamination_status": "PASS",
-        "local_path_precedence_status": "PASS",
+        "windows_app_ssh_readiness": "PASS",
+        "config_provenance": "PASS",
         "wrapper_target_safety_status": "PASS"
       },
-      "remote_native_codex_path": "",
-      "reason": "live wrapper apply remains gated on canonical SSH readiness, remote codex safety, native codex detection, and local PATH precedence"
+      "remote_native_codex_path": "/home/andy4917/.local/share/dev-management/codex-npm/bin/codex",
+      "reason": ""
     },
     "canonical_ssh_runtime_status": {
       "status": "PASS",
@@ -801,24 +1638,34 @@
       "observed_repo_root": "/home/andy4917/Dev-Management"
     },
     "remote_codex_resolution_status": {
-      "status": "BLOCKED",
-      "reason": "wrapper target resolves to the forbidden Windows-mounted Codex launcher",
-      "command_v": "/home/andy4917/.local/bin/codex",
+      "status": "PASS",
+      "reason": "",
+      "command_v": "/home/andy4917/.local/share/dev-management/codex-npm/bin/codex",
       "command_v_candidate": {
-        "path": "/home/andy4917/.local/bin/codex",
-        "classification": "forbidden_wrapper",
-        "status": "BLOCKED",
+        "path": "/home/andy4917/.local/share/dev-management/codex-npm/bin/codex",
+        "classification": "linux_native_candidate",
+        "status": "PASS",
         "exists": true,
-        "native_candidate": false,
-        "target": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
-        "reason": "wrapper target resolves to the forbidden Windows-mounted Codex launcher"
+        "native_candidate": true,
+        "target": "",
+        "reason": ""
       }
     },
     "remote_native_codex_status": {
-      "status": "WARN",
-      "reason": "no Linux-native codex absolute path was confirmed in the canonical SSH runtime",
-      "candidates": [],
-      "selected_path": ""
+      "status": "PASS",
+      "reason": "",
+      "candidates": [
+        {
+          "path": "/home/andy4917/.local/share/dev-management/codex-npm/bin/codex",
+          "classification": "linux_native_candidate",
+          "status": "PASS",
+          "exists": true,
+          "native_candidate": true,
+          "target": "",
+          "reason": ""
+        }
+      ],
+      "selected_path": "/home/andy4917/.local/share/dev-management/codex-npm/bin/codex"
     },
     "remote_path_contamination_status": {
       "status": "PASS",
@@ -826,15 +1673,15 @@
       "contaminated_entries": []
     },
     "local_live_codex_resolution_status": {
-      "status": "BLOCKED",
-      "reason": "wrapper target resolves to the forbidden Windows-mounted Codex launcher"
+      "status": "PASS",
+      "reason": ""
     },
     "local_path_precedence_status": {
       "status": "PASS",
       "launcher_dir_index": 0,
       "forbidden_indices": [
-        1,
-        2
+        2,
+        3
       ],
       "reasons": []
     },
@@ -851,7 +1698,7 @@
       "host_alias": "devmgmt-wsl",
       "repo_root": "/home/andy4917/Dev-Management",
       "expected_os": "linux",
-      "expected_primary_resolution": "linux-native codex in canonical SSH runtime",
+      "expected_primary_resolution": "linux-native codex CLI on the canonical SSH runtime login-shell PATH",
       "allowed_primary_resolution_fallback": "repo-generated local SSH wrapper",
       "forbidden_primary_resolution": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
       "client_surface_contamination_status_when_canonical_passes": "WARN",
@@ -868,6 +1715,7 @@
       "status": "WARN",
       "path_entries": [
         "/home/andy4917/.local/bin",
+        "/home/andy4917/.local/share/dev-management/codex-npm/bin",
         "/mnt/c/Users/anise/.codex/tmp/arg0/codex-arg0YMNT1f",
         "/mnt/c/Users/anise/.codex/bin/wsl",
         "/home/andy4917/.nvm/versions/node/v24.14.1/bin",
@@ -893,15 +1741,18 @@
       "command_v": "/home/andy4917/.local/bin/codex",
       "type_a": [
         "codex is /home/andy4917/.local/bin/codex",
+        "codex is /home/andy4917/.local/share/dev-management/codex-npm/bin/codex",
         "codex is /mnt/c/Users/anise/.codex/bin/wsl/codex",
         "codex is /home/andy4917/.local/bin/codex"
       ],
       "type_a_paths": [
         "/home/andy4917/.local/bin/codex",
+        "/home/andy4917/.local/share/dev-management/codex-npm/bin/codex",
         "/mnt/c/Users/anise/.codex/bin/wsl/codex"
       ],
       "path_entries": [
         "/home/andy4917/.local/bin",
+        "/home/andy4917/.local/share/dev-management/codex-npm/bin",
         "/mnt/c/Users/anise/.codex/tmp/arg0/codex-arg0YMNT1f",
         "/mnt/c/Users/anise/.codex/bin/wsl",
         "/home/andy4917/.nvm/versions/node/v24.14.1/bin",
@@ -923,15 +1774,15 @@
         "/mnt/c/Users/anise/.codex/bin/wsl"
       ],
       "local_live_codex_resolution_status": {
-        "status": "BLOCKED",
-        "reason": "wrapper target resolves to the forbidden Windows-mounted Codex launcher"
+        "status": "PASS",
+        "reason": ""
       },
       "local_path_precedence_status": {
         "status": "PASS",
         "launcher_dir_index": 0,
         "forbidden_indices": [
-          1,
-          2
+          2,
+          3
         ],
         "reasons": []
       },
@@ -941,7 +1792,7 @@
           "exists": true,
           "classification": "generated",
           "repairable": true,
-          "has_generated_header": false
+          "has_generated_header": true
         },
         "windows_mirror": {
           "path": "/mnt/c/Users/anise/.codex/config.toml",
@@ -954,37 +1805,46 @@
       "local_wrapper_probe": {
         "path": "/home/andy4917/.local/bin/codex",
         "exists": true,
-        "target": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
+        "target": "",
         "failure_mode": "exit 127",
-        "status": "BLOCKED",
-        "reason": "local wrapper still targets the forbidden Windows-mounted launcher"
+        "status": "PASS",
+        "reason": ""
       },
       "client_surface_status": {
         "status": "WARN",
         "reason": "client session PATH includes injected Codex app runtime paths"
       },
       "local_shell_status": {
-        "status": "BLOCKED",
-        "reason": "local shell still resolves or routes through forbidden runtime surfaces"
+        "status": "PASS",
+        "reason": ""
       },
       "command_v_candidate": {
         "path": "/home/andy4917/.local/bin/codex",
-        "classification": "forbidden_wrapper",
-        "status": "BLOCKED",
+        "classification": "repo_generated_ssh_wrapper",
+        "status": "WARN",
         "exists": true,
         "native_candidate": false,
-        "target": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
-        "reason": "wrapper target resolves to the forbidden Windows-mounted Codex launcher"
+        "target": "",
+        "reason": "repo-generated SSH wrapper is not a Linux-native codex target"
       },
       "type_a_candidates": [
         {
           "path": "/home/andy4917/.local/bin/codex",
-          "classification": "forbidden_wrapper",
-          "status": "BLOCKED",
+          "classification": "repo_generated_ssh_wrapper",
+          "status": "WARN",
           "exists": true,
           "native_candidate": false,
-          "target": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
-          "reason": "wrapper target resolves to the forbidden Windows-mounted Codex launcher"
+          "target": "",
+          "reason": "repo-generated SSH wrapper is not a Linux-native codex target"
+        },
+        {
+          "path": "/home/andy4917/.local/share/dev-management/codex-npm/bin/codex",
+          "classification": "linux_native_candidate",
+          "status": "PASS",
+          "exists": true,
+          "native_candidate": true,
+          "target": "",
+          "reason": ""
         },
         {
           "path": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
@@ -1004,20 +1864,21 @@
       }
     },
     "local_shell_surface": {
-      "status": "BLOCKED",
+      "status": "PASS",
       "command_v": "/home/andy4917/.local/bin/codex",
       "type_a": [
         "codex is /home/andy4917/.local/bin/codex",
+        "codex is /home/andy4917/.local/share/dev-management/codex-npm/bin/codex",
         "codex is /mnt/c/Users/anise/.codex/bin/wsl/codex",
         "codex is /home/andy4917/.local/bin/codex"
       ],
       "wrapper_probe": {
         "path": "/home/andy4917/.local/bin/codex",
         "exists": true,
-        "target": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
+        "target": "",
         "failure_mode": "exit 127",
-        "status": "BLOCKED",
-        "reason": "local wrapper still targets the forbidden Windows-mounted launcher"
+        "status": "PASS",
+        "reason": ""
       }
     },
     "ssh_activation": {
@@ -1032,23 +1893,35 @@
       "ssh_available": true,
       "stderr": "",
       "type_a": [
+        "codex is /home/andy4917/.local/share/dev-management/codex-npm/bin/codex",
         "codex is /home/andy4917/.local/bin/codex"
       ],
       "type_a_paths": [
+        "/home/andy4917/.local/share/dev-management/codex-npm/bin/codex",
         "/home/andy4917/.local/bin/codex"
       ],
       "type_a_candidates": [
         {
+          "path": "/home/andy4917/.local/share/dev-management/codex-npm/bin/codex",
+          "classification": "linux_native_candidate",
+          "status": "PASS",
+          "exists": true,
+          "native_candidate": true,
+          "target": "",
+          "reason": ""
+        },
+        {
           "path": "/home/andy4917/.local/bin/codex",
-          "classification": "forbidden_wrapper",
-          "status": "BLOCKED",
+          "classification": "repo_generated_ssh_wrapper",
+          "status": "WARN",
           "exists": true,
           "native_candidate": false,
-          "target": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
-          "reason": "wrapper target resolves to the forbidden Windows-mounted Codex launcher"
+          "target": "",
+          "reason": "repo-generated SSH wrapper is not a Linux-native codex target"
         }
       ],
       "path_entries": [
+        "/home/andy4917/.local/share/dev-management/codex-npm/bin",
         "/home/andy4917/.nvm/versions/node/v24.14.1/bin",
         "/home/andy4917/.local/bin",
         "/usr/local/sbin",
@@ -1073,24 +1946,34 @@
         "observed_repo_root": "/home/andy4917/Dev-Management"
       },
       "remote_codex_resolution_status": {
-        "status": "BLOCKED",
-        "reason": "wrapper target resolves to the forbidden Windows-mounted Codex launcher",
-        "command_v": "/home/andy4917/.local/bin/codex",
+        "status": "PASS",
+        "reason": "",
+        "command_v": "/home/andy4917/.local/share/dev-management/codex-npm/bin/codex",
         "command_v_candidate": {
-          "path": "/home/andy4917/.local/bin/codex",
-          "classification": "forbidden_wrapper",
-          "status": "BLOCKED",
+          "path": "/home/andy4917/.local/share/dev-management/codex-npm/bin/codex",
+          "classification": "linux_native_candidate",
+          "status": "PASS",
           "exists": true,
-          "native_candidate": false,
-          "target": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
-          "reason": "wrapper target resolves to the forbidden Windows-mounted Codex launcher"
+          "native_candidate": true,
+          "target": "",
+          "reason": ""
         }
       },
       "remote_native_codex_status": {
-        "status": "WARN",
-        "reason": "no Linux-native codex absolute path was confirmed in the canonical SSH runtime",
-        "candidates": [],
-        "selected_path": ""
+        "status": "PASS",
+        "reason": "",
+        "candidates": [
+          {
+            "path": "/home/andy4917/.local/share/dev-management/codex-npm/bin/codex",
+            "classification": "linux_native_candidate",
+            "status": "PASS",
+            "exists": true,
+            "native_candidate": true,
+            "target": "",
+            "reason": ""
+          }
+        ],
+        "selected_path": "/home/andy4917/.local/share/dev-management/codex-npm/bin/codex"
       },
       "remote_path_contamination_status": {
         "status": "PASS",
@@ -1099,10 +1982,20 @@
       }
     },
     "codex_resolution": {
-      "status": "BLOCKED",
-      "remote_command_v": "/home/andy4917/.local/bin/codex",
-      "remote_native_codex_path": "",
-      "remote_native_candidates": [],
+      "status": "PASS",
+      "remote_command_v": "/home/andy4917/.local/share/dev-management/codex-npm/bin/codex",
+      "remote_native_codex_path": "/home/andy4917/.local/share/dev-management/codex-npm/bin/codex",
+      "remote_native_candidates": [
+        {
+          "path": "/home/andy4917/.local/share/dev-management/codex-npm/bin/codex",
+          "classification": "linux_native_candidate",
+          "status": "PASS",
+          "exists": true,
+          "native_candidate": true,
+          "target": "",
+          "reason": ""
+        }
+      ],
       "local_command_v": "/home/andy4917/.local/bin/codex"
     },
     "path_contamination": {
@@ -1123,8 +2016,8 @@
     "preview_wrapper_path": "/home/andy4917/Dev-Management/reports/generated-runtime-preview/codex-ssh-wrapper.sh"
   },
   "codex_live_resolution": {
-    "status": "BLOCKED",
-    "reason": "wrapper target resolves to the forbidden Windows-mounted Codex launcher"
+    "status": "PASS",
+    "reason": ""
   },
   "path_contamination_legacy": {
     "local": [
@@ -1139,23 +2032,35 @@
     "ssh_available": true,
     "stderr": "",
     "type_a": [
+      "codex is /home/andy4917/.local/share/dev-management/codex-npm/bin/codex",
       "codex is /home/andy4917/.local/bin/codex"
     ],
     "type_a_paths": [
+      "/home/andy4917/.local/share/dev-management/codex-npm/bin/codex",
       "/home/andy4917/.local/bin/codex"
     ],
     "type_a_candidates": [
       {
+        "path": "/home/andy4917/.local/share/dev-management/codex-npm/bin/codex",
+        "classification": "linux_native_candidate",
+        "status": "PASS",
+        "exists": true,
+        "native_candidate": true,
+        "target": "",
+        "reason": ""
+      },
+      {
         "path": "/home/andy4917/.local/bin/codex",
-        "classification": "forbidden_wrapper",
-        "status": "BLOCKED",
+        "classification": "repo_generated_ssh_wrapper",
+        "status": "WARN",
         "exists": true,
         "native_candidate": false,
-        "target": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
-        "reason": "wrapper target resolves to the forbidden Windows-mounted Codex launcher"
+        "target": "",
+        "reason": "repo-generated SSH wrapper is not a Linux-native codex target"
       }
     ],
     "path_entries": [
+      "/home/andy4917/.local/share/dev-management/codex-npm/bin",
       "/home/andy4917/.nvm/versions/node/v24.14.1/bin",
       "/home/andy4917/.local/bin",
       "/usr/local/sbin",
@@ -1180,24 +2085,34 @@
       "observed_repo_root": "/home/andy4917/Dev-Management"
     },
     "remote_codex_resolution_status": {
-      "status": "BLOCKED",
-      "reason": "wrapper target resolves to the forbidden Windows-mounted Codex launcher",
-      "command_v": "/home/andy4917/.local/bin/codex",
+      "status": "PASS",
+      "reason": "",
+      "command_v": "/home/andy4917/.local/share/dev-management/codex-npm/bin/codex",
       "command_v_candidate": {
-        "path": "/home/andy4917/.local/bin/codex",
-        "classification": "forbidden_wrapper",
-        "status": "BLOCKED",
+        "path": "/home/andy4917/.local/share/dev-management/codex-npm/bin/codex",
+        "classification": "linux_native_candidate",
+        "status": "PASS",
         "exists": true,
-        "native_candidate": false,
-        "target": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
-        "reason": "wrapper target resolves to the forbidden Windows-mounted Codex launcher"
+        "native_candidate": true,
+        "target": "",
+        "reason": ""
       }
     },
     "remote_native_codex_status": {
-      "status": "WARN",
-      "reason": "no Linux-native codex absolute path was confirmed in the canonical SSH runtime",
-      "candidates": [],
-      "selected_path": ""
+      "status": "PASS",
+      "reason": "",
+      "candidates": [
+        {
+          "path": "/home/andy4917/.local/share/dev-management/codex-npm/bin/codex",
+          "classification": "linux_native_candidate",
+          "status": "PASS",
+          "exists": true,
+          "native_candidate": true,
+          "target": "",
+          "reason": ""
+        }
+      ],
+      "selected_path": "/home/andy4917/.local/share/dev-management/codex-npm/bin/codex"
     },
     "remote_path_contamination_status": {
       "status": "PASS",
@@ -1212,18 +2127,87 @@
         "repo_root": "/home/andy4917/Dev-Management",
         "status": "present",
         "dirty": [
+          " M contracts/execution_surfaces.json",
+          " M contracts/instruction_guard_policy.json",
           " M contracts/workspace_authority.json",
           " M docs/AGENT_GUARDRAILS.md",
           " M docs/GLOBAL_RUNTIME_ARCHITECTURE.md",
+          " M docs/HOOKS_WSL.md",
           " M docs/RUNBOOK.md",
+          " M docs/SERENA_USAGE.md",
+          " M docs/USER_SCORECARD.md",
+          " M reports/generated-runtime-preview/codex-ssh-wrapper.sh",
           " M reports/global-runtime.json",
+          " D reports/manual-system-remediation-20260421-041812.md",
+          " D reports/manual-system-remediation-20260421-044434.md",
+          " M reports/startup-workflow.json",
+          " M reports/user-scorecard.json",
+          " M scripts/activate_canonical_runtime.py",
           " M scripts/audit_workspace.py",
+          " M scripts/check_agent_instruction.py",
           " M scripts/check_global_runtime.py",
+          " M scripts/check_startup_workflow.py",
+          " M scripts/iaw_closeout.py",
           " M scripts/render_codex_runtime.py",
+          " M scripts/repair_codex_desktop_runtime.py",
+          " M scripts/run_canonical_command.py",
+          " M scripts/verify_migration_evidence.py",
           " M tests/test_audit_workspace_contract.py",
-          " M tests/test_check_global_runtime.py",
-          "?? reports/manual-system-remediation-20260421-044138.md",
-          "?? reports/workspace-dependency-surface.json"
+          " M tests/test_check_agent_instruction.py",
+          " M tests/test_iaw_closeout.py",
+          " M tests/test_repair_codex_desktop_runtime.py",
+          "?? quarantine/artifact-hygiene/",
+          "?? quarantine/runtime-wrapper-backups/",
+          "?? reports/artifact-hygiene.unified-phase.final.json",
+          "?? reports/artifact-hygiene.unified-phase.final.md",
+          "?? reports/artifact-hygiene.unified-phase.json",
+          "?? reports/artifact-hygiene.unified-phase.md",
+          "?? reports/audit.unified-phase.final.json",
+          "?? reports/codex-app-installed-release-impact.unified-phase.json",
+          "?? reports/codex-app-installed-release-impact.unified-phase.md",
+          "?? reports/codex-runtime-repair.unified-phase.pre-apply.json",
+          "?? reports/config-provenance.unified-phase.final.json",
+          "?? reports/config-provenance.unified-phase.final.md",
+          "?? reports/config-provenance.unified-phase.json",
+          "?? reports/config-provenance.unified-phase.md",
+          "?? reports/git-surface.pre-unified-phase.json",
+          "?? reports/git-surface.unified-phase.final.json",
+          "?? reports/global-runtime.pre-unified-phase.json",
+          "?? reports/global-runtime.unified-phase.final.json",
+          "?? reports/global-runtime.unified-phase.json",
+          "?? reports/hook-readiness.unified-phase.final.json",
+          "?? reports/hook-readiness.unified-phase.final.md",
+          "?? reports/hook-readiness.unified-phase.json",
+          "?? reports/hook-readiness.unified-phase.md",
+          "?? reports/instruction-guard.pre-unified-phase.json",
+          "?? reports/instruction-guard.unified-phase.final.json",
+          "?? reports/linux-native-codex-cli-activation.unified-phase.json",
+          "?? reports/linux-native-codex-cli-activation.unified-phase.md",
+          "?? reports/manual-system-remediation-20260421-063444.md",
+          "?? reports/score-layer.unified-phase.final.json",
+          "?? reports/score-layer.unified-phase.final.md",
+          "?? reports/serena-startup.unified-phase.dry-run.json",
+          "?? reports/startup-workflow.pre-unified-phase.json",
+          "?? reports/startup-workflow.unified-phase.final.json",
+          "?? reports/toolchain-surface.unified-phase.final.json",
+          "?? reports/toolchain-surface.unified-phase.final.md",
+          "?? reports/toolchain-surface.unified-phase.json",
+          "?? reports/toolchain-surface.unified-phase.md",
+          "?? reports/toolchain-usage.session.json",
+          "?? reports/windows-app-ssh-remote-readiness.unified-phase.json",
+          "?? reports/windows-app-ssh-remote-readiness.unified-phase.md",
+          "?? scripts/check_artifact_hygiene.py",
+          "?? scripts/check_config_provenance.py",
+          "?? scripts/check_hook_readiness.py",
+          "?? scripts/check_toolchain_surface.py",
+          "?? scripts/check_windows_app_ssh_readiness.py",
+          "?? scripts/run_score_layer.py",
+          "?? tests/test_artifact_hygiene.py",
+          "?? tests/test_check_config_provenance.py",
+          "?? tests/test_check_hook_readiness.py",
+          "?? tests/test_check_toolchain_surface.py",
+          "?? tests/test_score_layer.py",
+          "?? tests/test_windows_app_ssh_readiness.py"
         ],
         "local_config": {
           "available": true,
@@ -1601,7 +2585,7 @@
     "linux_launcher_path": "/home/andy4917/.local/bin/codex",
     "linux_launcher_exists": true,
     "linux_launcher_generated_header_ok": true,
-    "configured_target": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
+    "configured_target": "",
     "global_runtime_surface": {
       "status": "WARN",
       "overall_status": "WARN",
@@ -1610,24 +2594,219 @@
       "fail_closed": false,
       "canonical_execution_status": "PASS",
       "client_surface_status": "WARN",
-      "local_shell_status": "BLOCKED",
+      "local_shell_status": "PASS",
       "ssh_runtime_status": "PASS",
-      "codex_resolution_status": "BLOCKED",
+      "windows_app_ssh_readiness": {
+        "status": "PASS",
+        "host_alias": "devmgmt-wsl",
+        "windows_ssh_config": "/mnt/c/Users/anise/.ssh/config",
+        "alias_present": true,
+        "identity_file": "~/.ssh/codex_wsl_ed25519",
+        "probe": {
+          "ok": true,
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        "applied": false,
+        "backups": [],
+        "warnings": []
+      },
+      "config_provenance": {
+        "status": "WARN",
+        "gate_status": "PASS",
+        "checked_at": "2026-04-20T21:38:22.690790+00:00",
+        "authority_path": "/home/andy4917/Dev-Management/contracts/workspace_authority.json",
+        "authority_hash": "93d7e5ce0b41f4379f2f92b6c78a75b61d09aab1ad7e54265d2cb93c46324977",
+        "allowed_optional_user_override_source": "/home/andy4917/.codex/user-config.toml",
+        "override_source_paths": [],
+        "generated_mirror_contract": {
+          "status": "PASS",
+          "self_feed_reasons": [],
+          "mirrors_are_outputs_only": true
+        },
+        "classifications": {
+          "/home/andy4917/.codex/config.toml": "generated_mirror",
+          "/mnt/c/Users/anise/.codex/config.toml": "generated_mirror",
+          "/home/andy4917/.codex/AGENTS.md": "generated_mirror",
+          "/mnt/c/Users/anise/.codex/AGENTS.md": "generated_mirror",
+          "/home/andy4917/.codex/hooks.json": "generated_mirror",
+          "/mnt/c/Users/anise/.codex/hooks.json": "generated_mirror",
+          "/home/andy4917/.codex/user-config.toml": "optional_user_override_source",
+          "/home/andy4917/Dev-Management/contracts/workspace_authority.json": "source_of_truth"
+        },
+        "generated_headers": {
+          "/home/andy4917/.codex/config.toml": {
+            "status": "PASS",
+            "exists": true,
+            "checks": {
+              "marker": true,
+              "source_authority": true,
+              "source_hash": true,
+              "role": true,
+              "read_by_renderer": true,
+              "user_override_source": true,
+              "optional_user_override": true
+            },
+            "reasons": []
+          },
+          "/mnt/c/Users/anise/.codex/config.toml": {
+            "status": "PASS",
+            "exists": true,
+            "checks": {
+              "marker": true,
+              "source_authority": true,
+              "source_hash": true,
+              "role": true,
+              "read_by_renderer": true,
+              "user_override_source": true,
+              "optional_user_override": true
+            },
+            "reasons": []
+          },
+          "/home/andy4917/.codex/AGENTS.md": {
+            "status": "PASS",
+            "exists": true,
+            "checks": {
+              "generated_banner": true,
+              "authority_file_line": true,
+              "outputs_only_line": true,
+              "user_override_line": true
+            },
+            "reasons": []
+          },
+          "/mnt/c/Users/anise/.codex/AGENTS.md": {
+            "status": "PASS",
+            "exists": true,
+            "checks": {
+              "generated_banner": true,
+              "authority_file_line": true,
+              "outputs_only_line": true,
+              "user_override_line": true
+            },
+            "reasons": []
+          },
+          "/home/andy4917/.codex/hooks.json": {
+            "status": "PASS",
+            "exists": true,
+            "checks": {
+              "expected_generation": true,
+              "matches_render": true
+            },
+            "reasons": []
+          },
+          "/mnt/c/Users/anise/.codex/hooks.json": {
+            "status": "PASS",
+            "exists": true,
+            "checks": {
+              "expected_generation": true,
+              "matches_render": true
+            },
+            "reasons": []
+          }
+        },
+        "active_config_findings": {
+          "/home/andy4917/.codex/config.toml": {
+            "status": "PASS",
+            "blocked_reasons": [],
+            "features": {
+              "apply_patch_freeform": true,
+              "artifact": true,
+              "child_agents_md": true,
+              "code_mode": true,
+              "code_mode_only": true,
+              "codex_git_commit": true,
+              "codex_hooks": true,
+              "default_mode_request_user_input": true,
+              "enable_fanout": true,
+              "exec_permission_approvals": true,
+              "guardian_approval": true,
+              "image_generation": true,
+              "js_repl": true,
+              "memories": true,
+              "multi_agent_v2": true,
+              "prevent_idle_sleep": true,
+              "realtime_conversation": true,
+              "remote_connections": true,
+              "request_permissions_tool": true,
+              "runtime_metrics": true,
+              "shell_zsh_fork": true,
+              "skill_env_var_dependency_prompt": true,
+              "chronicle": true,
+              "tool_search": true,
+              "undo": true
+            },
+            "approval_policy": "on-request",
+            "sandbox_mode": "workspace-write"
+          },
+          "/mnt/c/Users/anise/.codex/config.toml": {
+            "status": "PASS",
+            "blocked_reasons": [],
+            "features": {
+              "apply_patch_freeform": true,
+              "artifact": true,
+              "child_agents_md": true,
+              "code_mode": true,
+              "code_mode_only": true,
+              "codex_git_commit": true,
+              "codex_hooks": true,
+              "default_mode_request_user_input": true,
+              "enable_fanout": true,
+              "exec_permission_approvals": true,
+              "guardian_approval": true,
+              "image_generation": true,
+              "js_repl": true,
+              "memories": true,
+              "multi_agent_v2": true,
+              "prevent_idle_sleep": true,
+              "realtime_conversation": true,
+              "remote_connections": true,
+              "request_permissions_tool": true,
+              "runtime_metrics": true,
+              "shell_zsh_fork": true,
+              "skill_env_var_dependency_prompt": true,
+              "chronicle": true,
+              "tool_search": true,
+              "undo": true
+            },
+            "approval_policy": "on-request",
+            "sandbox_mode": "workspace-write"
+          },
+          "/home/andy4917/.codex/user-config.toml": {
+            "status": "PASS",
+            "blocked_reasons": [],
+            "features": {},
+            "approval_policy": "",
+            "sandbox_mode": ""
+          }
+        },
+        "app_state_surface": {
+          "status": "WARN",
+          "path": "/mnt/c/Users/anise/.codex",
+          "classification": "app_state"
+        },
+        "blocked_reasons": [],
+        "warnings": [
+          "Windows Codex app state exists as evidence only and must not be treated as authority"
+        ]
+      },
+      "codex_resolution_status": "PASS",
       "path_contamination_status": "WARN",
       "wrapper_apply_readiness": {
-        "status": "BLOCKED",
-        "ready": false,
+        "status": "PASS",
+        "ready": true,
         "gates": {
           "canonical_execution_status": "PASS",
           "remote_repo_root_status": "PASS",
-          "remote_codex_resolution_status": "BLOCKED",
-          "remote_native_codex_status": "WARN",
+          "remote_codex_resolution_status": "PASS",
+          "remote_native_codex_status": "PASS",
           "remote_path_contamination_status": "PASS",
-          "local_path_precedence_status": "PASS",
+          "windows_app_ssh_readiness": "PASS",
+          "config_provenance": "PASS",
           "wrapper_target_safety_status": "PASS"
         },
-        "remote_native_codex_path": "",
-        "reason": "live wrapper apply remains gated on canonical SSH readiness, remote codex safety, native codex detection, and local PATH precedence"
+        "remote_native_codex_path": "/home/andy4917/.local/share/dev-management/codex-npm/bin/codex",
+        "reason": ""
       },
       "canonical_ssh_runtime_status": {
         "status": "PASS",
@@ -1639,24 +2818,34 @@
         "observed_repo_root": "/home/andy4917/Dev-Management"
       },
       "remote_codex_resolution_status": {
-        "status": "BLOCKED",
-        "reason": "wrapper target resolves to the forbidden Windows-mounted Codex launcher",
-        "command_v": "/home/andy4917/.local/bin/codex",
+        "status": "PASS",
+        "reason": "",
+        "command_v": "/home/andy4917/.local/share/dev-management/codex-npm/bin/codex",
         "command_v_candidate": {
-          "path": "/home/andy4917/.local/bin/codex",
-          "classification": "forbidden_wrapper",
-          "status": "BLOCKED",
+          "path": "/home/andy4917/.local/share/dev-management/codex-npm/bin/codex",
+          "classification": "linux_native_candidate",
+          "status": "PASS",
           "exists": true,
-          "native_candidate": false,
-          "target": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
-          "reason": "wrapper target resolves to the forbidden Windows-mounted Codex launcher"
+          "native_candidate": true,
+          "target": "",
+          "reason": ""
         }
       },
       "remote_native_codex_status": {
-        "status": "WARN",
-        "reason": "no Linux-native codex absolute path was confirmed in the canonical SSH runtime",
-        "candidates": [],
-        "selected_path": ""
+        "status": "PASS",
+        "reason": "",
+        "candidates": [
+          {
+            "path": "/home/andy4917/.local/share/dev-management/codex-npm/bin/codex",
+            "classification": "linux_native_candidate",
+            "status": "PASS",
+            "exists": true,
+            "native_candidate": true,
+            "target": "",
+            "reason": ""
+          }
+        ],
+        "selected_path": "/home/andy4917/.local/share/dev-management/codex-npm/bin/codex"
       },
       "remote_path_contamination_status": {
         "status": "PASS",
@@ -1664,15 +2853,15 @@
         "contaminated_entries": []
       },
       "local_live_codex_resolution_status": {
-        "status": "BLOCKED",
-        "reason": "wrapper target resolves to the forbidden Windows-mounted Codex launcher"
+        "status": "PASS",
+        "reason": ""
       },
       "local_path_precedence_status": {
         "status": "PASS",
         "launcher_dir_index": 0,
         "forbidden_indices": [
-          1,
-          2
+          2,
+          3
         ],
         "reasons": []
       },
@@ -1689,7 +2878,7 @@
         "host_alias": "devmgmt-wsl",
         "repo_root": "/home/andy4917/Dev-Management",
         "expected_os": "linux",
-        "expected_primary_resolution": "linux-native codex in canonical SSH runtime",
+        "expected_primary_resolution": "linux-native codex CLI on the canonical SSH runtime login-shell PATH",
         "allowed_primary_resolution_fallback": "repo-generated local SSH wrapper",
         "forbidden_primary_resolution": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
         "client_surface_contamination_status_when_canonical_passes": "WARN",
@@ -1706,6 +2895,7 @@
         "status": "WARN",
         "path_entries": [
           "/home/andy4917/.local/bin",
+          "/home/andy4917/.local/share/dev-management/codex-npm/bin",
           "/mnt/c/Users/anise/.codex/tmp/arg0/codex-arg0YMNT1f",
           "/mnt/c/Users/anise/.codex/bin/wsl",
           "/home/andy4917/.nvm/versions/node/v24.14.1/bin",
@@ -1731,15 +2921,18 @@
         "command_v": "/home/andy4917/.local/bin/codex",
         "type_a": [
           "codex is /home/andy4917/.local/bin/codex",
+          "codex is /home/andy4917/.local/share/dev-management/codex-npm/bin/codex",
           "codex is /mnt/c/Users/anise/.codex/bin/wsl/codex",
           "codex is /home/andy4917/.local/bin/codex"
         ],
         "type_a_paths": [
           "/home/andy4917/.local/bin/codex",
+          "/home/andy4917/.local/share/dev-management/codex-npm/bin/codex",
           "/mnt/c/Users/anise/.codex/bin/wsl/codex"
         ],
         "path_entries": [
           "/home/andy4917/.local/bin",
+          "/home/andy4917/.local/share/dev-management/codex-npm/bin",
           "/mnt/c/Users/anise/.codex/tmp/arg0/codex-arg0YMNT1f",
           "/mnt/c/Users/anise/.codex/bin/wsl",
           "/home/andy4917/.nvm/versions/node/v24.14.1/bin",
@@ -1761,15 +2954,15 @@
           "/mnt/c/Users/anise/.codex/bin/wsl"
         ],
         "local_live_codex_resolution_status": {
-          "status": "BLOCKED",
-          "reason": "wrapper target resolves to the forbidden Windows-mounted Codex launcher"
+          "status": "PASS",
+          "reason": ""
         },
         "local_path_precedence_status": {
           "status": "PASS",
           "launcher_dir_index": 0,
           "forbidden_indices": [
-            1,
-            2
+            2,
+            3
           ],
           "reasons": []
         },
@@ -1779,7 +2972,7 @@
             "exists": true,
             "classification": "generated",
             "repairable": true,
-            "has_generated_header": false
+            "has_generated_header": true
           },
           "windows_mirror": {
             "path": "/mnt/c/Users/anise/.codex/config.toml",
@@ -1792,37 +2985,46 @@
         "local_wrapper_probe": {
           "path": "/home/andy4917/.local/bin/codex",
           "exists": true,
-          "target": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
+          "target": "",
           "failure_mode": "exit 127",
-          "status": "BLOCKED",
-          "reason": "local wrapper still targets the forbidden Windows-mounted launcher"
+          "status": "PASS",
+          "reason": ""
         },
         "client_surface_status": {
           "status": "WARN",
           "reason": "client session PATH includes injected Codex app runtime paths"
         },
         "local_shell_status": {
-          "status": "BLOCKED",
-          "reason": "local shell still resolves or routes through forbidden runtime surfaces"
+          "status": "PASS",
+          "reason": ""
         },
         "command_v_candidate": {
           "path": "/home/andy4917/.local/bin/codex",
-          "classification": "forbidden_wrapper",
-          "status": "BLOCKED",
+          "classification": "repo_generated_ssh_wrapper",
+          "status": "WARN",
           "exists": true,
           "native_candidate": false,
-          "target": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
-          "reason": "wrapper target resolves to the forbidden Windows-mounted Codex launcher"
+          "target": "",
+          "reason": "repo-generated SSH wrapper is not a Linux-native codex target"
         },
         "type_a_candidates": [
           {
             "path": "/home/andy4917/.local/bin/codex",
-            "classification": "forbidden_wrapper",
-            "status": "BLOCKED",
+            "classification": "repo_generated_ssh_wrapper",
+            "status": "WARN",
             "exists": true,
             "native_candidate": false,
-            "target": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
-            "reason": "wrapper target resolves to the forbidden Windows-mounted Codex launcher"
+            "target": "",
+            "reason": "repo-generated SSH wrapper is not a Linux-native codex target"
+          },
+          {
+            "path": "/home/andy4917/.local/share/dev-management/codex-npm/bin/codex",
+            "classification": "linux_native_candidate",
+            "status": "PASS",
+            "exists": true,
+            "native_candidate": true,
+            "target": "",
+            "reason": ""
           },
           {
             "path": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
@@ -1842,20 +3044,21 @@
         }
       },
       "local_shell_surface": {
-        "status": "BLOCKED",
+        "status": "PASS",
         "command_v": "/home/andy4917/.local/bin/codex",
         "type_a": [
           "codex is /home/andy4917/.local/bin/codex",
+          "codex is /home/andy4917/.local/share/dev-management/codex-npm/bin/codex",
           "codex is /mnt/c/Users/anise/.codex/bin/wsl/codex",
           "codex is /home/andy4917/.local/bin/codex"
         ],
         "wrapper_probe": {
           "path": "/home/andy4917/.local/bin/codex",
           "exists": true,
-          "target": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
+          "target": "",
           "failure_mode": "exit 127",
-          "status": "BLOCKED",
-          "reason": "local wrapper still targets the forbidden Windows-mounted launcher"
+          "status": "PASS",
+          "reason": ""
         }
       },
       "ssh_activation": {
@@ -1870,23 +3073,35 @@
         "ssh_available": true,
         "stderr": "",
         "type_a": [
+          "codex is /home/andy4917/.local/share/dev-management/codex-npm/bin/codex",
           "codex is /home/andy4917/.local/bin/codex"
         ],
         "type_a_paths": [
+          "/home/andy4917/.local/share/dev-management/codex-npm/bin/codex",
           "/home/andy4917/.local/bin/codex"
         ],
         "type_a_candidates": [
           {
+            "path": "/home/andy4917/.local/share/dev-management/codex-npm/bin/codex",
+            "classification": "linux_native_candidate",
+            "status": "PASS",
+            "exists": true,
+            "native_candidate": true,
+            "target": "",
+            "reason": ""
+          },
+          {
             "path": "/home/andy4917/.local/bin/codex",
-            "classification": "forbidden_wrapper",
-            "status": "BLOCKED",
+            "classification": "repo_generated_ssh_wrapper",
+            "status": "WARN",
             "exists": true,
             "native_candidate": false,
-            "target": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
-            "reason": "wrapper target resolves to the forbidden Windows-mounted Codex launcher"
+            "target": "",
+            "reason": "repo-generated SSH wrapper is not a Linux-native codex target"
           }
         ],
         "path_entries": [
+          "/home/andy4917/.local/share/dev-management/codex-npm/bin",
           "/home/andy4917/.nvm/versions/node/v24.14.1/bin",
           "/home/andy4917/.local/bin",
           "/usr/local/sbin",
@@ -1911,24 +3126,34 @@
           "observed_repo_root": "/home/andy4917/Dev-Management"
         },
         "remote_codex_resolution_status": {
-          "status": "BLOCKED",
-          "reason": "wrapper target resolves to the forbidden Windows-mounted Codex launcher",
-          "command_v": "/home/andy4917/.local/bin/codex",
+          "status": "PASS",
+          "reason": "",
+          "command_v": "/home/andy4917/.local/share/dev-management/codex-npm/bin/codex",
           "command_v_candidate": {
-            "path": "/home/andy4917/.local/bin/codex",
-            "classification": "forbidden_wrapper",
-            "status": "BLOCKED",
+            "path": "/home/andy4917/.local/share/dev-management/codex-npm/bin/codex",
+            "classification": "linux_native_candidate",
+            "status": "PASS",
             "exists": true,
-            "native_candidate": false,
-            "target": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
-            "reason": "wrapper target resolves to the forbidden Windows-mounted Codex launcher"
+            "native_candidate": true,
+            "target": "",
+            "reason": ""
           }
         },
         "remote_native_codex_status": {
-          "status": "WARN",
-          "reason": "no Linux-native codex absolute path was confirmed in the canonical SSH runtime",
-          "candidates": [],
-          "selected_path": ""
+          "status": "PASS",
+          "reason": "",
+          "candidates": [
+            {
+              "path": "/home/andy4917/.local/share/dev-management/codex-npm/bin/codex",
+              "classification": "linux_native_candidate",
+              "status": "PASS",
+              "exists": true,
+              "native_candidate": true,
+              "target": "",
+              "reason": ""
+            }
+          ],
+          "selected_path": "/home/andy4917/.local/share/dev-management/codex-npm/bin/codex"
         },
         "remote_path_contamination_status": {
           "status": "PASS",
@@ -1937,10 +3162,20 @@
         }
       },
       "codex_resolution": {
-        "status": "BLOCKED",
-        "remote_command_v": "/home/andy4917/.local/bin/codex",
-        "remote_native_codex_path": "",
-        "remote_native_candidates": [],
+        "status": "PASS",
+        "remote_command_v": "/home/andy4917/.local/share/dev-management/codex-npm/bin/codex",
+        "remote_native_codex_path": "/home/andy4917/.local/share/dev-management/codex-npm/bin/codex",
+        "remote_native_candidates": [
+          {
+            "path": "/home/andy4917/.local/share/dev-management/codex-npm/bin/codex",
+            "classification": "linux_native_candidate",
+            "status": "PASS",
+            "exists": true,
+            "native_candidate": true,
+            "target": "",
+            "reason": ""
+          }
+        ],
         "local_command_v": "/home/andy4917/.local/bin/codex"
       },
       "path_contamination": {
@@ -1960,16 +3195,13 @@
       },
       "preview_wrapper_path": "/home/andy4917/Dev-Management/reports/generated-runtime-preview/codex-ssh-wrapper.sh"
     },
-    "reasons": [
-      "Linux Codex launcher shim still points to the forbidden Windows-mounted launcher.",
-      "Live command -v codex resolves to a forbidden runtime target."
-    ],
-    "status": "WARN"
+    "reasons": [],
+    "status": "PASS"
   },
   "startup_workflow_check": {
     "status": "BLOCKED",
     "summary": "Serena-first and Context7-first startup workflow is incomplete for the current diff.",
-    "generated_at": "2026-04-20T19:41:48.015712+00:00",
+    "generated_at": "2026-04-20T21:38:30.984143+00:00",
     "mode_requested": "auto",
     "mode_selected": "ssh-managed",
     "repo_root": "/home/andy4917/Dev-Management",
@@ -1979,27 +3211,127 @@
       "Use Context7 before protected dependency, API, configuration, or migration changes."
     ],
     "changed_paths": [
+      "contracts/execution_surfaces.json",
+      "contracts/instruction_guard_policy.json",
       "contracts/workspace_authority.json",
       "docs/AGENT_GUARDRAILS.md",
       "docs/GLOBAL_RUNTIME_ARCHITECTURE.md",
+      "docs/HOOKS_WSL.md",
       "docs/RUNBOOK.md",
+      "docs/SERENA_USAGE.md",
+      "docs/USER_SCORECARD.md",
+      "quarantine/artifact-hygiene/20260420-212308/reports/manual-system-remediation-20260421-041812.md",
+      "quarantine/artifact-hygiene/20260420-212308/reports/manual-system-remediation-20260421-044434.md",
+      "quarantine/artifact-hygiene/20260420-212308/reports/manual-system-remediation-20260421-050309.md",
+      "quarantine/artifact-hygiene/20260420-212308/reports/manual-system-remediation-20260421-050414.md",
+      "quarantine/artifact-hygiene/20260420-212308/reports/manual-system-remediation-20260421-054128.md",
+      "quarantine/artifact-hygiene/20260420-212308/reports/manual-system-remediation-20260421-054219.md",
+      "quarantine/artifact-hygiene/20260420-212308/reports/manual-system-remediation-20260421-054742.md",
+      "quarantine/artifact-hygiene/20260420-212308/reports/manual-system-remediation-20260421-055136.md",
+      "quarantine/artifact-hygiene/20260420-213517/reports/manual-system-remediation-20260421-062256.md",
+      "quarantine/artifact-hygiene/20260420-213517/reports/manual-system-remediation-20260421-063150.md",
+      "quarantine/runtime-wrapper-backups/20260421-063123/codex",
+      "reports/artifact-hygiene.unified-phase.final.json",
+      "reports/artifact-hygiene.unified-phase.final.md",
+      "reports/artifact-hygiene.unified-phase.json",
+      "reports/artifact-hygiene.unified-phase.md",
+      "reports/audit.unified-phase.final.json",
+      "reports/codex-app-installed-release-impact.unified-phase.json",
+      "reports/codex-app-installed-release-impact.unified-phase.md",
+      "reports/codex-runtime-repair.unified-phase.pre-apply.json",
+      "reports/config-provenance.unified-phase.final.json",
+      "reports/config-provenance.unified-phase.final.md",
+      "reports/config-provenance.unified-phase.json",
+      "reports/config-provenance.unified-phase.md",
       "reports/generated-runtime-preview/codex-ssh-wrapper.sh",
+      "reports/git-surface.pre-unified-phase.json",
+      "reports/git-surface.unified-phase.final.json",
       "reports/global-runtime.json",
-      "reports/manual-system-remediation-20260421-044138.md",
-      "reports/workspace-dependency-surface.json",
+      "reports/global-runtime.pre-unified-phase.json",
+      "reports/global-runtime.unified-phase.final.json",
+      "reports/global-runtime.unified-phase.json",
+      "reports/hook-readiness.unified-phase.final.json",
+      "reports/hook-readiness.unified-phase.final.md",
+      "reports/hook-readiness.unified-phase.json",
+      "reports/hook-readiness.unified-phase.md",
+      "reports/instruction-guard.pre-unified-phase.json",
+      "reports/instruction-guard.unified-phase.final.json",
+      "reports/linux-native-codex-cli-activation.unified-phase.json",
+      "reports/linux-native-codex-cli-activation.unified-phase.md",
+      "reports/manual-system-remediation-20260421-041812.md",
+      "reports/manual-system-remediation-20260421-044434.md",
+      "reports/manual-system-remediation-20260421-063444.md",
+      "reports/score-layer.unified-phase.final.json",
+      "reports/score-layer.unified-phase.final.md",
+      "reports/serena-startup.unified-phase.dry-run.json",
+      "reports/startup-workflow.json",
+      "reports/startup-workflow.pre-unified-phase.json",
+      "reports/startup-workflow.unified-phase.final.json",
+      "reports/toolchain-surface.unified-phase.final.json",
+      "reports/toolchain-surface.unified-phase.final.md",
+      "reports/toolchain-surface.unified-phase.json",
+      "reports/toolchain-surface.unified-phase.md",
+      "reports/toolchain-usage.session.json",
+      "reports/user-scorecard.json",
+      "reports/windows-app-ssh-remote-readiness.unified-phase.json",
+      "reports/windows-app-ssh-remote-readiness.unified-phase.md",
+      "scripts/activate_canonical_runtime.py",
       "scripts/audit_workspace.py",
+      "scripts/check_agent_instruction.py",
+      "scripts/check_artifact_hygiene.py",
+      "scripts/check_config_provenance.py",
       "scripts/check_global_runtime.py",
+      "scripts/check_hook_readiness.py",
+      "scripts/check_startup_workflow.py",
+      "scripts/check_toolchain_surface.py",
+      "scripts/check_windows_app_ssh_readiness.py",
+      "scripts/iaw_closeout.py",
       "scripts/render_codex_runtime.py",
+      "scripts/repair_codex_desktop_runtime.py",
+      "scripts/run_canonical_command.py",
+      "scripts/run_score_layer.py",
+      "scripts/verify_migration_evidence.py",
+      "tests/test_artifact_hygiene.py",
       "tests/test_audit_workspace_contract.py",
-      "tests/test_check_global_runtime.py"
+      "tests/test_check_agent_instruction.py",
+      "tests/test_check_config_provenance.py",
+      "tests/test_check_hook_readiness.py",
+      "tests/test_check_toolchain_surface.py",
+      "tests/test_iaw_closeout.py",
+      "tests/test_repair_codex_desktop_runtime.py",
+      "tests/test_score_layer.py",
+      "tests/test_windows_app_ssh_readiness.py"
     ],
     "workflow_changes": [
+      "contracts/execution_surfaces.json",
+      "contracts/instruction_guard_policy.json",
       "contracts/workspace_authority.json",
+      "scripts/activate_canonical_runtime.py",
       "scripts/audit_workspace.py",
+      "scripts/check_agent_instruction.py",
+      "scripts/check_artifact_hygiene.py",
+      "scripts/check_config_provenance.py",
       "scripts/check_global_runtime.py",
+      "scripts/check_hook_readiness.py",
+      "scripts/check_startup_workflow.py",
+      "scripts/check_toolchain_surface.py",
+      "scripts/check_windows_app_ssh_readiness.py",
+      "scripts/iaw_closeout.py",
       "scripts/render_codex_runtime.py",
+      "scripts/repair_codex_desktop_runtime.py",
+      "scripts/run_canonical_command.py",
+      "scripts/run_score_layer.py",
+      "scripts/verify_migration_evidence.py",
+      "tests/test_artifact_hygiene.py",
       "tests/test_audit_workspace_contract.py",
-      "tests/test_check_global_runtime.py"
+      "tests/test_check_agent_instruction.py",
+      "tests/test_check_config_provenance.py",
+      "tests/test_check_hook_readiness.py",
+      "tests/test_check_toolchain_surface.py",
+      "tests/test_iaw_closeout.py",
+      "tests/test_repair_codex_desktop_runtime.py",
+      "tests/test_score_layer.py",
+      "tests/test_windows_app_ssh_readiness.py"
     ],
     "blocking_reasons": [
       "Serena onboarding has not been performed for the current repo",
@@ -2062,9 +3394,9 @@
       "activation": {
         "status": "BLOCKED",
         "reason": "latest Serena MCP log shows the session started without activating a project",
-        "log_path": "/home/andy4917/.serena/logs/2026-04-21/mcp_20260421-043336_53720.txt",
+        "log_path": "/home/andy4917/.serena/logs/2026-04-21/mcp_20260421-060114_272121.txt",
         "matched_lines": [
-          "WARNING 2026-04-21 04:33:36,477 [MainThread] serena.cli:start_mcp_server:326 - No project root found from /mnt/c/Program Files/WindowsApps/OpenAI.Codex_26.417.4842.0_x64__2p2nqsd0c76g0/app/resources; not activating any project"
+          "WARNING 2026-04-21 06:01:14,606 [MainThread] serena.cli:start_mcp_server:326 - No project root found from /mnt/c/Program Files/WindowsApps/OpenAI.Codex_26.417.4842.0_x64__2p2nqsd0c76g0/app/resources; not activating any project"
         ]
       },
       "steps": [
@@ -2097,7 +3429,7 @@
           "status": "BLOCKED",
           "reason": "latest Serena MCP log shows the session started without activating a project",
           "evidence_refs": [
-            "/home/andy4917/.serena/logs/2026-04-21/mcp_20260421-043336_53720.txt"
+            "/home/andy4917/.serena/logs/2026-04-21/mcp_20260421-060114_272121.txt"
           ]
         }
       ]
@@ -2152,7 +3484,7 @@
         "status": "BLOCKED",
         "reason": "latest Serena MCP log shows the session started without activating a project",
         "evidence_refs": [
-          "/home/andy4917/.serena/logs/2026-04-21/mcp_20260421-043336_53720.txt"
+          "/home/andy4917/.serena/logs/2026-04-21/mcp_20260421-060114_272121.txt"
         ]
       },
       {
@@ -2188,8 +3520,7 @@
       ]
     }
   ],
-  "old_path_refs_outside_quarantine": [],
-  "tamper_events": [
+  "runtime_restore_seed_warning_only": [
     {
       "category": "projectless_restore_refs",
       "path": "/mnt/c/Users/anise/.codex/.codex-global-state.json",
@@ -2213,6 +3544,9 @@
       ]
     }
   ],
+  "runtime_restore_seed_blocking": [],
+  "old_path_refs_outside_quarantine": [],
+  "tamper_events": [],
   "gate_status": "BLOCKED",
   "status": "FAIL"
 }

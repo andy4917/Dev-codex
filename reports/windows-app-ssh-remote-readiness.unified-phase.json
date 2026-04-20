@@ -1,0 +1,16 @@
+{
+  "status": "PASS",
+  "host_alias": "devmgmt-wsl",
+  "windows_ssh_config": "/mnt/c/Users/anise/.ssh/config",
+  "alias_present": true,
+  "identity_file": "~/.ssh/codex_wsl_ed25519",
+  "probe": {
+    "ok": true,
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "applied": false,
+  "backups": [],
+  "warnings": []
+}

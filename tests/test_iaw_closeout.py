@@ -80,6 +80,7 @@ class IAWCloseoutTests(unittest.TestCase):
                 },
                 gate_status="PASS",
                 scorecard_ref=workspace / "reports" / "user-scorecard.json",
+                score_layer_ref=workspace / "reports" / "score-layer.unified-phase.json",
                 audit_refs={},
                 summary_ref=workspace / "SUMMARY.md",
                 preflight_reasons=[],
@@ -212,6 +213,8 @@ class IAWCloseoutTests(unittest.TestCase):
                             "closeout": str(ROOT / "scripts" / "iaw_closeout.py"),
                             "delivery_gate": str(ROOT / "scripts" / "delivery_gate.py"),
                             "summary_export": str(ROOT / "scripts" / "export_user_score_summary.py"),
+                            "score_layer": str(ROOT / "scripts" / "run_score_layer.py"),
+                            "score_layer_report": str(temp / "reports" / "score-layer.unified-phase.json"),
                         }
                     }
                 },
@@ -249,6 +252,9 @@ class IAWCloseoutTests(unittest.TestCase):
                 if label == "delivery_gate":
                     self.assertIn("--run-id", argv)
                     self.assertIn(run_id, argv)
+                if label == "score_layer":
+                    self.assertIn("run_score_layer.py", argv[1])
+                    _write_json(temp / "reports" / "score-layer.unified-phase.json", {"status": "PASS"})
                 return {"label": label, "argv": argv, "returncode": 0, "stdout": f"{label} ok\n", "stderr": ""}
 
             def fake_report_path(phase: str) -> Path:
@@ -301,6 +307,7 @@ class IAWCloseoutTests(unittest.TestCase):
             self.assertTrue(mirror_receipt.exists())
             receipt = json.loads(state_receipt.read_text(encoding="utf-8"))
             self.assertEqual(receipt["gate_status"], "PASS")
+            self.assertTrue(str(receipt["score_layer_ref"]).endswith("score-layer.unified-phase.json"))
             self.assertEqual(receipt["run_id"], run_id)
             self.assertEqual(receipt["schema_version"], 2)
             self.assertEqual(receipt["signature_policy"]["policy_id"], "scorecard-gate-receipt-v1.3")
@@ -308,13 +315,137 @@ class IAWCloseoutTests(unittest.TestCase):
             self.assertEqual(receipt["authority_layer"]["state_path"], str(state_receipt))
             self.assertEqual(receipt["authority_layer"]["mirror_path"], str(mirror_receipt))
             self.assertEqual(receipt["workspace_identity"]["workspace_root_realpath"], str(workspace.resolve()))
-            self.assertEqual(receipt["workspace_identity"]["codex_project_id"], workspace.name)
-            self.assertEqual(receipt["evidence_binding"]["changed_file_content_hash"], "content-hash")
-            self.assertEqual(receipt["release_semantics"]["scope"], "verification")
-            self.assertFalse(receipt["release_semantics"]["release_mode"])
-            self.assertFalse(receipt["release_semantics"]["release_scope_authoritative"])
-            self.assertFalse(receipt["release_semantics"]["release_ready"])
-            self.assertTrue(receipt.get("signature"))
+
+    def test_score_layer_warn_does_not_block_closeout(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            temp = Path(tmpdir)
+            codex_home = temp / "codex-home"
+            workspace = temp / "workspace"
+            workspace.mkdir(parents=True)
+            _git(workspace, "init")
+            _git(workspace, "config", "user.email", "codex@example.com")
+            _git(workspace, "config", "user.name", "Codex")
+            _write_text(workspace / "README.md", "hello\n")
+            _git(workspace, "add", "README.md")
+            _git(workspace, "commit", "-m", "init")
+            _write_text(workspace / "SUMMARY.md", "# Summary\n")
+
+            run_id = "run-warn"
+            run_root = workspace / ".agent-runs" / run_id
+            for name, payload in {
+                "WORKORDER.json": {"schema_version": 1},
+                "PLAN.json": {"plan": []},
+                "TASK_TREE.json": {"tasks": []},
+                "CONVENTION_LOCK.json": {"schema_version": 1, "locked_terms": []},
+                "EVIDENCE_MANIFEST.json": {"schema_version": 1},
+                "WAIVERS.json": {"waivers": []},
+                "REPEATED_VERIFY.json": {"rounds": []},
+                "CLAIM_LEDGER.json": {"claims": []},
+                "SUMMARY_COVERAGE.json": {"summary_claims": [], "negative_findings_present": True, "zombie_sections": []},
+            }.items():
+                _write_json(run_root / name, payload)
+            _write_text(run_root / "COMMAND_LOG.jsonl", "")
+            _write_text(run_root / "REPLAY.md", "# Replay\n")
+
+            authority_file = temp / "workspace_authority.json"
+            _write_json(
+                authority_file,
+                {
+                    "generation_targets": {
+                        "scorecard": {
+                            "accepted_profiles": ["L2"],
+                            "receipt_state_root": str(codex_home / "state" / "iaw"),
+                            "closeout": str(ROOT / "scripts" / "iaw_closeout.py"),
+                            "delivery_gate": str(ROOT / "scripts" / "delivery_gate.py"),
+                            "summary_export": str(ROOT / "scripts" / "export_user_score_summary.py"),
+                            "score_layer": str(ROOT / "scripts" / "run_score_layer.py"),
+                            "score_layer_report": str(temp / "reports" / "score-layer.unified-phase.json"),
+                        }
+                    }
+                },
+            )
+
+            review_file = temp / "user-scorecard.review.json"
+            scorecard_file = temp / "user-scorecard.json"
+            _write_json(scorecard_file, {"gate_status": "PASS", "final_decision": "PASS"})
+
+            manifest = {
+                "run_id": run_id,
+                "base_commit": _git_output(workspace, "rev-parse", "HEAD"),
+                "head_commit": _git_output(workspace, "rev-parse", "HEAD"),
+            }
+            manifest_meta = {
+                "changed_files": ["README.md"],
+                "changed_file_set_hash": "empty",
+                "changed_file_content_hash": "content-hash",
+                "policy_hashes": {"workspace_authority.json": "hash"},
+                "script_hashes": {"iaw_closeout.py": "hash"},
+                "evidence_manifest_hash": "manifest-hash",
+            }
+
+            audit_dir = temp / "audit"
+            pre_gate = audit_dir / "audit.pre-gate.json"
+            pre_export = audit_dir / "audit.pre-export.json"
+            post_export = audit_dir / "audit.post-export.json"
+            for report in (pre_gate, pre_export, post_export):
+                _write_json(report, {"status": "PASS"})
+
+            def fake_run_step(label: str, argv: list[str], cwd: Path) -> dict[str, object]:
+                if label == "score_layer":
+                    _write_json(temp / "reports" / "score-layer.unified-phase.json", {"status": "WARN"})
+                    return {"label": label, "argv": argv, "returncode": 1, "stdout": "score_layer warn\n", "stderr": ""}
+                return {"label": label, "argv": argv, "returncode": 0, "stdout": f"{label} ok\n", "stderr": ""}
+
+            def fake_report_path(phase: str) -> Path:
+                mapping = {"pre-gate": pre_gate, "pre-export": pre_export, "post-export": post_export}
+                return mapping[phase]
+
+            argv = sys.argv[:]
+            env = os.environ.copy()
+            env["CODEX_HOME"] = str(codex_home)
+            try:
+                sys.argv = [
+                    "iaw_closeout.py",
+                    "--workspace-root",
+                    str(workspace),
+                    "--run-id",
+                    run_id,
+                    "--profile",
+                    "L2",
+                    "--mode",
+                    "verify",
+                    "--review-file",
+                    str(review_file),
+                    "--scorecard-file",
+                    str(scorecard_file),
+                    "--authority-file",
+                    str(authority_file),
+                ]
+                with patch.dict(os.environ, env, clear=False), patch.object(
+                    self.module, "validate_workspace_authority_lease", return_value={"ok": True, "reasons": [], "lease": {}, "path": ""}
+                ), patch.object(self.module, "_validate_manifest", return_value=([], manifest, manifest_meta)), patch.object(
+                    self.module, "_validate_waivers", return_value=[]
+                ), patch.object(
+                    self.module, "_run_step", side_effect=fake_run_step
+                ), patch.object(
+                    self.module, "_report_path", side_effect=fake_report_path
+                ):
+                    exit_code = self.module.main()
+            finally:
+                sys.argv = argv
+
+            state_receipt = codex_home / "state" / "iaw" / "gate-receipts" / workspace.name / f"{run_id}.json"
+            receipt = json.loads(state_receipt.read_text(encoding="utf-8"))
+
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(receipt["gate_status"], "PASS")
+        self.assertEqual(receipt["workspace_identity"]["codex_project_id"], workspace.name)
+        self.assertEqual(receipt["evidence_binding"]["changed_file_content_hash"], "content-hash")
+        self.assertEqual(receipt["release_semantics"]["scope"], "verification")
+        self.assertFalse(receipt["release_semantics"]["release_mode"])
+        self.assertFalse(receipt["release_semantics"]["release_scope_authoritative"])
+        self.assertFalse(receipt["release_semantics"]["release_ready"])
+        self.assertTrue(receipt.get("signature"))
 
     def test_save_receipt_uses_atomic_write_for_state_and_mirror(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -395,6 +526,8 @@ class IAWCloseoutTests(unittest.TestCase):
                             "closeout": str(ROOT / "scripts" / "iaw_closeout.py"),
                             "delivery_gate": str(ROOT / "scripts" / "delivery_gate.py"),
                             "summary_export": str(ROOT / "scripts" / "export_user_score_summary.py"),
+                            "score_layer": str(ROOT / "scripts" / "run_score_layer.py"),
+                            "score_layer_report": str(temp / "reports" / "score-layer.unified-phase.json"),
                         }
                     }
                 },
@@ -452,6 +585,8 @@ class IAWCloseoutTests(unittest.TestCase):
                             "closeout": str(ROOT / "scripts" / "iaw_closeout.py"),
                             "delivery_gate": str(ROOT / "scripts" / "delivery_gate.py"),
                             "summary_export": str(ROOT / "scripts" / "export_user_score_summary.py"),
+                            "score_layer": str(ROOT / "scripts" / "run_score_layer.py"),
+                            "score_layer_report": str(temp / "reports" / "score-layer.unified-phase.json"),
                         }
                     }
                 },

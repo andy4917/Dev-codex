@@ -94,7 +94,7 @@ python /home/andy4917/Dev-Management/scripts/iaw_closeout.py --workspace-root /h
 python /home/andy4917/Dev-Management/scripts/record_reviewer_verdict.py --workspace-root /home/andy4917/Dev-Product/<project> --trace-id <trace_id> --role skeptic_reviewer --status APPROVED --green true --input-report <context.json>
 ```
 
-`iaw_closeout.py` is the only accepted verify or release close-out entrypoint. It canonicalizes the workspace root, verifies the authority lease and evidence manifest, runs the global prepare/gate/export/audit sequence, then issues the signed gate receipt.
+`iaw_closeout.py` is the only accepted verify or release close-out entrypoint. It canonicalizes the workspace root, verifies the authority lease and evidence manifest, runs the global `prepare -> audit(pre-gate) -> delivery_gate -> audit(pre-export) -> export -> audit(post-export) -> score-layer` sequence, then issues the signed gate receipt.
 
 The v1.3R gate receipt authority layer binds:
 

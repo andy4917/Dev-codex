@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# GENERATED - DO NOT EDIT
+set -euo pipefail
+
+target="/mnt/c/Users/anise/.codex/bin/wsl/codex"
+if [ -x "$target" ]; then
+  exec "$target" "$@"
+fi
+
+printf 'Codex WSL launcher not found at %s\n' "$target" >&2
+exit 127

@@ -2,59 +2,33 @@
 
 ## Default Stance
 
-- Treat Dev-Management as the authority repo.
-- Treat Codex App as a user surface only.
-- Treat Windows host as a client and UI surface only.
-- Treat `ssh-devmgmt-wsl` as the canonical execution runtime.
-- Treat Windows-mounted launchers as external dependencies, never as authority.
+- Treat Codex App as the primary user control surface.
+- Treat Windows host as the app host and SSH client surface.
+- Treat `devmgmt-wsl` as the canonical remote execution surface.
+- Treat Linux-native Codex CLI as the canonical agent binary.
+- Treat Dev-Management as the policy authority and runtime authority.
+- Treat generated mirrors as outputs only.
 
-## Hard Blocks
+## Standard Reminders
 
-The instruction guard must return `BLOCKED` for requests that:
-
-- make the Windows launcher the primary runtime
-- reintroduce `/mnt/c/Users/anise/.codex/bin/wsl` or `.codex/tmp/arg0` as preferred PATH targets
-- ask for manual edits to generated config or shim files
-- ask to modify code while Serena activation is still blocked
-- ask for protected changes without real Context7 evidence
-- ask to clean, revert, delete, or format unrelated dirty changes
-- ask for destructive commands
-- weaken sandbox or approval settings below the authority guard
-- force Windows Git and WSL Git to be mixed as one execution surface
-
-## Warnings
-
-The instruction guard should return `WARN` when:
-
-- the refactor scope is broad but not specific
-- the requested test plan is missing
-- app, CLI, IDE, and runtime surfaces are mixed together
-- local and remote execution surfaces might not match
-- the change is adjacent to protected files but not clearly protected
-- Windows and WSL Git drift exists but the impact is not yet proven
-
-## Bootstrap Exception
-
-- The bootstrap implementation exception is process-local only.
-- It must be enabled explicitly with `--activation-bootstrap`.
-- Older wrappers may still pass `--bootstrap-implementation-exception` as a compatibility alias, but new guidance should use `--activation-bootstrap`.
-- It must not be persisted in `contracts/instruction_guard_policy.json`.
-- It does not allow Windows launcher promotion, forbidden PATH reintroduction, generated file hand edits, destructive commands, unrelated cleanup, sandbox weakening, or Context7 bypass.
-- It is scoped to canonical runtime activation and Serena/bootstrap repair only. General code modification remains blocked while Serena startup is incomplete.
-
-## Standard Reminder Messages
-
-- runtime authority conflict: local runtime does not match the canonical SSH authority
-- Serena-first unmet: project activation, metadata, or onboarding is incomplete
-- Context7 evidence missing: protected change requires fresh `reports/context7-usage.json`
+- runtime authority conflict: Codex App is the primary user control surface, but execution authority belongs to `devmgmt-wsl` and Linux-native Codex CLI
+- Serena-first unmet: activation, onboarding, or latest activation evidence is incomplete
+- Context7 evidence missing: protected dependency, API, config, or migration change requires real evidence
+- generated mirror blocked: generated mirrors cannot be used as authority or override inputs
+- hooks trigger only: hooks may trigger checks, but audit, tests, and score layer are the final gates
 - unrelated dirty changes present: report them and leave them untouched
-- destructive command blocked: capture the needed manual step in a remediation report instead
-- sandbox or approval weakening blocked: authority guard cannot be relaxed by instruction text
 
 ## Editing Rules
 
-- Do not hand-edit generated config or shim files.
-- Treat `~/.codex/config.toml` as a generated mirror and `~/.codex/user-config.toml` as the only allowed global user override surface.
-- Do not overwrite live `~/.local/bin/codex` until canonical SSH readiness and local PATH precedence are both PASS.
-- Prefer preview outputs under `reports/generated-runtime-preview/` while readiness is incomplete.
-- If a system change is required, document it in `reports/manual-system-remediation-<timestamp>.md`.
+- Do not manually edit generated config, shim, hook, or AGENTS mirrors.
+- Do not use `/home/andy4917/.codex/config.toml` or `/mnt/c/Users/anise/.codex/config.toml` as override input.
+- Use `/home/andy4917/.codex/user-config.toml` only for allowed global user overrides.
+- Do not add hardcoded fallback paths or reintroduce `/mnt/c/Users/anise/.codex/bin/wsl/codex` as a primary runtime target.
+- Treat app memories, projectless chat state, and restore seed as hints only.
+- Do not claim hook-only enforcement.
+
+## Work Pattern
+
+- Before code work, inspect git status, instruction guard, global runtime, config provenance, and startup workflow.
+- During work, touch only in-scope files and record subagent, skill, plugin, hook, and workspace dependency usage when used.
+- After work, run hardcoding scans, stale feature scans, config provenance checks, artifact hygiene checks, `git diff --check`, and relevant tests before commit.

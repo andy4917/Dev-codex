@@ -12,6 +12,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+from check_config_provenance import evaluate_config_provenance
+from check_windows_app_ssh_readiness import evaluate_windows_app_ssh_readiness
 from render_codex_runtime import GENERATED_RUNTIME_HEADER, preview_linux_launcher_path, render_linux_launcher
 
 
@@ -64,7 +66,7 @@ def load_authority(repo_root: str | Path | None = None) -> dict[str, Any]:
 
 
 def canonical_surface(authority: dict[str, Any]) -> dict[str, Any]:
-    return authority.get("canonical_execution_surface", {})
+    return authority.get("canonical_remote_execution_surface", authority.get("canonical_execution_surface", {}))
 
 
 def run_local_shell(command: str) -> dict[str, Any]:
@@ -603,25 +605,28 @@ def build_wrapper_apply_readiness(
     remote_codex_resolution_status: dict[str, Any],
     remote_native_codex_status: dict[str, Any],
     remote_path_contamination_status: dict[str, Any],
-    local_path_precedence_status: dict[str, Any],
+    windows_app_ssh_readiness: dict[str, Any],
+    config_provenance: dict[str, Any],
     wrapper_target_safety_status: dict[str, Any],
 ) -> dict[str, Any]:
+    provenance_gate_status = str(config_provenance.get("gate_status", config_provenance.get("status", "WARN")))
     gates = {
         "canonical_execution_status": canonical_execution_status,
         "remote_repo_root_status": str(remote_repo_root_status.get("status", "WARN")),
         "remote_codex_resolution_status": str(remote_codex_resolution_status.get("status", "WARN")),
         "remote_native_codex_status": str(remote_native_codex_status.get("status", "WARN")),
         "remote_path_contamination_status": str(remote_path_contamination_status.get("status", "WARN")),
-        "local_path_precedence_status": str(local_path_precedence_status.get("status", "WARN")),
+        "windows_app_ssh_readiness": "PASS" if str(windows_app_ssh_readiness.get("status", "WARN")) == "PASS" else "WARN" if str(windows_app_ssh_readiness.get("status", "WARN")) == "WARN" else "BLOCKED",
+        "config_provenance": provenance_gate_status,
         "wrapper_target_safety_status": str(wrapper_target_safety_status.get("status", "WARN")),
     }
-    ready = all(value == "PASS" for value in gates.values())
+    ready = all(value == "PASS" for key, value in gates.items() if key != "windows_app_ssh_readiness") and gates["windows_app_ssh_readiness"] in {"PASS", "WARN"}
     return {
         "status": "PASS" if ready else "BLOCKED",
         "ready": ready,
         "gates": gates,
         "remote_native_codex_path": str(remote_native_codex_status.get("selected_path", "")),
-        "reason": "" if ready else "live wrapper apply remains gated on canonical SSH readiness, remote codex safety, native codex detection, and local PATH precedence",
+        "reason": "" if ready else "live wrapper apply remains gated on canonical SSH readiness, remote codex safety, native codex detection, config provenance, and Windows App-side SSH readiness",
     }
 
 
@@ -710,6 +715,8 @@ def evaluate_global_runtime(repo_root: str | Path | None = None, *, mode: str = 
         remote = remote_runtime_probe(authority, host_alias, repo_path)
     else:
         remote = skipped_remote_runtime_probe("canonical SSH runtime is not the selected execution authority for this workspace")
+    config_provenance = evaluate_config_provenance(repo_path)
+    windows_app_ssh_readiness = evaluate_windows_app_ssh_readiness(repo_path)
     wrapper_target_safety_status = render_wrapper_target_safety(authority)
     preview_path = write_preview_wrapper(authority)
 
@@ -745,7 +752,8 @@ def evaluate_global_runtime(repo_root: str | Path | None = None, *, mode: str = 
         remote_codex_resolution_status=remote.get("remote_codex_resolution_status", {}),
         remote_native_codex_status=remote.get("remote_native_codex_status", {}),
         remote_path_contamination_status=remote.get("remote_path_contamination_status", {}),
-        local_path_precedence_status=local.get("local_path_precedence_status", {}),
+        windows_app_ssh_readiness=windows_app_ssh_readiness,
+        config_provenance=config_provenance,
         wrapper_target_safety_status=wrapper_target_safety_status,
     )
 
@@ -773,6 +781,8 @@ def evaluate_global_runtime(repo_root: str | Path | None = None, *, mode: str = 
         "client_surface_status": client_surface_status,
         "local_shell_status": local_shell_status,
         "ssh_runtime_status": ssh_runtime_status,
+        "windows_app_ssh_readiness": windows_app_ssh_readiness,
+        "config_provenance": config_provenance,
         "codex_resolution_status": codex_resolution_status,
         "path_contamination_status": path_contamination_status["status"],
         "wrapper_apply_readiness": wrapper_apply_readiness,

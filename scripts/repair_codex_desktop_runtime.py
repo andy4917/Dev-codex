@@ -5,6 +5,7 @@ import argparse
 import json
 import shutil
 import sqlite3
+import subprocess
 import sys
 import tomllib
 from datetime import datetime, timezone
@@ -130,10 +131,11 @@ def allowed_hosts(authority: dict[str, Any], policy: dict[str, Any]) -> tuple[st
 
 
 def user_override_config_paths(authority: dict[str, Any]) -> list[Path]:
-    # The Windows mirror is generated output, so only the Linux config can feed overrides back in.
+    # Generated mirrors are outputs only. The dedicated user override path is
+    # the only allowed optional override source for runtime-derived defaults.
     runtime = authority.get("generation_targets", {}).get("global_runtime", {})
     paths: list[Path] = []
-    raw_path = runtime.get("linux", {}).get("config")
+    raw_path = runtime.get("linux", {}).get("user_override_config")
     if raw_path:
         path = Path(raw_path)
         if path.exists():
@@ -605,13 +607,14 @@ def repair_linux_launcher_shim(authority: dict[str, Any], *, apply: bool = True)
         "remote_codex_resolution_status": gate_report.get("remote_codex_resolution_status", {}).get("status", "BLOCKED"),
         "remote_native_codex_status": gate_report.get("remote_native_codex_status", {}).get("status", "BLOCKED"),
         "remote_path_contamination_status": gate_report.get("remote_path_contamination_status", {}).get("status", "BLOCKED"),
-        "local_path_precedence_status": gate_report.get("local_path_precedence_status", {}).get("status", "BLOCKED"),
+        "windows_app_ssh_readiness": gate_report.get("windows_app_ssh_readiness", {}).get("status", "BLOCKED"),
+        "config_provenance": gate_report.get("config_provenance", {}).get("gate_status", gate_report.get("config_provenance", {}).get("status", "BLOCKED")),
         "wrapper_target_safety_status": gate_report.get("wrapper_target_safety_status", {}).get("status", "BLOCKED"),
     }
-    live_write_allowed = all(value == "PASS" for value in gate_statuses.values())
+    live_write_allowed = all(value == "PASS" for name, value in gate_statuses.items() if name != "windows_app_ssh_readiness") and gate_statuses["windows_app_ssh_readiness"] in {"PASS", "WARN"}
     live_write_blockers = [name for name, value in gate_statuses.items() if value != "PASS"]
     if live_write_blockers:
-        reasons.append("Live launcher overwrite remains blocked until canonical SSH and local PATH safety gates pass.")
+        reasons.append("Live launcher overwrite remains blocked until canonical SSH, Windows App SSH readiness, config provenance, and remote codex safety gates pass.")
 
     if live_write_allowed and apply and needs_repair:
         sync_generated_executable_text(shim_path, expected_text)

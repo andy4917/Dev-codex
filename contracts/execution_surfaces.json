@@ -1,12 +1,15 @@
 {
   "version": 2,
   "canonical_execution_surface_id": "ssh-devmgmt-wsl",
+  "canonical_remote_execution_surface_id": "ssh-devmgmt-wsl",
   "surfaces": [
     {
       "id": "windows-native",
       "roles": [
-        "user_surface",
-        "client_surface"
+        "primary_user_control_surface",
+        "remote_session_control_surface",
+        "app_host",
+        "ssh_client_surface"
       ],
       "authority": false
     },
@@ -21,7 +24,7 @@
     {
       "id": "ssh-devmgmt-wsl",
       "roles": [
-        "canonical_execution_surface"
+        "canonical_remote_execution_surface"
       ],
       "authority": true
     }
@@ -57,6 +60,7 @@
   },
   "client_surface_policy": {
     "codex_app_session_path_is_client_surface_only": true,
+    "codex_app_session_is_primary_user_control_surface": true,
     "client_surface_contamination_status_when_canonical_passes": "WARN",
     "local_shell_execution_status_when_forbidden_runtime_is_selected": "BLOCKED"
   },
@@ -71,10 +75,17 @@
     "front_loaded_arg0_status": "BLOCKED"
   },
   "codex_resolution_precedence_rules": {
-    "preferred_primary_resolution": "linux-native codex in canonical SSH runtime",
+    "preferred_primary_resolution": "linux-native Codex CLI on canonical SSH runtime login-shell PATH",
     "allowed_fallback_resolution": "repo-generated local SSH wrapper",
     "forbidden_primary_resolution": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
     "status_on_forbidden_resolution": "BLOCKED"
+  },
+  "generated_mirror_rules": {
+    "linux_mirror": "/home/andy4917/.codex/config.toml",
+    "windows_mirror": "/mnt/c/Users/anise/.codex/config.toml",
+    "optional_user_override_source": "/home/andy4917/.codex/user-config.toml",
+    "mirrors_are_outputs_only": true,
+    "generated_mirror_self_feed_status": "BLOCKED"
   },
   "git_surface_drift_rules": {
     "mixed_windows_and_wsl_execution_status": "BLOCKED",
@@ -84,9 +95,27 @@
     "stale_safe_directory_status": "WARN"
   },
   "app_surface_rules": {
-    "codex_app_role": "user_surface_only",
+    "codex_app_role": "primary_user_control_surface",
+    "codex_app_remote_session_role": "remote_session_control_surface",
     "windows_codex_state_role": "observed_runtime_evidence_only",
     "windows_codex_launcher_role": "external_dependency_forbidden_primary_runtime"
+  },
+  "release_driven_audit_surfaces": {
+    "codex_app_installed_release": true,
+    "codex_app_remote_connections": true,
+    "codex_app_multiple_terminals": true,
+    "codex_app_plugins": true,
+    "codex_app_skills": true,
+    "codex_app_mcp_plugin_surface": true,
+    "codex_app_automations": true,
+    "codex_app_worktrees": true,
+    "codex_app_projectless_chats": true,
+    "codex_app_memories": true,
+    "codex_app_local_environments": true,
+    "codex_app_integrated_terminal": true,
+    "codex_app_settings_sync": true,
+    "codex_app_computer_use": true,
+    "codex_app_in_app_browser": true
   },
   "evidence_sources": [
     "package.json",

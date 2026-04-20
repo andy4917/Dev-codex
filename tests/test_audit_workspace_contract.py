@@ -527,10 +527,17 @@ trust_level = "trusted"
         self.assertIn("binding instruction-level guidance", rendered_agents)
         self.assertIn("Canonical global close-out command", rendered_agents)
         self.assertIn("iaw_closeout.py --workspace-root <repo> --run-id <run_id> --profile <L1|L2|L3|L4> --mode verify", rendered_agents)
-        self.assertIn("Codex App and the Windows host are user or client surfaces only", rendered_agents)
-        self.assertIn("Canonical execution runs only through `ssh-devmgmt-wsl` via host alias `devmgmt-wsl`", rendered_agents)
+        self.assertIn("Required scorecard layer command", rendered_agents)
+        self.assertIn("run_score_layer.py --json", rendered_agents)
+        self.assertIn("Codex App is the primary user control surface and remote session control surface", rendered_agents)
+        self.assertIn("Generated config mirrors are outputs only", rendered_agents)
+        self.assertIn("Optional user override source is /home/andy4917/.codex/user-config.toml only", rendered_agents)
+        self.assertIn("Linux-native Codex CLI on the canonical remote login-shell PATH is the canonical agent binary", rendered_agents)
         self.assertIn("PATH contamination is a client-surface warning only", rendered_agents)
         self.assertIn("Windows-mounted launchers such as `/mnt/c/Users/anise/.codex/bin/wsl/codex` are external dependencies", rendered_agents)
+        self.assertIn("Before modifying anything", rendered_agents)
+        self.assertIn("After work", rendered_agents)
+        self.assertIn("telepathy, workspace_dependencies, danger-full-access", rendered_agents)
         self.assertIn("activate the current project or worktree with Serena", rendered_agents)
         self.assertIn("Use Context7 before changing external libraries", rendered_agents)
         self.assertIn("/home/andy4917/.codex/state/iaw/gate-receipts", rendered_agents)
@@ -548,6 +555,7 @@ trust_level = "trusted"
         self.assertIn("Convert-ToLinuxPath", wrapper)
         self.assertIn("wsl.exe python3 $HookScript", wrapper)
         self.assertIn('host_alias="devmgmt-wsl"', launcher_script)
+        self.assertIn("canonical agent binary: Linux-native Codex CLI", launcher_script)
         self.assertIn("forbidden primary runtime: /mnt/c/Users/anise/.codex/bin/wsl/codex", launcher_script)
 
     def test_sync_generated_text_removes_stale_hooks_file(self) -> None:
@@ -717,6 +725,21 @@ remote_connections = true
             runtime = self.module.detect_runtime_restore_seed_violations(state_path, authority)
 
         self.assertEqual(runtime, [])
+
+    def test_partition_runtime_restore_seed_violations_marks_projectless_and_hints_as_warning_only(self) -> None:
+        violations = [
+            {"category": "projectless_restore_refs", "reason": "stale thread refs"},
+            {"category": "thread_workspace_root_hints", "reason": "stale hints"},
+            {"category": "active_workspace_roots", "reason": "stale active roots"},
+        ]
+
+        blocking, warning_only = self.module.partition_runtime_restore_seed_violations(violations)
+
+        self.assertEqual([item["category"] for item in blocking], ["active_workspace_roots"])
+        self.assertEqual(
+            [item["category"] for item in warning_only],
+            ["projectless_restore_refs", "thread_workspace_root_hints"],
+        )
 
     def test_detect_score_policy_tamper_requires_structured_policy_update_workorder(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

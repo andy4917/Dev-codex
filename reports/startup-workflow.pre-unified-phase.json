@@ -1,0 +1,181 @@
+{
+  "status": "PASS",
+  "summary": "Serena-first and Context7-first startup workflow is ready for the current diff.",
+  "generated_at": "2026-04-20T20:04:23.790343+00:00",
+  "mode_requested": "ssh-managed",
+  "mode_selected": "ssh-managed",
+  "repo_root": "/home/andy4917/Dev-Management",
+  "expected_sequence": [
+    "Activate the current project or worktree with Serena before code work.",
+    "Verify Serena onboarding and project memories before major code changes.",
+    "Use Context7 before protected dependency, API, configuration, or migration changes."
+  ],
+  "changed_paths": [
+    "reports/git-surface.pre-unified-phase.json",
+    "reports/global-runtime.pre-unified-phase.json",
+    "reports/instruction-guard.pre-unified-phase.json",
+    "reports/manual-system-remediation-20260421-050309.md",
+    "reports/manual-system-remediation-20260421-050414.md",
+    "reports/startup-workflow.pre-unified-phase.json"
+  ],
+  "workflow_changes": [],
+  "blocking_reasons": [],
+  "warnings": [
+    "Windows Serena config parity is not confirmed."
+  ],
+  "runtime_gate": {
+    "canonical_ssh_runtime_status": {
+      "status": "PASS",
+      "reason": ""
+    },
+    "fail_closed": false
+  },
+  "serena": {
+    "status": "PASS",
+    "summary": "Serena startup sequence is ready for the current diff.",
+    "required": false,
+    "warnings": [
+      "Windows Serena config parity is not confirmed."
+    ],
+    "blockers": [],
+    "required_actions": [
+      "uv tool install -p 3.13 serena-agent@latest --prerelease=allow",
+      "serena init",
+      "cd /home/andy4917/Dev-Management && serena project create --index"
+    ],
+    "config": {
+      "global": {
+        "path": "/home/andy4917/.codex/config.toml",
+        "present": true,
+        "matches_canonical": true
+      },
+      "windows_mirror": {
+        "path": "/mnt/c/Users/anise/.codex/config.toml",
+        "present": true,
+        "matches_canonical": false
+      }
+    },
+    "runtime": {
+      "linux": {
+        "serena_home": "/home/andy4917/.serena",
+        "binary_found": true,
+        "home_initialized": true,
+        "project_dir": "/home/andy4917/Dev-Management/.serena",
+        "project_configured": true,
+        "onboarding_performed": false
+      }
+    },
+    "repair_advice": {
+      "can_auto_repair": false,
+      "reason": "Deterministic Serena onboarding repair is not confirmed; use serena project index only for metadata/index and keep onboarding manual.",
+      "deterministic_cli": {
+        "available": true,
+        "binary": "/home/andy4917/.local/bin/serena",
+        "project_index_available": true,
+        "reason": ""
+      }
+    },
+    "activation": {
+      "status": "BLOCKED",
+      "reason": "latest Serena MCP log shows the session started without activating a project",
+      "log_path": "/home/andy4917/.serena/logs/2026-04-21/mcp_20260421-050344_129848.txt",
+      "matched_lines": [
+        "WARNING 2026-04-21 05:03:44,600 [MainThread] serena.cli:start_mcp_server:326 - No project root found from /mnt/c/Program Files/WindowsApps/OpenAI.Codex_26.417.4842.0_x64__2p2nqsd0c76g0/app/resources; not activating any project"
+      ]
+    },
+    "steps": [
+      {
+        "id": "serena_global_config_ready",
+        "status": "PASS",
+        "reason": "",
+        "evidence_refs": [
+          "/home/andy4917/.codex/config.toml"
+        ]
+      },
+      {
+        "id": "serena_project_metadata_present",
+        "status": "WAIVED",
+        "reason": "",
+        "evidence_refs": [
+          "/home/andy4917/Dev-Management/.serena/project.yml"
+        ]
+      },
+      {
+        "id": "serena_onboarding_completed",
+        "status": "WAIVED",
+        "reason": "",
+        "evidence_refs": [
+          "/home/andy4917/Dev-Management/.serena/memories"
+        ]
+      },
+      {
+        "id": "serena_project_activated",
+        "status": "WAIVED",
+        "reason": "",
+        "evidence_refs": [
+          "/home/andy4917/.serena/logs/2026-04-21/mcp_20260421-050344_129848.txt"
+        ]
+      }
+    ]
+  },
+  "context7": {
+    "status": "PASS",
+    "summary": "Context7 evidence is ready for the current diff.",
+    "required": false,
+    "report_path": "/home/andy4917/Dev-Management/reports/context7-usage.json",
+    "detected_changes": [],
+    "entries": [],
+    "warnings": [],
+    "blockers": [],
+    "config": {
+      "global_config_path": "/home/andy4917/.codex/config.toml",
+      "global_matches_canonical": true
+    },
+    "step": {
+      "id": "context7_consulted_before_protected_changes",
+      "status": "WAIVED",
+      "reason": "current diff does not touch Context7-protected files",
+      "evidence_refs": []
+    }
+  },
+  "sequence": [
+    {
+      "id": "serena_global_config_ready",
+      "status": "PASS",
+      "reason": "",
+      "evidence_refs": [
+        "/home/andy4917/.codex/config.toml"
+      ]
+    },
+    {
+      "id": "serena_project_metadata_present",
+      "status": "WAIVED",
+      "reason": "",
+      "evidence_refs": [
+        "/home/andy4917/Dev-Management/.serena/project.yml"
+      ]
+    },
+    {
+      "id": "serena_onboarding_completed",
+      "status": "WAIVED",
+      "reason": "",
+      "evidence_refs": [
+        "/home/andy4917/Dev-Management/.serena/memories"
+      ]
+    },
+    {
+      "id": "serena_project_activated",
+      "status": "WAIVED",
+      "reason": "",
+      "evidence_refs": [
+        "/home/andy4917/.serena/logs/2026-04-21/mcp_20260421-050344_129848.txt"
+      ]
+    },
+    {
+      "id": "context7_consulted_before_protected_changes",
+      "status": "WAIVED",
+      "reason": "current diff does not touch Context7-protected files",
+      "evidence_refs": []
+    }
+  ]
+}

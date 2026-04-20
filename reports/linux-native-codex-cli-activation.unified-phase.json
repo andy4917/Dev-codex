@@ -1,0 +1,39 @@
+{
+  "status": "PASS",
+  "generated_at": "2026-04-20T21:35:42.524200+00:00",
+  "canonical_ssh_runtime_status": "PASS",
+  "windows_app_ssh_readiness": "PASS",
+  "remote_codex_resolution_status": "PASS",
+  "remote_native_codex_status": "PASS",
+  "remote_native_codex_path": "/home/andy4917/.local/share/dev-management/codex-npm/bin/codex",
+  "remote_codex_command_v": "/home/andy4917/.local/share/dev-management/codex-npm/bin/codex",
+  "remote_codex_version": "codex-cli 0.122.0",
+  "remote_path_contamination_status": "PASS",
+  "client_surface_status": "WARN",
+  "local_shell_status": "PASS",
+  "local_wrapper_path": "/home/andy4917/.local/bin/codex",
+  "live_wrapper_overwrite_completed": true,
+  "live_wrapper_target_mode": "ssh-remote-linux-native-codex",
+  "live_wrapper_backup_path": "/home/andy4917/Dev-Management/quarantine/runtime-wrapper-backups/20260421-063123/codex",
+  "preview_wrapper_path": "/home/andy4917/Dev-Management/reports/generated-runtime-preview/codex-ssh-wrapper.sh",
+  "wrapper_apply_readiness": {
+    "status": "PASS",
+    "ready": true,
+    "gates": {
+      "canonical_execution_status": "PASS",
+      "remote_repo_root_status": "PASS",
+      "remote_codex_resolution_status": "PASS",
+      "remote_native_codex_status": "PASS",
+      "remote_path_contamination_status": "PASS",
+      "windows_app_ssh_readiness": "PASS",
+      "config_provenance": "PASS",
+      "wrapper_target_safety_status": "PASS"
+    },
+    "remote_native_codex_path": "/home/andy4917/.local/share/dev-management/codex-npm/bin/codex",
+    "reason": ""
+  },
+  "reasons": [],
+  "warnings": [
+    "Client-surface PATH contamination remains a warning while canonical remote execution is PASS."
+  ]
+}

@@ -9,6 +9,7 @@ import tempfile
 import unittest
 from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
+from unittest.mock import patch
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -173,8 +174,9 @@ class RepairCodexDesktopRuntimeTests(unittest.TestCase):
                 "remote_codex_resolution_status": {"status": "PASS"},
                 "remote_native_codex_status": {"status": "PASS", "selected_path": "/usr/local/bin/codex"},
                 "remote_path_contamination_status": {"status": "PASS"},
-                "local_path_precedence_status": {"status": "PASS"},
                 "wrapper_target_safety_status": {"status": "PASS"},
+                "windows_app_ssh_readiness": {"status": "PASS"},
+                "config_provenance": {"status": "PASS"},
                 "ssh_canonical_runtime": {
                     "canonical_ssh_runtime_status": {"status": "PASS"},
                     "remote_repo_root_status": {"status": "PASS"},
@@ -260,7 +262,6 @@ class RepairCodexDesktopRuntimeTests(unittest.TestCase):
                 },
             ],
         )
-
         db_path = windows_codex / "state_5.sqlite"
         _create_threads_db(db_path)
         conn = sqlite3.connect(db_path)
@@ -275,6 +276,32 @@ class RepairCodexDesktopRuntimeTests(unittest.TestCase):
             conn.commit()
         finally:
             conn.close()
+
+    def test_user_override_config_paths_uses_dedicated_user_override_file(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp = Path(tmpdir)
+            fixture = self._configure_runtime_fixture(tmp)
+            authority = self.module.load_json(self.module.AUTHORITY_PATH)
+            user_override = fixture["linux_codex"] / "user-config.toml"
+            user_override.write_text('model_reasoning_effort = "medium"\n', encoding="utf-8")
+            authority["generation_targets"]["global_runtime"]["linux"]["user_override_config"] = str(user_override)
+
+            paths = self.module.user_override_config_paths(authority)
+
+            self.assertEqual(paths, [user_override.resolve()])
+            self.assertNotIn((fixture["linux_codex"] / "config.toml").resolve(), paths)
+
+    def test_git_diff_check_status_reads_subprocess_result(self) -> None:
+        class Result:
+            returncode = 0
+            stdout = ""
+            stderr = ""
+
+        with patch.object(self.module.subprocess, "run", return_value=Result()) as run:
+            report = self.module.git_diff_check_status()
+
+        self.assertEqual(report["status"], "PASS")
+        self.assertEqual(run.call_args.args[0][:3], ["git", "-C", str(self.module.MANAGEMENT_ROOT)])
 
     def _run_main(self, argv: list[str]) -> tuple[int, str]:
         stdout = io.StringIO()

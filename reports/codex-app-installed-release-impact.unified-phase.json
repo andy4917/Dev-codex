@@ -1,0 +1,144 @@
+{
+  "status": "PASS",
+  "installed_app_name": "OpenAI.Codex",
+  "installed_app_version": "26.417.4842.0",
+  "installed_package_full_name": "OpenAI.Codex_26.417.4842.0_x64__2p2nqsd0c76g0",
+  "installed_location": "C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.417.4842.0_x64__2p2nqsd0c76g0",
+  "installed_modified_time": "2026-04-21 ���� 3:57:27",
+  "install_or_update_date": "2026-04-21",
+  "installed_build_corresponds_to_2026_04_21": true,
+  "public_documented_release_date": "unversioned official reference pages",
+  "public_documented_release_version": "not pinned in current public docs pages",
+  "installed_app_release_date": "2026-04-21",
+  "installed_app_release_version": "26.417.4842.0",
+  "installed_app_release_wins": true,
+  "installed_evidence": {
+    "get_appx_package_codex": {
+      "ok": true,
+      "exit_code": 0,
+      "stdout": "Name            : OpenAI.Codex\nVersion         : 26.417.4842.0\nPackageFullName : OpenAI.Codex_26.417.4842.0_x64__2p2nqsd0c76g0\nInstallLocation : C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.417.4842.0_x64__2p2nqsd0c76g0",
+      "stderr": ""
+    },
+    "get_appx_package_openai": {
+      "ok": true,
+      "exit_code": 0,
+      "stdout": "Name            : OpenAI.Codex\nVersion         : 26.417.4842.0\nPackageFullName : OpenAI.Codex_26.417.4842.0_x64__2p2nqsd0c76g0\nInstallLocation : C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.417.4842.0_x64__2p2nqsd0c76g0",
+      "stderr": ""
+    },
+    "winget_list": {
+      "ok": false,
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "winget : 'winget' �� cmdlet, �Լ�, ��ũ��Ʈ ���� �Ǵ� ������ �� �ִ� ���α׷� �̸����� �νĵ��� �ʽ��ϴ�. �̸��� ��\nȮ���� Ȯ���ϰ� ��ΰ� ���Ե� ��� ��ΰ� �ùٸ��� ������ ���� �ٽ� �õ��Ͻʽÿ�.\n��ġ ��:1 ����:1\n+ winget list --name Codex --source msstore\n+ ~~~~~~\n    + CategoryInfo          : ObjectNotFound: (winget:String) [], CommandNotFoundException\n    + FullyQualifiedErrorId : CommandNotFoundException"
+    },
+    "uninstall_registry_query": {
+      "ok": true,
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    "install_location_item": {
+      "ok": true,
+      "exit_code": 0,
+      "stdout": "FullName      : C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.417.4842.0_x64__2p2nqsd0c76g0\nLastWriteTime : 2026-04-21 ���� 3:57:27",
+      "stderr": ""
+    }
+  },
+  "official_reference_urls": [
+    "https://developers.openai.com/codex/remote-connections#codex-app",
+    "https://developers.openai.com/codex/app/windows#windows-subsystem-for-linux-wsl",
+    "https://developers.openai.com/codex/config-reference#configtoml",
+    "https://developers.openai.com/codex/app#plugins",
+    "https://developers.openai.com/codex/quickstart#setup",
+    "https://developers.openai.com/codex/agent-approvals-security#os-level-sandbox"
+  ],
+  "feature_surface_analysis": [
+    {
+      "feature": "remote connections",
+      "installed_4_21_evidence": "Installed Windows app build on 2026-04-21 and generated config keeps remote_connections enabled.",
+      "official_reference_summary": "OpenAI remote connections docs require remote_connections=true and require codex on the remote login-shell PATH.",
+      "how_it_affects_dev_management": "Codex App is the main UI for opening devmgmt-wsl remote projects while Dev-Management remains authority.",
+      "guard_impact": "Windows-side SSH alias and remote codex PATH must be verified.",
+      "audit_impact": "Remote readiness and remote codex PATH are audit sections.",
+      "repair_impact": "User-level Windows SSH config repair is allowed; system SSH and portproxy remain manual.",
+      "test_impact": "Windows app-side SSH readiness and remote codex classification tests are required.",
+      "status": "PASS"
+    },
+    {
+      "feature": "Windows WSL agent selection",
+      "installed_4_21_evidence": "Current app model supports Windows UI with Linux execution.",
+      "official_reference_summary": "OpenAI Windows docs describe Windows-native and WSL agents as separate execution choices.",
+      "how_it_affects_dev_management": "Windows host stays app_host/ssh_client_surface and devmgmt-wsl stays canonical_remote_execution_surface.",
+      "guard_impact": "App cannot redefine execution or policy authority.",
+      "audit_impact": "Surface-role drift is audited.",
+      "repair_impact": "Docs/contracts/AGENTS encode the split; no binary modification.",
+      "test_impact": "Codex App not execution authority tests remain required.",
+      "status": "PASS"
+    },
+    {
+      "feature": "integrated terminal and multiple terminals",
+      "installed_4_21_evidence": "Terminal surface exists separately from the selected agent surface.",
+      "official_reference_summary": "OpenAI Windows docs note the integrated terminal is independent from the agent configuration.",
+      "how_it_affects_dev_management": "Terminal-specific PATH drift becomes evidence, not default authority.",
+      "guard_impact": "Selected execution terminal with contaminated PATH is blocked only when used as execution authority.",
+      "audit_impact": "Terminal mismatch and PATH contamination are warn-or-block evidence.",
+      "repair_impact": "Report-only unless authority-managed helpers are in scope.",
+      "test_impact": "PATH mismatch tests remain required.",
+      "status": "WARN"
+    },
+    {
+      "feature": "plugins / skills / plugin-provided MCP",
+      "installed_4_21_evidence": "Current session exposes the GitHub plugin, MCP servers, skills, and subagents.",
+      "official_reference_summary": "OpenAI plugin docs describe plugins as bundles of skills, apps, and MCP servers that do not bypass approvals.",
+      "how_it_affects_dev_management": "Plugins and MCP are toolchain surfaces with provenance, not authority sources.",
+      "guard_impact": "Plugin MCP drift affecting Serena or Context7 must be audited before code modification.",
+      "audit_impact": "Toolchain surface report records plugin, MCP, skill, and subagent provenance.",
+      "repair_impact": "Report-only unless authority-managed config is in scope.",
+      "test_impact": "plugin MCP and provenance tests remain required.",
+      "status": "PASS"
+    },
+    {
+      "feature": "projectless chats / memories / chronicle",
+      "installed_4_21_evidence": "Chronicle is enabled; app memory and projectless chat state exist as runtime evidence.",
+      "official_reference_summary": "OpenAI docs treat memories and related app state as context surfaces.",
+      "how_it_affects_dev_management": "App memory is a hint only and projectless code modification without repo root stays blocked.",
+      "guard_impact": "Chronicle allowed; telepathy forbidden; app memory cannot authorize code changes.",
+      "audit_impact": "Stale inactive app state is WARN evidence only.",
+      "repair_impact": "No automatic repair beyond drift reporting.",
+      "test_impact": "projectless-chat and memory-not-authority tests remain required.",
+      "status": "WARN"
+    },
+    {
+      "feature": "automations / worktrees / local environments / browser / computer use / settings sync / app server",
+      "installed_4_21_evidence": "These app surfaces exist and can influence local runtime state or review flow.",
+      "official_reference_summary": "OpenAI app feature pages list automations, worktrees, local environments, browser, and related UI surfaces.",
+      "how_it_affects_dev_management": "They are audit surfaces but cannot replace authority or canonical runtime.",
+      "guard_impact": "App update or settings sync cannot reintroduce Windows launcher as primary runtime.",
+      "audit_impact": "Surface presence is recorded in release-impact and toolchain reports.",
+      "repair_impact": "Mostly report-only; authority-managed generated surfaces may be rerendered.",
+      "test_impact": "release-driven surface coverage tests remain required.",
+      "status": "WARN"
+    }
+  ],
+  "operational_conclusion": {
+    "codex_app_role": [
+      "primary_user_control_surface",
+      "remote_session_control_surface"
+    ],
+    "windows_host_role": [
+      "app_host",
+      "ssh_client_surface"
+    ],
+    "devmgmt_wsl_role": [
+      "canonical_remote_execution_surface"
+    ],
+    "linux_native_codex_cli_role": [
+      "canonical_agent_binary"
+    ],
+    "dev_management_role": [
+      "policy_authority",
+      "runtime_authority"
+    ],
+    "blocked_relation": "Codex App on Windows -> /mnt/c/Users/anise/.codex/bin/wsl/codex -> primary execution runtime"
+  }
+}

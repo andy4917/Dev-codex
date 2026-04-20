@@ -57,7 +57,7 @@ class CheckAgentInstructionTests(unittest.TestCase):
         policy = json.loads(POLICY_PATH.read_text(encoding="utf-8"))
         self.assertFalse(policy["bootstrap_exception"]["persisted"])
 
-    def test_codex_app_is_user_surface_only(self) -> None:
+    def test_codex_app_is_not_execution_or_policy_authority(self) -> None:
         with patch.object(self.module, "evaluate_global_runtime", return_value=self._runtime()), patch.object(
             self.module, "evaluate_startup_workflow", return_value=self._startup()
         ):

@@ -166,10 +166,20 @@ def evaluate_instruction(
     activation_task = likely_activation_task(normalized)
     code_change = likely_code_change(normalized)
     local_execution_request = likely_local_execution_request(normalized)
+    repo_root_present = (root / ".git").exists()
 
     if "codex app" in normalized and any(token in normalized for token in ["runtime", "authority", "primary"]):
-        reasons.append("Codex App is a user surface only and cannot become the execution authority.")
+        reasons.append("Codex App is the primary user control surface, but execution authority belongs to devmgmt-wsl and Linux-native Codex CLI.")
         reminders.append(policy["required_reminders"]["runtime_authority_conflict"])
+    if code_change and not repo_root_present and any(token in normalized for token in ["projectless", "memory", "chat", "app state"]):
+        reasons.append("Projectless chat or app state cannot authorize code modification without a repo root.")
+    if any(token in normalized for token in ["memory authorizes", "app memory authorizes", "restore state authorizes"]):
+        reasons.append("Codex App memory or restore state can hint but cannot authorize changes.")
+    if "hooks are enough" in normalized or "hook-only" in normalized:
+        reasons.append("Hooks may trigger checks, but hooks alone cannot be the final enforcement boundary.")
+        reminders.append(policy["required_reminders"]["hooks_trigger_only"])
+    if "plugin" in normalized and "mcp" in normalized and "audit" not in normalized and code_change:
+        warnings.append("Plugin-provided MCP or config drift must be audited before code modification.")
     if "/mnt/c/users/anise/.codex/bin/wsl/codex" in normalized or ("windows launcher" in normalized and "primary" in normalized):
         reasons.append("Windows-side Codex launcher cannot become the primary runtime.")
         reminders.append(policy["required_reminders"]["runtime_authority_conflict"])

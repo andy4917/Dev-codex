@@ -7,11 +7,13 @@
   },
   "surface_roles": {
     "codex_app": [
-      "user_surface"
+      "primary_user_control_surface",
+      "remote_session_control_surface"
     ],
     "windows_host": [
-      "user_surface",
-      "client_surface"
+      "app_host",
+      "ssh_client_surface",
+      "user_surface"
     ],
     "windows_codex_state": [
       "live_runtime_surface",
@@ -25,11 +27,15 @@
       "local_execution_surface"
     ],
     "ssh_devmgmt_wsl": [
-      "canonical_execution_surface"
+      "canonical_remote_execution_surface"
+    ],
+    "linux_native_codex_cli": [
+      "canonical_agent_binary"
     ],
     "dev_management": [
-      "source_of_truth",
-      "repo_owned_authority"
+      "policy_authority",
+      "runtime_authority",
+      "source_of_truth"
     ],
     "dev_workflow": [
       "workflow_runtime_support"
@@ -80,7 +86,18 @@
     "host_alias": "devmgmt-wsl",
     "repo_root": "/home/andy4917/Dev-Management",
     "expected_os": "linux",
-    "expected_primary_resolution": "linux-native codex in canonical SSH runtime",
+    "expected_primary_resolution": "linux-native codex CLI on the canonical SSH runtime login-shell PATH",
+    "allowed_primary_resolution_fallback": "repo-generated local SSH wrapper",
+    "forbidden_primary_resolution": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
+    "client_surface_contamination_status_when_canonical_passes": "WARN",
+    "local_shell_requested_execution_status_when_forbidden": "BLOCKED"
+  },
+  "canonical_remote_execution_surface": {
+    "id": "ssh-devmgmt-wsl",
+    "host_alias": "devmgmt-wsl",
+    "repo_root": "/home/andy4917/Dev-Management",
+    "expected_os": "linux",
+    "expected_primary_resolution": "linux-native codex CLI on the canonical SSH runtime login-shell PATH",
     "allowed_primary_resolution_fallback": "repo-generated local SSH wrapper",
     "forbidden_primary_resolution": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
     "client_surface_contamination_status_when_canonical_passes": "WARN",
@@ -229,7 +246,7 @@
       {
         "id": "L2",
         "name": "generated_mirror",
-        "role": "Generated Linux and Windows .codex mirrors rendered from authority plus user overrides.",
+        "role": "Generated Linux and Windows .codex mirrors rendered from authority plus optional user overrides. Generated mirrors are outputs only and must never be treated as render inputs, user override inputs, or authority sources.",
         "mutability": "generated_only"
       },
       {
@@ -247,6 +264,9 @@
     ],
     "user_override_policy": {
       "precedence": "partial_user_override",
+      "optional_user_override_sources": [
+        "/home/andy4917/.codex/user-config.toml"
+      ],
       "allowed_fields": [
         "model",
         "model_reasoning_effort",
@@ -261,6 +281,10 @@
         "workspace_preference",
         "memories",
         "trusted_projects_within_canonical_roots"
+      ],
+      "generated_mirror_paths_forbidden_as_override_sources": [
+        "/home/andy4917/.codex/config.toml",
+        "/mnt/c/Users/anise/.codex/config.toml"
       ],
       "blocked_feature_overrides": [
         "js_repl_tools_only",
@@ -367,6 +391,7 @@
    "feature_rules": {
      "forbidden_feature_flags": [
         "telepathy",
+        "workspace_dependencies",
         "use_agent_identity"
      ]
    }
@@ -401,12 +426,14 @@
     "final_rescan_required": true
   },
   "generation_targets": {
-    "global_runtime": {
+   "global_runtime": {
    "linux": {
      "agents": "/home/andy4917/.codex/AGENTS.md",
      "config": "/home/andy4917/.codex/config.toml",
       "user_override_config": "/home/andy4917/.codex/user-config.toml",
      "hooks_config": "/home/andy4917/.codex/hooks.json",
+     "generated_config_role": "generated_mirror",
+     "generated_config_outputs_only": true,
      "launcher": "/home/andy4917/.local/bin/codex"
    },
       "windows_mirror": {
@@ -414,6 +441,8 @@
         "config": "/mnt/c/Users/anise/.codex/config.toml",
         "hooks_config": "/mnt/c/Users/anise/.codex/hooks.json",
         "wsl_launcher": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
+        "generated_config_role": "generated_mirror",
+        "generated_config_outputs_only": true,
         "generated_header": "GENERATED - DO NOT EDIT"
       }
     },
@@ -427,9 +456,11 @@
       "receipt_state_root": "/home/andy4917/.codex/state/iaw",
       "gate_receipt_root": "/home/andy4917/.codex/state/gate-receipts",
       "report": "/home/andy4917/Dev-Management/reports/user-scorecard.json",
+      "score_layer_report": "/home/andy4917/Dev-Management/reports/score-layer.unified-phase.json",
       "closeout": "/home/andy4917/Dev-Management/scripts/iaw_closeout.py",
       "delivery_gate": "/home/andy4917/Dev-Management/scripts/delivery_gate.py",
       "summary_export": "/home/andy4917/Dev-Management/scripts/export_user_score_summary.py",
+      "score_layer": "/home/andy4917/Dev-Management/scripts/run_score_layer.py",
       "accepted_profiles": [
         "L1",
         "L2",
@@ -445,9 +476,11 @@
         "/home/andy4917/Dev-Management/scripts/prepare_user_scorecard_review.py",
         "/home/andy4917/Dev-Management/scripts/delivery_gate.py",
         "/home/andy4917/Dev-Management/scripts/export_user_score_summary.py",
+        "/home/andy4917/Dev-Management/scripts/run_score_layer.py",
         "/home/andy4917/Dev-Management/scripts/audit_workspace.py"
       ],
       "runtime_hook": {
+        "role": "trigger_only",
         "script": "/home/andy4917/Dev-Management/scripts/scorecard_runtime_hook.py",
         "linux_command_prefix": "python3",
         "state_root": "/home/andy4917/.codex/state/scorecard-hook",

@@ -3,7 +3,7 @@
   "scorecard_schema_version": 2,
   "scope": "codex-global",
   "policy_version": 2,
-  "generated_at": "2026-04-20T12:28:22.236373+00:00",
+  "generated_at": "2026-04-20T21:38:16.881988+00:00",
   "workspace_root": "/home/andy4917/Dev-Product/reservation-system",
   "run_id": "trace-0d51c24d6c80b096",
   "mode": "verify",
@@ -14,7 +14,7 @@
     "reasons": [
       "no disqualifiers recorded"
     ],
-    "generated_at": "2026-04-20T12:28:22.234113+00:00"
+    "generated_at": "2026-04-20T21:38:16.880061+00:00"
   },
   "authoritative_context_path": "/home/andy4917/.codex/state/scorecard-context/reservation-system/trace-0d51c24d6c80b096.json",
   "trace": {
