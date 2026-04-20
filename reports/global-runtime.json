@@ -173,8 +173,8 @@
       "linux": {
         "path": "/home/andy4917/.codex/config.toml",
         "exists": true,
-        "classification": "user_override",
-        "repairable": false,
+        "classification": "generated",
+        "repairable": true,
         "has_generated_header": false
       },
       "windows_mirror": {
@@ -355,5 +355,5 @@
     "forbidden_reference_found": false
   },
   "preview_wrapper_path": "/home/andy4917/Dev-Management/reports/generated-runtime-preview/codex-ssh-wrapper.sh",
-  "manual_remediation_report": "/home/andy4917/Dev-Management/reports/manual-system-remediation-20260421-041812.md"
+  "manual_remediation_report": "/home/andy4917/Dev-Management/reports/manual-system-remediation-20260421-044434.md"
 }

@@ -8,6 +8,7 @@
 - `ssh-devmgmt-wsl` is the canonical execution surface.
 - `/mnt/c/Users/anise/.codex/bin/wsl/codex` is an external dependency and is forbidden as the primary runtime.
 - Generated config and shim files must not be edited by hand.
+- `~/.codex/config.toml` is generated output; use `~/.codex/user-config.toml` for allowed global L1 overrides.
 
 ## Prerequisites
 
@@ -22,6 +23,7 @@ Runtime authority evidence now also includes:
 - `reports/global-runtime.json`
 - `reports/git-surface.json`
 - `reports/startup-workflow.json`
+- `reports/workspace-dependency-surface.json`
 - `reports/generated-runtime-preview/`
 - `reports/manual-system-remediation-<timestamp>.md`
 

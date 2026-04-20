@@ -1,0 +1,11 @@
+{
+  "status": "WARN",
+  "checked_at": "2026-04-21T04:41:23+09:00",
+  "source": "codex_app_tool_probe",
+  "tool_status": "DISABLED_IN_APP_SETTINGS",
+  "available": false,
+  "message": "Workspace dependency tools are disabled in Codex settings.",
+  "install_attempted": false,
+  "reason": "Workspace dependency tools are disabled in Codex settings."
+}
+

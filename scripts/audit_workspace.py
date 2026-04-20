@@ -85,18 +85,19 @@ def text_hash(text: str) -> str:
 
 
 def runtime_paths(authority: dict[str, Any]) -> dict[str, Path]:
-    runtime = authority.get("generation_targets", {}).get("global_runtime", {})
-    linux = runtime.get("linux", {})
-    windows = runtime.get("windows_mirror", {})
-    windows_config = Path(str(windows.get("config", WINDOWS_CODEX / "config.toml"))).expanduser()
-    return {
-        "linux_agents": Path(str(linux.get("agents", HOME / ".codex" / "AGENTS.md"))).expanduser(),
-        "linux_config": Path(str(linux.get("config", HOME / ".codex" / "config.toml"))).expanduser(),
-        "linux_launcher": Path(str(linux.get("launcher", HOME / ".local" / "bin" / "codex"))).expanduser(),
-        "windows_agents": Path(str(windows.get("agents", WINDOWS_CODEX / "AGENTS.md"))).expanduser(),
-        "windows_config": Path(str(windows.get("config", WINDOWS_CODEX / "config.toml"))).expanduser(),
-        "windows_wsl_launcher": Path(str(windows.get("wsl_launcher", windows_config.parent / "bin" / "wsl" / "codex"))).expanduser(),
-    }
+   runtime = authority.get("generation_targets", {}).get("global_runtime", {})
+   linux = runtime.get("linux", {})
+   windows = runtime.get("windows_mirror", {})
+   windows_config = Path(str(windows.get("config", WINDOWS_CODEX / "config.toml"))).expanduser()
+   return {
+       "linux_agents": Path(str(linux.get("agents", HOME / ".codex" / "AGENTS.md"))).expanduser(),
+       "linux_config": Path(str(linux.get("config", HOME / ".codex" / "config.toml"))).expanduser(),
+        "linux_user_override_config": Path(str(linux.get("user_override_config", HOME / ".codex" / "user-config.toml"))).expanduser(),
+       "linux_launcher": Path(str(linux.get("launcher", HOME / ".local" / "bin" / "codex"))).expanduser(),
+       "windows_agents": Path(str(windows.get("agents", WINDOWS_CODEX / "AGENTS.md"))).expanduser(),
+       "windows_config": Path(str(windows.get("config", WINDOWS_CODEX / "config.toml"))).expanduser(),
+       "windows_wsl_launcher": Path(str(windows.get("wsl_launcher", windows_config.parent / "bin" / "wsl" / "codex"))).expanduser(),
+   }
 
 
 def git_lines(repo_root: Path, *args: str) -> list[str]:
@@ -450,6 +451,35 @@ def build_git_surface_drift_check() -> dict[str, Any]:
         return {"status": "WARN", "reason": str(exc)}
 
 
+def build_workspace_dependency_surface_check(management_root: Path, runtime: dict[str, Path]) -> dict[str, Any]:
+    report_path = management_root / "reports" / "workspace-dependency-surface.json"
+    report = load_json(report_path, default={}) if report_path.exists() else {}
+    feature_enabled = False
+    if runtime["linux_config"].exists():
+        payload = load_toml(runtime["linux_config"])
+        features = payload.get("features", {})
+        if isinstance(features, dict):
+            feature_enabled = bool(features.get("workspace_dependencies") is True)
+    tool_status = str(report.get("tool_status", "")).strip() if isinstance(report, dict) else ""
+    status = "PASS"
+    reasons: list[str] = []
+    if feature_enabled and not report_path.exists():
+        status = "WARN"
+        reasons.append("workspace dependency feature is enabled but no app-surface availability report is present")
+    elif feature_enabled and tool_status in {"DISABLED_IN_APP_SETTINGS", "DISABLED", "BLOCKED"}:
+        status = "WARN"
+        reasons.append("workspace dependency feature is enabled but the current Codex app disables workspace dependency tools")
+    return {
+        "status": status,
+        "feature_enabled": feature_enabled,
+        "report_path": str(report_path),
+        "report_present": report_path.exists(),
+        "tool_status": tool_status,
+        "report": report,
+        "reasons": reasons,
+    }
+
+
 def build_instruction_guard_policy_check(management_root: Path) -> dict[str, Any]:
     policy_path = management_root / "contracts" / "instruction_guard_policy.json"
     payload = load_json(policy_path, default={})
@@ -475,6 +505,7 @@ def build_repair_boundary_check(authority: dict[str, Any]) -> dict[str, Any]:
 def build_windows_source_of_truth_proof(authority: dict[str, Any], runtime: dict[str, Path]) -> dict[str, Any]:
     linux_agents = runtime["linux_agents"].resolve()
     linux_config = runtime["linux_config"].resolve()
+    linux_user_override = runtime["linux_user_override_config"].resolve()
     windows_agents = runtime["windows_agents"].resolve()
     windows_config = runtime["windows_config"].resolve()
     authority_source = str(authority.get("_authority_path", AUTHORITY_PATH))
@@ -483,9 +514,11 @@ def build_windows_source_of_truth_proof(authority: dict[str, Any], runtime: dict
         "script": str(Path(__file__).resolve().with_name("render_codex_runtime.py")),
         "function": "user_override_config_paths",
         "linux_config_path": str(linux_config),
+        "linux_user_override_config_path": str(linux_user_override),
         "windows_config_path": str(windows_config),
         "returned_paths": [],
         "linux_config_used_as_override_source": False,
+        "linux_user_override_used_as_override_source": False,
         "windows_config_used_as_override_source": False,
         "reasons": [],
         "status": "FAIL",
@@ -495,9 +528,10 @@ def build_windows_source_of_truth_proof(authority: dict[str, Any], runtime: dict
         returned_paths = [str(Path(item).expanduser().resolve()) for item in user_override_paths(authority)]
         probe["returned_paths"] = returned_paths
         probe["linux_config_used_as_override_source"] = str(linux_config) in returned_paths
+        probe["linux_user_override_used_as_override_source"] = str(linux_user_override) in returned_paths if linux_user_override.exists() else False
         probe["windows_config_used_as_override_source"] = str(windows_config) in returned_paths
-        if not probe["linux_config_used_as_override_source"]:
-            probe["reasons"].append("render_codex_runtime.py did not treat the Linux config as an override input.")
+        if probe["linux_config_used_as_override_source"]:
+            probe["reasons"].append("render_codex_runtime.py treated the Linux generated config as an override input.")
         if probe["windows_config_used_as_override_source"]:
             probe["reasons"].append("render_codex_runtime.py treated the Windows mirror config as an override input.")
         probe["status"] = "PASS" if not probe["reasons"] else "FAIL"
@@ -513,10 +547,11 @@ def build_windows_source_of_truth_proof(authority: dict[str, Any], runtime: dict
     return {
         "authority_path": authority_source,
         "agents_generation_source": authority_source,
-        "linux_runtime_targets": {
-            "agents": str(linux_agents),
-            "config": str(linux_config),
-        },
+       "linux_runtime_targets": {
+           "agents": str(linux_agents),
+           "config": str(linux_config),
+            "user_override_config": str(linux_user_override),
+       },
         "windows_runtime_targets": {
             "agents": str(windows_agents),
             "config": str(windows_config),
@@ -863,6 +898,7 @@ def main() -> int:
     global_runtime_surface = build_global_runtime_surface_check(Path(roots["management"]))
     wsl_launcher_check = build_wsl_launcher_check(authority, runtime=runtime)
     git_surface_drift = build_git_surface_drift_check()
+    workspace_dependency_surface = build_workspace_dependency_surface_check(Path(roots["management"]), runtime)
     instruction_guard_policy = build_instruction_guard_policy_check(Path(roots["management"]))
     repair_boundary = build_repair_boundary_check(authority)
     quarantine_root_ok = quarantine_root_policy_ok(quarantine_root)
@@ -970,6 +1006,7 @@ def main() -> int:
         "serena_startup": serena_startup,
         "context7_evidence": context7_evidence,
         "git_surface": git_surface_drift,
+        "workspace_dependency_surface": workspace_dependency_surface,
         "instruction_guard": instruction_guard_policy,
         "repair_readiness": repair_readiness,
         "global_runtime_surface": global_runtime_surface,

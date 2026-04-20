@@ -223,10 +223,9 @@ def load_serena_template() -> dict[str, Any]:
 
 
 def user_override_config_paths(authority: dict) -> list[Path]:
-    # The Windows mirror is generated output, so only the Linux config can feed overrides back in.
     runtime = authority.get("generation_targets", {}).get("global_runtime", {})
     paths: list[Path] = []
-    raw_path = runtime.get("linux", {}).get("config")
+    raw_path = runtime.get("linux", {}).get("user_override_config")
     if raw_path:
         path = Path(raw_path)
         if path.exists():
@@ -256,6 +255,11 @@ def path_within_canonical_roots(path_str: str, authority: dict) -> bool:
 def blocked_feature_overrides(authority: dict) -> set[str]:
     override = authority.get("runtime_layering", {}).get("user_override_policy", {})
     return {str(item) for item in override.get("blocked_feature_overrides", [])}
+
+
+def forbidden_feature_overrides(authority: dict) -> set[str]:
+    feature_rules = authority.get("hardcoding_definition", {}).get("feature_rules", {})
+    return {str(item).strip() for item in feature_rules.get("forbidden_feature_flags", []) if str(item).strip()}
 
 
 def mcp_server_key_policies(authority: dict) -> dict[str, dict[str, Any]]:
@@ -348,10 +352,11 @@ def nested_diff_from_base(base: dict[str, Any], candidate: dict[str, Any]) -> di
 def build_effective_global_config(authority: dict, override_paths: list[Path] | None = None) -> dict[str, Any]:
     cfg = authority["generation_targets"]["global_config"]
     blocked_features = blocked_feature_overrides(authority)
+    forbidden_features = forbidden_feature_overrides(authority)
     base_features = {
         str(feature): True
         for feature in cfg.get("enabled_features", [])
-        if str(feature) not in blocked_features
+        if str(feature) not in blocked_features and str(feature) not in forbidden_features
     }
     base_mcp_servers = load_mcp_server_templates(authority)
     effective: dict[str, Any] = {
@@ -403,7 +408,7 @@ def build_effective_global_config(authority: dict, override_paths: list[Path] | 
         feature_cfg = payload.get("features", {})
         if isinstance(feature_cfg, dict):
             for feature, enabled in feature_cfg.items():
-                if str(feature) in blocked_features or not isinstance(enabled, bool):
+                if str(feature) in blocked_features or str(feature) in forbidden_features or not isinstance(enabled, bool):
                     continue
                 feature_name = str(feature)
                 if feature_name in base_features and base_features[feature_name] == enabled:

@@ -38,18 +38,20 @@ class AuditWorkspaceContractTests(unittest.TestCase):
         self.assertFalse(self.module.quarantine_root_policy_ok(Path("/home/andy4917/Dev-Management/quarantine/2026-04-16")))
         self.assertTrue(self.module.quarantine_root_policy_ok(Path("/home/andy4917/Dev-Management/quarantine")))
 
-    def test_windows_source_of_truth_proof_uses_linux_override_input_only(self) -> None:
+    def test_windows_source_of_truth_proof_uses_dedicated_user_override_input_only(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             tmp = Path(tmpdir)
             linux_agents = tmp / "linux" / "AGENTS.md"
             linux_config = tmp / "linux" / "config.toml"
+            linux_user_override = tmp / "linux" / "user-config.toml"
             windows_agents = tmp / "windows" / "AGENTS.md"
             windows_config = tmp / "windows" / "config.toml"
 
             linux_agents.parent.mkdir(parents=True)
             windows_agents.parent.mkdir(parents=True)
             linux_agents.write_text("# Generated Codex Workspace Contract\n", encoding="utf-8")
-            linux_config.write_text('approval_policy = "on-request"\n', encoding="utf-8")
+            linux_config.write_text('# GENERATED - DO NOT EDIT\napproval_policy = "on-request"\n', encoding="utf-8")
+            linux_user_override.write_text('model_reasoning_effort = "high"\n', encoding="utf-8")
             windows_agents.write_text("GENERATED - DO NOT EDIT\n\n# Generated Codex Workspace Contract\n", encoding="utf-8")
             windows_config.write_text('# GENERATED - DO NOT EDIT\napproval_policy = "on-request"\n', encoding="utf-8")
 
@@ -59,6 +61,7 @@ class AuditWorkspaceContractTests(unittest.TestCase):
                         "linux": {
                             "agents": str(linux_agents),
                             "config": str(linux_config),
+                            "user_override_config": str(linux_user_override),
                         },
                         "windows_mirror": {
                             "agents": str(windows_agents),
@@ -71,6 +74,7 @@ class AuditWorkspaceContractTests(unittest.TestCase):
             runtime = {
                 "linux_agents": linux_agents,
                 "linux_config": linux_config,
+                "linux_user_override_config": linux_user_override,
                 "windows_agents": windows_agents,
                 "windows_config": windows_config,
             }
@@ -79,7 +83,8 @@ class AuditWorkspaceContractTests(unittest.TestCase):
 
             self.assertEqual(proof["status"], "PASS")
             self.assertTrue(proof["linux_and_windows_targets_are_distinct"])
-            self.assertTrue(proof["config_override_probe"]["linux_config_used_as_override_source"])
+            self.assertFalse(proof["config_override_probe"]["linux_config_used_as_override_source"])
+            self.assertTrue(proof["config_override_probe"]["linux_user_override_used_as_override_source"])
             self.assertFalse(proof["config_override_probe"]["windows_config_used_as_override_source"])
 
     def test_windows_runtime_mirror_check_reports_divergence_per_file(self) -> None:
@@ -141,6 +146,36 @@ class AuditWorkspaceContractTests(unittest.TestCase):
                 "config: Windows config.toml generation diverges from the Linux canonical runtime output.",
                 check["divergence_summary"],
             )
+
+    def test_workspace_dependency_surface_warns_only_when_feature_is_enabled(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp = Path(tmpdir)
+            reports = tmp / "reports"
+            reports.mkdir(parents=True)
+            linux_config = tmp / ".codex" / "config.toml"
+            linux_config.parent.mkdir(parents=True)
+            linux_config.write_text("[features]\nworkspace_dependencies = true\n", encoding="utf-8")
+            (reports / "workspace-dependency-surface.json").write_text(
+                json.dumps(
+                    {
+                        "tool_status": "DISABLED_IN_APP_SETTINGS",
+                        "available": False,
+                    }
+                ),
+                encoding="utf-8",
+            )
+            runtime = {
+                "linux_config": linux_config,
+            }
+
+            result = self.module.build_workspace_dependency_surface_check(tmp, runtime)
+            self.assertEqual(result["status"], "WARN")
+            self.assertTrue(result["feature_enabled"])
+
+            linux_config.write_text("[features]\njs_repl = true\n", encoding="utf-8")
+            result = self.module.build_workspace_dependency_surface_check(tmp, runtime)
+            self.assertEqual(result["status"], "PASS")
+            self.assertFalse(result["feature_enabled"])
 
     def test_rendered_global_config_includes_model_reasoning_and_features_and_mirrors_match(self) -> None:
         render = _load_render_module()
@@ -240,6 +275,7 @@ class AuditWorkspaceContractTests(unittest.TestCase):
             extra_project = product / "project-a"
             external_project = tmp / "Outside"
             linux_config_path = tmp / "linux" / "config.toml"
+            linux_user_override_path = tmp / "linux" / "user-config.toml"
             windows_config_path = tmp / "windows" / "config.toml"
 
             extra_project.mkdir(parents=True)
@@ -247,7 +283,7 @@ class AuditWorkspaceContractTests(unittest.TestCase):
             linux_config_path.parent.mkdir(parents=True)
             windows_config_path.parent.mkdir(parents=True)
 
-            linux_config_path.write_text(
+            linux_user_override_path.write_text(
                 """model_reasoning_effort = "high"
 
 [mcp_servers.context7]
@@ -268,7 +304,6 @@ url = "https://invalid.example/mcp"
 js_repl = false
 js_repl_tools_only = true
 remote_control = true
-workspace_dependencies = true
 
 [projects."/tmp/Outside"]
 trust_level = "trusted"
@@ -278,6 +313,7 @@ no_memories_if_mcp_or_web_search = false
 """,
                 encoding="utf-8",
             )
+            linux_config_path.write_text('# GENERATED - DO NOT EDIT\napproval_policy = "on-request"\n', encoding="utf-8")
             windows_config_path.write_text(
                 f"""approval_policy = "never"
 sandbox_mode = "danger-full-access"
@@ -351,7 +387,7 @@ trust_level = "trusted"
                 },
                 "generation_targets": {
                     "global_runtime": {
-                        "linux": {"config": str(linux_config_path)},
+                        "linux": {"config": str(linux_config_path), "user_override_config": str(linux_user_override_path)},
                         "windows_mirror": {
                             "config": str(windows_config_path),
                             "generated_header": "GENERATED - DO NOT EDIT",
@@ -383,7 +419,6 @@ trust_level = "trusted"
             self.assertEqual(effective["approval_policy"], "on-request")
             self.assertEqual(effective["sandbox_mode"], "workspace-write")
             self.assertFalse(effective["features"]["js_repl"])
-            self.assertTrue(effective["features"]["workspace_dependencies"])
             self.assertNotIn("js_repl_tools_only", effective["features"])
             self.assertNotIn("remote_control", effective["features"])
             self.assertNotIn(str(extra_project), effective["trusted_projects"])
@@ -402,7 +437,6 @@ trust_level = "trusted"
             self.assertIn('approval_policy = "on-request"', linux_config)
             self.assertIn('sandbox_mode = "workspace-write"', linux_config)
             self.assertIn('js_repl = false', linux_config)
-            self.assertIn('workspace_dependencies = true', linux_config)
             self.assertNotIn("js_repl_tools_only", linux_config)
             self.assertNotIn("remote_control", linux_config)
             self.assertNotIn(f'[projects."{extra_project}"]', linux_config)

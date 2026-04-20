@@ -65,10 +65,10 @@
         "windows_path": "/mnt/c/Users/anise/.codex/config.toml",
         "linux_exists": true,
         "windows_exists": true,
-        "linux_sha256": "f68b740704d6525dc1abc3d8c666c648ad207aca2c5df327cd5bb6a9de297a6c",
-        "windows_sha256": "c53a8202d9e93ef95bfc3eec7c4eff689a9850ca6dca8a76dba45e88ba97322c",
-        "linux_body_sha256": "d8f3a831bc1a4e9ad5b545c2b18e88f6bdca67374c6e5093af53f8bdc4f5035a",
-        "windows_body_sha256": "d8f3a831bc1a4e9ad5b545c2b18e88f6bdca67374c6e5093af53f8bdc4f5035a",
+        "linux_sha256": "517f0baad0a7659ff7be7c2d48286df31f42954273eda41f0b522a4fd966b301",
+        "windows_sha256": "668860944354e6028686835b2c68954cdbbb9f83daa216447bafee0513ca02b6",
+        "linux_body_sha256": "eb7a2aca8c52dada6b9ba26a14f7a72839089dc3df67b063b23ea2ff275c5ce9",
+        "windows_body_sha256": "eb7a2aca8c52dada6b9ba26a14f7a72839089dc3df67b063b23ea2ff275c5ce9",
         "expected_windows_headers": [
           "# GENERATED - DO NOT EDIT",
           "GENERATED - DO NOT EDIT"
@@ -89,7 +89,8 @@
       "agents_generation_source": "/home/andy4917/Dev-Management/contracts/workspace_authority.json",
       "linux_runtime_targets": {
         "agents": "/home/andy4917/.codex/AGENTS.md",
-        "config": "/home/andy4917/.codex/config.toml"
+        "config": "/home/andy4917/.codex/config.toml",
+        "user_override_config": "/home/andy4917/.codex/user-config.toml"
       },
       "windows_runtime_targets": {
         "agents": "/mnt/c/Users/anise/.codex/AGENTS.md",
@@ -100,11 +101,11 @@
         "script": "/home/andy4917/Dev-Management/scripts/render_codex_runtime.py",
         "function": "user_override_config_paths",
         "linux_config_path": "/home/andy4917/.codex/config.toml",
+        "linux_user_override_config_path": "/home/andy4917/.codex/user-config.toml",
         "windows_config_path": "/mnt/c/Users/anise/.codex/config.toml",
-        "returned_paths": [
-          "/home/andy4917/.codex/config.toml"
-        ],
-        "linux_config_used_as_override_source": true,
+        "returned_paths": [],
+        "linux_config_used_as_override_source": false,
+        "linux_user_override_used_as_override_source": false,
         "windows_config_used_as_override_source": false,
         "reasons": [],
         "status": "PASS"
@@ -304,9 +305,9 @@
     "activation": {
       "status": "BLOCKED",
       "reason": "latest Serena MCP log shows the session started without activating a project",
-      "log_path": "/home/andy4917/.serena/logs/2026-04-21/mcp_20260421-041009_7120.txt",
+      "log_path": "/home/andy4917/.serena/logs/2026-04-21/mcp_20260421-043336_53720.txt",
       "matched_lines": [
-        "WARNING 2026-04-21 04:10:09,919 [MainThread] serena.cli:start_mcp_server:326 - No project root found from /mnt/c/Program Files/WindowsApps/OpenAI.Codex_26.417.4842.0_x64__2p2nqsd0c76g0/app/resources; not activating any project"
+        "WARNING 2026-04-21 04:33:36,477 [MainThread] serena.cli:start_mcp_server:326 - No project root found from /mnt/c/Program Files/WindowsApps/OpenAI.Codex_26.417.4842.0_x64__2p2nqsd0c76g0/app/resources; not activating any project"
       ]
     },
     "steps": [
@@ -339,7 +340,7 @@
         "status": "BLOCKED",
         "reason": "latest Serena MCP log shows the session started without activating a project",
         "evidence_refs": [
-          "/home/andy4917/.serena/logs/2026-04-21/mcp_20260421-041009_7120.txt"
+          "/home/andy4917/.serena/logs/2026-04-21/mcp_20260421-043336_53720.txt"
         ]
       }
     ]
@@ -371,52 +372,18 @@
         "repo_root": "/home/andy4917/Dev-Management",
         "status": "present",
         "dirty": [
-          " M contracts/execution_surfaces.json",
           " M contracts/workspace_authority.json",
+          " M docs/AGENT_GUARDRAILS.md",
+          " M docs/GLOBAL_RUNTIME_ARCHITECTURE.md",
           " M docs/RUNBOOK.md",
-          " M docs/SERENA_USAGE.md",
-          " M reports/audit.final.json",
+          " M reports/global-runtime.json",
           " M scripts/audit_workspace.py",
+          " M scripts/check_global_runtime.py",
           " M scripts/render_codex_runtime.py",
-          " M scripts/repair_codex_desktop_runtime.py",
-          " M scripts/verify_migration_evidence.py",
           " M tests/test_audit_workspace_contract.py",
-          " M tests/test_repair_codex_desktop_runtime.py",
-          "?? .serena/",
-          "?? contracts/instruction_guard_policy.json",
-          "?? docs/AGENT_GUARDRAILS.md",
-          "?? docs/GLOBAL_RUNTIME_ARCHITECTURE.md",
-          "?? reports/canonical-runtime-activation.dry-run.json",
-          "?? reports/canonical-runtime-activation.json",
-          "?? reports/generated-runtime-preview/",
-          "?? reports/git-surface.json",
-          "?? reports/global-runtime.after-activation.json",
-          "?? reports/global-runtime.json",
-          "?? reports/manual-system-remediation-20260421-030157.md",
-          "?? reports/manual-system-remediation-20260421-030516.md",
-          "?? reports/manual-system-remediation-20260421-031215.md",
-          "?? reports/manual-system-remediation-20260421-033211.md",
-          "?? reports/manual-system-remediation-20260421-035801.md",
-          "?? reports/manual-system-remediation-20260421-035900.md",
-          "?? reports/manual-system-remediation-20260421-041812.md",
-          "?? reports/serena-startup-repair.apply.json",
-          "?? reports/serena-startup-repair.json",
-          "?? reports/startup-workflow.after-activation.json",
-          "?? reports/startup-workflow.json",
-          "?? scripts/activate_canonical_runtime.py",
-          "?? scripts/check_agent_instruction.py",
-          "?? scripts/check_git_surface.py",
-          "?? scripts/check_global_runtime.py",
-          "?? scripts/check_startup_workflow.py",
-          "?? scripts/repair_serena_startup.py",
-          "?? scripts/run_canonical_command.py",
-          "?? tests/test_activate_canonical_runtime.py",
-          "?? tests/test_check_agent_instruction.py",
-          "?? tests/test_check_global_runtime.py",
-          "?? tests/test_check_startup_workflow.py",
-          "?? tests/test_git_surface.py",
-          "?? tests/test_repair_serena_startup.py",
-          "?? tests/test_run_canonical_command.py"
+          " M tests/test_check_global_runtime.py",
+          "?? reports/manual-system-remediation-20260421-044138.md",
+          "?? reports/workspace-dependency-surface.json"
         ],
         "local_config": {
           "available": true,
@@ -758,6 +725,24 @@
       "Dev-Management repo-local .gitattributes proposal is available."
     ]
   },
+  "workspace_dependency_surface": {
+    "status": "PASS",
+    "feature_enabled": false,
+    "report_path": "/home/andy4917/Dev-Management/reports/workspace-dependency-surface.json",
+    "report_present": true,
+    "tool_status": "DISABLED_IN_APP_SETTINGS",
+    "report": {
+      "status": "WARN",
+      "checked_at": "2026-04-21T04:41:23+09:00",
+      "source": "codex_app_tool_probe",
+      "tool_status": "DISABLED_IN_APP_SETTINGS",
+      "available": false,
+      "message": "Workspace dependency tools are disabled in Codex settings.",
+      "install_attempted": false,
+      "reason": "Workspace dependency tools are disabled in Codex settings."
+    },
+    "reasons": []
+  },
   "instruction_guard": {
     "policy_path": "/home/andy4917/Dev-Management/contracts/instruction_guard_policy.json",
     "present": true,
@@ -954,8 +939,8 @@
         "linux": {
           "path": "/home/andy4917/.codex/config.toml",
           "exists": true,
-          "classification": "user_override",
-          "repairable": false,
+          "classification": "generated",
+          "repairable": true,
           "has_generated_header": false
         },
         "windows_mirror": {
@@ -1227,52 +1212,18 @@
         "repo_root": "/home/andy4917/Dev-Management",
         "status": "present",
         "dirty": [
-          " M contracts/execution_surfaces.json",
           " M contracts/workspace_authority.json",
+          " M docs/AGENT_GUARDRAILS.md",
+          " M docs/GLOBAL_RUNTIME_ARCHITECTURE.md",
           " M docs/RUNBOOK.md",
-          " M docs/SERENA_USAGE.md",
-          " M reports/audit.final.json",
+          " M reports/global-runtime.json",
           " M scripts/audit_workspace.py",
+          " M scripts/check_global_runtime.py",
           " M scripts/render_codex_runtime.py",
-          " M scripts/repair_codex_desktop_runtime.py",
-          " M scripts/verify_migration_evidence.py",
           " M tests/test_audit_workspace_contract.py",
-          " M tests/test_repair_codex_desktop_runtime.py",
-          "?? .serena/",
-          "?? contracts/instruction_guard_policy.json",
-          "?? docs/AGENT_GUARDRAILS.md",
-          "?? docs/GLOBAL_RUNTIME_ARCHITECTURE.md",
-          "?? reports/canonical-runtime-activation.dry-run.json",
-          "?? reports/canonical-runtime-activation.json",
-          "?? reports/generated-runtime-preview/",
-          "?? reports/git-surface.json",
-          "?? reports/global-runtime.after-activation.json",
-          "?? reports/global-runtime.json",
-          "?? reports/manual-system-remediation-20260421-030157.md",
-          "?? reports/manual-system-remediation-20260421-030516.md",
-          "?? reports/manual-system-remediation-20260421-031215.md",
-          "?? reports/manual-system-remediation-20260421-033211.md",
-          "?? reports/manual-system-remediation-20260421-035801.md",
-          "?? reports/manual-system-remediation-20260421-035900.md",
-          "?? reports/manual-system-remediation-20260421-041812.md",
-          "?? reports/serena-startup-repair.apply.json",
-          "?? reports/serena-startup-repair.json",
-          "?? reports/startup-workflow.after-activation.json",
-          "?? reports/startup-workflow.json",
-          "?? scripts/activate_canonical_runtime.py",
-          "?? scripts/check_agent_instruction.py",
-          "?? scripts/check_git_surface.py",
-          "?? scripts/check_global_runtime.py",
-          "?? scripts/check_startup_workflow.py",
-          "?? scripts/repair_serena_startup.py",
-          "?? scripts/run_canonical_command.py",
-          "?? tests/test_activate_canonical_runtime.py",
-          "?? tests/test_check_agent_instruction.py",
-          "?? tests/test_check_global_runtime.py",
-          "?? tests/test_check_startup_workflow.py",
-          "?? tests/test_git_surface.py",
-          "?? tests/test_repair_serena_startup.py",
-          "?? tests/test_run_canonical_command.py"
+          " M tests/test_check_global_runtime.py",
+          "?? reports/manual-system-remediation-20260421-044138.md",
+          "?? reports/workspace-dependency-surface.json"
         ],
         "local_config": {
           "available": true,
@@ -1826,8 +1777,8 @@
           "linux": {
             "path": "/home/andy4917/.codex/config.toml",
             "exists": true,
-            "classification": "user_override",
-            "repairable": false,
+            "classification": "generated",
+            "repairable": true,
             "has_generated_header": false
           },
           "windows_mirror": {
@@ -2018,7 +1969,7 @@
   "startup_workflow_check": {
     "status": "BLOCKED",
     "summary": "Serena-first and Context7-first startup workflow is incomplete for the current diff.",
-    "generated_at": "2026-04-20T19:18:23.792202+00:00",
+    "generated_at": "2026-04-20T19:41:48.015712+00:00",
     "mode_requested": "auto",
     "mode_selected": "ssh-managed",
     "repo_root": "/home/andy4917/Dev-Management",
@@ -2028,80 +1979,27 @@
       "Use Context7 before protected dependency, API, configuration, or migration changes."
     ],
     "changed_paths": [
-      ".serena/.gitignore",
-      ".serena/project.yml",
-      "contracts/execution_surfaces.json",
-      "contracts/instruction_guard_policy.json",
       "contracts/workspace_authority.json",
       "docs/AGENT_GUARDRAILS.md",
       "docs/GLOBAL_RUNTIME_ARCHITECTURE.md",
       "docs/RUNBOOK.md",
-      "docs/SERENA_USAGE.md",
-      "reports/audit.final.json",
-      "reports/canonical-runtime-activation.dry-run.json",
-      "reports/canonical-runtime-activation.json",
       "reports/generated-runtime-preview/codex-ssh-wrapper.sh",
-      "reports/git-surface.json",
-      "reports/global-runtime.after-activation.json",
       "reports/global-runtime.json",
-      "reports/manual-system-remediation-20260421-030157.md",
-      "reports/manual-system-remediation-20260421-030516.md",
-      "reports/manual-system-remediation-20260421-031215.md",
-      "reports/manual-system-remediation-20260421-033211.md",
-      "reports/manual-system-remediation-20260421-035801.md",
-      "reports/manual-system-remediation-20260421-035900.md",
-      "reports/manual-system-remediation-20260421-041812.md",
-      "reports/serena-startup-repair.apply.json",
-      "reports/serena-startup-repair.json",
-      "reports/startup-workflow.after-activation.json",
-      "reports/startup-workflow.json",
-      "scripts/activate_canonical_runtime.py",
+      "reports/manual-system-remediation-20260421-044138.md",
+      "reports/workspace-dependency-surface.json",
       "scripts/audit_workspace.py",
-      "scripts/check_agent_instruction.py",
-      "scripts/check_git_surface.py",
       "scripts/check_global_runtime.py",
-      "scripts/check_startup_workflow.py",
       "scripts/render_codex_runtime.py",
-      "scripts/repair_codex_desktop_runtime.py",
-      "scripts/repair_serena_startup.py",
-      "scripts/run_canonical_command.py",
-      "scripts/verify_migration_evidence.py",
-      "tests/test_activate_canonical_runtime.py",
       "tests/test_audit_workspace_contract.py",
-      "tests/test_check_agent_instruction.py",
-      "tests/test_check_global_runtime.py",
-      "tests/test_check_startup_workflow.py",
-      "tests/test_git_surface.py",
-      "tests/test_repair_codex_desktop_runtime.py",
-      "tests/test_repair_serena_startup.py",
-      "tests/test_run_canonical_command.py"
+      "tests/test_check_global_runtime.py"
     ],
     "workflow_changes": [
-      ".serena/.gitignore",
-      ".serena/project.yml",
-      "contracts/execution_surfaces.json",
-      "contracts/instruction_guard_policy.json",
       "contracts/workspace_authority.json",
-      "scripts/activate_canonical_runtime.py",
       "scripts/audit_workspace.py",
-      "scripts/check_agent_instruction.py",
-      "scripts/check_git_surface.py",
       "scripts/check_global_runtime.py",
-      "scripts/check_startup_workflow.py",
       "scripts/render_codex_runtime.py",
-      "scripts/repair_codex_desktop_runtime.py",
-      "scripts/repair_serena_startup.py",
-      "scripts/run_canonical_command.py",
-      "scripts/verify_migration_evidence.py",
-      "tests/test_activate_canonical_runtime.py",
       "tests/test_audit_workspace_contract.py",
-      "tests/test_check_agent_instruction.py",
-      "tests/test_check_global_runtime.py",
-      "tests/test_check_startup_workflow.py",
-      "tests/test_git_surface.py",
-      "tests/test_repair_codex_desktop_runtime.py",
-      "tests/test_repair_serena_startup.py",
-      "tests/test_run_canonical_command.py"
+      "tests/test_check_global_runtime.py"
     ],
     "blocking_reasons": [
       "Serena onboarding has not been performed for the current repo",
@@ -2164,9 +2062,9 @@
       "activation": {
         "status": "BLOCKED",
         "reason": "latest Serena MCP log shows the session started without activating a project",
-        "log_path": "/home/andy4917/.serena/logs/2026-04-21/mcp_20260421-041009_7120.txt",
+        "log_path": "/home/andy4917/.serena/logs/2026-04-21/mcp_20260421-043336_53720.txt",
         "matched_lines": [
-          "WARNING 2026-04-21 04:10:09,919 [MainThread] serena.cli:start_mcp_server:326 - No project root found from /mnt/c/Program Files/WindowsApps/OpenAI.Codex_26.417.4842.0_x64__2p2nqsd0c76g0/app/resources; not activating any project"
+          "WARNING 2026-04-21 04:33:36,477 [MainThread] serena.cli:start_mcp_server:326 - No project root found from /mnt/c/Program Files/WindowsApps/OpenAI.Codex_26.417.4842.0_x64__2p2nqsd0c76g0/app/resources; not activating any project"
         ]
       },
       "steps": [
@@ -2199,7 +2097,7 @@
           "status": "BLOCKED",
           "reason": "latest Serena MCP log shows the session started without activating a project",
           "evidence_refs": [
-            "/home/andy4917/.serena/logs/2026-04-21/mcp_20260421-041009_7120.txt"
+            "/home/andy4917/.serena/logs/2026-04-21/mcp_20260421-043336_53720.txt"
           ]
         }
       ]
@@ -2254,7 +2152,7 @@
         "status": "BLOCKED",
         "reason": "latest Serena MCP log shows the session started without activating a project",
         "evidence_refs": [
-          "/home/andy4917/.serena/logs/2026-04-21/mcp_20260421-041009_7120.txt"
+          "/home/andy4917/.serena/logs/2026-04-21/mcp_20260421-043336_53720.txt"
         ]
       },
       {

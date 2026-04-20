@@ -108,14 +108,15 @@ def run_ssh(host: str, command: str) -> dict[str, Any]:
 
 
 def runtime_paths(authority: dict[str, Any]) -> dict[str, Path]:
-    runtime = authority.get("generation_targets", {}).get("global_runtime", {})
-    linux = runtime.get("linux", {})
-    windows = runtime.get("windows_mirror", {})
-    return {
-        "linux_config": Path(str(linux.get("config", Path.home() / ".codex" / "config.toml"))).expanduser(),
-        "windows_config": Path(str(windows.get("config", "/mnt/c/Users/anise/.codex/config.toml"))).expanduser(),
-        "linux_launcher": Path(str(linux.get("launcher", Path.home() / ".local" / "bin" / "codex"))).expanduser(),
-    }
+   runtime = authority.get("generation_targets", {}).get("global_runtime", {})
+   linux = runtime.get("linux", {})
+   windows = runtime.get("windows_mirror", {})
+   return {
+       "linux_config": Path(str(linux.get("config", Path.home() / ".codex" / "config.toml"))).expanduser(),
+        "linux_user_override_config": Path(str(linux.get("user_override_config", Path.home() / ".codex" / "user-config.toml"))).expanduser(),
+       "windows_config": Path(str(windows.get("config", "/mnt/c/Users/anise/.codex/config.toml"))).expanduser(),
+       "linux_launcher": Path(str(linux.get("launcher", Path.home() / ".local" / "bin" / "codex"))).expanduser(),
+   }
 
 
 def forbidden_runtime_paths(authority: dict[str, Any]) -> list[str]:
@@ -175,21 +176,25 @@ def config_surface_classification(path: Path, authority: dict[str, Any]) -> dict
     runtime = runtime_paths(authority)
     windows_target = runtime["windows_config"].resolve()
     linux_target = runtime["linux_config"].resolve()
+    user_override_target = runtime["linux_user_override_config"].resolve()
     classification = "unmanaged"
     repairable = False
     if path.exists() and path.resolve() == windows_target:
         classification = "generated"
         repairable = True
+    elif path.exists() and path.resolve() == linux_target:
+        classification = "generated"
+        repairable = True
+    elif path.exists() and path.resolve() == user_override_target:
+        classification = "user_override"
+        repairable = False
     elif text.startswith("# GENERATED - DO NOT EDIT") or text.startswith("GENERATED - DO NOT EDIT"):
         classification = "generated"
         repairable = True
-    elif path.exists() and path.resolve() == linux_target:
-        classification = "user_override"
-        repairable = False
     return {
-        "path": str(path),
-        "exists": path.exists(),
-        "classification": classification,
+       "path": str(path),
+       "exists": path.exists(),
+       "classification": classification,
         "repairable": repairable,
         "has_generated_header": text.startswith("# GENERATED - DO NOT EDIT") or text.startswith("GENERATED - DO NOT EDIT"),
     }
@@ -620,8 +625,10 @@ def build_wrapper_apply_readiness(
     }
 
 
-def manual_remediation_lines(runtime_report: dict[str, Any], git_report: dict[str, Any]) -> list[str]:
+def manual_remediation_lines(runtime_report: dict[str, Any], git_report: dict[str, Any], workspace_dependency_report: dict[str, Any] | None = None) -> list[str]:
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    workspace_dependency_report = workspace_dependency_report or {}
+    workspace_dependency_status = str(workspace_dependency_report.get("tool_status", "")).strip()
     return [
         "# Manual System Remediation",
         "",
@@ -639,6 +646,9 @@ def manual_remediation_lines(runtime_report: dict[str, Any], git_report: dict[st
         "- Windows PATH is not repo-owned; if Codex app sessions keep injecting .codex/tmp/arg0 or .codex/bin/wsl, treat that as a client-surface warning and correct it outside the repo.",
         "- Reconcile Windows Git and WSL Git config drift manually. Current Git surface status: " + str(git_report.get("status", "UNKNOWN")),
         "- Review Windows Git safe.directory, credential helper, core.autocrlf, and LFS settings against the WSL Git configuration before using mixed surfaces.",
+        *([
+            "- Current Codex app settings disable workspace dependency tools; enable Codex dependencies in the app before expecting load/install workspace dependency tools to work."
+        ] if workspace_dependency_status == "DISABLED_IN_APP_SETTINGS" else []),
         "- Install or expose a Linux-native codex binary inside the canonical SSH runtime if remote native detection remains incomplete.",
         "- The local PATH normalizer at ~/.config/shell/wsl-runtime-paths.sh is currently not repo-owned; update it manually if you want to strip .codex/tmp/arg0 or .codex/bin/wsl entries.",
         "- Rollback for user-level SSH activation: remove ~/.ssh/config.d/dev-management.conf, remove the Dev-Management include block from ~/.ssh/config, remove the marker block from authorized_keys, and delete ~/.ssh/devmgmt_wsl_ed25519(.pub) if it was created solely for this runtime.",
@@ -649,9 +659,10 @@ def manual_remediation_lines(runtime_report: dict[str, Any], git_report: dict[st
 def write_manual_remediation_report(repo_root: Path, runtime_report: dict[str, Any], git_report: dict[str, Any]) -> str:
     reports_dir = repo_root / "reports"
     reports_dir.mkdir(parents=True, exist_ok=True)
+    workspace_dependency_report = load_json(reports_dir / "workspace-dependency-surface.json", default={})
     timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
     path = reports_dir / f"manual-system-remediation-{timestamp}.md"
-    path.write_text("\n".join(manual_remediation_lines(runtime_report, git_report)) + "\n", encoding="utf-8")
+    path.write_text("\n".join(manual_remediation_lines(runtime_report, git_report, workspace_dependency_report)) + "\n", encoding="utf-8")
     return str(path)
 
 

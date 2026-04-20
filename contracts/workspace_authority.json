@@ -364,11 +364,12 @@
         "\\\\wsl.localhost\\Ubuntu\\home\\andy4917\\code\\reservation-system"
       ]
     },
-    "feature_rules": {
-      "forbidden_feature_flags": [
+   "feature_rules": {
+     "forbidden_feature_flags": [
+        "telepathy",
         "use_agent_identity"
-      ]
-    }
+     ]
+   }
   },
   "runtime_state_exclusions": [
     "auth",
@@ -401,12 +402,13 @@
   },
   "generation_targets": {
     "global_runtime": {
-      "linux": {
-        "agents": "/home/andy4917/.codex/AGENTS.md",
-        "config": "/home/andy4917/.codex/config.toml",
-        "hooks_config": "/home/andy4917/.codex/hooks.json",
-        "launcher": "/home/andy4917/.local/bin/codex"
-      },
+   "linux": {
+     "agents": "/home/andy4917/.codex/AGENTS.md",
+     "config": "/home/andy4917/.codex/config.toml",
+      "user_override_config": "/home/andy4917/.codex/user-config.toml",
+     "hooks_config": "/home/andy4917/.codex/hooks.json",
+     "launcher": "/home/andy4917/.local/bin/codex"
+   },
       "windows_mirror": {
         "agents": "/mnt/c/Users/anise/.codex/AGENTS.md",
         "config": "/mnt/c/Users/anise/.codex/config.toml",
@@ -498,10 +500,10 @@
         "runtime_metrics",
         "shell_zsh_fork",
         "skill_env_var_dependency_prompt",
-        "telepathy",
-        "tool_search",
-        "undo"
-      ],
+      "chronicle",
+     "tool_search",
+     "undo"
+   ],
       "enabled_plugins": [
         "github@openai-curated"
       ]

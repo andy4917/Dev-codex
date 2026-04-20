@@ -79,7 +79,9 @@ Not repairable by the repo:
 
 - Generated files carry an authority path, generated header, or explicit authority ownership and are repairable.
 - User-level live overrides are report-only drift unless explicitly declared repo-owned.
-- `~/.codex/config.toml` is treated as a user override in the current migration state.
+- `~/.codex/config.toml` is the generated Linux runtime mirror.
+- `~/.codex/user-config.toml` is the optional L1 user override surface.
+- Generated config must not feed itself back in as an override source.
 
 ## Guard And Audit Rules
 

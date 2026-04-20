@@ -54,6 +54,7 @@ The instruction guard should return `WARN` when:
 ## Editing Rules
 
 - Do not hand-edit generated config or shim files.
+- Treat `~/.codex/config.toml` as a generated mirror and `~/.codex/user-config.toml` as the only allowed global user override surface.
 - Do not overwrite live `~/.local/bin/codex` until canonical SSH readiness and local PATH precedence are both PASS.
 - Prefer preview outputs under `reports/generated-runtime-preview/` while readiness is incomplete.
 - If a system change is required, document it in `reports/manual-system-remediation-<timestamp>.md`.
