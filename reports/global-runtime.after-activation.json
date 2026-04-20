@@ -1,0 +1,359 @@
+{
+  "status": "WARN",
+  "overall_status": "WARN",
+  "mode_requested": "auto",
+  "mode_selected": "ssh-managed",
+  "fail_closed": false,
+  "canonical_execution_status": "PASS",
+  "client_surface_status": "WARN",
+  "local_shell_status": "BLOCKED",
+  "ssh_runtime_status": "PASS",
+  "codex_resolution_status": "BLOCKED",
+  "path_contamination_status": "WARN",
+  "wrapper_apply_readiness": {
+    "status": "BLOCKED",
+    "ready": false,
+    "gates": {
+      "canonical_execution_status": "PASS",
+      "remote_repo_root_status": "PASS",
+      "remote_codex_resolution_status": "BLOCKED",
+      "remote_native_codex_status": "WARN",
+      "remote_path_contamination_status": "PASS",
+      "local_path_precedence_status": "PASS",
+      "wrapper_target_safety_status": "PASS"
+    },
+    "remote_native_codex_path": "",
+    "reason": "live wrapper apply remains gated on canonical SSH readiness, remote codex safety, native codex detection, and local PATH precedence"
+  },
+  "canonical_ssh_runtime_status": {
+    "status": "PASS",
+    "reason": ""
+  },
+  "remote_repo_root_status": {
+    "status": "PASS",
+    "reason": "",
+    "observed_repo_root": "/home/andy4917/Dev-Management"
+  },
+  "remote_codex_resolution_status": {
+    "status": "BLOCKED",
+    "reason": "wrapper target resolves to the forbidden Windows-mounted Codex launcher",
+    "command_v": "/home/andy4917/.local/bin/codex",
+    "command_v_candidate": {
+      "path": "/home/andy4917/.local/bin/codex",
+      "classification": "forbidden_wrapper",
+      "status": "BLOCKED",
+      "exists": true,
+      "native_candidate": false,
+      "target": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
+      "reason": "wrapper target resolves to the forbidden Windows-mounted Codex launcher"
+    }
+  },
+  "remote_native_codex_status": {
+    "status": "WARN",
+    "reason": "no Linux-native codex absolute path was confirmed in the canonical SSH runtime",
+    "candidates": [],
+    "selected_path": ""
+  },
+  "remote_path_contamination_status": {
+    "status": "PASS",
+    "reason": "",
+    "contaminated_entries": []
+  },
+  "local_live_codex_resolution_status": {
+    "status": "BLOCKED",
+    "reason": "wrapper target resolves to the forbidden Windows-mounted Codex launcher"
+  },
+  "local_path_precedence_status": {
+    "status": "PASS",
+    "launcher_dir_index": 0,
+    "forbidden_indices": [
+      1,
+      2
+    ],
+    "reasons": []
+  },
+  "tests_status": {
+    "status": "WARN",
+    "reason": "check_global_runtime.py does not execute the repo test suite"
+  },
+  "diff_check_status": {
+    "status": "PASS",
+    "reason": ""
+  },
+  "canonical_execution_surface": {
+    "id": "ssh-devmgmt-wsl",
+    "host_alias": "devmgmt-wsl",
+    "repo_root": "/home/andy4917/Dev-Management",
+    "expected_os": "linux",
+    "expected_primary_resolution": "linux-native codex in canonical SSH runtime",
+    "allowed_primary_resolution_fallback": "repo-generated local SSH wrapper",
+    "forbidden_primary_resolution": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
+    "client_surface_contamination_status_when_canonical_passes": "WARN",
+    "local_shell_requested_execution_status_when_forbidden": "BLOCKED"
+  },
+  "observed_remote_evidence": {
+    "codex_app_remote_record": {
+      "value": "andy4917@localhost:22",
+      "authoritative": false,
+      "role": "observed_fallback_candidate"
+    }
+  },
+  "client_surface": {
+    "status": "WARN",
+    "path_entries": [
+      "/home/andy4917/.local/bin",
+      "/mnt/c/Users/anise/.codex/tmp/arg0/codex-arg0XAVvIB",
+      "/mnt/c/Users/anise/.codex/bin/wsl",
+      "/home/andy4917/.nvm/versions/node/v24.14.1/bin",
+      "/home/andy4917/.local/bin",
+      "/usr/local/sbin",
+      "/usr/local/bin",
+      "/usr/sbin",
+      "/usr/bin",
+      "/sbin",
+      "/bin",
+      "/usr/games",
+      "/usr/local/games",
+      "/usr/lib/wsl/lib",
+      "/mnt/c/WINDOWS/system32",
+      "/mnt/c/WINDOWS"
+    ],
+    "contaminated_entries": [
+      "/mnt/c/Users/anise/.codex/tmp/arg0/codex-arg0XAVvIB",
+      "/mnt/c/Users/anise/.codex/bin/wsl"
+    ]
+  },
+  "local_runtime_surface": {
+    "command_v": "/home/andy4917/.local/bin/codex",
+    "type_a": [
+      "codex is /home/andy4917/.local/bin/codex",
+      "codex is /mnt/c/Users/anise/.codex/bin/wsl/codex",
+      "codex is /home/andy4917/.local/bin/codex"
+    ],
+    "type_a_paths": [
+      "/home/andy4917/.local/bin/codex",
+      "/mnt/c/Users/anise/.codex/bin/wsl/codex"
+    ],
+    "path_entries": [
+      "/home/andy4917/.local/bin",
+      "/mnt/c/Users/anise/.codex/tmp/arg0/codex-arg0XAVvIB",
+      "/mnt/c/Users/anise/.codex/bin/wsl",
+      "/home/andy4917/.nvm/versions/node/v24.14.1/bin",
+      "/home/andy4917/.local/bin",
+      "/usr/local/sbin",
+      "/usr/local/bin",
+      "/usr/sbin",
+      "/usr/bin",
+      "/sbin",
+      "/bin",
+      "/usr/games",
+      "/usr/local/games",
+      "/usr/lib/wsl/lib",
+      "/mnt/c/WINDOWS/system32",
+      "/mnt/c/WINDOWS"
+    ],
+    "contaminated_entries": [
+      "/mnt/c/Users/anise/.codex/tmp/arg0/codex-arg0XAVvIB",
+      "/mnt/c/Users/anise/.codex/bin/wsl"
+    ],
+    "local_live_codex_resolution_status": {
+      "status": "BLOCKED",
+      "reason": "wrapper target resolves to the forbidden Windows-mounted Codex launcher"
+    },
+    "local_path_precedence_status": {
+      "status": "PASS",
+      "launcher_dir_index": 0,
+      "forbidden_indices": [
+        1,
+        2
+      ],
+      "reasons": []
+    },
+    "config_surfaces": {
+      "linux": {
+        "path": "/home/andy4917/.codex/config.toml",
+        "exists": true,
+        "classification": "user_override",
+        "repairable": false,
+        "has_generated_header": false
+      },
+      "windows_mirror": {
+        "path": "/mnt/c/Users/anise/.codex/config.toml",
+        "exists": true,
+        "classification": "generated",
+        "repairable": true,
+        "has_generated_header": true
+      }
+    },
+    "local_wrapper_probe": {
+      "path": "/home/andy4917/.local/bin/codex",
+      "exists": true,
+      "target": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
+      "failure_mode": "exit 127",
+      "status": "BLOCKED",
+      "reason": "local wrapper still targets the forbidden Windows-mounted launcher"
+    },
+    "client_surface_status": {
+      "status": "WARN",
+      "reason": "client session PATH includes injected Codex app runtime paths"
+    },
+    "local_shell_status": {
+      "status": "BLOCKED",
+      "reason": "local shell still resolves or routes through forbidden runtime surfaces"
+    },
+    "command_v_candidate": {
+      "path": "/home/andy4917/.local/bin/codex",
+      "classification": "forbidden_wrapper",
+      "status": "BLOCKED",
+      "exists": true,
+      "native_candidate": false,
+      "target": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
+      "reason": "wrapper target resolves to the forbidden Windows-mounted Codex launcher"
+    },
+    "type_a_candidates": [
+      {
+        "path": "/home/andy4917/.local/bin/codex",
+        "classification": "forbidden_wrapper",
+        "status": "BLOCKED",
+        "exists": true,
+        "native_candidate": false,
+        "target": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
+        "reason": "wrapper target resolves to the forbidden Windows-mounted Codex launcher"
+      },
+      {
+        "path": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
+        "classification": "forbidden_path",
+        "status": "BLOCKED",
+        "exists": false,
+        "native_candidate": false,
+        "target": "",
+        "reason": "candidate resolves to a forbidden Windows-mounted runtime path"
+      }
+    ],
+    "path_normalizer": {
+      "path": "/home/andy4917/.config/shell/wsl-runtime-paths.sh",
+      "exists": true,
+      "repo_owned": false,
+      "evidence": []
+    }
+  },
+  "local_shell_surface": {
+    "status": "BLOCKED",
+    "command_v": "/home/andy4917/.local/bin/codex",
+    "type_a": [
+      "codex is /home/andy4917/.local/bin/codex",
+      "codex is /mnt/c/Users/anise/.codex/bin/wsl/codex",
+      "codex is /home/andy4917/.local/bin/codex"
+    ],
+    "wrapper_probe": {
+      "path": "/home/andy4917/.local/bin/codex",
+      "exists": true,
+      "target": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
+      "failure_mode": "exit 127",
+      "status": "BLOCKED",
+      "reason": "local wrapper still targets the forbidden Windows-mounted launcher"
+    }
+  },
+  "ssh_activation": {
+    "status": "PASS",
+    "host_alias": "devmgmt-wsl",
+    "hostname": "andy4917",
+    "stderr": ""
+  },
+  "ssh_canonical_runtime": {
+    "host_alias": "devmgmt-wsl",
+    "hostname": "andy4917",
+    "ssh_available": true,
+    "stderr": "",
+    "type_a": [
+      "codex is /home/andy4917/.local/bin/codex"
+    ],
+    "type_a_paths": [
+      "/home/andy4917/.local/bin/codex"
+    ],
+    "type_a_candidates": [
+      {
+        "path": "/home/andy4917/.local/bin/codex",
+        "classification": "forbidden_wrapper",
+        "status": "BLOCKED",
+        "exists": true,
+        "native_candidate": false,
+        "target": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
+        "reason": "wrapper target resolves to the forbidden Windows-mounted Codex launcher"
+      }
+    ],
+    "path_entries": [
+      "/home/andy4917/.nvm/versions/node/v24.14.1/bin",
+      "/home/andy4917/.local/bin",
+      "/usr/local/sbin",
+      "/usr/local/bin",
+      "/usr/sbin",
+      "/usr/bin",
+      "/sbin",
+      "/bin",
+      "/usr/games"
+    ],
+    "ssh_runtime_status": {
+      "status": "PASS",
+      "reason": ""
+    },
+    "canonical_ssh_runtime_status": {
+      "status": "PASS",
+      "reason": ""
+    },
+    "remote_repo_root_status": {
+      "status": "PASS",
+      "reason": "",
+      "observed_repo_root": "/home/andy4917/Dev-Management"
+    },
+    "remote_codex_resolution_status": {
+      "status": "BLOCKED",
+      "reason": "wrapper target resolves to the forbidden Windows-mounted Codex launcher",
+      "command_v": "/home/andy4917/.local/bin/codex",
+      "command_v_candidate": {
+        "path": "/home/andy4917/.local/bin/codex",
+        "classification": "forbidden_wrapper",
+        "status": "BLOCKED",
+        "exists": true,
+        "native_candidate": false,
+        "target": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
+        "reason": "wrapper target resolves to the forbidden Windows-mounted Codex launcher"
+      }
+    },
+    "remote_native_codex_status": {
+      "status": "WARN",
+      "reason": "no Linux-native codex absolute path was confirmed in the canonical SSH runtime",
+      "candidates": [],
+      "selected_path": ""
+    },
+    "remote_path_contamination_status": {
+      "status": "PASS",
+      "reason": "",
+      "contaminated_entries": []
+    }
+  },
+  "codex_resolution": {
+    "status": "BLOCKED",
+    "remote_command_v": "/home/andy4917/.local/bin/codex",
+    "remote_native_codex_path": "",
+    "remote_native_candidates": [],
+    "local_command_v": "/home/andy4917/.local/bin/codex"
+  },
+  "path_contamination": {
+    "status": "WARN",
+    "client_surface_status": "WARN",
+    "remote_path_status": "PASS",
+    "local_contaminated_entries": [
+      "/mnt/c/Users/anise/.codex/tmp/arg0/codex-arg0XAVvIB",
+      "/mnt/c/Users/anise/.codex/bin/wsl"
+    ],
+    "remote_contaminated_entries": []
+  },
+  "wrapper_target_safety_status": {
+    "status": "PASS",
+    "preview_path": "/home/andy4917/Dev-Management/reports/generated-runtime-preview/codex-ssh-wrapper.sh",
+    "forbidden_reference_found": false
+  },
+  "preview_wrapper_path": "/home/andy4917/Dev-Management/reports/generated-runtime-preview/codex-ssh-wrapper.sh",
+  "manual_remediation_report": "/home/andy4917/Dev-Management/reports/manual-system-remediation-20260421-035900.md"
+}

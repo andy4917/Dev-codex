@@ -393,6 +393,11 @@ def main() -> int:
             },
             "git_root_marker_proof": git_root_marker_proof,
             "windows_mirror_proof": windows_mirror_proof,
+            "startup_workflow_proof": audit.get("startup_workflow_check", {}),
+            "global_runtime_proof": audit.get("global_runtime_surface", {}),
+            "git_surface_proof": audit.get("git_surface_drift", {}),
+            "instruction_guard_proof": audit.get("instruction_guard_policy", {}),
+            "context7_proof": audit.get("startup_workflow_check", {}).get("context7", {}),
             "hardcoding_legacy_duplicate_audit": hardcoding_audit,
         },
     }

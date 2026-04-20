@@ -424,6 +424,17 @@ trust_level = "trusted"
                 "workflow": "/home/andy4917/Dev-Workflow",
                 "product": "/home/andy4917/Dev-Product",
             },
+            "canonical_execution_surface": {
+                "id": "ssh-devmgmt-wsl",
+                "host_alias": "devmgmt-wsl",
+                "repo_root": "/home/andy4917/Dev-Management",
+                "forbidden_primary_resolution": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
+            },
+            "forbidden_primary_runtime_paths": [
+                "/mnt/c/Users/anise/.codex/bin/wsl",
+                "/mnt/c/Users/anise/.codex/tmp/arg0",
+                ".codex/bin/wsl/codex",
+            ],
             "cleanup_policy": {
                 "quarantine_root": "/home/andy4917/Dev-Management/quarantine",
             },
@@ -440,7 +451,11 @@ trust_level = "trusted"
             },
             "generation_targets": {
                 "global_runtime": {
+                    "linux": {
+                        "launcher": "/home/andy4917/.local/bin/codex",
+                    },
                     "windows_mirror": {
+                        "wsl_launcher": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
                         "generated_header": "GENERATED - DO NOT EDIT",
                     }
                 },
@@ -473,10 +488,15 @@ trust_level = "trusted"
         linux_hooks = json.loads(render.render_hooks(authority, windows=False))
         windows_hooks = json.loads(render.render_hooks(authority, windows=True))
         wrapper = render.render_windows_hook_wrapper(authority)
+        launcher_script = render.render_linux_launcher(authority)
 
         self.assertIn("binding instruction-level guidance", rendered_agents)
         self.assertIn("Canonical global close-out command", rendered_agents)
         self.assertIn("iaw_closeout.py --workspace-root <repo> --run-id <run_id> --profile <L1|L2|L3|L4> --mode verify", rendered_agents)
+        self.assertIn("Codex App and the Windows host are user or client surfaces only", rendered_agents)
+        self.assertIn("Canonical execution runs only through `ssh-devmgmt-wsl` via host alias `devmgmt-wsl`", rendered_agents)
+        self.assertIn("PATH contamination is a client-surface warning only", rendered_agents)
+        self.assertIn("Windows-mounted launchers such as `/mnt/c/Users/anise/.codex/bin/wsl/codex` are external dependencies", rendered_agents)
         self.assertIn("activate the current project or worktree with Serena", rendered_agents)
         self.assertIn("Use Context7 before changing external libraries", rendered_agents)
         self.assertIn("/home/andy4917/.codex/state/iaw/gate-receipts", rendered_agents)
@@ -490,8 +510,11 @@ trust_level = "trusted"
             "powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File C:/Users/anise/.codex/bin/scorecard-hook-wrapper.ps1 -Event UserPromptSubmit -AuthorityPath /home/andy4917/Dev-Management/contracts/workspace_authority.json",
         )
         self.assertIsNotNone(wrapper)
+        self.assertIsNotNone(launcher_script)
         self.assertIn("Convert-ToLinuxPath", wrapper)
         self.assertIn("wsl.exe python3 $HookScript", wrapper)
+        self.assertIn('host_alias="devmgmt-wsl"', launcher_script)
+        self.assertIn("forbidden primary runtime: /mnt/c/Users/anise/.codex/bin/wsl/codex", launcher_script)
 
     def test_sync_generated_text_removes_stale_hooks_file(self) -> None:
         render = _load_render_module()
@@ -502,6 +525,63 @@ trust_level = "trusted"
             render.sync_generated_text(hook_path, None)
 
             self.assertFalse(hook_path.exists())
+
+    def test_wsl_launcher_check_detects_stale_linux_shim(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp = Path(tmpdir)
+            linux_launcher = tmp / "linux-home" / ".local" / "bin" / "codex"
+            linux_config = tmp / "linux-home" / ".codex" / "config.toml"
+            windows_config = tmp / "windows-home" / ".codex" / "config.toml"
+            windows_launcher = tmp / "windows-home" / ".codex" / "bin" / "wsl" / "codex"
+
+            linux_launcher.parent.mkdir(parents=True)
+            linux_config.parent.mkdir(parents=True)
+            windows_config.parent.mkdir(parents=True)
+            windows_launcher.parent.mkdir(parents=True)
+
+            linux_launcher.write_text(
+                "#!/usr/bin/env bash\n"
+                "# GENERATED - DO NOT EDIT\n"
+                'target="/mnt/c/Users/anise/.codex/bin/wsl/old-codex"\n'
+                'exec "$target" "$@"\n',
+                encoding="utf-8",
+            )
+            linux_config.write_text('approval_policy = "on-request"\n', encoding="utf-8")
+            windows_config.write_text('# GENERATED - DO NOT EDIT\napproval_policy = "on-request"\n', encoding="utf-8")
+            windows_launcher.write_text("#!/usr/bin/env bash\nexit 0\n", encoding="utf-8")
+
+            authority = {
+                "forbidden_primary_runtime_paths": [
+                    "/mnt/c/Users/anise/.codex/bin/wsl",
+                    "/mnt/c/Users/anise/.codex/tmp/arg0",
+                    ".codex/bin/wsl/codex",
+                ],
+                "generation_targets": {
+                    "global_runtime": {
+                        "linux": {
+                            "launcher": str(linux_launcher),
+                            "config": str(linux_config),
+                        },
+                        "windows_mirror": {
+                            "config": str(windows_config),
+                            "wsl_launcher": str(windows_launcher),
+                            "generated_header": "GENERATED - DO NOT EDIT",
+                        },
+                    }
+                }
+            }
+            runtime = {
+                "linux_launcher": linux_launcher,
+                "linux_config": linux_config,
+                "windows_config": windows_config,
+                "windows_wsl_launcher": windows_launcher,
+            }
+
+            check = self.module.build_wsl_launcher_check(authority, runtime=runtime)
+
+        self.assertEqual(check["status"], "BLOCKED")
+        self.assertEqual(check["configured_target"], "/mnt/c/Users/anise/.codex/bin/wsl/old-codex")
+        self.assertIn("forbidden Windows-mounted launcher", " ".join(check["reasons"]))
 
     def test_audit_detects_forbidden_feature_flags_and_active_runtime_restore_seed(self) -> None:
         authority = {

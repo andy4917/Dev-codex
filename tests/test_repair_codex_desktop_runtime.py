@@ -81,6 +81,8 @@ class RepairCodexDesktopRuntimeTests(unittest.TestCase):
         management_root = tmp / "Dev-Management"
         linux_codex = tmp / "linux" / ".codex"
         windows_codex = tmp / "windows" / ".codex"
+        linux_launcher = tmp / "linux-home" / ".local" / "bin" / "codex"
+        windows_launcher = windows_codex / "bin" / "wsl" / "codex"
         product_root = tmp / "Dev-Product"
         reservation_root = product_root / "reservation-system"
         management_root.mkdir(parents=True)
@@ -100,21 +102,34 @@ class RepairCodexDesktopRuntimeTests(unittest.TestCase):
                 "product": str(product_root),
                 "reservation-system": str(reservation_root),
             },
+            "canonical_execution_surface": {
+                "id": "ssh-devmgmt-wsl",
+                "host_alias": "devmgmt-wsl",
+                "repo_root": str(management_root),
+                "forbidden_primary_resolution": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
+            },
+            "forbidden_primary_runtime_paths": [
+                "/mnt/c/Users/anise/.codex/bin/wsl",
+                "/mnt/c/Users/anise/.codex/tmp/arg0",
+                ".codex/bin/wsl/codex",
+            ],
             "generation_targets": {
                 "global_config": {"model_reasoning_effort": "high"},
-                "global_runtime": {
-                    "linux": {
-                        "agents": str(linux_codex / "AGENTS.md"),
-                        "config": str(linux_codex / "config.toml"),
-                        "hooks_config": str(linux_codex / "hooks.json"),
-                    },
-                    "windows_mirror": {
-                        "agents": str(windows_codex / "AGENTS.md"),
-                        "config": str(windows_codex / "config.toml"),
-                        "hooks_config": str(windows_codex / "hooks.json"),
+                    "global_runtime": {
+                        "linux": {
+                            "agents": str(linux_codex / "AGENTS.md"),
+                            "config": str(linux_codex / "config.toml"),
+                            "hooks_config": str(linux_codex / "hooks.json"),
+                            "launcher": str(linux_launcher),
+                        },
+                        "windows_mirror": {
+                            "agents": str(windows_codex / "AGENTS.md"),
+                            "config": str(windows_codex / "config.toml"),
+                            "hooks_config": str(windows_codex / "hooks.json"),
+                            "wsl_launcher": str(windows_launcher),
+                        },
                     },
                 },
-            },
             "runtime_layering": {
                 "restore_seed_policy": {
                     "preferred_windows_access_host": "wsl.localhost",
@@ -145,7 +160,31 @@ class RepairCodexDesktopRuntimeTests(unittest.TestCase):
             {
                 "status": "PASS",
                 "windows_runtime_mirror_check": {"status": "PASS"},
+                "wsl_launcher_check": {"status": "PASS"},
                 "runtime_restore_seed_violations": [],
+            },
+        )
+        _write_json(
+            management_root / "reports" / "global-runtime.json",
+            {
+                "status": "PASS",
+                "canonical_execution_status": "PASS",
+                "remote_repo_root_status": {"status": "PASS"},
+                "remote_codex_resolution_status": {"status": "PASS"},
+                "remote_native_codex_status": {"status": "PASS", "selected_path": "/usr/local/bin/codex"},
+                "remote_path_contamination_status": {"status": "PASS"},
+                "local_path_precedence_status": {"status": "PASS"},
+                "wrapper_target_safety_status": {"status": "PASS"},
+                "ssh_canonical_runtime": {
+                    "canonical_ssh_runtime_status": {"status": "PASS"},
+                    "remote_repo_root_status": {"status": "PASS"},
+                    "remote_codex_resolution_status": {"status": "PASS"},
+                    "remote_native_codex_status": {"status": "PASS", "selected_path": "/usr/local/bin/codex"},
+                    "remote_path_contamination_status": {"status": "PASS"},
+                },
+                "local_runtime_surface": {
+                    "local_path_precedence_status": {"status": "PASS"},
+                },
             },
         )
 
@@ -154,11 +193,19 @@ class RepairCodexDesktopRuntimeTests(unittest.TestCase):
         self.module.ENV_SYNC_POLICY_PATH = management_root / "contracts" / "environment_sync_policy.json"
         self.module.REPORT_PATH = management_root / "reports" / "codex-runtime-repair.json"
         self.module.resolve_codex_home = lambda: linux_codex
+        windows_launcher.parent.mkdir(parents=True, exist_ok=True)
+        windows_launcher.write_text("#!/usr/bin/env bash\nexit 0\n", encoding="utf-8")
+        windows_launcher.chmod(0o755)
+        linux_launcher.parent.mkdir(parents=True, exist_ok=True)
+        linux_launcher.write_text(self.module.render_linux_launcher(authority), encoding="utf-8")
+        linux_launcher.chmod(0o755)
 
         return {
             "management_root": management_root,
             "linux_codex": linux_codex,
+            "linux_launcher": linux_launcher,
             "windows_codex": windows_codex,
+            "windows_launcher": windows_launcher,
             "product_root": product_root,
             "reservation_root": reservation_root,
             "report_path": self.module.REPORT_PATH,
@@ -168,6 +215,14 @@ class RepairCodexDesktopRuntimeTests(unittest.TestCase):
         windows_codex = fixture["windows_codex"]
         management_root = fixture["management_root"]
         reservation_root = fixture["reservation_root"]
+        stale_launcher_target = windows_codex / "bin" / "wsl" / "old-codex"
+        fixture["linux_launcher"].write_text(
+            "#!/usr/bin/env bash\n"
+            f'target="{stale_launcher_target}"\n'
+            'exec "$target" "$@"\n',
+            encoding="utf-8",
+        )
+        fixture["linux_launcher"].chmod(0o755)
         _write_json(
             windows_codex / ".codex-global-state.json",
             {
@@ -552,7 +607,7 @@ class RepairCodexDesktopRuntimeTests(unittest.TestCase):
             self._seed_runtime_drift(fixture)
             state_path = fixture["windows_codex"] / ".codex-global-state.json"
 
-            exit_code, _output = self._run_main(["--apply", "--runtime-codex-home", str(fixture["windows_codex"])])
+            exit_code, _output = self._run_main(["--apply", "--tests-status", "PASS", "--runtime-codex-home", str(fixture["windows_codex"])])
             repaired = json.loads(state_path.read_text(encoding="utf-8"))
             report = json.loads(fixture["report_path"].read_text(encoding="utf-8"))
 
@@ -561,6 +616,20 @@ class RepairCodexDesktopRuntimeTests(unittest.TestCase):
         self.assertEqual(report["mode"], "apply")
         self.assertTrue(report["applied_changes"])
         self.assertTrue(report["backup"]["created"])
+
+    def test_apply_repairs_linux_launcher_shim(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            fixture = self._configure_runtime_fixture(Path(tmpdir))
+            self._seed_runtime_drift(fixture)
+
+            exit_code, _output = self._run_main(["--apply", "--tests-status", "PASS", "--runtime-codex-home", str(fixture["windows_codex"])])
+            report = json.loads(fixture["report_path"].read_text(encoding="utf-8"))
+            launcher_text = fixture["linux_launcher"].read_text(encoding="utf-8")
+
+        self.assertEqual(exit_code, 0)
+        self.assertIn('host_alias="devmgmt-wsl"', launcher_text)
+        self.assertEqual(report["launcher_shim"]["status"], "PASS")
+        self.assertTrue(any(item["type"] == "linux_codex_launcher_shim_rewrite" for item in report["applied_changes"]))
 
     def test_runtime_codex_home_override(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -610,6 +679,7 @@ class RepairCodexDesktopRuntimeTests(unittest.TestCase):
         self.assertEqual(exit_code, 0)
         self.assertEqual(report["unexpected_resume_root_rewrites"], [])
         self.assertEqual(report["baseline"]["windows_runtime_mirror_check_status"], "PASS")
+        self.assertEqual(report["baseline"]["wsl_launcher_check_status"], "PASS")
         self.assertEqual(report["baseline"]["runtime_restore_seed_violations_count"], 0)
 
 

@@ -5,6 +5,94 @@
     "workflow": "/home/andy4917/Dev-Workflow",
     "product": "/home/andy4917/Dev-Product"
   },
+  "surface_roles": {
+    "codex_app": [
+      "user_surface"
+    ],
+    "windows_host": [
+      "user_surface",
+      "client_surface"
+    ],
+    "windows_codex_state": [
+      "live_runtime_surface",
+      "not_authority"
+    ],
+    "windows_codex_launcher": [
+      "external_dependency",
+      "forbidden_primary_runtime"
+    ],
+    "wsl_linux_shell": [
+      "local_execution_surface"
+    ],
+    "ssh_devmgmt_wsl": [
+      "canonical_execution_surface"
+    ],
+    "dev_management": [
+      "source_of_truth",
+      "repo_owned_authority"
+    ],
+    "dev_workflow": [
+      "workflow_runtime_support"
+    ],
+    "reservation_system": [
+      "application_repo"
+    ],
+    "serena": [
+      "startup_gate"
+    ],
+    "context7": [
+      "protected_change_gate"
+    ],
+    "git_windows": [
+      "git_surface"
+    ],
+    "git_wsl": [
+      "git_surface"
+    ]
+  },
+  "repair_boundaries": {
+    "repo_may_repair": [
+      "generated_config_files",
+      "generated_wrapper_files",
+      "generated_report_files"
+    ],
+    "repo_may_repair_local_generated_wrappers_only_when_canonical_runtime_passes": true,
+    "repo_must_not_repair": [
+      "windows_codex_app_binaries",
+      "windows_codex_launcher_binaries",
+      "windows_global_or_system_git_config",
+      "windows_path",
+      "wsl_system_config",
+      "ssh_private_key_permissions"
+    ],
+    "repo_must_not_treat_as_repo_owned": [
+      "/mnt/c/Users/anise/.codex/bin/wsl/codex"
+    ],
+    "repo_must_not_overwrite_external_app_state_except_owned_generated_mirrors": true
+  },
+  "forbidden_primary_runtime_paths": [
+    "/mnt/c/Users/anise/.codex/bin/wsl",
+    "/mnt/c/Users/anise/.codex/tmp/arg0",
+    ".codex/bin/wsl/codex"
+  ],
+  "canonical_execution_surface": {
+    "id": "ssh-devmgmt-wsl",
+    "host_alias": "devmgmt-wsl",
+    "repo_root": "/home/andy4917/Dev-Management",
+    "expected_os": "linux",
+    "expected_primary_resolution": "linux-native codex in canonical SSH runtime",
+    "allowed_primary_resolution_fallback": "repo-generated local SSH wrapper",
+    "forbidden_primary_resolution": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
+    "client_surface_contamination_status_when_canonical_passes": "WARN",
+    "local_shell_requested_execution_status_when_forbidden": "BLOCKED"
+  },
+  "observed_remote_evidence": {
+    "codex_app_remote_record": {
+      "value": "andy4917@localhost:22",
+      "authoritative": false,
+      "role": "observed_fallback_candidate"
+    }
+  },
   "classification_rules": {
     "management": {
       "description": "Global authority, operating contracts, audits, migration manifests, quarantine records, and generated runtime orchestration.",
@@ -24,6 +112,7 @@
         "execution_surfaces.json",
         "experiment_policy.json",
         "human_bottleneck_rules.json",
+        "instruction_guard_policy.json",
         "memory_policy.json",
         "spawn_policy.json",
         "syncthing_policy.json",
@@ -34,6 +123,7 @@
         "CLOSE_OUT.md",
         "CONTEXT7_USAGE.md",
         "DEPENDENCY_INVERSION.md",
+        "GLOBAL_RUNTIME_ARCHITECTURE.md",
         "HOOKS_WSL.md",
         "LOCAL_ENVIRONMENTS.md",
         "PREREQUISITES.md",
@@ -41,6 +131,7 @@
         "RELEASE_PLAN.md",
         "ROLLBACK.md",
         "RUNBOOK.md",
+        "AGENT_GUARDRAILS.md",
         "SESSION_THREAD_CONTAMINATION_AUDIT.md",
         "SYNCTHING.md",
         "TOOLCHAIN.md",
@@ -313,12 +404,14 @@
       "linux": {
         "agents": "/home/andy4917/.codex/AGENTS.md",
         "config": "/home/andy4917/.codex/config.toml",
-        "hooks_config": "/home/andy4917/.codex/hooks.json"
+        "hooks_config": "/home/andy4917/.codex/hooks.json",
+        "launcher": "/home/andy4917/.local/bin/codex"
       },
       "windows_mirror": {
         "agents": "/mnt/c/Users/anise/.codex/AGENTS.md",
         "config": "/mnt/c/Users/anise/.codex/config.toml",
         "hooks_config": "/mnt/c/Users/anise/.codex/hooks.json",
+        "wsl_launcher": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
         "generated_header": "GENERATED - DO NOT EDIT"
       }
     },

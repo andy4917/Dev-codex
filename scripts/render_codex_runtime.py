@@ -11,11 +11,13 @@ from typing import Any
 
 
 AUTHORITY_PATH = Path("/home/andy4917/Dev-Management/contracts/workspace_authority.json")
+MANAGEMENT_ROOT = AUTHORITY_PATH.parents[1]
 DEFAULT_MCP_SERVERS = ("context7", "serena")
 DEFAULT_MCP_TRANSPORTS = {
     "context7": "remote_http",
     "serena": "stdio",
 }
+GENERATED_RUNTIME_HEADER = "GENERATED - DO NOT EDIT"
 HTTP_ONLY_KEYS = {"url", "bearer_token_env_var", "http_headers", "env_http_headers"}
 STDIO_ONLY_KEYS = {"command", "args", "env", "env_vars", "cwd"}
 NESTED_MCP_KEYS = ("env_http_headers", "http_headers", "env", "env_vars")
@@ -59,6 +61,18 @@ def write_text(path: Path, text: str) -> None:
     path.write_text(text, encoding="utf-8")
 
 
+def make_executable(path: Path) -> None:
+    try:
+        path.chmod(path.stat().st_mode | 0o111)
+    except OSError:
+        pass
+
+
+def write_executable_text(path: Path, text: str) -> None:
+    write_text(path, text)
+    make_executable(path)
+
+
 def sync_generated_text(path: Path, text: str | None) -> None:
     if text is None:
         if path.is_dir() and not path.is_symlink():
@@ -67,6 +81,13 @@ def sync_generated_text(path: Path, text: str | None) -> None:
             path.unlink()
         return
     write_text(path, text)
+
+
+def sync_generated_executable_text(path: Path, text: str | None) -> None:
+    if text is None:
+        sync_generated_text(path, None)
+        return
+    write_executable_text(path, text)
 
 
 def relink(link: Path, target: Path) -> None:
@@ -85,10 +106,32 @@ def sync_tree(source: Path, target: Path) -> None:
     shutil.copytree(source, target)
 
 
+def launcher_paths(authority: dict) -> dict[str, Path]:
+    runtime = authority.get("generation_targets", {}).get("global_runtime", {})
+    linux = runtime.get("linux", {})
+    return {
+        "linux_launcher": Path(str(linux.get("launcher", Path.home() / ".local" / "bin" / "codex"))).expanduser(),
+        "preview_launcher": preview_linux_launcher_path(authority),
+    }
+
+
+def preview_linux_launcher_path(authority: dict) -> Path:
+    return MANAGEMENT_ROOT / "reports" / "generated-runtime-preview" / "codex-ssh-wrapper.sh"
+
+
 def render_agents(authority: dict, windows: bool) -> str:
     roots = authority["canonical_roots"]
     cleanup = authority["cleanup_policy"]
     scorecard = authority["generation_targets"]["scorecard"]
+    canonical_surface = authority.get("canonical_execution_surface", {})
+    host_alias = str(canonical_surface.get("host_alias", "devmgmt-wsl")).strip() or "devmgmt-wsl"
+    observed_remote = authority.get("observed_remote_evidence", {})
+    observed_remote_text = ""
+    if observed_remote:
+        observed_remote_text = str(observed_remote.get("fallback_observed_remote", "")).strip()
+    forbidden_primary = str(
+        canonical_surface.get("forbidden_primary_resolution", "/mnt/c/Users/anise/.codex/bin/wsl/codex")
+    ).strip()
     receipt_state_root = scorecard.get("receipt_state_root", "")
     receipt_root_text = (
         f"{receipt_state_root}/gate-receipts"
@@ -132,6 +175,14 @@ def render_agents(authority: dict, windows: bool) -> str:
         f"- Runtime restore seed is derived-only, preserves named threads, drops stale projectless restore refs, removes stale remote environment state, and prefers `{restore['preferred_windows_access_host']}` UNC roots.\n"
         f"- Terminal restore must stay in `{restore['terminal_restore_policy']}` mode and conversation detail should default to `{restore['conversation_detail_mode']}` while stabilization is in progress.\n"
         f"- Use `.git` as the only project root marker.\n"
+        f"- Codex App and the Windows host are user or client surfaces only; they are never the runtime authority.\n"
+        f"- Dev-Management is the repo-owned runtime authority and source of truth for generated runtime files.\n"
+        f"- Canonical execution runs only through `{canonical_surface.get('id', 'ssh-devmgmt-wsl')}` via host alias `{host_alias}`.\n"
+        f"- Observed app remotes such as `{observed_remote_text or 'andy4917@localhost:22'}` are evidence only and must not be promoted into authority without verification.\n"
+        f"- Windows-mounted launchers such as `{forbidden_primary}` are external dependencies and are forbidden as the primary runtime.\n"
+        f"- When canonical SSH execution passes, Codex App PATH contamination is a client-surface warning only; it does not replace the canonical execution authority.\n"
+        f"- Local shell execution remains blocked while live codex resolution or PATH precedence still points at a forbidden Windows-mounted launcher.\n"
+        f"- Do not hand-edit generated AGENTS, config, shim, or preview runtime files; rerender them from the authority repo instead.\n"
         f"- Before code work, activate the current project or worktree with Serena when it is available.\n"
         f"- Check Serena onboarding and project memories before major code changes.\n"
         f"- Prefer Serena symbol and reference tools over repeated whole-file reads when Serena is available.\n"
@@ -592,6 +643,53 @@ def render_windows_hook_wrapper(authority: dict) -> str | None:
     )
 
 
+def render_linux_launcher(authority: dict, remote_native_codex_path: str = "") -> str | None:
+    paths = launcher_paths(authority)
+    launcher_path = paths["linux_launcher"]
+    surface = authority.get("canonical_execution_surface", {})
+    host_alias = str(surface.get("host_alias", "devmgmt-wsl")).strip() or "devmgmt-wsl"
+    repo_root = str(surface.get("repo_root", authority.get("canonical_roots", {}).get("management", MANAGEMENT_ROOT))).strip()
+    forbidden_primary = str(surface.get("forbidden_primary_resolution", "/mnt/c/Users/anise/.codex/bin/wsl/codex")).strip()
+    if not launcher_path:
+        return None
+    remote_exec = str(remote_native_codex_path).strip() or "codex"
+    return (
+        "#!/usr/bin/env bash\n"
+        f"# {GENERATED_RUNTIME_HEADER}\n"
+        "# generated by Dev-Management\n"
+        f"# authority file: {AUTHORITY_PATH}\n"
+        f"# canonical execution surface: {surface.get('id', 'ssh-devmgmt-wsl')} ({host_alias})\n"
+        f"# forbidden primary runtime: {forbidden_primary}\n"
+        "# failure mode: exit 127 if the canonical SSH runtime or remote codex command is unavailable\n"
+        "set -euo pipefail\n\n"
+        f"host_alias={json.dumps(host_alias)}\n"
+        f"repo_root={json.dumps(repo_root)}\n"
+        "remote_cmd=$(python3 - \"$repo_root\" \"$@\" <<'PY'\n"
+        "import shlex\n"
+        "import sys\n"
+        "repo_root = sys.argv[1]\n"
+        f"remote_exec = {json.dumps(remote_exec)}\n"
+        "args = ' '.join(shlex.quote(arg) for arg in sys.argv[2:])\n"
+        "command = f\"cd {shlex.quote(repo_root)} && exec {shlex.quote(remote_exec)}\"\n"
+        "if args:\n"
+        "    command = f\"{command} {args}\"\n"
+        "print(command)\n"
+        "PY\n"
+        ")\n"
+        "if [ -z \"$remote_cmd\" ]; then\n"
+        "  printf 'Failed to construct remote Codex command\\n' >&2\n"
+        "  exit 127\n"
+        "fi\n"
+        "exec ssh -o BatchMode=yes \"$host_alias\" \"$remote_cmd\"\n"
+    )
+
+
+def write_launcher_preview(authority: dict) -> Path:
+    preview_path = preview_linux_launcher_path(authority)
+    sync_generated_executable_text(preview_path, render_linux_launcher(authority))
+    return preview_path
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Render generated Codex runtime files from workspace authority.")
     parser.add_argument("--skip-skills", action="store_true", help="Skip skill exposure synchronization.")
@@ -613,6 +711,7 @@ def main() -> int:
     windows_hooks = runtime["windows_mirror"].get("hooks_config")
     if windows_hooks:
         sync_generated_text(Path(windows_hooks), render_hooks(authority, windows=True))
+    write_launcher_preview(authority)
     relink(Path.home() / ".codex" / "workspace_authority.json", AUTHORITY_PATH)
 
     if not args.skip_skills:

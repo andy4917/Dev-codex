@@ -44,10 +44,10 @@
         "windows_path": "/mnt/c/Users/anise/.codex/AGENTS.md",
         "linux_exists": true,
         "windows_exists": true,
-        "linux_sha256": "45ea0dd954230d4faac06b5f9ecf43ba5e200a69a45d360b2ea64e4dd5796b17",
-        "windows_sha256": "2b9935897fd8d56f506a0ce8fc71aa2d76ce78d4945dca386e2fb42d1c42ada1",
-        "linux_body_sha256": "63fb56efabfeb6c6a4cc8f731dc8805be2e39ec70b1acbbafa9eded6bbade7af",
-        "windows_body_sha256": "63fb56efabfeb6c6a4cc8f731dc8805be2e39ec70b1acbbafa9eded6bbade7af",
+        "linux_sha256": "579fe08a0c49aed24362bcc776a45bbc2ac0924a9af326ea06ef94d048431e62",
+        "windows_sha256": "0ab4ea024b7f7616fef343823de5031e14e526eee847464f730fcc023f43c9f0",
+        "linux_body_sha256": "22543126ad21f3ac36a85affbc7d83d2609b600dd3f29422774a6a99ee496254",
+        "windows_body_sha256": "22543126ad21f3ac36a85affbc7d83d2609b600dd3f29422774a6a99ee496254",
         "expected_windows_headers": [
           "GENERATED - DO NOT EDIT"
         ],
@@ -115,6 +115,2156 @@
     "divergence_summary": [],
     "status": "PASS"
   },
+  "canonical_execution_surface": {
+    "status": "PASS",
+    "details": {
+      "host_alias": "devmgmt-wsl",
+      "hostname": "andy4917",
+      "ssh_available": true,
+      "stderr": "",
+      "type_a": [
+        "codex is /home/andy4917/.local/bin/codex"
+      ],
+      "type_a_paths": [
+        "/home/andy4917/.local/bin/codex"
+      ],
+      "type_a_candidates": [
+        {
+          "path": "/home/andy4917/.local/bin/codex",
+          "classification": "forbidden_wrapper",
+          "status": "BLOCKED",
+          "exists": true,
+          "native_candidate": false,
+          "target": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
+          "reason": "wrapper target resolves to the forbidden Windows-mounted Codex launcher"
+        }
+      ],
+      "path_entries": [
+        "/home/andy4917/.nvm/versions/node/v24.14.1/bin",
+        "/home/andy4917/.local/bin",
+        "/usr/local/sbin",
+        "/usr/local/bin",
+        "/usr/sbin",
+        "/usr/bin",
+        "/sbin",
+        "/bin",
+        "/usr/games"
+      ],
+      "ssh_runtime_status": {
+        "status": "PASS",
+        "reason": ""
+      },
+      "canonical_ssh_runtime_status": {
+        "status": "PASS",
+        "reason": ""
+      },
+      "remote_repo_root_status": {
+        "status": "PASS",
+        "reason": "",
+        "observed_repo_root": "/home/andy4917/Dev-Management"
+      },
+      "remote_codex_resolution_status": {
+        "status": "BLOCKED",
+        "reason": "wrapper target resolves to the forbidden Windows-mounted Codex launcher",
+        "command_v": "/home/andy4917/.local/bin/codex",
+        "command_v_candidate": {
+          "path": "/home/andy4917/.local/bin/codex",
+          "classification": "forbidden_wrapper",
+          "status": "BLOCKED",
+          "exists": true,
+          "native_candidate": false,
+          "target": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
+          "reason": "wrapper target resolves to the forbidden Windows-mounted Codex launcher"
+        }
+      },
+      "remote_native_codex_status": {
+        "status": "WARN",
+        "reason": "no Linux-native codex absolute path was confirmed in the canonical SSH runtime",
+        "candidates": [],
+        "selected_path": ""
+      },
+      "remote_path_contamination_status": {
+        "status": "PASS",
+        "reason": "",
+        "contaminated_entries": []
+      }
+    }
+  },
+  "client_surface": {
+    "status": "WARN",
+    "path_entries": [
+      "/home/andy4917/.local/bin",
+      "/mnt/c/Users/anise/.codex/tmp/arg0/codex-arg0YMNT1f",
+      "/mnt/c/Users/anise/.codex/bin/wsl",
+      "/home/andy4917/.nvm/versions/node/v24.14.1/bin",
+      "/home/andy4917/.local/bin",
+      "/usr/local/sbin",
+      "/usr/local/bin",
+      "/usr/sbin",
+      "/usr/bin",
+      "/sbin",
+      "/bin",
+      "/usr/games",
+      "/usr/local/games",
+      "/usr/lib/wsl/lib",
+      "/mnt/c/WINDOWS/system32",
+      "/mnt/c/WINDOWS"
+    ],
+    "contaminated_entries": [
+      "/mnt/c/Users/anise/.codex/tmp/arg0/codex-arg0YMNT1f",
+      "/mnt/c/Users/anise/.codex/bin/wsl"
+    ]
+  },
+  "local_shell_surface": {
+    "status": "BLOCKED",
+    "command_v": "/home/andy4917/.local/bin/codex",
+    "type_a": [
+      "codex is /home/andy4917/.local/bin/codex",
+      "codex is /mnt/c/Users/anise/.codex/bin/wsl/codex",
+      "codex is /home/andy4917/.local/bin/codex"
+    ],
+    "wrapper_probe": {
+      "path": "/home/andy4917/.local/bin/codex",
+      "exists": true,
+      "target": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
+      "failure_mode": "exit 127",
+      "status": "BLOCKED",
+      "reason": "local wrapper still targets the forbidden Windows-mounted launcher"
+    }
+  },
+  "codex_resolution": {
+    "status": "BLOCKED",
+    "remote_command_v": "/home/andy4917/.local/bin/codex",
+    "remote_native_codex_path": "",
+    "remote_native_candidates": [],
+    "local_command_v": "/home/andy4917/.local/bin/codex"
+  },
+  "path_contamination": {
+    "status": "WARN",
+    "client_surface_status": "WARN",
+    "remote_path_status": "PASS",
+    "local_contaminated_entries": [
+      "/mnt/c/Users/anise/.codex/tmp/arg0/codex-arg0YMNT1f",
+      "/mnt/c/Users/anise/.codex/bin/wsl"
+    ],
+    "remote_contaminated_entries": []
+  },
+  "ssh_activation": {
+    "status": "PASS",
+    "host_alias": "devmgmt-wsl",
+    "hostname": "andy4917",
+    "stderr": ""
+  },
+  "serena_startup": {
+    "status": "BLOCKED",
+    "summary": "Serena startup sequence is incomplete for the current diff.",
+    "required": true,
+    "warnings": [],
+    "blockers": [
+      "Serena onboarding has not been performed for the current repo",
+      "latest Serena MCP log shows the session started without activating a project"
+    ],
+    "required_actions": [
+      "uv tool install -p 3.13 serena-agent@latest --prerelease=allow",
+      "serena init",
+      "cd /home/andy4917/Dev-Management && serena project create --index"
+    ],
+    "config": {
+      "global": {
+        "path": "/home/andy4917/.codex/config.toml",
+        "present": true,
+        "matches_canonical": true
+      },
+      "windows_mirror": {
+        "path": "/mnt/c/Users/anise/.codex/config.toml",
+        "present": true,
+        "matches_canonical": true
+      }
+    },
+    "runtime": {
+      "linux": {
+        "serena_home": "/home/andy4917/.serena",
+        "binary_found": true,
+        "home_initialized": true,
+        "project_dir": "/home/andy4917/Dev-Management/.serena",
+        "project_configured": true,
+        "onboarding_performed": false
+      }
+    },
+    "repair_advice": {
+      "can_auto_repair": false,
+      "reason": "Deterministic Serena onboarding repair is not confirmed; use serena project index only for metadata/index and keep onboarding manual.",
+      "deterministic_cli": {
+        "available": true,
+        "binary": "/home/andy4917/.local/bin/serena",
+        "project_index_available": true,
+        "reason": ""
+      }
+    },
+    "activation": {
+      "status": "BLOCKED",
+      "reason": "latest Serena MCP log shows the session started without activating a project",
+      "log_path": "/home/andy4917/.serena/logs/2026-04-21/mcp_20260421-041009_7120.txt",
+      "matched_lines": [
+        "WARNING 2026-04-21 04:10:09,919 [MainThread] serena.cli:start_mcp_server:326 - No project root found from /mnt/c/Program Files/WindowsApps/OpenAI.Codex_26.417.4842.0_x64__2p2nqsd0c76g0/app/resources; not activating any project"
+      ]
+    },
+    "steps": [
+      {
+        "id": "serena_global_config_ready",
+        "status": "PASS",
+        "reason": "",
+        "evidence_refs": [
+          "/home/andy4917/.codex/config.toml"
+        ]
+      },
+      {
+        "id": "serena_project_metadata_present",
+        "status": "PASS",
+        "reason": "",
+        "evidence_refs": [
+          "/home/andy4917/Dev-Management/.serena/project.yml"
+        ]
+      },
+      {
+        "id": "serena_onboarding_completed",
+        "status": "BLOCKED",
+        "reason": "Serena onboarding has not been performed for the current repo",
+        "evidence_refs": [
+          "/home/andy4917/Dev-Management/.serena/memories"
+        ]
+      },
+      {
+        "id": "serena_project_activated",
+        "status": "BLOCKED",
+        "reason": "latest Serena MCP log shows the session started without activating a project",
+        "evidence_refs": [
+          "/home/andy4917/.serena/logs/2026-04-21/mcp_20260421-041009_7120.txt"
+        ]
+      }
+    ]
+  },
+  "context7_evidence": {
+    "status": "PASS",
+    "summary": "Context7 evidence is ready for the current diff.",
+    "required": false,
+    "report_path": "/home/andy4917/Dev-Management/reports/context7-usage.json",
+    "detected_changes": [],
+    "entries": [],
+    "warnings": [],
+    "blockers": [],
+    "config": {
+      "global_config_path": "/home/andy4917/.codex/config.toml",
+      "global_matches_canonical": true
+    },
+    "step": {
+      "id": "context7_consulted_before_protected_changes",
+      "status": "WAIVED",
+      "reason": "current diff does not touch Context7-protected files",
+      "evidence_refs": []
+    }
+  },
+  "git_surface": {
+    "status": "WARN",
+    "repo_reports": [
+      {
+        "repo_root": "/home/andy4917/Dev-Management",
+        "status": "present",
+        "dirty": [
+          " M contracts/execution_surfaces.json",
+          " M contracts/workspace_authority.json",
+          " M docs/RUNBOOK.md",
+          " M docs/SERENA_USAGE.md",
+          " M reports/audit.final.json",
+          " M scripts/audit_workspace.py",
+          " M scripts/render_codex_runtime.py",
+          " M scripts/repair_codex_desktop_runtime.py",
+          " M scripts/verify_migration_evidence.py",
+          " M tests/test_audit_workspace_contract.py",
+          " M tests/test_repair_codex_desktop_runtime.py",
+          "?? .serena/",
+          "?? contracts/instruction_guard_policy.json",
+          "?? docs/AGENT_GUARDRAILS.md",
+          "?? docs/GLOBAL_RUNTIME_ARCHITECTURE.md",
+          "?? reports/canonical-runtime-activation.dry-run.json",
+          "?? reports/canonical-runtime-activation.json",
+          "?? reports/generated-runtime-preview/",
+          "?? reports/git-surface.json",
+          "?? reports/global-runtime.after-activation.json",
+          "?? reports/global-runtime.json",
+          "?? reports/manual-system-remediation-20260421-030157.md",
+          "?? reports/manual-system-remediation-20260421-030516.md",
+          "?? reports/manual-system-remediation-20260421-031215.md",
+          "?? reports/manual-system-remediation-20260421-033211.md",
+          "?? reports/manual-system-remediation-20260421-035801.md",
+          "?? reports/manual-system-remediation-20260421-035900.md",
+          "?? reports/manual-system-remediation-20260421-041812.md",
+          "?? reports/serena-startup-repair.apply.json",
+          "?? reports/serena-startup-repair.json",
+          "?? reports/startup-workflow.after-activation.json",
+          "?? reports/startup-workflow.json",
+          "?? scripts/activate_canonical_runtime.py",
+          "?? scripts/check_agent_instruction.py",
+          "?? scripts/check_git_surface.py",
+          "?? scripts/check_global_runtime.py",
+          "?? scripts/check_startup_workflow.py",
+          "?? scripts/repair_serena_startup.py",
+          "?? scripts/run_canonical_command.py",
+          "?? tests/test_activate_canonical_runtime.py",
+          "?? tests/test_check_agent_instruction.py",
+          "?? tests/test_check_global_runtime.py",
+          "?? tests/test_check_startup_workflow.py",
+          "?? tests/test_git_surface.py",
+          "?? tests/test_repair_serena_startup.py",
+          "?? tests/test_run_canonical_command.py"
+        ],
+        "local_config": {
+          "available": true,
+          "scope": "local",
+          "lines": [
+            "file:.git/config\tremote.origin.url=https://github.com/andy4917/Dev-codex.git",
+            "file:.git/config\tremote.origin.fetch=+refs/heads/*:refs/remotes/origin/*"
+          ],
+          "map": {
+            "remote.origin.url": "https://github.com/andy4917/Dev-codex.git",
+            "remote.origin.fetch": "+refs/heads/*:refs/remotes/origin/*"
+          },
+          "stderr": "",
+          "exit_code": 0
+        },
+        "top_level": "/home/andy4917/Dev-Management",
+        "hooks_path": ".git/hooks",
+        "is_worktree": false,
+        "is_sparse_checkout": false,
+        "superproject": "",
+        "warnings": [
+          "repo is dirty"
+        ]
+      },
+      {
+        "repo_root": "/home/andy4917/Dev-Workflow",
+        "status": "present",
+        "dirty": [
+          " M scripts/delivery_gate.py",
+          "?? tests/test_delivery_gate_scorecard_slice.py"
+        ],
+        "local_config": {
+          "available": true,
+          "scope": "local",
+          "lines": [
+            "file:.git/config\tremote.origin.url=https://github.com/andy4917/Dev-Workflow.git",
+            "file:.git/config\tremote.origin.fetch=+refs/heads/*:refs/remotes/origin/*"
+          ],
+          "map": {
+            "remote.origin.url": "https://github.com/andy4917/Dev-Workflow.git",
+            "remote.origin.fetch": "+refs/heads/*:refs/remotes/origin/*"
+          },
+          "stderr": "",
+          "exit_code": 0
+        },
+        "top_level": "/home/andy4917/Dev-Workflow",
+        "hooks_path": ".git/hooks",
+        "is_worktree": false,
+        "is_sparse_checkout": false,
+        "superproject": "",
+        "warnings": [
+          "repo is dirty"
+        ]
+      },
+      {
+        "repo_root": "/home/andy4917/Dev-Product/reservation-system",
+        "status": "present",
+        "dirty": [
+          " D .codex_tmp/ota_dom_fallback_handoff.json",
+          " D .codex_tmp/ota_dom_fallback_memory.json",
+          " D .codex_tmp/ota_dom_fallback_regression.json",
+          " D .codex_tmp/ota_fetch_instrumentation_handoff.json",
+          " D .codex_tmp/ota_fetch_instrumentation_memory.json",
+          " D .codex_tmp/ota_fetch_instrumentation_regression.json",
+          " M .gitignore",
+          " M README.md",
+          " M app_v2/main/bgeModelInstaller.ts",
+          " M app_v2/main/preflight.ts",
+          " M app_v2/main/providerWorkspaceManager.ts",
+          " M app_v2/renderer/App.tsx",
+          " D docs/runtime/ACTIVE_MEMORY.md",
+          " D docs/runtime/HANDOFF.md",
+          " D docs/runtime/PLAN.md",
+          " D docs/runtime/STAGE_V1_CHECKLIST.md",
+          " D docs/runtime/TASK_STATE.md",
+          " D docs/runtime/WORKSPACE_ALIGNMENT.md",
+          " M pyproject.toml",
+          " M scripts/app_v2_artifact_check.mjs",
+          " M scripts/app_v2_electron_smoke.mjs",
+          " M scripts/app_v2_runtime_verify.mjs",
+          " M scripts/check_contract_hygiene.py",
+          " D scripts/lib/atomicWriteJsonFile.mjs",
+          " D scripts/lib/workspace_alignment.py",
+          " M scripts/run-app-windows.cmd",
+          " D scripts/workspace_alignment/check.py",
+          " D scripts/workspace_alignment/repair.py",
+          " M setup.py",
+          " M tests/regression_app_v2_no_legacy_refs.mjs",
+          " M tests/regression_app_v2_settings_reference_contract.mjs",
+          " M tests/regression_workspace_alignment_py.py",
+          " M truth_dataset/reports/wings_har_refresh_audit.md",
+          " M ui-workbench/README.md",
+          " M ui-workbench/public/stitch-recovery/manifest.json",
+          " M uv.lock",
+          "?? .github/",
+          "?? Makefile",
+          "?? contracts/",
+          "?? docs/ARCHITECTURE.md",
+          "?? docs/BENCHMARK_PROTOCOL.md",
+          "?? docs/DESIGN.md",
+          "?? docs/OBSIDIAN.md",
+          "?? docs/PRODUCT_REQUIREMENTS.md",
+          "?? examples/",
+          "?? knowledge/",
+          "?? memory/",
+          "?? reports/",
+          "?? scripts/_common.py",
+          "?? scripts/audit_execution_surfaces.py",
+          "?? scripts/benchmark_prepare.py",
+          "?? scripts/bootstrap_real_env.py",
+          "?? scripts/build_inventory_cpp_core.py",
+          "?? scripts/check_bundle_sync.py",
+          "?? scripts/check_context7.py",
+          "?? scripts/check_dip.py",
+          "?? scripts/check_hook_logs.py",
+          "?? scripts/check_local_environments.py",
+          "?? scripts/check_path_visibility.py",
+          "?? scripts/check_runaway.py",
+          "?? scripts/check_serena.py",
+          "?? scripts/check_sync_conflicts.py",
+          "?? scripts/check_syncthing.py",
+          "?? scripts/check_toolchain.py",
+          "?? scripts/check_traceability.py",
+          "?? scripts/check_unknowns.py",
+          "?? scripts/check_wsl_status.py",
+          "?? scripts/configure_syncthing.py",
+          "?? scripts/delivery_gate.py",
+          "?? scripts/export_obsidian_notes.py",
+          "?? scripts/human_bottleneck_patch.py",
+          "?? scripts/install_hooks.py",
+          "?? scripts/install_or_repair_toolchain.py",
+          "?? scripts/issue_workspace_authority.py",
+          "?? scripts/lib",
+          "?? scripts/memory_checkpoint.py",
+          "?? scripts/memory_resume.py",
+          "?? scripts/project_setup.py",
+          "?? scripts/run_acceptance.py",
+          "?? scripts/session_router.py",
+          "?? scripts/summarize_benchmark_results.py",
+          "?? scripts/update_wsl_and_ubuntu.py",
+          "?? scripts/workspace_alignment",
+          "?? tests/regression_global_scorecard_bridge_py.py"
+        ],
+        "local_config": {
+          "available": true,
+          "scope": "local",
+          "lines": [
+            "file:.git/config\tremote.origin.url=https://github.com/andy4917/reservation-system.git",
+            "file:.git/config\tremote.origin.fetch=+refs/heads/*:refs/remotes/origin/*"
+          ],
+          "map": {
+            "remote.origin.url": "https://github.com/andy4917/reservation-system.git",
+            "remote.origin.fetch": "+refs/heads/*:refs/remotes/origin/*"
+          },
+          "stderr": "",
+          "exit_code": 0
+        },
+        "top_level": "/home/andy4917/Dev-Product/reservation-system",
+        "hooks_path": ".git/hooks",
+        "is_worktree": false,
+        "is_sparse_checkout": false,
+        "superproject": "",
+        "warnings": [
+          "repo is dirty"
+        ]
+      },
+      {
+        "repo_root": "/home/andy4917/reservation-system",
+        "status": "requested-path-missing",
+        "dirty": [],
+        "local_config": {
+          "available": false,
+          "lines": [],
+          "map": {}
+        },
+        "top_level": "",
+        "hooks_path": "",
+        "is_worktree": false,
+        "is_sparse_checkout": false,
+        "superproject": "",
+        "warnings": []
+      }
+    ],
+    "repo_local_guard_proposals": [
+      {
+        "repo_root": "/home/andy4917/Dev-Management",
+        "status": "PROPOSED",
+        "path": "/home/andy4917/Dev-Management/.gitattributes",
+        "reason": "Dev-Management does not define a repo-local .gitattributes policy yet",
+        "missing_lines": [
+          "* text=auto eol=lf",
+          "*.bat text eol=crlf",
+          "*.cmd text eol=crlf",
+          "*.ps1 text eol=crlf"
+        ]
+      },
+      {
+        "repo_root": "/home/andy4917/Dev-Workflow",
+        "status": "WAIVED",
+        "path": "/home/andy4917/Dev-Workflow/.gitattributes",
+        "reason": "repo-local .gitattributes proposals are only emitted for Dev-Management",
+        "missing_lines": []
+      },
+      {
+        "repo_root": "/home/andy4917/Dev-Product/reservation-system",
+        "status": "WAIVED",
+        "path": "/home/andy4917/Dev-Product/reservation-system/.gitattributes",
+        "reason": "repo-local .gitattributes proposals are only emitted for Dev-Management",
+        "missing_lines": []
+      },
+      {
+        "repo_root": "/home/andy4917/reservation-system",
+        "status": "WAIVED",
+        "path": "/home/andy4917/reservation-system/.gitattributes",
+        "reason": "repo-local .gitattributes proposals are only emitted for Dev-Management",
+        "missing_lines": []
+      }
+    ],
+    "wsl": {
+      "global": {
+        "available": true,
+        "scope": "global",
+        "lines": [
+          "file:/home/andy4917/.gitconfig\tcore.autocrlf=input"
+        ],
+        "map": {
+          "core.autocrlf": "input"
+        },
+        "stderr": "",
+        "exit_code": 0
+      },
+      "system": {
+        "available": false,
+        "scope": "system",
+        "lines": [],
+        "map": {},
+        "stderr": "fatal: unable to read config file '/etc/gitconfig': No such file or directory",
+        "exit_code": 128
+      },
+      "lfs": {
+        "available": false,
+        "stdout": "",
+        "stderr": "git: 'lfs' is not a git command. See 'git --help'.\n\nThe most similar command is\n\tlog"
+      },
+      "stale_safe_directories": []
+    },
+    "windows": {
+      "git_exe": "/mnt/c/Program Files/Git/cmd/git.exe",
+      "global": {
+        "available": true,
+        "scope": "global",
+        "lines": [
+          "file:C:/Users/anise/.gitconfig\tfilter.lfs.clean=git-lfs clean -- %f",
+          "file:C:/Users/anise/.gitconfig\tfilter.lfs.smudge=git-lfs smudge -- %f",
+          "file:C:/Users/anise/.gitconfig\tfilter.lfs.process=git-lfs filter-process",
+          "file:C:/Users/anise/.gitconfig\tfilter.lfs.required=true",
+          "file:C:/Users/anise/.gitconfig\tsafe.directory=%(prefix)///wsl.localhost/Ubuntu/home/andy4917/code/reservation-system",
+          "file:C:/Users/anise/.gitconfig\tsafe.directory=//wsl.localhost/Ubuntu/home/andy4917/code/reservation-system"
+        ],
+        "map": {
+          "filter.lfs.clean": "git-lfs clean -- %f",
+          "filter.lfs.smudge": "git-lfs smudge -- %f",
+          "filter.lfs.process": "git-lfs filter-process",
+          "filter.lfs.required": "true",
+          "safe.directory": "//wsl.localhost/Ubuntu/home/andy4917/code/reservation-system"
+        },
+        "stderr": "",
+        "exit_code": 0
+      },
+      "system": {
+        "available": true,
+        "scope": "system",
+        "lines": [
+          "file:C:/Program Files/Git/etc/gitconfig\tfilter.lfs.clean=git-lfs clean -- %f",
+          "file:C:/Program Files/Git/etc/gitconfig\tfilter.lfs.smudge=git-lfs smudge -- %f",
+          "file:C:/Program Files/Git/etc/gitconfig\tfilter.lfs.process=git-lfs filter-process",
+          "file:C:/Program Files/Git/etc/gitconfig\tfilter.lfs.required=true",
+          "file:C:/Program Files/Git/etc/gitconfig\tcore.autocrlf=true",
+          "file:C:/Program Files/Git/etc/gitconfig\tcredential.helper=manager"
+        ],
+        "map": {
+          "filter.lfs.clean": "git-lfs clean -- %f",
+          "filter.lfs.smudge": "git-lfs smudge -- %f",
+          "filter.lfs.process": "git-lfs filter-process",
+          "filter.lfs.required": "true",
+          "core.autocrlf": "true",
+          "credential.helper": "manager"
+        },
+        "stderr": "",
+        "exit_code": 0
+      },
+      "lfs": {
+        "available": true,
+        "stdout": "git-lfs/3.7.1 (GitHub; windows amd64; go 1.25.1; git b84b3384)",
+        "stderr": ""
+      },
+      "stale_safe_directories": [
+        "%(prefix)///wsl.localhost/Ubuntu/home/andy4917/code/reservation-system",
+        "//wsl.localhost/Ubuntu/home/andy4917/code/reservation-system"
+      ]
+    },
+    "global_drift": [
+      {
+        "key": "core.autocrlf",
+        "wsl": "input",
+        "windows": ""
+      },
+      {
+        "key": "filter.lfs.clean",
+        "wsl": "",
+        "windows": "git-lfs clean -- %f"
+      },
+      {
+        "key": "filter.lfs.process",
+        "wsl": "",
+        "windows": "git-lfs filter-process"
+      },
+      {
+        "key": "filter.lfs.required",
+        "wsl": "",
+        "windows": "true"
+      },
+      {
+        "key": "filter.lfs.smudge",
+        "wsl": "",
+        "windows": "git-lfs smudge -- %f"
+      },
+      {
+        "key": "safe.directory",
+        "wsl": "",
+        "windows": "//wsl.localhost/Ubuntu/home/andy4917/code/reservation-system"
+      }
+    ],
+    "warnings": [
+      "Windows Git global safe.directory contains stale paths.",
+      "Windows Git and WSL Git global config differ.",
+      "Git LFS is configured but unavailable in WSL.",
+      "Dirty repos were detected and are reported only.",
+      "Dev-Management repo-local .gitattributes proposal is available."
+    ]
+  },
+  "instruction_guard": {
+    "policy_path": "/home/andy4917/Dev-Management/contracts/instruction_guard_policy.json",
+    "present": true,
+    "bootstrap_exception_persisted": false,
+    "status": "PASS"
+  },
+  "repair_readiness": {
+    "status": "BLOCKED",
+    "ready": false,
+    "gates": {
+      "canonical_execution_status": "PASS",
+      "remote_repo_root_status": "PASS",
+      "remote_codex_resolution_status": "BLOCKED",
+      "remote_native_codex_status": "WARN",
+      "remote_path_contamination_status": "PASS",
+      "local_path_precedence_status": "PASS",
+      "wrapper_target_safety_status": "PASS"
+    },
+    "remote_native_codex_path": "",
+    "reason": "live wrapper apply remains gated on canonical SSH readiness, remote codex safety, native codex detection, and local PATH precedence"
+  },
+  "global_runtime_surface": {
+    "status": "WARN",
+    "overall_status": "WARN",
+    "mode_requested": "auto",
+    "mode_selected": "ssh-managed",
+    "fail_closed": false,
+    "canonical_execution_status": "PASS",
+    "client_surface_status": "WARN",
+    "local_shell_status": "BLOCKED",
+    "ssh_runtime_status": "PASS",
+    "codex_resolution_status": "BLOCKED",
+    "path_contamination_status": "WARN",
+    "wrapper_apply_readiness": {
+      "status": "BLOCKED",
+      "ready": false,
+      "gates": {
+        "canonical_execution_status": "PASS",
+        "remote_repo_root_status": "PASS",
+        "remote_codex_resolution_status": "BLOCKED",
+        "remote_native_codex_status": "WARN",
+        "remote_path_contamination_status": "PASS",
+        "local_path_precedence_status": "PASS",
+        "wrapper_target_safety_status": "PASS"
+      },
+      "remote_native_codex_path": "",
+      "reason": "live wrapper apply remains gated on canonical SSH readiness, remote codex safety, native codex detection, and local PATH precedence"
+    },
+    "canonical_ssh_runtime_status": {
+      "status": "PASS",
+      "reason": ""
+    },
+    "remote_repo_root_status": {
+      "status": "PASS",
+      "reason": "",
+      "observed_repo_root": "/home/andy4917/Dev-Management"
+    },
+    "remote_codex_resolution_status": {
+      "status": "BLOCKED",
+      "reason": "wrapper target resolves to the forbidden Windows-mounted Codex launcher",
+      "command_v": "/home/andy4917/.local/bin/codex",
+      "command_v_candidate": {
+        "path": "/home/andy4917/.local/bin/codex",
+        "classification": "forbidden_wrapper",
+        "status": "BLOCKED",
+        "exists": true,
+        "native_candidate": false,
+        "target": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
+        "reason": "wrapper target resolves to the forbidden Windows-mounted Codex launcher"
+      }
+    },
+    "remote_native_codex_status": {
+      "status": "WARN",
+      "reason": "no Linux-native codex absolute path was confirmed in the canonical SSH runtime",
+      "candidates": [],
+      "selected_path": ""
+    },
+    "remote_path_contamination_status": {
+      "status": "PASS",
+      "reason": "",
+      "contaminated_entries": []
+    },
+    "local_live_codex_resolution_status": {
+      "status": "BLOCKED",
+      "reason": "wrapper target resolves to the forbidden Windows-mounted Codex launcher"
+    },
+    "local_path_precedence_status": {
+      "status": "PASS",
+      "launcher_dir_index": 0,
+      "forbidden_indices": [
+        1,
+        2
+      ],
+      "reasons": []
+    },
+    "tests_status": {
+      "status": "WARN",
+      "reason": "check_global_runtime.py does not execute the repo test suite"
+    },
+    "diff_check_status": {
+      "status": "PASS",
+      "reason": ""
+    },
+    "canonical_execution_surface": {
+      "id": "ssh-devmgmt-wsl",
+      "host_alias": "devmgmt-wsl",
+      "repo_root": "/home/andy4917/Dev-Management",
+      "expected_os": "linux",
+      "expected_primary_resolution": "linux-native codex in canonical SSH runtime",
+      "allowed_primary_resolution_fallback": "repo-generated local SSH wrapper",
+      "forbidden_primary_resolution": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
+      "client_surface_contamination_status_when_canonical_passes": "WARN",
+      "local_shell_requested_execution_status_when_forbidden": "BLOCKED"
+    },
+    "observed_remote_evidence": {
+      "codex_app_remote_record": {
+        "value": "andy4917@localhost:22",
+        "authoritative": false,
+        "role": "observed_fallback_candidate"
+      }
+    },
+    "client_surface": {
+      "status": "WARN",
+      "path_entries": [
+        "/home/andy4917/.local/bin",
+        "/mnt/c/Users/anise/.codex/tmp/arg0/codex-arg0YMNT1f",
+        "/mnt/c/Users/anise/.codex/bin/wsl",
+        "/home/andy4917/.nvm/versions/node/v24.14.1/bin",
+        "/home/andy4917/.local/bin",
+        "/usr/local/sbin",
+        "/usr/local/bin",
+        "/usr/sbin",
+        "/usr/bin",
+        "/sbin",
+        "/bin",
+        "/usr/games",
+        "/usr/local/games",
+        "/usr/lib/wsl/lib",
+        "/mnt/c/WINDOWS/system32",
+        "/mnt/c/WINDOWS"
+      ],
+      "contaminated_entries": [
+        "/mnt/c/Users/anise/.codex/tmp/arg0/codex-arg0YMNT1f",
+        "/mnt/c/Users/anise/.codex/bin/wsl"
+      ]
+    },
+    "local_runtime_surface": {
+      "command_v": "/home/andy4917/.local/bin/codex",
+      "type_a": [
+        "codex is /home/andy4917/.local/bin/codex",
+        "codex is /mnt/c/Users/anise/.codex/bin/wsl/codex",
+        "codex is /home/andy4917/.local/bin/codex"
+      ],
+      "type_a_paths": [
+        "/home/andy4917/.local/bin/codex",
+        "/mnt/c/Users/anise/.codex/bin/wsl/codex"
+      ],
+      "path_entries": [
+        "/home/andy4917/.local/bin",
+        "/mnt/c/Users/anise/.codex/tmp/arg0/codex-arg0YMNT1f",
+        "/mnt/c/Users/anise/.codex/bin/wsl",
+        "/home/andy4917/.nvm/versions/node/v24.14.1/bin",
+        "/home/andy4917/.local/bin",
+        "/usr/local/sbin",
+        "/usr/local/bin",
+        "/usr/sbin",
+        "/usr/bin",
+        "/sbin",
+        "/bin",
+        "/usr/games",
+        "/usr/local/games",
+        "/usr/lib/wsl/lib",
+        "/mnt/c/WINDOWS/system32",
+        "/mnt/c/WINDOWS"
+      ],
+      "contaminated_entries": [
+        "/mnt/c/Users/anise/.codex/tmp/arg0/codex-arg0YMNT1f",
+        "/mnt/c/Users/anise/.codex/bin/wsl"
+      ],
+      "local_live_codex_resolution_status": {
+        "status": "BLOCKED",
+        "reason": "wrapper target resolves to the forbidden Windows-mounted Codex launcher"
+      },
+      "local_path_precedence_status": {
+        "status": "PASS",
+        "launcher_dir_index": 0,
+        "forbidden_indices": [
+          1,
+          2
+        ],
+        "reasons": []
+      },
+      "config_surfaces": {
+        "linux": {
+          "path": "/home/andy4917/.codex/config.toml",
+          "exists": true,
+          "classification": "user_override",
+          "repairable": false,
+          "has_generated_header": false
+        },
+        "windows_mirror": {
+          "path": "/mnt/c/Users/anise/.codex/config.toml",
+          "exists": true,
+          "classification": "generated",
+          "repairable": true,
+          "has_generated_header": true
+        }
+      },
+      "local_wrapper_probe": {
+        "path": "/home/andy4917/.local/bin/codex",
+        "exists": true,
+        "target": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
+        "failure_mode": "exit 127",
+        "status": "BLOCKED",
+        "reason": "local wrapper still targets the forbidden Windows-mounted launcher"
+      },
+      "client_surface_status": {
+        "status": "WARN",
+        "reason": "client session PATH includes injected Codex app runtime paths"
+      },
+      "local_shell_status": {
+        "status": "BLOCKED",
+        "reason": "local shell still resolves or routes through forbidden runtime surfaces"
+      },
+      "command_v_candidate": {
+        "path": "/home/andy4917/.local/bin/codex",
+        "classification": "forbidden_wrapper",
+        "status": "BLOCKED",
+        "exists": true,
+        "native_candidate": false,
+        "target": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
+        "reason": "wrapper target resolves to the forbidden Windows-mounted Codex launcher"
+      },
+      "type_a_candidates": [
+        {
+          "path": "/home/andy4917/.local/bin/codex",
+          "classification": "forbidden_wrapper",
+          "status": "BLOCKED",
+          "exists": true,
+          "native_candidate": false,
+          "target": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
+          "reason": "wrapper target resolves to the forbidden Windows-mounted Codex launcher"
+        },
+        {
+          "path": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
+          "classification": "forbidden_path",
+          "status": "BLOCKED",
+          "exists": false,
+          "native_candidate": false,
+          "target": "",
+          "reason": "candidate resolves to a forbidden Windows-mounted runtime path"
+        }
+      ],
+      "path_normalizer": {
+        "path": "/home/andy4917/.config/shell/wsl-runtime-paths.sh",
+        "exists": true,
+        "repo_owned": false,
+        "evidence": []
+      }
+    },
+    "local_shell_surface": {
+      "status": "BLOCKED",
+      "command_v": "/home/andy4917/.local/bin/codex",
+      "type_a": [
+        "codex is /home/andy4917/.local/bin/codex",
+        "codex is /mnt/c/Users/anise/.codex/bin/wsl/codex",
+        "codex is /home/andy4917/.local/bin/codex"
+      ],
+      "wrapper_probe": {
+        "path": "/home/andy4917/.local/bin/codex",
+        "exists": true,
+        "target": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
+        "failure_mode": "exit 127",
+        "status": "BLOCKED",
+        "reason": "local wrapper still targets the forbidden Windows-mounted launcher"
+      }
+    },
+    "ssh_activation": {
+      "status": "PASS",
+      "host_alias": "devmgmt-wsl",
+      "hostname": "andy4917",
+      "stderr": ""
+    },
+    "ssh_canonical_runtime": {
+      "host_alias": "devmgmt-wsl",
+      "hostname": "andy4917",
+      "ssh_available": true,
+      "stderr": "",
+      "type_a": [
+        "codex is /home/andy4917/.local/bin/codex"
+      ],
+      "type_a_paths": [
+        "/home/andy4917/.local/bin/codex"
+      ],
+      "type_a_candidates": [
+        {
+          "path": "/home/andy4917/.local/bin/codex",
+          "classification": "forbidden_wrapper",
+          "status": "BLOCKED",
+          "exists": true,
+          "native_candidate": false,
+          "target": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
+          "reason": "wrapper target resolves to the forbidden Windows-mounted Codex launcher"
+        }
+      ],
+      "path_entries": [
+        "/home/andy4917/.nvm/versions/node/v24.14.1/bin",
+        "/home/andy4917/.local/bin",
+        "/usr/local/sbin",
+        "/usr/local/bin",
+        "/usr/sbin",
+        "/usr/bin",
+        "/sbin",
+        "/bin",
+        "/usr/games"
+      ],
+      "ssh_runtime_status": {
+        "status": "PASS",
+        "reason": ""
+      },
+      "canonical_ssh_runtime_status": {
+        "status": "PASS",
+        "reason": ""
+      },
+      "remote_repo_root_status": {
+        "status": "PASS",
+        "reason": "",
+        "observed_repo_root": "/home/andy4917/Dev-Management"
+      },
+      "remote_codex_resolution_status": {
+        "status": "BLOCKED",
+        "reason": "wrapper target resolves to the forbidden Windows-mounted Codex launcher",
+        "command_v": "/home/andy4917/.local/bin/codex",
+        "command_v_candidate": {
+          "path": "/home/andy4917/.local/bin/codex",
+          "classification": "forbidden_wrapper",
+          "status": "BLOCKED",
+          "exists": true,
+          "native_candidate": false,
+          "target": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
+          "reason": "wrapper target resolves to the forbidden Windows-mounted Codex launcher"
+        }
+      },
+      "remote_native_codex_status": {
+        "status": "WARN",
+        "reason": "no Linux-native codex absolute path was confirmed in the canonical SSH runtime",
+        "candidates": [],
+        "selected_path": ""
+      },
+      "remote_path_contamination_status": {
+        "status": "PASS",
+        "reason": "",
+        "contaminated_entries": []
+      }
+    },
+    "codex_resolution": {
+      "status": "BLOCKED",
+      "remote_command_v": "/home/andy4917/.local/bin/codex",
+      "remote_native_codex_path": "",
+      "remote_native_candidates": [],
+      "local_command_v": "/home/andy4917/.local/bin/codex"
+    },
+    "path_contamination": {
+      "status": "WARN",
+      "client_surface_status": "WARN",
+      "remote_path_status": "PASS",
+      "local_contaminated_entries": [
+        "/mnt/c/Users/anise/.codex/tmp/arg0/codex-arg0YMNT1f",
+        "/mnt/c/Users/anise/.codex/bin/wsl"
+      ],
+      "remote_contaminated_entries": []
+    },
+    "wrapper_target_safety_status": {
+      "status": "PASS",
+      "preview_path": "/home/andy4917/Dev-Management/reports/generated-runtime-preview/codex-ssh-wrapper.sh",
+      "forbidden_reference_found": false
+    },
+    "preview_wrapper_path": "/home/andy4917/Dev-Management/reports/generated-runtime-preview/codex-ssh-wrapper.sh"
+  },
+  "codex_live_resolution": {
+    "status": "BLOCKED",
+    "reason": "wrapper target resolves to the forbidden Windows-mounted Codex launcher"
+  },
+  "path_contamination_legacy": {
+    "local": [
+      "/mnt/c/Users/anise/.codex/tmp/arg0/codex-arg0YMNT1f",
+      "/mnt/c/Users/anise/.codex/bin/wsl"
+    ],
+    "remote": []
+  },
+  "ssh_canonical_runtime": {
+    "host_alias": "devmgmt-wsl",
+    "hostname": "andy4917",
+    "ssh_available": true,
+    "stderr": "",
+    "type_a": [
+      "codex is /home/andy4917/.local/bin/codex"
+    ],
+    "type_a_paths": [
+      "/home/andy4917/.local/bin/codex"
+    ],
+    "type_a_candidates": [
+      {
+        "path": "/home/andy4917/.local/bin/codex",
+        "classification": "forbidden_wrapper",
+        "status": "BLOCKED",
+        "exists": true,
+        "native_candidate": false,
+        "target": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
+        "reason": "wrapper target resolves to the forbidden Windows-mounted Codex launcher"
+      }
+    ],
+    "path_entries": [
+      "/home/andy4917/.nvm/versions/node/v24.14.1/bin",
+      "/home/andy4917/.local/bin",
+      "/usr/local/sbin",
+      "/usr/local/bin",
+      "/usr/sbin",
+      "/usr/bin",
+      "/sbin",
+      "/bin",
+      "/usr/games"
+    ],
+    "ssh_runtime_status": {
+      "status": "PASS",
+      "reason": ""
+    },
+    "canonical_ssh_runtime_status": {
+      "status": "PASS",
+      "reason": ""
+    },
+    "remote_repo_root_status": {
+      "status": "PASS",
+      "reason": "",
+      "observed_repo_root": "/home/andy4917/Dev-Management"
+    },
+    "remote_codex_resolution_status": {
+      "status": "BLOCKED",
+      "reason": "wrapper target resolves to the forbidden Windows-mounted Codex launcher",
+      "command_v": "/home/andy4917/.local/bin/codex",
+      "command_v_candidate": {
+        "path": "/home/andy4917/.local/bin/codex",
+        "classification": "forbidden_wrapper",
+        "status": "BLOCKED",
+        "exists": true,
+        "native_candidate": false,
+        "target": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
+        "reason": "wrapper target resolves to the forbidden Windows-mounted Codex launcher"
+      }
+    },
+    "remote_native_codex_status": {
+      "status": "WARN",
+      "reason": "no Linux-native codex absolute path was confirmed in the canonical SSH runtime",
+      "candidates": [],
+      "selected_path": ""
+    },
+    "remote_path_contamination_status": {
+      "status": "PASS",
+      "reason": "",
+      "contaminated_entries": []
+    }
+  },
+  "git_surface_drift": {
+    "status": "WARN",
+    "repo_reports": [
+      {
+        "repo_root": "/home/andy4917/Dev-Management",
+        "status": "present",
+        "dirty": [
+          " M contracts/execution_surfaces.json",
+          " M contracts/workspace_authority.json",
+          " M docs/RUNBOOK.md",
+          " M docs/SERENA_USAGE.md",
+          " M reports/audit.final.json",
+          " M scripts/audit_workspace.py",
+          " M scripts/render_codex_runtime.py",
+          " M scripts/repair_codex_desktop_runtime.py",
+          " M scripts/verify_migration_evidence.py",
+          " M tests/test_audit_workspace_contract.py",
+          " M tests/test_repair_codex_desktop_runtime.py",
+          "?? .serena/",
+          "?? contracts/instruction_guard_policy.json",
+          "?? docs/AGENT_GUARDRAILS.md",
+          "?? docs/GLOBAL_RUNTIME_ARCHITECTURE.md",
+          "?? reports/canonical-runtime-activation.dry-run.json",
+          "?? reports/canonical-runtime-activation.json",
+          "?? reports/generated-runtime-preview/",
+          "?? reports/git-surface.json",
+          "?? reports/global-runtime.after-activation.json",
+          "?? reports/global-runtime.json",
+          "?? reports/manual-system-remediation-20260421-030157.md",
+          "?? reports/manual-system-remediation-20260421-030516.md",
+          "?? reports/manual-system-remediation-20260421-031215.md",
+          "?? reports/manual-system-remediation-20260421-033211.md",
+          "?? reports/manual-system-remediation-20260421-035801.md",
+          "?? reports/manual-system-remediation-20260421-035900.md",
+          "?? reports/manual-system-remediation-20260421-041812.md",
+          "?? reports/serena-startup-repair.apply.json",
+          "?? reports/serena-startup-repair.json",
+          "?? reports/startup-workflow.after-activation.json",
+          "?? reports/startup-workflow.json",
+          "?? scripts/activate_canonical_runtime.py",
+          "?? scripts/check_agent_instruction.py",
+          "?? scripts/check_git_surface.py",
+          "?? scripts/check_global_runtime.py",
+          "?? scripts/check_startup_workflow.py",
+          "?? scripts/repair_serena_startup.py",
+          "?? scripts/run_canonical_command.py",
+          "?? tests/test_activate_canonical_runtime.py",
+          "?? tests/test_check_agent_instruction.py",
+          "?? tests/test_check_global_runtime.py",
+          "?? tests/test_check_startup_workflow.py",
+          "?? tests/test_git_surface.py",
+          "?? tests/test_repair_serena_startup.py",
+          "?? tests/test_run_canonical_command.py"
+        ],
+        "local_config": {
+          "available": true,
+          "scope": "local",
+          "lines": [
+            "file:.git/config\tremote.origin.url=https://github.com/andy4917/Dev-codex.git",
+            "file:.git/config\tremote.origin.fetch=+refs/heads/*:refs/remotes/origin/*"
+          ],
+          "map": {
+            "remote.origin.url": "https://github.com/andy4917/Dev-codex.git",
+            "remote.origin.fetch": "+refs/heads/*:refs/remotes/origin/*"
+          },
+          "stderr": "",
+          "exit_code": 0
+        },
+        "top_level": "/home/andy4917/Dev-Management",
+        "hooks_path": ".git/hooks",
+        "is_worktree": false,
+        "is_sparse_checkout": false,
+        "superproject": "",
+        "warnings": [
+          "repo is dirty"
+        ]
+      },
+      {
+        "repo_root": "/home/andy4917/Dev-Workflow",
+        "status": "present",
+        "dirty": [
+          " M scripts/delivery_gate.py",
+          "?? tests/test_delivery_gate_scorecard_slice.py"
+        ],
+        "local_config": {
+          "available": true,
+          "scope": "local",
+          "lines": [
+            "file:.git/config\tremote.origin.url=https://github.com/andy4917/Dev-Workflow.git",
+            "file:.git/config\tremote.origin.fetch=+refs/heads/*:refs/remotes/origin/*"
+          ],
+          "map": {
+            "remote.origin.url": "https://github.com/andy4917/Dev-Workflow.git",
+            "remote.origin.fetch": "+refs/heads/*:refs/remotes/origin/*"
+          },
+          "stderr": "",
+          "exit_code": 0
+        },
+        "top_level": "/home/andy4917/Dev-Workflow",
+        "hooks_path": ".git/hooks",
+        "is_worktree": false,
+        "is_sparse_checkout": false,
+        "superproject": "",
+        "warnings": [
+          "repo is dirty"
+        ]
+      },
+      {
+        "repo_root": "/home/andy4917/Dev-Product/reservation-system",
+        "status": "present",
+        "dirty": [
+          " D .codex_tmp/ota_dom_fallback_handoff.json",
+          " D .codex_tmp/ota_dom_fallback_memory.json",
+          " D .codex_tmp/ota_dom_fallback_regression.json",
+          " D .codex_tmp/ota_fetch_instrumentation_handoff.json",
+          " D .codex_tmp/ota_fetch_instrumentation_memory.json",
+          " D .codex_tmp/ota_fetch_instrumentation_regression.json",
+          " M .gitignore",
+          " M README.md",
+          " M app_v2/main/bgeModelInstaller.ts",
+          " M app_v2/main/preflight.ts",
+          " M app_v2/main/providerWorkspaceManager.ts",
+          " M app_v2/renderer/App.tsx",
+          " D docs/runtime/ACTIVE_MEMORY.md",
+          " D docs/runtime/HANDOFF.md",
+          " D docs/runtime/PLAN.md",
+          " D docs/runtime/STAGE_V1_CHECKLIST.md",
+          " D docs/runtime/TASK_STATE.md",
+          " D docs/runtime/WORKSPACE_ALIGNMENT.md",
+          " M pyproject.toml",
+          " M scripts/app_v2_artifact_check.mjs",
+          " M scripts/app_v2_electron_smoke.mjs",
+          " M scripts/app_v2_runtime_verify.mjs",
+          " M scripts/check_contract_hygiene.py",
+          " D scripts/lib/atomicWriteJsonFile.mjs",
+          " D scripts/lib/workspace_alignment.py",
+          " M scripts/run-app-windows.cmd",
+          " D scripts/workspace_alignment/check.py",
+          " D scripts/workspace_alignment/repair.py",
+          " M setup.py",
+          " M tests/regression_app_v2_no_legacy_refs.mjs",
+          " M tests/regression_app_v2_settings_reference_contract.mjs",
+          " M tests/regression_workspace_alignment_py.py",
+          " M truth_dataset/reports/wings_har_refresh_audit.md",
+          " M ui-workbench/README.md",
+          " M ui-workbench/public/stitch-recovery/manifest.json",
+          " M uv.lock",
+          "?? .github/",
+          "?? Makefile",
+          "?? contracts/",
+          "?? docs/ARCHITECTURE.md",
+          "?? docs/BENCHMARK_PROTOCOL.md",
+          "?? docs/DESIGN.md",
+          "?? docs/OBSIDIAN.md",
+          "?? docs/PRODUCT_REQUIREMENTS.md",
+          "?? examples/",
+          "?? knowledge/",
+          "?? memory/",
+          "?? reports/",
+          "?? scripts/_common.py",
+          "?? scripts/audit_execution_surfaces.py",
+          "?? scripts/benchmark_prepare.py",
+          "?? scripts/bootstrap_real_env.py",
+          "?? scripts/build_inventory_cpp_core.py",
+          "?? scripts/check_bundle_sync.py",
+          "?? scripts/check_context7.py",
+          "?? scripts/check_dip.py",
+          "?? scripts/check_hook_logs.py",
+          "?? scripts/check_local_environments.py",
+          "?? scripts/check_path_visibility.py",
+          "?? scripts/check_runaway.py",
+          "?? scripts/check_serena.py",
+          "?? scripts/check_sync_conflicts.py",
+          "?? scripts/check_syncthing.py",
+          "?? scripts/check_toolchain.py",
+          "?? scripts/check_traceability.py",
+          "?? scripts/check_unknowns.py",
+          "?? scripts/check_wsl_status.py",
+          "?? scripts/configure_syncthing.py",
+          "?? scripts/delivery_gate.py",
+          "?? scripts/export_obsidian_notes.py",
+          "?? scripts/human_bottleneck_patch.py",
+          "?? scripts/install_hooks.py",
+          "?? scripts/install_or_repair_toolchain.py",
+          "?? scripts/issue_workspace_authority.py",
+          "?? scripts/lib",
+          "?? scripts/memory_checkpoint.py",
+          "?? scripts/memory_resume.py",
+          "?? scripts/project_setup.py",
+          "?? scripts/run_acceptance.py",
+          "?? scripts/session_router.py",
+          "?? scripts/summarize_benchmark_results.py",
+          "?? scripts/update_wsl_and_ubuntu.py",
+          "?? scripts/workspace_alignment",
+          "?? tests/regression_global_scorecard_bridge_py.py"
+        ],
+        "local_config": {
+          "available": true,
+          "scope": "local",
+          "lines": [
+            "file:.git/config\tremote.origin.url=https://github.com/andy4917/reservation-system.git",
+            "file:.git/config\tremote.origin.fetch=+refs/heads/*:refs/remotes/origin/*"
+          ],
+          "map": {
+            "remote.origin.url": "https://github.com/andy4917/reservation-system.git",
+            "remote.origin.fetch": "+refs/heads/*:refs/remotes/origin/*"
+          },
+          "stderr": "",
+          "exit_code": 0
+        },
+        "top_level": "/home/andy4917/Dev-Product/reservation-system",
+        "hooks_path": ".git/hooks",
+        "is_worktree": false,
+        "is_sparse_checkout": false,
+        "superproject": "",
+        "warnings": [
+          "repo is dirty"
+        ]
+      },
+      {
+        "repo_root": "/home/andy4917/reservation-system",
+        "status": "requested-path-missing",
+        "dirty": [],
+        "local_config": {
+          "available": false,
+          "lines": [],
+          "map": {}
+        },
+        "top_level": "",
+        "hooks_path": "",
+        "is_worktree": false,
+        "is_sparse_checkout": false,
+        "superproject": "",
+        "warnings": []
+      }
+    ],
+    "repo_local_guard_proposals": [
+      {
+        "repo_root": "/home/andy4917/Dev-Management",
+        "status": "PROPOSED",
+        "path": "/home/andy4917/Dev-Management/.gitattributes",
+        "reason": "Dev-Management does not define a repo-local .gitattributes policy yet",
+        "missing_lines": [
+          "* text=auto eol=lf",
+          "*.bat text eol=crlf",
+          "*.cmd text eol=crlf",
+          "*.ps1 text eol=crlf"
+        ]
+      },
+      {
+        "repo_root": "/home/andy4917/Dev-Workflow",
+        "status": "WAIVED",
+        "path": "/home/andy4917/Dev-Workflow/.gitattributes",
+        "reason": "repo-local .gitattributes proposals are only emitted for Dev-Management",
+        "missing_lines": []
+      },
+      {
+        "repo_root": "/home/andy4917/Dev-Product/reservation-system",
+        "status": "WAIVED",
+        "path": "/home/andy4917/Dev-Product/reservation-system/.gitattributes",
+        "reason": "repo-local .gitattributes proposals are only emitted for Dev-Management",
+        "missing_lines": []
+      },
+      {
+        "repo_root": "/home/andy4917/reservation-system",
+        "status": "WAIVED",
+        "path": "/home/andy4917/reservation-system/.gitattributes",
+        "reason": "repo-local .gitattributes proposals are only emitted for Dev-Management",
+        "missing_lines": []
+      }
+    ],
+    "wsl": {
+      "global": {
+        "available": true,
+        "scope": "global",
+        "lines": [
+          "file:/home/andy4917/.gitconfig\tcore.autocrlf=input"
+        ],
+        "map": {
+          "core.autocrlf": "input"
+        },
+        "stderr": "",
+        "exit_code": 0
+      },
+      "system": {
+        "available": false,
+        "scope": "system",
+        "lines": [],
+        "map": {},
+        "stderr": "fatal: unable to read config file '/etc/gitconfig': No such file or directory",
+        "exit_code": 128
+      },
+      "lfs": {
+        "available": false,
+        "stdout": "",
+        "stderr": "git: 'lfs' is not a git command. See 'git --help'.\n\nThe most similar command is\n\tlog"
+      },
+      "stale_safe_directories": []
+    },
+    "windows": {
+      "git_exe": "/mnt/c/Program Files/Git/cmd/git.exe",
+      "global": {
+        "available": true,
+        "scope": "global",
+        "lines": [
+          "file:C:/Users/anise/.gitconfig\tfilter.lfs.clean=git-lfs clean -- %f",
+          "file:C:/Users/anise/.gitconfig\tfilter.lfs.smudge=git-lfs smudge -- %f",
+          "file:C:/Users/anise/.gitconfig\tfilter.lfs.process=git-lfs filter-process",
+          "file:C:/Users/anise/.gitconfig\tfilter.lfs.required=true",
+          "file:C:/Users/anise/.gitconfig\tsafe.directory=%(prefix)///wsl.localhost/Ubuntu/home/andy4917/code/reservation-system",
+          "file:C:/Users/anise/.gitconfig\tsafe.directory=//wsl.localhost/Ubuntu/home/andy4917/code/reservation-system"
+        ],
+        "map": {
+          "filter.lfs.clean": "git-lfs clean -- %f",
+          "filter.lfs.smudge": "git-lfs smudge -- %f",
+          "filter.lfs.process": "git-lfs filter-process",
+          "filter.lfs.required": "true",
+          "safe.directory": "//wsl.localhost/Ubuntu/home/andy4917/code/reservation-system"
+        },
+        "stderr": "",
+        "exit_code": 0
+      },
+      "system": {
+        "available": true,
+        "scope": "system",
+        "lines": [
+          "file:C:/Program Files/Git/etc/gitconfig\tfilter.lfs.clean=git-lfs clean -- %f",
+          "file:C:/Program Files/Git/etc/gitconfig\tfilter.lfs.smudge=git-lfs smudge -- %f",
+          "file:C:/Program Files/Git/etc/gitconfig\tfilter.lfs.process=git-lfs filter-process",
+          "file:C:/Program Files/Git/etc/gitconfig\tfilter.lfs.required=true",
+          "file:C:/Program Files/Git/etc/gitconfig\tcore.autocrlf=true",
+          "file:C:/Program Files/Git/etc/gitconfig\tcredential.helper=manager"
+        ],
+        "map": {
+          "filter.lfs.clean": "git-lfs clean -- %f",
+          "filter.lfs.smudge": "git-lfs smudge -- %f",
+          "filter.lfs.process": "git-lfs filter-process",
+          "filter.lfs.required": "true",
+          "core.autocrlf": "true",
+          "credential.helper": "manager"
+        },
+        "stderr": "",
+        "exit_code": 0
+      },
+      "lfs": {
+        "available": true,
+        "stdout": "git-lfs/3.7.1 (GitHub; windows amd64; go 1.25.1; git b84b3384)",
+        "stderr": ""
+      },
+      "stale_safe_directories": [
+        "%(prefix)///wsl.localhost/Ubuntu/home/andy4917/code/reservation-system",
+        "//wsl.localhost/Ubuntu/home/andy4917/code/reservation-system"
+      ]
+    },
+    "global_drift": [
+      {
+        "key": "core.autocrlf",
+        "wsl": "input",
+        "windows": ""
+      },
+      {
+        "key": "filter.lfs.clean",
+        "wsl": "",
+        "windows": "git-lfs clean -- %f"
+      },
+      {
+        "key": "filter.lfs.process",
+        "wsl": "",
+        "windows": "git-lfs filter-process"
+      },
+      {
+        "key": "filter.lfs.required",
+        "wsl": "",
+        "windows": "true"
+      },
+      {
+        "key": "filter.lfs.smudge",
+        "wsl": "",
+        "windows": "git-lfs smudge -- %f"
+      },
+      {
+        "key": "safe.directory",
+        "wsl": "",
+        "windows": "//wsl.localhost/Ubuntu/home/andy4917/code/reservation-system"
+      }
+    ],
+    "warnings": [
+      "Windows Git global safe.directory contains stale paths.",
+      "Windows Git and WSL Git global config differ.",
+      "Git LFS is configured but unavailable in WSL.",
+      "Dirty repos were detected and are reported only.",
+      "Dev-Management repo-local .gitattributes proposal is available."
+    ]
+  },
+  "instruction_guard_policy": {
+    "policy_path": "/home/andy4917/Dev-Management/contracts/instruction_guard_policy.json",
+    "present": true,
+    "bootstrap_exception_persisted": false,
+    "status": "PASS"
+  },
+  "repair_boundary": {
+    "status": "PASS",
+    "boundaries": {
+      "repo_may_repair": [
+        "generated_config_files",
+        "generated_wrapper_files",
+        "generated_report_files"
+      ],
+      "repo_may_repair_local_generated_wrappers_only_when_canonical_runtime_passes": true,
+      "repo_must_not_repair": [
+        "windows_codex_app_binaries",
+        "windows_codex_launcher_binaries",
+        "windows_global_or_system_git_config",
+        "windows_path",
+        "wsl_system_config",
+        "ssh_private_key_permissions"
+      ],
+      "repo_must_not_treat_as_repo_owned": [
+        "/mnt/c/Users/anise/.codex/bin/wsl/codex"
+      ],
+      "repo_must_not_overwrite_external_app_state_except_owned_generated_mirrors": true
+    },
+    "external_targets": [
+      "/mnt/c/Users/anise/.codex/bin/wsl/codex"
+    ]
+  },
+  "wsl_launcher_check": {
+    "linux_launcher_path": "/home/andy4917/.local/bin/codex",
+    "linux_launcher_exists": true,
+    "linux_launcher_generated_header_ok": true,
+    "configured_target": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
+    "global_runtime_surface": {
+      "status": "WARN",
+      "overall_status": "WARN",
+      "mode_requested": "auto",
+      "mode_selected": "ssh-managed",
+      "fail_closed": false,
+      "canonical_execution_status": "PASS",
+      "client_surface_status": "WARN",
+      "local_shell_status": "BLOCKED",
+      "ssh_runtime_status": "PASS",
+      "codex_resolution_status": "BLOCKED",
+      "path_contamination_status": "WARN",
+      "wrapper_apply_readiness": {
+        "status": "BLOCKED",
+        "ready": false,
+        "gates": {
+          "canonical_execution_status": "PASS",
+          "remote_repo_root_status": "PASS",
+          "remote_codex_resolution_status": "BLOCKED",
+          "remote_native_codex_status": "WARN",
+          "remote_path_contamination_status": "PASS",
+          "local_path_precedence_status": "PASS",
+          "wrapper_target_safety_status": "PASS"
+        },
+        "remote_native_codex_path": "",
+        "reason": "live wrapper apply remains gated on canonical SSH readiness, remote codex safety, native codex detection, and local PATH precedence"
+      },
+      "canonical_ssh_runtime_status": {
+        "status": "PASS",
+        "reason": ""
+      },
+      "remote_repo_root_status": {
+        "status": "PASS",
+        "reason": "",
+        "observed_repo_root": "/home/andy4917/Dev-Management"
+      },
+      "remote_codex_resolution_status": {
+        "status": "BLOCKED",
+        "reason": "wrapper target resolves to the forbidden Windows-mounted Codex launcher",
+        "command_v": "/home/andy4917/.local/bin/codex",
+        "command_v_candidate": {
+          "path": "/home/andy4917/.local/bin/codex",
+          "classification": "forbidden_wrapper",
+          "status": "BLOCKED",
+          "exists": true,
+          "native_candidate": false,
+          "target": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
+          "reason": "wrapper target resolves to the forbidden Windows-mounted Codex launcher"
+        }
+      },
+      "remote_native_codex_status": {
+        "status": "WARN",
+        "reason": "no Linux-native codex absolute path was confirmed in the canonical SSH runtime",
+        "candidates": [],
+        "selected_path": ""
+      },
+      "remote_path_contamination_status": {
+        "status": "PASS",
+        "reason": "",
+        "contaminated_entries": []
+      },
+      "local_live_codex_resolution_status": {
+        "status": "BLOCKED",
+        "reason": "wrapper target resolves to the forbidden Windows-mounted Codex launcher"
+      },
+      "local_path_precedence_status": {
+        "status": "PASS",
+        "launcher_dir_index": 0,
+        "forbidden_indices": [
+          1,
+          2
+        ],
+        "reasons": []
+      },
+      "tests_status": {
+        "status": "WARN",
+        "reason": "check_global_runtime.py does not execute the repo test suite"
+      },
+      "diff_check_status": {
+        "status": "PASS",
+        "reason": ""
+      },
+      "canonical_execution_surface": {
+        "id": "ssh-devmgmt-wsl",
+        "host_alias": "devmgmt-wsl",
+        "repo_root": "/home/andy4917/Dev-Management",
+        "expected_os": "linux",
+        "expected_primary_resolution": "linux-native codex in canonical SSH runtime",
+        "allowed_primary_resolution_fallback": "repo-generated local SSH wrapper",
+        "forbidden_primary_resolution": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
+        "client_surface_contamination_status_when_canonical_passes": "WARN",
+        "local_shell_requested_execution_status_when_forbidden": "BLOCKED"
+      },
+      "observed_remote_evidence": {
+        "codex_app_remote_record": {
+          "value": "andy4917@localhost:22",
+          "authoritative": false,
+          "role": "observed_fallback_candidate"
+        }
+      },
+      "client_surface": {
+        "status": "WARN",
+        "path_entries": [
+          "/home/andy4917/.local/bin",
+          "/mnt/c/Users/anise/.codex/tmp/arg0/codex-arg0YMNT1f",
+          "/mnt/c/Users/anise/.codex/bin/wsl",
+          "/home/andy4917/.nvm/versions/node/v24.14.1/bin",
+          "/home/andy4917/.local/bin",
+          "/usr/local/sbin",
+          "/usr/local/bin",
+          "/usr/sbin",
+          "/usr/bin",
+          "/sbin",
+          "/bin",
+          "/usr/games",
+          "/usr/local/games",
+          "/usr/lib/wsl/lib",
+          "/mnt/c/WINDOWS/system32",
+          "/mnt/c/WINDOWS"
+        ],
+        "contaminated_entries": [
+          "/mnt/c/Users/anise/.codex/tmp/arg0/codex-arg0YMNT1f",
+          "/mnt/c/Users/anise/.codex/bin/wsl"
+        ]
+      },
+      "local_runtime_surface": {
+        "command_v": "/home/andy4917/.local/bin/codex",
+        "type_a": [
+          "codex is /home/andy4917/.local/bin/codex",
+          "codex is /mnt/c/Users/anise/.codex/bin/wsl/codex",
+          "codex is /home/andy4917/.local/bin/codex"
+        ],
+        "type_a_paths": [
+          "/home/andy4917/.local/bin/codex",
+          "/mnt/c/Users/anise/.codex/bin/wsl/codex"
+        ],
+        "path_entries": [
+          "/home/andy4917/.local/bin",
+          "/mnt/c/Users/anise/.codex/tmp/arg0/codex-arg0YMNT1f",
+          "/mnt/c/Users/anise/.codex/bin/wsl",
+          "/home/andy4917/.nvm/versions/node/v24.14.1/bin",
+          "/home/andy4917/.local/bin",
+          "/usr/local/sbin",
+          "/usr/local/bin",
+          "/usr/sbin",
+          "/usr/bin",
+          "/sbin",
+          "/bin",
+          "/usr/games",
+          "/usr/local/games",
+          "/usr/lib/wsl/lib",
+          "/mnt/c/WINDOWS/system32",
+          "/mnt/c/WINDOWS"
+        ],
+        "contaminated_entries": [
+          "/mnt/c/Users/anise/.codex/tmp/arg0/codex-arg0YMNT1f",
+          "/mnt/c/Users/anise/.codex/bin/wsl"
+        ],
+        "local_live_codex_resolution_status": {
+          "status": "BLOCKED",
+          "reason": "wrapper target resolves to the forbidden Windows-mounted Codex launcher"
+        },
+        "local_path_precedence_status": {
+          "status": "PASS",
+          "launcher_dir_index": 0,
+          "forbidden_indices": [
+            1,
+            2
+          ],
+          "reasons": []
+        },
+        "config_surfaces": {
+          "linux": {
+            "path": "/home/andy4917/.codex/config.toml",
+            "exists": true,
+            "classification": "user_override",
+            "repairable": false,
+            "has_generated_header": false
+          },
+          "windows_mirror": {
+            "path": "/mnt/c/Users/anise/.codex/config.toml",
+            "exists": true,
+            "classification": "generated",
+            "repairable": true,
+            "has_generated_header": true
+          }
+        },
+        "local_wrapper_probe": {
+          "path": "/home/andy4917/.local/bin/codex",
+          "exists": true,
+          "target": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
+          "failure_mode": "exit 127",
+          "status": "BLOCKED",
+          "reason": "local wrapper still targets the forbidden Windows-mounted launcher"
+        },
+        "client_surface_status": {
+          "status": "WARN",
+          "reason": "client session PATH includes injected Codex app runtime paths"
+        },
+        "local_shell_status": {
+          "status": "BLOCKED",
+          "reason": "local shell still resolves or routes through forbidden runtime surfaces"
+        },
+        "command_v_candidate": {
+          "path": "/home/andy4917/.local/bin/codex",
+          "classification": "forbidden_wrapper",
+          "status": "BLOCKED",
+          "exists": true,
+          "native_candidate": false,
+          "target": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
+          "reason": "wrapper target resolves to the forbidden Windows-mounted Codex launcher"
+        },
+        "type_a_candidates": [
+          {
+            "path": "/home/andy4917/.local/bin/codex",
+            "classification": "forbidden_wrapper",
+            "status": "BLOCKED",
+            "exists": true,
+            "native_candidate": false,
+            "target": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
+            "reason": "wrapper target resolves to the forbidden Windows-mounted Codex launcher"
+          },
+          {
+            "path": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
+            "classification": "forbidden_path",
+            "status": "BLOCKED",
+            "exists": false,
+            "native_candidate": false,
+            "target": "",
+            "reason": "candidate resolves to a forbidden Windows-mounted runtime path"
+          }
+        ],
+        "path_normalizer": {
+          "path": "/home/andy4917/.config/shell/wsl-runtime-paths.sh",
+          "exists": true,
+          "repo_owned": false,
+          "evidence": []
+        }
+      },
+      "local_shell_surface": {
+        "status": "BLOCKED",
+        "command_v": "/home/andy4917/.local/bin/codex",
+        "type_a": [
+          "codex is /home/andy4917/.local/bin/codex",
+          "codex is /mnt/c/Users/anise/.codex/bin/wsl/codex",
+          "codex is /home/andy4917/.local/bin/codex"
+        ],
+        "wrapper_probe": {
+          "path": "/home/andy4917/.local/bin/codex",
+          "exists": true,
+          "target": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
+          "failure_mode": "exit 127",
+          "status": "BLOCKED",
+          "reason": "local wrapper still targets the forbidden Windows-mounted launcher"
+        }
+      },
+      "ssh_activation": {
+        "status": "PASS",
+        "host_alias": "devmgmt-wsl",
+        "hostname": "andy4917",
+        "stderr": ""
+      },
+      "ssh_canonical_runtime": {
+        "host_alias": "devmgmt-wsl",
+        "hostname": "andy4917",
+        "ssh_available": true,
+        "stderr": "",
+        "type_a": [
+          "codex is /home/andy4917/.local/bin/codex"
+        ],
+        "type_a_paths": [
+          "/home/andy4917/.local/bin/codex"
+        ],
+        "type_a_candidates": [
+          {
+            "path": "/home/andy4917/.local/bin/codex",
+            "classification": "forbidden_wrapper",
+            "status": "BLOCKED",
+            "exists": true,
+            "native_candidate": false,
+            "target": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
+            "reason": "wrapper target resolves to the forbidden Windows-mounted Codex launcher"
+          }
+        ],
+        "path_entries": [
+          "/home/andy4917/.nvm/versions/node/v24.14.1/bin",
+          "/home/andy4917/.local/bin",
+          "/usr/local/sbin",
+          "/usr/local/bin",
+          "/usr/sbin",
+          "/usr/bin",
+          "/sbin",
+          "/bin",
+          "/usr/games"
+        ],
+        "ssh_runtime_status": {
+          "status": "PASS",
+          "reason": ""
+        },
+        "canonical_ssh_runtime_status": {
+          "status": "PASS",
+          "reason": ""
+        },
+        "remote_repo_root_status": {
+          "status": "PASS",
+          "reason": "",
+          "observed_repo_root": "/home/andy4917/Dev-Management"
+        },
+        "remote_codex_resolution_status": {
+          "status": "BLOCKED",
+          "reason": "wrapper target resolves to the forbidden Windows-mounted Codex launcher",
+          "command_v": "/home/andy4917/.local/bin/codex",
+          "command_v_candidate": {
+            "path": "/home/andy4917/.local/bin/codex",
+            "classification": "forbidden_wrapper",
+            "status": "BLOCKED",
+            "exists": true,
+            "native_candidate": false,
+            "target": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
+            "reason": "wrapper target resolves to the forbidden Windows-mounted Codex launcher"
+          }
+        },
+        "remote_native_codex_status": {
+          "status": "WARN",
+          "reason": "no Linux-native codex absolute path was confirmed in the canonical SSH runtime",
+          "candidates": [],
+          "selected_path": ""
+        },
+        "remote_path_contamination_status": {
+          "status": "PASS",
+          "reason": "",
+          "contaminated_entries": []
+        }
+      },
+      "codex_resolution": {
+        "status": "BLOCKED",
+        "remote_command_v": "/home/andy4917/.local/bin/codex",
+        "remote_native_codex_path": "",
+        "remote_native_candidates": [],
+        "local_command_v": "/home/andy4917/.local/bin/codex"
+      },
+      "path_contamination": {
+        "status": "WARN",
+        "client_surface_status": "WARN",
+        "remote_path_status": "PASS",
+        "local_contaminated_entries": [
+          "/mnt/c/Users/anise/.codex/tmp/arg0/codex-arg0YMNT1f",
+          "/mnt/c/Users/anise/.codex/bin/wsl"
+        ],
+        "remote_contaminated_entries": []
+      },
+      "wrapper_target_safety_status": {
+        "status": "PASS",
+        "preview_path": "/home/andy4917/Dev-Management/reports/generated-runtime-preview/codex-ssh-wrapper.sh",
+        "forbidden_reference_found": false
+      },
+      "preview_wrapper_path": "/home/andy4917/Dev-Management/reports/generated-runtime-preview/codex-ssh-wrapper.sh"
+    },
+    "reasons": [
+      "Linux Codex launcher shim still points to the forbidden Windows-mounted launcher.",
+      "Live command -v codex resolves to a forbidden runtime target."
+    ],
+    "status": "WARN"
+  },
+  "startup_workflow_check": {
+    "status": "BLOCKED",
+    "summary": "Serena-first and Context7-first startup workflow is incomplete for the current diff.",
+    "generated_at": "2026-04-20T19:18:23.792202+00:00",
+    "mode_requested": "auto",
+    "mode_selected": "ssh-managed",
+    "repo_root": "/home/andy4917/Dev-Management",
+    "expected_sequence": [
+      "Activate the current project or worktree with Serena before code work.",
+      "Verify Serena onboarding and project memories before major code changes.",
+      "Use Context7 before protected dependency, API, configuration, or migration changes."
+    ],
+    "changed_paths": [
+      ".serena/.gitignore",
+      ".serena/project.yml",
+      "contracts/execution_surfaces.json",
+      "contracts/instruction_guard_policy.json",
+      "contracts/workspace_authority.json",
+      "docs/AGENT_GUARDRAILS.md",
+      "docs/GLOBAL_RUNTIME_ARCHITECTURE.md",
+      "docs/RUNBOOK.md",
+      "docs/SERENA_USAGE.md",
+      "reports/audit.final.json",
+      "reports/canonical-runtime-activation.dry-run.json",
+      "reports/canonical-runtime-activation.json",
+      "reports/generated-runtime-preview/codex-ssh-wrapper.sh",
+      "reports/git-surface.json",
+      "reports/global-runtime.after-activation.json",
+      "reports/global-runtime.json",
+      "reports/manual-system-remediation-20260421-030157.md",
+      "reports/manual-system-remediation-20260421-030516.md",
+      "reports/manual-system-remediation-20260421-031215.md",
+      "reports/manual-system-remediation-20260421-033211.md",
+      "reports/manual-system-remediation-20260421-035801.md",
+      "reports/manual-system-remediation-20260421-035900.md",
+      "reports/manual-system-remediation-20260421-041812.md",
+      "reports/serena-startup-repair.apply.json",
+      "reports/serena-startup-repair.json",
+      "reports/startup-workflow.after-activation.json",
+      "reports/startup-workflow.json",
+      "scripts/activate_canonical_runtime.py",
+      "scripts/audit_workspace.py",
+      "scripts/check_agent_instruction.py",
+      "scripts/check_git_surface.py",
+      "scripts/check_global_runtime.py",
+      "scripts/check_startup_workflow.py",
+      "scripts/render_codex_runtime.py",
+      "scripts/repair_codex_desktop_runtime.py",
+      "scripts/repair_serena_startup.py",
+      "scripts/run_canonical_command.py",
+      "scripts/verify_migration_evidence.py",
+      "tests/test_activate_canonical_runtime.py",
+      "tests/test_audit_workspace_contract.py",
+      "tests/test_check_agent_instruction.py",
+      "tests/test_check_global_runtime.py",
+      "tests/test_check_startup_workflow.py",
+      "tests/test_git_surface.py",
+      "tests/test_repair_codex_desktop_runtime.py",
+      "tests/test_repair_serena_startup.py",
+      "tests/test_run_canonical_command.py"
+    ],
+    "workflow_changes": [
+      ".serena/.gitignore",
+      ".serena/project.yml",
+      "contracts/execution_surfaces.json",
+      "contracts/instruction_guard_policy.json",
+      "contracts/workspace_authority.json",
+      "scripts/activate_canonical_runtime.py",
+      "scripts/audit_workspace.py",
+      "scripts/check_agent_instruction.py",
+      "scripts/check_git_surface.py",
+      "scripts/check_global_runtime.py",
+      "scripts/check_startup_workflow.py",
+      "scripts/render_codex_runtime.py",
+      "scripts/repair_codex_desktop_runtime.py",
+      "scripts/repair_serena_startup.py",
+      "scripts/run_canonical_command.py",
+      "scripts/verify_migration_evidence.py",
+      "tests/test_activate_canonical_runtime.py",
+      "tests/test_audit_workspace_contract.py",
+      "tests/test_check_agent_instruction.py",
+      "tests/test_check_global_runtime.py",
+      "tests/test_check_startup_workflow.py",
+      "tests/test_git_surface.py",
+      "tests/test_repair_codex_desktop_runtime.py",
+      "tests/test_repair_serena_startup.py",
+      "tests/test_run_canonical_command.py"
+    ],
+    "blocking_reasons": [
+      "Serena onboarding has not been performed for the current repo",
+      "latest Serena MCP log shows the session started without activating a project"
+    ],
+    "warnings": [],
+    "runtime_gate": {
+      "canonical_ssh_runtime_status": {
+        "status": "PASS",
+        "reason": ""
+      },
+      "fail_closed": false
+    },
+    "serena": {
+      "status": "BLOCKED",
+      "summary": "Serena startup sequence is incomplete for the current diff.",
+      "required": true,
+      "warnings": [],
+      "blockers": [
+        "Serena onboarding has not been performed for the current repo",
+        "latest Serena MCP log shows the session started without activating a project"
+      ],
+      "required_actions": [
+        "uv tool install -p 3.13 serena-agent@latest --prerelease=allow",
+        "serena init",
+        "cd /home/andy4917/Dev-Management && serena project create --index"
+      ],
+      "config": {
+        "global": {
+          "path": "/home/andy4917/.codex/config.toml",
+          "present": true,
+          "matches_canonical": true
+        },
+        "windows_mirror": {
+          "path": "/mnt/c/Users/anise/.codex/config.toml",
+          "present": true,
+          "matches_canonical": true
+        }
+      },
+      "runtime": {
+        "linux": {
+          "serena_home": "/home/andy4917/.serena",
+          "binary_found": true,
+          "home_initialized": true,
+          "project_dir": "/home/andy4917/Dev-Management/.serena",
+          "project_configured": true,
+          "onboarding_performed": false
+        }
+      },
+      "repair_advice": {
+        "can_auto_repair": false,
+        "reason": "Deterministic Serena onboarding repair is not confirmed; use serena project index only for metadata/index and keep onboarding manual.",
+        "deterministic_cli": {
+          "available": true,
+          "binary": "/home/andy4917/.local/bin/serena",
+          "project_index_available": true,
+          "reason": ""
+        }
+      },
+      "activation": {
+        "status": "BLOCKED",
+        "reason": "latest Serena MCP log shows the session started without activating a project",
+        "log_path": "/home/andy4917/.serena/logs/2026-04-21/mcp_20260421-041009_7120.txt",
+        "matched_lines": [
+          "WARNING 2026-04-21 04:10:09,919 [MainThread] serena.cli:start_mcp_server:326 - No project root found from /mnt/c/Program Files/WindowsApps/OpenAI.Codex_26.417.4842.0_x64__2p2nqsd0c76g0/app/resources; not activating any project"
+        ]
+      },
+      "steps": [
+        {
+          "id": "serena_global_config_ready",
+          "status": "PASS",
+          "reason": "",
+          "evidence_refs": [
+            "/home/andy4917/.codex/config.toml"
+          ]
+        },
+        {
+          "id": "serena_project_metadata_present",
+          "status": "PASS",
+          "reason": "",
+          "evidence_refs": [
+            "/home/andy4917/Dev-Management/.serena/project.yml"
+          ]
+        },
+        {
+          "id": "serena_onboarding_completed",
+          "status": "BLOCKED",
+          "reason": "Serena onboarding has not been performed for the current repo",
+          "evidence_refs": [
+            "/home/andy4917/Dev-Management/.serena/memories"
+          ]
+        },
+        {
+          "id": "serena_project_activated",
+          "status": "BLOCKED",
+          "reason": "latest Serena MCP log shows the session started without activating a project",
+          "evidence_refs": [
+            "/home/andy4917/.serena/logs/2026-04-21/mcp_20260421-041009_7120.txt"
+          ]
+        }
+      ]
+    },
+    "context7": {
+      "status": "PASS",
+      "summary": "Context7 evidence is ready for the current diff.",
+      "required": false,
+      "report_path": "/home/andy4917/Dev-Management/reports/context7-usage.json",
+      "detected_changes": [],
+      "entries": [],
+      "warnings": [],
+      "blockers": [],
+      "config": {
+        "global_config_path": "/home/andy4917/.codex/config.toml",
+        "global_matches_canonical": true
+      },
+      "step": {
+        "id": "context7_consulted_before_protected_changes",
+        "status": "WAIVED",
+        "reason": "current diff does not touch Context7-protected files",
+        "evidence_refs": []
+      }
+    },
+    "sequence": [
+      {
+        "id": "serena_global_config_ready",
+        "status": "PASS",
+        "reason": "",
+        "evidence_refs": [
+          "/home/andy4917/.codex/config.toml"
+        ]
+      },
+      {
+        "id": "serena_project_metadata_present",
+        "status": "PASS",
+        "reason": "",
+        "evidence_refs": [
+          "/home/andy4917/Dev-Management/.serena/project.yml"
+        ]
+      },
+      {
+        "id": "serena_onboarding_completed",
+        "status": "BLOCKED",
+        "reason": "Serena onboarding has not been performed for the current repo",
+        "evidence_refs": [
+          "/home/andy4917/Dev-Management/.serena/memories"
+        ]
+      },
+      {
+        "id": "serena_project_activated",
+        "status": "BLOCKED",
+        "reason": "latest Serena MCP log shows the session started without activating a project",
+        "evidence_refs": [
+          "/home/andy4917/.serena/logs/2026-04-21/mcp_20260421-041009_7120.txt"
+        ]
+      },
+      {
+        "id": "context7_consulted_before_protected_changes",
+        "status": "WAIVED",
+        "reason": "current diff does not touch Context7-protected files",
+        "evidence_refs": []
+      }
+    ]
+  },
   "forbidden_feature_flags_enabled": [],
   "runtime_restore_seed_violations": [
     {
@@ -165,5 +2315,6 @@
       ]
     }
   ],
+  "gate_status": "BLOCKED",
   "status": "FAIL"
 }

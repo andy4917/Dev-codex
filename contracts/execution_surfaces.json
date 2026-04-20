@@ -1,8 +1,30 @@
 {
-  "phase": "phase0-environment-audit",
+  "version": 2,
+  "canonical_execution_surface_id": "ssh-devmgmt-wsl",
   "surfaces": [
-    "windows-native",
-    "wsl-ubuntu"
+    {
+      "id": "windows-native",
+      "roles": [
+        "user_surface",
+        "client_surface"
+      ],
+      "authority": false
+    },
+    {
+      "id": "wsl-ubuntu",
+      "roles": [
+        "local_execution_surface",
+        "diagnostic_surface"
+      ],
+      "authority": false
+    },
+    {
+      "id": "ssh-devmgmt-wsl",
+      "roles": [
+        "canonical_execution_surface"
+      ],
+      "authority": true
+    }
   ],
   "required_tool_families": [
     "git",
@@ -18,13 +40,53 @@
     "not_on_path",
     "surface_mismatch",
     "policy_intentional",
-    "unconfirmed"
+    "unconfirmed",
+    "canonical_runtime_unavailable"
   ],
   "surface_gate_rules": {
     "required_missing_status": "BLOCKED",
     "optional_missing_status": "HOLD",
     "wsl_distro_missing_status": "BLOCKED",
+    "canonical_ssh_unavailable_status": "BLOCKED",
     "exclude_environment_blocked_runs_from_variant_scoring": true
+  },
+  "local_vs_remote_mismatch_rules": {
+    "canonical_surface_must_match_authority": true,
+    "auto_mode_falls_back_to_local_authority": false,
+    "status_on_mismatch": "BLOCKED"
+  },
+  "client_surface_policy": {
+    "codex_app_session_path_is_client_surface_only": true,
+    "client_surface_contamination_status_when_canonical_passes": "WARN",
+    "local_shell_execution_status_when_forbidden_runtime_is_selected": "BLOCKED"
+  },
+  "forbidden_path_contamination_rules": {
+    "blocked_prefixes": [
+      "/mnt/c/Users/anise/.codex/bin/wsl",
+      "/mnt/c/Users/anise/.codex/tmp/arg0"
+    ],
+    "blocked_suffixes": [
+      ".codex/bin/wsl/codex"
+    ],
+    "front_loaded_arg0_status": "BLOCKED"
+  },
+  "codex_resolution_precedence_rules": {
+    "preferred_primary_resolution": "linux-native codex in canonical SSH runtime",
+    "allowed_fallback_resolution": "repo-generated local SSH wrapper",
+    "forbidden_primary_resolution": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
+    "status_on_forbidden_resolution": "BLOCKED"
+  },
+  "git_surface_drift_rules": {
+    "mixed_windows_and_wsl_execution_status": "BLOCKED",
+    "windows_git_observation_only": true,
+    "local_dirty_state_status": "WARN",
+    "lfs_missing_status": "WARN",
+    "stale_safe_directory_status": "WARN"
+  },
+  "app_surface_rules": {
+    "codex_app_role": "user_surface_only",
+    "windows_codex_state_role": "observed_runtime_evidence_only",
+    "windows_codex_launcher_role": "external_dependency_forbidden_primary_runtime"
   },
   "evidence_sources": [
     "package.json",

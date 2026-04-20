@@ -1,0 +1,393 @@
+{
+  "status": "WARN",
+  "repo_reports": [
+    {
+      "repo_root": "/home/andy4917/Dev-Management",
+      "status": "present",
+      "dirty": [
+        " M contracts/execution_surfaces.json",
+        " M contracts/workspace_authority.json",
+        " M docs/RUNBOOK.md",
+        " M docs/SERENA_USAGE.md",
+        " M reports/audit.final.json",
+        " M scripts/audit_workspace.py",
+        " M scripts/render_codex_runtime.py",
+        " M scripts/repair_codex_desktop_runtime.py",
+        " M scripts/verify_migration_evidence.py",
+        " M tests/test_audit_workspace_contract.py",
+        " M tests/test_repair_codex_desktop_runtime.py",
+        "?? .serena/",
+        "?? contracts/instruction_guard_policy.json",
+        "?? docs/AGENT_GUARDRAILS.md",
+        "?? docs/GLOBAL_RUNTIME_ARCHITECTURE.md",
+        "?? reports/canonical-runtime-activation.dry-run.json",
+        "?? reports/canonical-runtime-activation.json",
+        "?? reports/generated-runtime-preview/",
+        "?? reports/git-surface.json",
+        "?? reports/global-runtime.after-activation.json",
+        "?? reports/global-runtime.json",
+        "?? reports/manual-system-remediation-20260421-030157.md",
+        "?? reports/manual-system-remediation-20260421-030516.md",
+        "?? reports/manual-system-remediation-20260421-031215.md",
+        "?? reports/manual-system-remediation-20260421-033211.md",
+        "?? reports/manual-system-remediation-20260421-035801.md",
+        "?? reports/manual-system-remediation-20260421-035900.md",
+        "?? reports/serena-startup-repair.apply.json",
+        "?? reports/serena-startup-repair.json",
+        "?? reports/startup-workflow.after-activation.json",
+        "?? reports/startup-workflow.json",
+        "?? scripts/activate_canonical_runtime.py",
+        "?? scripts/check_agent_instruction.py",
+        "?? scripts/check_git_surface.py",
+        "?? scripts/check_global_runtime.py",
+        "?? scripts/check_startup_workflow.py",
+        "?? scripts/repair_serena_startup.py",
+        "?? scripts/run_canonical_command.py",
+        "?? tests/test_activate_canonical_runtime.py",
+        "?? tests/test_check_agent_instruction.py",
+        "?? tests/test_check_global_runtime.py",
+        "?? tests/test_check_startup_workflow.py",
+        "?? tests/test_git_surface.py",
+        "?? tests/test_repair_serena_startup.py",
+        "?? tests/test_run_canonical_command.py"
+      ],
+      "local_config": {
+        "available": true,
+        "scope": "local",
+        "lines": [
+          "file:.git/config\tremote.origin.url=https://github.com/andy4917/Dev-codex.git",
+          "file:.git/config\tremote.origin.fetch=+refs/heads/*:refs/remotes/origin/*"
+        ],
+        "map": {
+          "remote.origin.url": "https://github.com/andy4917/Dev-codex.git",
+          "remote.origin.fetch": "+refs/heads/*:refs/remotes/origin/*"
+        },
+        "stderr": "",
+        "exit_code": 0
+      },
+      "top_level": "/home/andy4917/Dev-Management",
+      "hooks_path": ".git/hooks",
+      "is_worktree": false,
+      "is_sparse_checkout": false,
+      "superproject": "",
+      "warnings": [
+        "repo is dirty"
+      ]
+    },
+    {
+      "repo_root": "/home/andy4917/Dev-Workflow",
+      "status": "present",
+      "dirty": [
+        " M scripts/delivery_gate.py",
+        "?? tests/test_delivery_gate_scorecard_slice.py"
+      ],
+      "local_config": {
+        "available": true,
+        "scope": "local",
+        "lines": [
+          "file:.git/config\tremote.origin.url=https://github.com/andy4917/Dev-Workflow.git",
+          "file:.git/config\tremote.origin.fetch=+refs/heads/*:refs/remotes/origin/*"
+        ],
+        "map": {
+          "remote.origin.url": "https://github.com/andy4917/Dev-Workflow.git",
+          "remote.origin.fetch": "+refs/heads/*:refs/remotes/origin/*"
+        },
+        "stderr": "",
+        "exit_code": 0
+      },
+      "top_level": "/home/andy4917/Dev-Workflow",
+      "hooks_path": ".git/hooks",
+      "is_worktree": false,
+      "is_sparse_checkout": false,
+      "superproject": "",
+      "warnings": [
+        "repo is dirty"
+      ]
+    },
+    {
+      "repo_root": "/home/andy4917/Dev-Product/reservation-system",
+      "status": "present",
+      "dirty": [
+        " D .codex_tmp/ota_dom_fallback_handoff.json",
+        " D .codex_tmp/ota_dom_fallback_memory.json",
+        " D .codex_tmp/ota_dom_fallback_regression.json",
+        " D .codex_tmp/ota_fetch_instrumentation_handoff.json",
+        " D .codex_tmp/ota_fetch_instrumentation_memory.json",
+        " D .codex_tmp/ota_fetch_instrumentation_regression.json",
+        " M .gitignore",
+        " M README.md",
+        " M app_v2/main/bgeModelInstaller.ts",
+        " M app_v2/main/preflight.ts",
+        " M app_v2/main/providerWorkspaceManager.ts",
+        " M app_v2/renderer/App.tsx",
+        " D docs/runtime/ACTIVE_MEMORY.md",
+        " D docs/runtime/HANDOFF.md",
+        " D docs/runtime/PLAN.md",
+        " D docs/runtime/STAGE_V1_CHECKLIST.md",
+        " D docs/runtime/TASK_STATE.md",
+        " D docs/runtime/WORKSPACE_ALIGNMENT.md",
+        " M pyproject.toml",
+        " M scripts/app_v2_artifact_check.mjs",
+        " M scripts/app_v2_electron_smoke.mjs",
+        " M scripts/app_v2_runtime_verify.mjs",
+        " M scripts/check_contract_hygiene.py",
+        " D scripts/lib/atomicWriteJsonFile.mjs",
+        " D scripts/lib/workspace_alignment.py",
+        " M scripts/run-app-windows.cmd",
+        " D scripts/workspace_alignment/check.py",
+        " D scripts/workspace_alignment/repair.py",
+        " M setup.py",
+        " M tests/regression_app_v2_no_legacy_refs.mjs",
+        " M tests/regression_app_v2_settings_reference_contract.mjs",
+        " M tests/regression_workspace_alignment_py.py",
+        " M truth_dataset/reports/wings_har_refresh_audit.md",
+        " M ui-workbench/README.md",
+        " M ui-workbench/public/stitch-recovery/manifest.json",
+        " M uv.lock",
+        "?? .github/",
+        "?? Makefile",
+        "?? contracts/",
+        "?? docs/ARCHITECTURE.md",
+        "?? docs/BENCHMARK_PROTOCOL.md",
+        "?? docs/DESIGN.md",
+        "?? docs/OBSIDIAN.md",
+        "?? docs/PRODUCT_REQUIREMENTS.md",
+        "?? examples/",
+        "?? knowledge/",
+        "?? memory/",
+        "?? reports/",
+        "?? scripts/_common.py",
+        "?? scripts/audit_execution_surfaces.py",
+        "?? scripts/benchmark_prepare.py",
+        "?? scripts/bootstrap_real_env.py",
+        "?? scripts/build_inventory_cpp_core.py",
+        "?? scripts/check_bundle_sync.py",
+        "?? scripts/check_context7.py",
+        "?? scripts/check_dip.py",
+        "?? scripts/check_hook_logs.py",
+        "?? scripts/check_local_environments.py",
+        "?? scripts/check_path_visibility.py",
+        "?? scripts/check_runaway.py",
+        "?? scripts/check_serena.py",
+        "?? scripts/check_sync_conflicts.py",
+        "?? scripts/check_syncthing.py",
+        "?? scripts/check_toolchain.py",
+        "?? scripts/check_traceability.py",
+        "?? scripts/check_unknowns.py",
+        "?? scripts/check_wsl_status.py",
+        "?? scripts/configure_syncthing.py",
+        "?? scripts/delivery_gate.py",
+        "?? scripts/export_obsidian_notes.py",
+        "?? scripts/human_bottleneck_patch.py",
+        "?? scripts/install_hooks.py",
+        "?? scripts/install_or_repair_toolchain.py",
+        "?? scripts/issue_workspace_authority.py",
+        "?? scripts/lib",
+        "?? scripts/memory_checkpoint.py",
+        "?? scripts/memory_resume.py",
+        "?? scripts/project_setup.py",
+        "?? scripts/run_acceptance.py",
+        "?? scripts/session_router.py",
+        "?? scripts/summarize_benchmark_results.py",
+        "?? scripts/update_wsl_and_ubuntu.py",
+        "?? scripts/workspace_alignment",
+        "?? tests/regression_global_scorecard_bridge_py.py"
+      ],
+      "local_config": {
+        "available": true,
+        "scope": "local",
+        "lines": [
+          "file:.git/config\tremote.origin.url=https://github.com/andy4917/reservation-system.git",
+          "file:.git/config\tremote.origin.fetch=+refs/heads/*:refs/remotes/origin/*"
+        ],
+        "map": {
+          "remote.origin.url": "https://github.com/andy4917/reservation-system.git",
+          "remote.origin.fetch": "+refs/heads/*:refs/remotes/origin/*"
+        },
+        "stderr": "",
+        "exit_code": 0
+      },
+      "top_level": "/home/andy4917/Dev-Product/reservation-system",
+      "hooks_path": ".git/hooks",
+      "is_worktree": false,
+      "is_sparse_checkout": false,
+      "superproject": "",
+      "warnings": [
+        "repo is dirty"
+      ]
+    },
+    {
+      "repo_root": "/home/andy4917/reservation-system",
+      "status": "requested-path-missing",
+      "dirty": [],
+      "local_config": {
+        "available": false,
+        "lines": [],
+        "map": {}
+      },
+      "top_level": "",
+      "hooks_path": "",
+      "is_worktree": false,
+      "is_sparse_checkout": false,
+      "superproject": "",
+      "warnings": []
+    }
+  ],
+  "repo_local_guard_proposals": [
+    {
+      "repo_root": "/home/andy4917/Dev-Management",
+      "status": "PROPOSED",
+      "path": "/home/andy4917/Dev-Management/.gitattributes",
+      "reason": "Dev-Management does not define a repo-local .gitattributes policy yet",
+      "missing_lines": [
+        "* text=auto eol=lf",
+        "*.bat text eol=crlf",
+        "*.cmd text eol=crlf",
+        "*.ps1 text eol=crlf"
+      ]
+    },
+    {
+      "repo_root": "/home/andy4917/Dev-Workflow",
+      "status": "WAIVED",
+      "path": "/home/andy4917/Dev-Workflow/.gitattributes",
+      "reason": "repo-local .gitattributes proposals are only emitted for Dev-Management",
+      "missing_lines": []
+    },
+    {
+      "repo_root": "/home/andy4917/Dev-Product/reservation-system",
+      "status": "WAIVED",
+      "path": "/home/andy4917/Dev-Product/reservation-system/.gitattributes",
+      "reason": "repo-local .gitattributes proposals are only emitted for Dev-Management",
+      "missing_lines": []
+    },
+    {
+      "repo_root": "/home/andy4917/reservation-system",
+      "status": "WAIVED",
+      "path": "/home/andy4917/reservation-system/.gitattributes",
+      "reason": "repo-local .gitattributes proposals are only emitted for Dev-Management",
+      "missing_lines": []
+    }
+  ],
+  "wsl": {
+    "global": {
+      "available": true,
+      "scope": "global",
+      "lines": [
+        "file:/home/andy4917/.gitconfig\tcore.autocrlf=input"
+      ],
+      "map": {
+        "core.autocrlf": "input"
+      },
+      "stderr": "",
+      "exit_code": 0
+    },
+    "system": {
+      "available": false,
+      "scope": "system",
+      "lines": [],
+      "map": {},
+      "stderr": "fatal: unable to read config file '/etc/gitconfig': No such file or directory",
+      "exit_code": 128
+    },
+    "lfs": {
+      "available": false,
+      "stdout": "",
+      "stderr": "git: 'lfs' is not a git command. See 'git --help'.\n\nThe most similar command is\n\tlog"
+    },
+    "stale_safe_directories": []
+  },
+  "windows": {
+    "git_exe": "/mnt/c/Program Files/Git/cmd/git.exe",
+    "global": {
+      "available": true,
+      "scope": "global",
+      "lines": [
+        "file:C:/Users/anise/.gitconfig\tfilter.lfs.clean=git-lfs clean -- %f",
+        "file:C:/Users/anise/.gitconfig\tfilter.lfs.smudge=git-lfs smudge -- %f",
+        "file:C:/Users/anise/.gitconfig\tfilter.lfs.process=git-lfs filter-process",
+        "file:C:/Users/anise/.gitconfig\tfilter.lfs.required=true",
+        "file:C:/Users/anise/.gitconfig\tsafe.directory=%(prefix)///wsl.localhost/Ubuntu/home/andy4917/code/reservation-system",
+        "file:C:/Users/anise/.gitconfig\tsafe.directory=//wsl.localhost/Ubuntu/home/andy4917/code/reservation-system"
+      ],
+      "map": {
+        "filter.lfs.clean": "git-lfs clean -- %f",
+        "filter.lfs.smudge": "git-lfs smudge -- %f",
+        "filter.lfs.process": "git-lfs filter-process",
+        "filter.lfs.required": "true",
+        "safe.directory": "//wsl.localhost/Ubuntu/home/andy4917/code/reservation-system"
+      },
+      "stderr": "",
+      "exit_code": 0
+    },
+    "system": {
+      "available": true,
+      "scope": "system",
+      "lines": [
+        "file:C:/Program Files/Git/etc/gitconfig\tfilter.lfs.clean=git-lfs clean -- %f",
+        "file:C:/Program Files/Git/etc/gitconfig\tfilter.lfs.smudge=git-lfs smudge -- %f",
+        "file:C:/Program Files/Git/etc/gitconfig\tfilter.lfs.process=git-lfs filter-process",
+        "file:C:/Program Files/Git/etc/gitconfig\tfilter.lfs.required=true",
+        "file:C:/Program Files/Git/etc/gitconfig\tcore.autocrlf=true",
+        "file:C:/Program Files/Git/etc/gitconfig\tcredential.helper=manager"
+      ],
+      "map": {
+        "filter.lfs.clean": "git-lfs clean -- %f",
+        "filter.lfs.smudge": "git-lfs smudge -- %f",
+        "filter.lfs.process": "git-lfs filter-process",
+        "filter.lfs.required": "true",
+        "core.autocrlf": "true",
+        "credential.helper": "manager"
+      },
+      "stderr": "",
+      "exit_code": 0
+    },
+    "lfs": {
+      "available": true,
+      "stdout": "git-lfs/3.7.1 (GitHub; windows amd64; go 1.25.1; git b84b3384)",
+      "stderr": ""
+    },
+    "stale_safe_directories": [
+      "%(prefix)///wsl.localhost/Ubuntu/home/andy4917/code/reservation-system",
+      "//wsl.localhost/Ubuntu/home/andy4917/code/reservation-system"
+    ]
+  },
+  "global_drift": [
+    {
+      "key": "core.autocrlf",
+      "wsl": "input",
+      "windows": ""
+    },
+    {
+      "key": "filter.lfs.clean",
+      "wsl": "",
+      "windows": "git-lfs clean -- %f"
+    },
+    {
+      "key": "filter.lfs.process",
+      "wsl": "",
+      "windows": "git-lfs filter-process"
+    },
+    {
+      "key": "filter.lfs.required",
+      "wsl": "",
+      "windows": "true"
+    },
+    {
+      "key": "filter.lfs.smudge",
+      "wsl": "",
+      "windows": "git-lfs smudge -- %f"
+    },
+    {
+      "key": "safe.directory",
+      "wsl": "",
+      "windows": "//wsl.localhost/Ubuntu/home/andy4917/code/reservation-system"
+    }
+  ],
+  "warnings": [
+    "Windows Git global safe.directory contains stale paths.",
+    "Windows Git and WSL Git global config differ.",
+    "Git LFS is configured but unavailable in WSL.",
+    "Dirty repos were detected and are reported only.",
+    "Dev-Management repo-local .gitattributes proposal is available."
+  ]
+}

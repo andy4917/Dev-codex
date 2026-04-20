@@ -23,6 +23,9 @@ if str(WORKFLOW_SCRIPTS) not in sys.path:
 
 from _common import current_wsl_distro  # noqa: E402
 from _scorecard_common import codex_home as resolve_codex_home  # noqa: E402
+from render_codex_runtime import launcher_paths as runtime_launcher_paths  # noqa: E402
+from render_codex_runtime import preview_linux_launcher_path, render_linux_launcher, sync_generated_executable_text  # noqa: E402
+from check_global_runtime import evaluate_global_runtime  # noqa: E402
 
 
 def load_json(path: Path, default: Any | None = None) -> Any:
@@ -41,6 +44,27 @@ def load_toml(path: Path) -> dict[str, Any]:
 def save_json(path: Path, payload: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
+def extract_launcher_target(text: str) -> str:
+    for line in str(text).splitlines():
+        stripped = line.strip()
+        if not stripped.startswith("target="):
+            continue
+        value = stripped.split("=", 1)[1].strip()
+        if len(value) >= 2 and value[0] == value[-1] and value[0] in {'"', "'"}:
+            return value[1:-1]
+        return value
+    return ""
+
+
+def collapse_gate_status(statuses: list[str]) -> str:
+    filtered = [value for value in statuses if value]
+    if any(value == "BLOCKED" for value in filtered):
+        return "BLOCKED"
+    if any(value == "WARN" for value in filtered):
+        return "WARN"
+    return "PASS"
 
 
 def to_unc_path(path: str | Path, host: str) -> str:
@@ -548,6 +572,76 @@ def repair_local_environments(
     return changed
 
 
+def repair_linux_launcher_shim(authority: dict[str, Any], *, apply: bool = True) -> dict[str, Any]:
+    paths = runtime_launcher_paths(authority)
+    shim_path = paths["linux_launcher"].expanduser()
+    preview_path = preview_linux_launcher_path(authority).expanduser()
+    current_text = shim_path.read_text(encoding="utf-8") if shim_path.exists() else ""
+    current_target = extract_launcher_target(current_text)
+    changed = False
+    reasons: list[str] = []
+
+    if not shim_path.exists():
+        reasons.append(f"Linux Codex launcher shim is missing: {shim_path}")
+    if current_target and "/mnt/c/Users/anise/.codex/bin/wsl/codex" in current_target:
+        reasons.append("Linux Codex launcher shim still points to the forbidden Windows-mounted launcher.")
+
+    gate_report = load_json(MANAGEMENT_ROOT / "reports" / "global-runtime.json", default={})
+    if not isinstance(gate_report, dict) or not gate_report:
+        gate_report = evaluate_global_runtime(MANAGEMENT_ROOT, mode="auto")
+    native_codex_path = (
+        gate_report.get("remote_native_codex_status", {}).get("selected_path")
+        or gate_report.get("wrapper_apply_readiness", {}).get("remote_native_codex_path")
+        or ""
+    )
+    expected_text = render_linux_launcher(authority, remote_native_codex_path=str(native_codex_path)) or ""
+    needs_repair = bool(expected_text) and (not shim_path.exists() or current_text != expected_text)
+    sync_generated_executable_text(preview_path, expected_text)
+    if needs_repair and not current_target and shim_path.exists():
+        reasons.append(f"Linux Codex launcher shim does not declare a target path: {shim_path}")
+    gate_statuses = {
+        "canonical_execution_status": gate_report.get("canonical_execution_status", "BLOCKED"),
+        "remote_repo_root_status": gate_report.get("remote_repo_root_status", {}).get("status", "BLOCKED"),
+        "remote_codex_resolution_status": gate_report.get("remote_codex_resolution_status", {}).get("status", "BLOCKED"),
+        "remote_native_codex_status": gate_report.get("remote_native_codex_status", {}).get("status", "BLOCKED"),
+        "remote_path_contamination_status": gate_report.get("remote_path_contamination_status", {}).get("status", "BLOCKED"),
+        "local_path_precedence_status": gate_report.get("local_path_precedence_status", {}).get("status", "BLOCKED"),
+        "wrapper_target_safety_status": gate_report.get("wrapper_target_safety_status", {}).get("status", "BLOCKED"),
+    }
+    live_write_allowed = all(value == "PASS" for value in gate_statuses.values())
+    live_write_blockers = [name for name, value in gate_statuses.items() if value != "PASS"]
+    if live_write_blockers:
+        reasons.append("Live launcher overwrite remains blocked until canonical SSH and local PATH safety gates pass.")
+
+    if live_write_allowed and apply and needs_repair:
+        sync_generated_executable_text(shim_path, expected_text)
+        changed = True
+
+    status = "PASS"
+    if changed:
+        status = "PASS"
+    elif needs_repair and live_write_allowed:
+        status = "REPAIRABLE"
+    elif needs_repair and not live_write_allowed:
+        status = "BLOCKED"
+
+    return {
+        "path": str(shim_path),
+        "preview_path": str(preview_path),
+        "exists": shim_path.exists(),
+        "current_target": current_target,
+        "expected_target": native_codex_path or "ssh-devmgmt-wsl:codex",
+        "needs_repair": needs_repair,
+        "repairable": live_write_allowed and needs_repair,
+        "changed": changed,
+        "live_write_allowed": live_write_allowed,
+        "live_write_blockers": live_write_blockers,
+        "apply_gates": gate_statuses,
+        "status": status,
+        "reasons": reasons,
+    }
+
+
 def remove_stale_environment(state: dict[str, Any]) -> bool:
     atom_state = state.get("electron-persisted-atom-state")
     if not isinstance(atom_state, dict):
@@ -853,7 +947,31 @@ def parse_args() -> argparse.Namespace:
     mode_group.add_argument("--apply", action="store_true", help="Apply runtime repairs after capturing backups.")
     parser.add_argument("--runtime-codex-home", default="", help="Override the target Codex home to inspect or repair.")
     parser.add_argument("--report-file", default=str(REPORT_PATH), help="Write the runtime repair report to this path.")
+    parser.add_argument(
+        "--tests-status",
+        choices=["PASS", "WARN", "BLOCKED"],
+        default="BLOCKED",
+        help="Status of the related verification tests. Live launcher overwrite requires PASS.",
+    )
     return parser.parse_args()
+
+
+def git_diff_check_status() -> dict[str, Any]:
+    if not (MANAGEMENT_ROOT / ".git").exists():
+        return {"status": "PASS", "output": "", "reason": "fixture repo does not include .git"}
+    result = subprocess.run(
+        ["git", "-C", str(MANAGEMENT_ROOT), "diff", "--check"],
+        check=False,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+    )
+    output = (result.stdout or "") + (result.stderr or "")
+    return {
+        "status": "PASS" if result.returncode == 0 else "BLOCKED",
+        "output": output.strip(),
+        "reason": "" if result.returncode == 0 else "git diff --check reported problems",
+    }
 
 
 def resolve_runtime_codex_home(authority: dict[str, Any], override: str) -> Path:
@@ -881,12 +999,14 @@ def capture_baseline_snapshot() -> dict[str, Any]:
             source = str(path)
             break
     windows_check = payload.get("windows_runtime_mirror_check", {}) if isinstance(payload, dict) else {}
+    launcher_check = payload.get("wsl_launcher_check", {}) if isinstance(payload, dict) else {}
     violations = payload.get("runtime_restore_seed_violations", []) if isinstance(payload, dict) else []
     return {
         "captured_at": datetime.now(timezone.utc).isoformat(),
         "audit_report": source,
         "audit_status": str(payload.get("status", "UNKNOWN")).strip() if isinstance(payload, dict) else "UNKNOWN",
         "windows_runtime_mirror_check_status": str(windows_check.get("status", "UNKNOWN")).strip() if isinstance(windows_check, dict) else "UNKNOWN",
+        "wsl_launcher_check_status": str(launcher_check.get("status", "UNKNOWN")).strip() if isinstance(launcher_check, dict) else "UNKNOWN",
         "runtime_restore_seed_violations_count": len(violations) if isinstance(violations, list) else 0,
     }
 
@@ -920,6 +1040,7 @@ def load_thread_rows(db_path: Path, thread_ids: list[str]) -> dict[str, dict[str
 def build_change_entries(
     *,
     global_state_result: dict[str, Any],
+    launcher_result: dict[str, Any],
     local_env_changed: list[str],
     sessions_changed: list[str],
     threads_result: dict[str, Any],
@@ -940,6 +1061,19 @@ def build_change_entries(
                 "path": str(global_state_result.get("path", "")).strip(),
                 "projectless_thread_ids_removed": len(global_state_result.get("removed_projectless_thread_ids", [])),
                 "thread_workspace_hints_removed": len(global_state_result.get("removed_thread_hints", [])),
+            }
+        )
+
+    if launcher_result.get("needs_repair"):
+        changes.append(
+            {
+                "type": "linux_codex_launcher_shim_rewrite",
+                "path": str(launcher_result.get("path", "")).strip(),
+                "from": str(launcher_result.get("current_target", "")).strip(),
+                "to": str(launcher_result.get("expected_target", "")).strip(),
+                "repairable": bool(launcher_result.get("repairable")),
+                "live_write_allowed": bool(launcher_result.get("live_write_allowed")),
+                "preview_path": str(launcher_result.get("preview_path", "")).strip(),
             }
         )
 
@@ -985,6 +1119,7 @@ def build_change_entries(
 def collect_backup_targets(
     *,
     global_state_result: dict[str, Any],
+    launcher_result: dict[str, Any],
     local_env_changed: list[str],
     sessions_changed: list[str],
     threads_result: dict[str, Any],
@@ -992,6 +1127,8 @@ def collect_backup_targets(
     targets: list[Path] = []
     if global_state_result.get("changed"):
         targets.append(Path(str(global_state_result.get("path", "")).strip()))
+    if launcher_result.get("needs_repair") and launcher_result.get("live_write_allowed"):
+        targets.append(Path(str(launcher_result.get("path", "")).strip()))
     targets.extend(Path(path) for path in local_env_changed if str(path).strip())
     targets.extend(Path(path) for path in sessions_changed if str(path).strip())
     if int(threads_result.get("changed_rows", 0) or 0) > 0:
@@ -1069,6 +1206,7 @@ def main() -> int:
     latest_resume = resume_candidates[0] if resume_candidates else None
     preferred_active_root = str((latest_resume or {}).get("workspace_unc_root", "")).strip() or None
     mode = "apply" if args.apply else "dry-run"
+    diff_check = git_diff_check_status()
 
     global_state_result = repair_global_state(
         authority,
@@ -1077,6 +1215,16 @@ def main() -> int:
         preferred_active_root=preferred_active_root,
         apply=False,
     )
+    launcher_result = repair_linux_launcher_shim(authority, apply=False)
+    launcher_result["tests_status"] = args.tests_status
+    launcher_result["diff_check_status"] = diff_check["status"]
+    if args.tests_status != "PASS" and "tests_status" not in launcher_result["live_write_blockers"]:
+        launcher_result["live_write_blockers"].append("tests_status")
+    if diff_check["status"] != "PASS" and "diff_check_status" not in launcher_result["live_write_blockers"]:
+        launcher_result["live_write_blockers"].append("diff_check_status")
+    launcher_result["live_write_allowed"] = bool(launcher_result.get("live_write_allowed")) and args.tests_status == "PASS" and diff_check["status"] == "PASS"
+    launcher_result["repairable"] = launcher_result["live_write_allowed"] and bool(launcher_result.get("needs_repair"))
+    launcher_result["live_write_status"] = "PASS" if launcher_result["live_write_allowed"] else "BLOCKED"
     local_env_changed = repair_local_environments(
         codex_home=codex_home,
         linux_roots=roots,
@@ -1112,6 +1260,7 @@ def main() -> int:
     )
     predicted_changes, unexpected_resume_root_rewrites = build_change_entries(
         global_state_result=global_state_result,
+        launcher_result=launcher_result,
         local_env_changed=local_env_changed,
         sessions_changed=sessions_changed,
         threads_result=threads_result,
@@ -1128,6 +1277,7 @@ def main() -> int:
         backup = backup_targets(
             collect_backup_targets(
                 global_state_result=global_state_result,
+                launcher_result=launcher_result,
                 local_env_changed=local_env_changed,
                 sessions_changed=sessions_changed,
                 threads_result=threads_result,
@@ -1141,6 +1291,12 @@ def main() -> int:
             preferred_active_root=preferred_active_root,
             apply=True,
         )
+        applied_launcher_result = repair_linux_launcher_shim(authority, apply=bool(launcher_result["live_write_allowed"]))
+        applied_launcher_result["tests_status"] = args.tests_status
+        applied_launcher_result["diff_check_status"] = diff_check["status"]
+        applied_launcher_result["live_write_allowed"] = bool(launcher_result["live_write_allowed"])
+        if not applied_launcher_result["live_write_allowed"]:
+            applied_launcher_result["live_write_blockers"] = list(launcher_result["live_write_blockers"])
         applied_local_env_changed = repair_local_environments(
             codex_home=codex_home,
             linux_roots=roots,
@@ -1176,6 +1332,7 @@ def main() -> int:
         )
         applied_changes, unexpected_resume_root_rewrites = build_change_entries(
             global_state_result=applied_global_state_result,
+            launcher_result=applied_launcher_result,
             local_env_changed=applied_local_env_changed,
             sessions_changed=applied_sessions_changed,
             threads_result=applied_threads_result,
@@ -1186,12 +1343,20 @@ def main() -> int:
             known_roots=roots,
         )
 
+    launcher_report = launcher_result if not args.apply else applied_launcher_result
     report = {
-        "status": "PASS",
+        "status": collapse_gate_status(
+            [
+                "BLOCKED" if launcher_report.get("status") in {"FAIL", "BLOCKED"} else "",
+                "WARN" if launcher_report.get("status") == "REPAIRABLE" else "",
+            ]
+        ),
         "schema_version": 1,
         "mode": mode,
         "runtime_codex_home": str(codex_home),
         "baseline": capture_baseline_snapshot(),
+        "diff_check": diff_check,
+        "launcher_shim": launcher_report,
         "predicted_changes": predicted_changes,
         "applied_changes": applied_changes,
         "resume_candidates": resume_candidates,
@@ -1201,6 +1366,9 @@ def main() -> int:
     }
     save_json(report_path, report)
     print(json.dumps(report, ensure_ascii=False, indent=2))
+    # Repair is a reporting and staging surface. Non-pass launcher readiness
+    # must stay visible in the JSON report, but it should not be treated as a
+    # process error when the script completed deterministically.
     return 0
 
 

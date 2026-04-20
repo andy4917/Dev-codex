@@ -88,11 +88,14 @@ def runtime_paths(authority: dict[str, Any]) -> dict[str, Path]:
     runtime = authority.get("generation_targets", {}).get("global_runtime", {})
     linux = runtime.get("linux", {})
     windows = runtime.get("windows_mirror", {})
+    windows_config = Path(str(windows.get("config", WINDOWS_CODEX / "config.toml"))).expanduser()
     return {
         "linux_agents": Path(str(linux.get("agents", HOME / ".codex" / "AGENTS.md"))).expanduser(),
         "linux_config": Path(str(linux.get("config", HOME / ".codex" / "config.toml"))).expanduser(),
+        "linux_launcher": Path(str(linux.get("launcher", HOME / ".local" / "bin" / "codex"))).expanduser(),
         "windows_agents": Path(str(windows.get("agents", WINDOWS_CODEX / "AGENTS.md"))).expanduser(),
         "windows_config": Path(str(windows.get("config", WINDOWS_CODEX / "config.toml"))).expanduser(),
+        "windows_wsl_launcher": Path(str(windows.get("wsl_launcher", windows_config.parent / "bin" / "wsl" / "codex"))).expanduser(),
     }
 
 
@@ -361,6 +364,27 @@ def first_nonempty_line(text: str) -> str:
     return ""
 
 
+def launcher_header_ok(text: str) -> bool:
+    lines = [line.strip() for line in text.splitlines()[:3] if line.strip()]
+    return len(lines) >= 2 and lines[0] == "#!/usr/bin/env bash" and lines[1] == "# GENERATED - DO NOT EDIT"
+
+
+def extract_launcher_target(text: str) -> str:
+    match = re.search(r'^\s*target=(["\'])(?P<target>.+?)\1\s*$', text, re.MULTILINE)
+    return match.group("target") if match else ""
+
+
+def is_forbidden_runtime_value(value: str, authority: dict[str, Any]) -> bool:
+    normalized = value.replace("\\", "/").strip().lower()
+    for raw in authority.get("forbidden_primary_runtime_paths", []):
+        marker = str(raw).replace("\\", "/").strip().lower()
+        if marker == ".codex/bin/wsl/codex" and normalized.endswith(marker):
+            return True
+        if marker and marker in normalized:
+            return True
+    return False
+
+
 def diff_preview(left: str, right: str, *, left_label: str, right_label: str, limit: int = 20) -> list[str]:
     if left == right:
         return []
@@ -386,6 +410,66 @@ def load_script_function(script_name: str, function_name: str):
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return getattr(module, function_name)
+
+
+def build_startup_workflow_check(management_root: Path) -> dict[str, Any]:
+    try:
+        evaluator = load_script_function("check_startup_workflow.py", "evaluate_startup_workflow")
+        payload = evaluator(management_root)
+        if isinstance(payload, dict):
+            return payload
+        return {
+            "status": "FAIL",
+            "summary": "startup workflow check returned an unexpected payload",
+            "repo_root": str(management_root),
+        }
+    except Exception as exc:
+        return {
+            "status": "FAIL",
+            "summary": "startup workflow check failed to run",
+            "repo_root": str(management_root),
+            "reason": str(exc),
+        }
+
+
+def build_global_runtime_surface_check(management_root: Path) -> dict[str, Any]:
+    try:
+        evaluator = load_script_function("check_global_runtime.py", "evaluate_global_runtime")
+        payload = evaluator(management_root, mode="auto")
+        return payload if isinstance(payload, dict) else {"status": "BLOCKED", "reason": "unexpected global runtime payload"}
+    except Exception as exc:
+        return {"status": "BLOCKED", "reason": str(exc)}
+
+
+def build_git_surface_drift_check() -> dict[str, Any]:
+    try:
+        evaluator = load_script_function("check_git_surface.py", "evaluate_git_surfaces")
+        payload = evaluator()
+        return payload if isinstance(payload, dict) else {"status": "WARN", "reason": "unexpected git surface payload"}
+    except Exception as exc:
+        return {"status": "WARN", "reason": str(exc)}
+
+
+def build_instruction_guard_policy_check(management_root: Path) -> dict[str, Any]:
+    policy_path = management_root / "contracts" / "instruction_guard_policy.json"
+    payload = load_json(policy_path, default={})
+    persisted = bool(payload.get("bootstrap_exception", {}).get("persisted", True)) if isinstance(payload, dict) else True
+    return {
+        "policy_path": str(policy_path),
+        "present": policy_path.exists(),
+        "bootstrap_exception_persisted": persisted,
+        "status": "PASS" if policy_path.exists() and not persisted else "BLOCKED",
+    }
+
+
+def build_repair_boundary_check(authority: dict[str, Any]) -> dict[str, Any]:
+    payload = authority.get("repair_boundaries", {})
+    blocked_targets = [str(item) for item in payload.get("repo_must_not_treat_as_repo_owned", [])]
+    return {
+        "status": "PASS" if payload else "WARN",
+        "boundaries": payload,
+        "external_targets": blocked_targets,
+    }
 
 
 def build_windows_source_of_truth_proof(authority: dict[str, Any], runtime: dict[str, Path]) -> dict[str, Any]:
@@ -547,6 +631,65 @@ def build_windows_runtime_mirror_check(
         "all_windows_bodies_match_linux": all_bodies_match_linux,
         "source_of_truth_proof": proof,
         "divergence_summary": divergence_summary,
+        "status": status,
+    }
+
+
+def build_wsl_launcher_check(
+    authority: dict[str, Any],
+    runtime: dict[str, Path] | None = None,
+) -> dict[str, Any]:
+    runtime_paths_map = runtime or runtime_paths(authority)
+    linux_launcher = runtime_paths_map["linux_launcher"]
+    launcher_text = read_text(linux_launcher)
+    configured_target = extract_launcher_target(launcher_text)
+    management_root_value = str(authority.get("canonical_roots", {}).get("management", "")).strip()
+    global_runtime = (
+        build_global_runtime_surface_check(Path(management_root_value))
+        if management_root_value
+        else {
+            "local_runtime_surface": {
+                "local_live_codex_resolution_status": {"status": "PASS"},
+                "local_path_precedence_status": {"status": "PASS"},
+            },
+            "wrapper_target_safety_status": {"status": "PASS"},
+        }
+    )
+
+    reasons: list[str] = []
+    if not linux_launcher.exists():
+        reasons.append(f"Linux Codex launcher shim is missing: {linux_launcher}")
+    elif not launcher_header_ok(launcher_text):
+        reasons.append(f"Linux Codex launcher shim is missing the generated header: {linux_launcher}")
+    if configured_target and is_forbidden_runtime_value(configured_target, authority):
+        reasons.append("Linux Codex launcher shim still points to the forbidden Windows-mounted launcher.")
+    live_status = (
+        global_runtime.get("local_runtime_surface", {})
+        .get("local_live_codex_resolution_status", {})
+        .get("status", "BLOCKED")
+    )
+    precedence_status = (
+        global_runtime.get("local_runtime_surface", {})
+        .get("local_path_precedence_status", {})
+        .get("status", "BLOCKED")
+    )
+    wrapper_safety = global_runtime.get("wrapper_target_safety_status", {}).get("status", "BLOCKED")
+    if live_status != "PASS":
+        reasons.append("Live command -v codex resolves to a forbidden runtime target.")
+    if precedence_status != "PASS":
+        reasons.append("Local PATH precedence still allows forbidden runtime entries ahead of the local wrapper.")
+    if wrapper_safety != "PASS":
+        reasons.append("Rendered wrapper target is not safe.")
+    canonical_execution_status = global_runtime.get("canonical_execution_status", "BLOCKED")
+    status = "PASS" if not reasons else "WARN" if canonical_execution_status == "PASS" else "BLOCKED"
+
+    return {
+        "linux_launcher_path": str(linux_launcher),
+        "linux_launcher_exists": linux_launcher.exists(),
+        "linux_launcher_generated_header_ok": launcher_header_ok(launcher_text) if launcher_text else False,
+        "configured_target": configured_target,
+        "global_runtime_surface": global_runtime,
+        "reasons": reasons,
         "status": status,
     }
 
@@ -717,6 +860,11 @@ def main() -> int:
     windows_runtime_mirror_check = build_windows_runtime_mirror_check(authority, runtime=runtime)
     windows_generated_header_ok = windows_runtime_mirror_check["all_windows_headers_ok"]
     windows_generated_body_matches_linux = windows_runtime_mirror_check["all_windows_bodies_match_linux"]
+    global_runtime_surface = build_global_runtime_surface_check(Path(roots["management"]))
+    wsl_launcher_check = build_wsl_launcher_check(authority, runtime=runtime)
+    git_surface_drift = build_git_surface_drift_check()
+    instruction_guard_policy = build_instruction_guard_policy_check(Path(roots["management"]))
+    repair_boundary = build_repair_boundary_check(authority)
     quarantine_root_ok = quarantine_root_policy_ok(quarantine_root)
 
     files_to_scan: list[Path] = []
@@ -746,6 +894,7 @@ def main() -> int:
     forbidden_feature_findings = detect_forbidden_feature_flags(config_files, authority)
     runtime_restore_seed_violations = detect_runtime_restore_seed_violations(WINDOWS_CODEX / ".codex-global-state.json", authority)
     score_policy_tamper_events = detect_score_policy_tamper_events(Path(roots["management"]), Path(roots["workflow"]))
+    startup_workflow_check = build_startup_workflow_check(Path(roots["management"]))
     tamper_events = build_tamper_events(
         old_path_refs=old_path_refs,
         forbidden_features=forbidden_feature_findings,
@@ -762,6 +911,41 @@ def main() -> int:
             continue
         product_rule_leaks.append(path_str)
 
+    canonical_execution_surface = {
+        "status": global_runtime_surface.get("canonical_execution_status", "BLOCKED"),
+        "details": global_runtime_surface.get("ssh_canonical_runtime", {}),
+    }
+    client_surface = global_runtime_surface.get("client_surface", {})
+    local_shell_surface = global_runtime_surface.get("local_shell_surface", {})
+    codex_resolution = global_runtime_surface.get("codex_resolution", {})
+    path_contamination = global_runtime_surface.get("path_contamination", {})
+    ssh_activation = global_runtime_surface.get("ssh_activation", {})
+    serena_startup = startup_workflow_check.get("serena", {})
+    context7_evidence = startup_workflow_check.get("context7", {})
+    repair_readiness = global_runtime_surface.get("wrapper_apply_readiness", {})
+
+    blocking_conditions = [
+        bool(any(violations.values())),
+        bool(product_rule_leaks),
+        not quarantine_root_ok,
+        not project_root_marker_ok,
+        windows_runtime_mirror_check["status"] != "PASS",
+        canonical_execution_surface["status"] != "PASS",
+        startup_workflow_check["status"] != "PASS",
+        instruction_guard_policy["status"] != "PASS",
+        bool(forbidden_feature_findings),
+        bool(runtime_restore_seed_violations),
+        bool(old_path_refs),
+        bool(tamper_events),
+    ]
+    warning_conditions = [
+        global_runtime_surface.get("status") == "WARN",
+        wsl_launcher_check["status"] == "WARN",
+        git_surface_drift["status"] == "WARN",
+        repair_readiness.get("status") != "PASS",
+    ]
+    gate_status = "BLOCKED" if any(blocking_conditions) else "WARN" if any(warning_conditions) else "PASS"
+
     report = {
         "phase": str(args.phase).strip() or "final",
         "blocking_only": bool(args.blocking_only),
@@ -777,23 +961,37 @@ def main() -> int:
         "windows_generated_mirror": windows_generated_header_ok,
         "windows_generated_mirror_matches_linux": windows_generated_body_matches_linux,
         "windows_runtime_mirror_check": windows_runtime_mirror_check,
+        "canonical_execution_surface": canonical_execution_surface,
+        "client_surface": client_surface,
+        "local_shell_surface": local_shell_surface,
+        "codex_resolution": codex_resolution,
+        "path_contamination": path_contamination,
+        "ssh_activation": ssh_activation,
+        "serena_startup": serena_startup,
+        "context7_evidence": context7_evidence,
+        "git_surface": git_surface_drift,
+        "instruction_guard": instruction_guard_policy,
+        "repair_readiness": repair_readiness,
+        "global_runtime_surface": global_runtime_surface,
+        "codex_live_resolution": global_runtime_surface.get("local_runtime_surface", {}).get("local_live_codex_resolution_status", {}),
+        "path_contamination_legacy": {
+            "local": global_runtime_surface.get("local_runtime_surface", {}).get("contaminated_entries", []),
+            "remote": global_runtime_surface.get("ssh_canonical_runtime", {})
+            .get("remote_path_contamination_status", {})
+            .get("contaminated_entries", []),
+        },
+        "ssh_canonical_runtime": global_runtime_surface.get("ssh_canonical_runtime", {}),
+        "git_surface_drift": git_surface_drift,
+        "instruction_guard_policy": instruction_guard_policy,
+        "repair_boundary": repair_boundary,
+        "wsl_launcher_check": wsl_launcher_check,
+        "startup_workflow_check": startup_workflow_check,
         "forbidden_feature_flags_enabled": forbidden_feature_findings,
         "runtime_restore_seed_violations": runtime_restore_seed_violations,
         "old_path_refs_outside_quarantine": sorted(set(old_path_refs)),
         "tamper_events": tamper_events,
-        "status": "PASS"
-        if (
-            not any(violations.values())
-            and not product_rule_leaks
-            and quarantine_root_ok
-            and project_root_marker_ok
-            and windows_runtime_mirror_check["status"] == "PASS"
-            and not forbidden_feature_findings
-            and not runtime_restore_seed_violations
-            and not old_path_refs
-            and not tamper_events
-        )
-        else "FAIL",
+        "gate_status": gate_status,
+        "status": "FAIL" if gate_status == "BLOCKED" else "WARN" if gate_status == "WARN" else "PASS",
     }
 
     output = json.dumps(report, ensure_ascii=False, indent=2) + "\n"

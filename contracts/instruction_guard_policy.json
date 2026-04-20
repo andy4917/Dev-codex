@@ -1,0 +1,84 @@
+{
+  "version": 1,
+  "status_values": [
+    "PASS",
+    "WARN",
+    "BLOCKED"
+  ],
+  "bootstrap_exception": {
+    "persisted": false,
+    "description": "Bootstrap implementation exceptions are process-local only and must be explicitly enabled by CLI flag."
+  },
+  "blocked_rules": [
+    {
+      "id": "windows_launcher_primary_runtime",
+      "summary": "Windows-side Codex launcher cannot become the primary runtime."
+    },
+    {
+      "id": "forbidden_path_reintroduction",
+      "summary": "Forbidden Windows-mounted Codex launcher paths cannot be added back into PATH or wrapper targets."
+    },
+    {
+      "id": "generated_file_manual_edit",
+      "summary": "Generated config, wrapper, and mirror files must not be manually edited."
+    },
+    {
+      "id": "serena_gate_before_code_change",
+      "summary": "Normal code modification requests are blocked while Serena startup activation is incomplete."
+    },
+    {
+      "id": "context7_evidence_missing",
+      "summary": "Protected changes require actual Context7 evidence."
+    },
+    {
+      "id": "unrelated_dirty_cleanup",
+      "summary": "Unrelated dirty changes must not be reverted, reformatted, or cleaned up."
+    },
+    {
+      "id": "destructive_commands",
+      "summary": "Destructive or system-changing commands remain blocked."
+    },
+    {
+      "id": "sandbox_or_approval_weaken",
+      "summary": "Instructions must not weaken sandbox or approval settings beyond authority defaults."
+    },
+    {
+      "id": "mixed_git_surfaces",
+      "summary": "Instructions must not force mixed Windows Git and WSL Git execution."
+    }
+  ],
+  "warning_rules": [
+    {
+      "id": "ambiguous_large_refactor",
+      "summary": "Large refactors without explicit scope are warned."
+    },
+    {
+      "id": "missing_test_plan",
+      "summary": "Implementation requests without explicit verification guidance are warned."
+    },
+    {
+      "id": "surface_mixup",
+      "summary": "Mixed app, CLI, IDE, or runtime surfaces are warned."
+    },
+    {
+      "id": "runtime_mismatch",
+      "summary": "Local and canonical remote runtime mismatches are warned or blocked depending on scope."
+    },
+    {
+      "id": "protected_file_proximity",
+      "summary": "Changes near protected files are warned even when no protected diff is detected."
+    },
+    {
+      "id": "git_drift_present",
+      "summary": "Git surface drift that does not directly block the current task is warned."
+    }
+  ],
+  "required_reminders": {
+    "runtime_authority_conflict": "runtime authority conflict: Codex App and Windows launcher are not execution authority surfaces.",
+    "serena_first_unmet": "Serena-first is unmet: activate the canonical project and complete onboarding before normal code changes.",
+    "context7_missing": "Context7 evidence is missing for a protected change.",
+    "unrelated_dirty_present": "Unrelated dirty changes exist and must remain untouched.",
+    "destructive_blocked": "Destructive or system-changing commands are blocked by authority.",
+    "sandbox_blocked": "Sandbox or approval weakening is blocked by authority."
+  }
+}
