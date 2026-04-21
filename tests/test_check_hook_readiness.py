@@ -31,18 +31,15 @@ class CheckHookReadinessTests(unittest.TestCase):
 
     def _authority(self, tmp: Path) -> dict[str, object]:
         return {
+            "windows_app_state": {"codex_home": str(tmp / "windows-home" / ".codex")},
             "generation_targets": {
                 "global_runtime": {
                     "linux": {"hooks_config": str(tmp / "linux-hooks.json")},
-                    "windows_mirror": {"hooks_config": str(tmp / "windows-hooks.json")},
                 },
                 "scorecard": {
                     "runtime_hook": {
                         "script": "/home/andy4917/Dev-Management/scripts/scorecard_runtime_hook.py",
                         "linux_command_prefix": "python3",
-                        "windows_command_prefix": "powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File",
-                        "windows_wrapper_path": str(tmp / "wrapper.ps1"),
-                        "windows_wrapper_generated_header": "GENERATED - DO NOT EDIT",
                         "events": {"UserPromptSubmit": {"matcher": ".*"}},
                     }
                 },
@@ -61,11 +58,10 @@ class CheckHookReadinessTests(unittest.TestCase):
             self._write_json(authority_path, authority)
             with patch.object(self.module, "AUTHORITY_PATH", authority_path):
                 (tmp / "linux-hooks.json").write_text(self.module.render_hooks(authority, windows=False), encoding="utf-8")
-                (tmp / "windows-hooks.json").write_text(self.module.render_hooks(authority, windows=True), encoding="utf-8")
-                (tmp / "wrapper.ps1").write_text(self.module.render_windows_hook_wrapper(authority), encoding="utf-8")
                 report = self.module.evaluate_hook_readiness(tmp / "repo")
         self.assertEqual(report["status"], "PASS")
         self.assertTrue(report["trigger_only"])
+        self.assertFalse(report["windows_generation_enabled"])
 
     def test_hook_mismatch_warns(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -79,20 +75,21 @@ class CheckHookReadinessTests(unittest.TestCase):
                 report = self.module.evaluate_hook_readiness(tmp / "repo")
         self.assertEqual(report["status"], "WARN")
 
-    def test_missing_wrapper_path_does_not_crash(self) -> None:
+    def test_windows_policy_hooks_present_block(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             tmp = Path(tmpdir)
             authority = self._authority(tmp)
-            authority["generation_targets"]["scorecard"]["runtime_hook"].pop("windows_wrapper_path")
             authority_path = tmp / "repo" / "contracts" / "workspace_authority.json"
             authority_path.parent.mkdir(parents=True)
             self._write_json(authority_path, authority)
             with patch.object(self.module, "AUTHORITY_PATH", authority_path):
                 (tmp / "linux-hooks.json").write_text(self.module.render_hooks(authority, windows=False), encoding="utf-8")
-                (tmp / "windows-hooks.json").write_text(self.module.render_hooks(authority, windows=True), encoding="utf-8")
+                windows_hooks = tmp / "windows-home" / ".codex" / "hooks.json"
+                windows_hooks.parent.mkdir(parents=True, exist_ok=True)
+                windows_hooks.write_text('{"hooks": {}}\n', encoding="utf-8")
                 report = self.module.evaluate_hook_readiness(tmp / "repo")
-        self.assertEqual(report["status"], "PASS")
-        self.assertFalse(report["windows_wrapper"]["configured"])
+        self.assertEqual(report["status"], "BLOCKED")
+        self.assertTrue(report["windows_policy_hooks"]["present"])
 
     def test_non_trigger_only_hook_role_blocks(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -104,25 +101,21 @@ class CheckHookReadinessTests(unittest.TestCase):
             self._write_json(authority_path, authority)
             with patch.object(self.module, "AUTHORITY_PATH", authority_path):
                 (tmp / "linux-hooks.json").write_text(self.module.render_hooks(authority, windows=False), encoding="utf-8")
-                (tmp / "windows-hooks.json").write_text(self.module.render_hooks(authority, windows=True), encoding="utf-8")
-                (tmp / "wrapper.ps1").write_text(self.module.render_windows_hook_wrapper(authority), encoding="utf-8")
                 report = self.module.evaluate_hook_readiness(tmp / "repo")
         self.assertEqual(report["status"], "BLOCKED")
         self.assertTrue(report["hook_only_enforcement_claim"])
 
-    def test_windows_hooks_can_be_intentionally_disabled(self) -> None:
+    def test_windows_generation_reports_disabled_reason(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             tmp = Path(tmpdir)
             authority = self._authority(tmp)
-            authority["generation_targets"]["scorecard"]["runtime_hook"]["windows_generation_enabled"] = False
-            authority["generation_targets"]["scorecard"]["runtime_hook"]["windows_generation_reason"] = "disabled for terminal churn"
             authority_path = tmp / "repo" / "contracts" / "workspace_authority.json"
             authority_path.parent.mkdir(parents=True)
             self._write_json(authority_path, authority)
             with patch.object(self.module, "AUTHORITY_PATH", authority_path):
                 (tmp / "linux-hooks.json").write_text(self.module.render_hooks(authority, windows=False), encoding="utf-8")
                 report = self.module.evaluate_hook_readiness(tmp / "repo")
-        self.assertEqual(report["status"], "WARN")
+        self.assertEqual(report["status"], "PASS")
         self.assertFalse(report["windows_generation_enabled"])
 
 

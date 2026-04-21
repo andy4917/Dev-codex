@@ -19,6 +19,7 @@ from devmgmt_runtime.reports import save_json
 from devmgmt_runtime.status import status_exit_code
 from devmgmt_runtime.subprocess_safe import run_ssh
 from check_artifact_hygiene import evaluate_artifact_hygiene
+from check_active_config_smoke import evaluate_active_config_smoke, render_markdown as render_active_config_markdown
 from check_config_provenance import evaluate_config_provenance, render_markdown as render_config_markdown
 from check_global_runtime import evaluate_global_runtime
 from check_git_surface import evaluate_git_surfaces, render_text_summary as render_git_surface_summary
@@ -105,7 +106,9 @@ def render_app_usability_markdown(report: dict[str, Any]) -> str:
         f"- Remote codex: {report['remote_codex_status']}",
         f"- Linux-native Codex CLI: {report['linux_native_codex_cli_status']}",
         f"- Config provenance: {report['config_provenance_status']}",
-        f"- Generated AGENTS: {report['generated_agents_status']}",
+        f"- Active config smoke: {report['active_config_smoke_status']}",
+        f"- Windows policy surface: {report['windows_policy_surface_status']}",
+        f"- Windows app evidence: {report['windows_app_evidence_status']}",
         f"- Control thread: {report.get('control_thread_status', 'WARN')}",
         f"- Canonical repo root: {report.get('canonical_repo_root', '')}",
         f"- Active worktree root: {report.get('active_worktree_root', '')}",
@@ -158,12 +161,6 @@ def evaluate_app_usability(
     agent_actions_applied: list[str] = []
     agent_actions_skipped: list[str] = []
 
-    runtime = evaluate_global_runtime(root)
-    runtime_path = reports_root / "global-runtime.final.json"
-    save_json(runtime_path, runtime)
-    reports_created.append(str(runtime_path))
-    save_json(root / "reports" / "global-runtime.json", runtime)
-
     windows = evaluate_windows_app_ssh_readiness(root, apply_user_level=apply_user_level)
     windows_path = reports_root / "windows-app-ssh-remote-readiness.final.json"
     save_json(windows_path, windows)
@@ -176,11 +173,23 @@ def evaluate_app_usability(
     else:
         agent_actions_skipped.append("Windows user SSH alias unchanged")
 
+    runtime = evaluate_global_runtime(root, windows_app_ssh_readiness=windows)
+    runtime_path = reports_root / "global-runtime.final.json"
+    save_json(runtime_path, runtime)
+    reports_created.append(str(runtime_path))
+    save_json(root / "reports" / "global-runtime.json", runtime)
+
     config = evaluate_config_provenance(root)
     config_path = reports_root / "config-provenance.final.json"
     save_json(config_path, config)
     save_markdown(config_path.with_suffix(".md"), render_config_markdown(config))
     reports_created.extend([str(config_path), str(config_path.with_suffix(".md"))])
+
+    active_config = evaluate_active_config_smoke(root)
+    active_config_path = reports_root / "active-config-smoke.final.json"
+    save_json(active_config_path, active_config)
+    save_markdown(active_config_path.with_suffix(".md"), render_active_config_markdown(active_config))
+    reports_created.extend([str(active_config_path), str(active_config_path.with_suffix(".md"))])
 
     toolchain = evaluate_toolchain_surface(root)
     toolchain_path = reports_root / "toolchain-surface.final.json"
@@ -286,12 +295,14 @@ def evaluate_app_usability(
         status_reasons.append("Linux-native Codex CLI is not available on the canonical remote PATH.")
     if str(config.get("gate_status", config.get("status", "WARN"))) == "BLOCKED":
         status_reasons.append("Config provenance is blocked.")
-    generated_agents_status = "PASS"
-    for path_text, payload in config.get("generated_headers", {}).items():
-        if path_text.endswith("AGENTS.md") and str(payload.get("status", "PASS")) != "PASS":
-            generated_agents_status = "WARN"
-    if generated_agents_status != "PASS":
-        status_reasons.append("Generated AGENTS mirrors are not current.")
+    windows_policy_surface_status = str(config.get("windows_policy_surface_status", "PASS"))
+    windows_app_evidence_status = str(active_config.get("windows_app_evidence_status", config.get("app_state_surface", {}).get("status", "WARN")))
+    if str(active_config.get("gate_status", active_config.get("status", "WARN"))) == "BLOCKED":
+        status_reasons.append("Active config smoke is blocked.")
+    if windows_policy_surface_status == "BLOCKED":
+        status_reasons.append("Windows policy-bearing .codex surface is still present on an app-readable active settings or instruction surface.")
+    elif windows_policy_surface_status == "WARN":
+        warning_reasons.append("Windows .codex still contains non-generated policy-like user or app content; treat it as evidence-only and review manually before cleanup.")
     auth_status = "PASS" if windows["status"] != "BLOCKED" else "BLOCKED"
     if auth_status == "BLOCKED":
         status_reasons.append("App auth or sign-in flow cannot proceed until the SSH connection is repaired.")
@@ -361,7 +372,9 @@ def evaluate_app_usability(
         "remote_codex_status": remote_codex_status,
         "linux_native_codex_cli_status": str(runtime.get("remote_native_codex_status", {}).get("status", linux_cli.get("status", "WARN"))),
         "config_provenance_status": str(config.get("gate_status", config.get("status", "WARN"))),
-        "generated_agents_status": generated_agents_status,
+        "active_config_smoke_status": str(active_config.get("gate_status", active_config.get("status", "WARN"))),
+        "windows_policy_surface_status": windows_policy_surface_status,
+        "windows_app_evidence_status": windows_app_evidence_status,
         "control_thread_status": "PASS" if control_thread.get("name") else "WARN",
         "auth_status": auth_status,
         "serena_status": startup["status"],

@@ -252,10 +252,9 @@ def main() -> int:
     config_marker_violations: list[dict[str, Any]] = []
     all_config_paths = [Path(entry["path"]) for entry in artifacts if entry["kind"] == "codex_config"]
     runtime = authority.get("generation_targets", {}).get("global_runtime", {})
-    for key in ("linux", "windows_mirror"):
-        config_path = runtime.get(key, {}).get("config")
-        if config_path:
-            all_config_paths.append(Path(config_path))
+    config_path = runtime.get("linux", {}).get("config")
+    if config_path:
+        all_config_paths.append(Path(config_path))
     for config_path in sorted(set(path.resolve() for path in all_config_paths)):
         violation = scan_config_markers(config_path, expected_markers)
         if violation:

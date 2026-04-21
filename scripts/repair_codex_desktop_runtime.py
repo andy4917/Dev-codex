@@ -163,15 +163,18 @@ def effective_default_effort(authority: dict[str, Any]) -> str:
 def runtime_restore_homes(authority: dict[str, Any]) -> list[Path]:
     runtime = authority.get("generation_targets", {}).get("global_runtime", {})
     paths: list[Path] = []
-    for surface in ("windows_mirror", "linux"):
-        payload = runtime.get(surface, {})
-        if not isinstance(payload, dict):
-            continue
+    linux = runtime.get("linux", {})
+    if isinstance(linux, dict):
         for key in ("agents", "config", "hooks_config"):
-            raw_path = payload.get(key)
+            raw_path = linux.get(key)
             if not raw_path:
                 continue
             paths.append(Path(str(raw_path)).expanduser().resolve().parent)
+    windows_state = authority.get("windows_app_state", {})
+    if isinstance(windows_state, dict):
+        raw_home = windows_state.get("codex_home")
+        if raw_home:
+            paths.append(Path(str(raw_home)).expanduser().resolve())
     fallback = resolve_codex_home()
     if fallback not in paths:
         paths.append(fallback)
@@ -1001,14 +1004,14 @@ def capture_baseline_snapshot() -> dict[str, Any]:
             payload = candidate
             source = str(path)
             break
-    windows_check = payload.get("windows_runtime_mirror_check", {}) if isinstance(payload, dict) else {}
+    windows_check = payload.get("windows_policy_surface_check", {}) if isinstance(payload, dict) else {}
     launcher_check = payload.get("wsl_launcher_check", {}) if isinstance(payload, dict) else {}
     violations = payload.get("runtime_restore_seed_violations", []) if isinstance(payload, dict) else []
     return {
         "captured_at": datetime.now(timezone.utc).isoformat(),
         "audit_report": source,
         "audit_status": str(payload.get("status", "UNKNOWN")).strip() if isinstance(payload, dict) else "UNKNOWN",
-        "windows_runtime_mirror_check_status": str(windows_check.get("status", "UNKNOWN")).strip() if isinstance(windows_check, dict) else "UNKNOWN",
+        "windows_policy_surface_status": str(windows_check.get("status", payload.get("windows_policy_surface_status", "UNKNOWN"))).strip() if isinstance(payload, dict) else "UNKNOWN",
         "wsl_launcher_check_status": str(launcher_check.get("status", "UNKNOWN")).strip() if isinstance(launcher_check, dict) else "UNKNOWN",
         "runtime_restore_seed_violations_count": len(violations) if isinstance(violations, list) else 0,
     }

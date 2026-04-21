@@ -52,6 +52,7 @@ class CodexAppUsabilityTests(unittest.TestCase):
                     "blocked_feature_overrides": ["remote_control"],
                 },
             },
+            "windows_app_state": {"codex_home": str(tmp / "win" / ".codex")},
             "generation_targets": {
                 "global_runtime": {
                     "linux": {
@@ -59,10 +60,6 @@ class CodexAppUsabilityTests(unittest.TestCase):
                         "config": str(tmp / ".codex" / "config.toml"),
                         "agents": str(tmp / ".codex" / "AGENTS.md"),
                         "user_override_config": str(tmp / ".codex" / "user-config.toml"),
-                    },
-                    "windows_mirror": {
-                        "config": str(tmp / "win" / "config.toml"),
-                        "agents": str(tmp / "win" / "AGENTS.md"),
                     },
                 },
                 "scorecard": {
@@ -112,7 +109,11 @@ class CodexAppUsabilityTests(unittest.TestCase):
             ), patch.object(
                 self.module,
                 "evaluate_config_provenance",
-                return_value={"gate_status": "PASS", "generated_headers": {str(tmp / ".codex" / "AGENTS.md"): {"status": "PASS"}, str(tmp / "win" / "AGENTS.md"): {"status": "PASS"}}},
+                return_value={"gate_status": "PASS", "windows_policy_surface_status": "PASS", "app_state_surface": {"status": "PASS"}},
+            ), patch.object(
+                self.module,
+                "evaluate_active_config_smoke",
+                return_value={"gate_status": "PASS", "windows_app_evidence_status": "PASS"},
             ), patch.object(
                 self.module,
                 "evaluate_toolchain_surface",
@@ -187,7 +188,11 @@ class CodexAppUsabilityTests(unittest.TestCase):
             ), patch.object(
                 self.module,
                 "evaluate_config_provenance",
-                return_value={"gate_status": "PASS", "generated_headers": {str(tmp / ".codex" / "AGENTS.md"): {"status": "PASS"}, str(tmp / "win" / "AGENTS.md"): {"status": "PASS"}}},
+                return_value={"gate_status": "PASS", "windows_policy_surface_status": "PASS", "app_state_surface": {"status": "PASS"}},
+            ), patch.object(
+                self.module,
+                "evaluate_active_config_smoke",
+                return_value={"gate_status": "PASS", "windows_app_evidence_status": "PASS"},
             ), patch.object(
                 self.module,
                 "evaluate_toolchain_surface",

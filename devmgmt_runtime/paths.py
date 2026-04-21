@@ -8,22 +8,50 @@ from .authority import canonical_repo_root as authority_canonical_repo_root
 
 
 WINDOWS_CODEX_HOME = Path("/mnt/c/Users/anise/.codex")
+WINDOWS_POLICY_RELATIVE_PATHS = {
+    "config": Path("config.toml"),
+    "agents": Path("AGENTS.md"),
+    "hooks": Path("hooks.json"),
+    "skills": Path("skills") / "dev-workflow",
+    "wsl_launcher": Path("bin") / "wsl" / "codex",
+}
+
+
+def windows_policy_paths(authority: dict[str, Any] | None = None) -> dict[str, Path]:
+    payload = authority if isinstance(authority, dict) else {}
+    windows_state = payload.get("windows_app_state", {}) if isinstance(payload.get("windows_app_state"), dict) else {}
+    codex_home = Path(str(windows_state.get("codex_home", WINDOWS_CODEX_HOME))).expanduser().resolve()
+    return {
+        "codex_home": codex_home,
+        "config": (codex_home / WINDOWS_POLICY_RELATIVE_PATHS["config"]).resolve(),
+        "agents": (codex_home / WINDOWS_POLICY_RELATIVE_PATHS["agents"]).resolve(),
+        "hooks": (codex_home / WINDOWS_POLICY_RELATIVE_PATHS["hooks"]).resolve(),
+        "skills": (codex_home / WINDOWS_POLICY_RELATIVE_PATHS["skills"]).resolve(),
+        "wsl_launcher": (codex_home / WINDOWS_POLICY_RELATIVE_PATHS["wsl_launcher"]).resolve(),
+    }
 
 
 def runtime_paths(authority: dict[str, Any]) -> dict[str, Path]:
     runtime = authority.get("generation_targets", {}).get("global_runtime", {})
     linux = runtime.get("linux", {})
-    windows = runtime.get("windows_mirror", {})
+    windows_policy = windows_policy_paths(authority)
     return {
         "linux_config": Path(str(linux.get("config", Path.home() / ".codex" / "config.toml"))).expanduser().resolve(),
         "linux_agents": Path(str(linux.get("agents", Path.home() / ".codex" / "AGENTS.md"))).expanduser().resolve(),
         "linux_hooks": Path(str(linux.get("hooks_config", Path.home() / ".codex" / "hooks.json"))).expanduser().resolve(),
         "linux_user_override": Path(str(linux.get("user_override_config", Path.home() / ".codex" / "user-config.toml"))).expanduser().resolve(),
         "linux_launcher": Path(str(linux.get("launcher", Path.home() / ".local" / "bin" / "codex"))).expanduser().resolve(),
-        "windows_config": Path(str(windows.get("config", WINDOWS_CODEX_HOME / "config.toml"))).expanduser().resolve(),
-        "windows_agents": Path(str(windows.get("agents", WINDOWS_CODEX_HOME / "AGENTS.md"))).expanduser().resolve(),
-        "windows_hooks": Path(str(windows.get("hooks_config", WINDOWS_CODEX_HOME / "hooks.json"))).expanduser().resolve(),
-        "windows_wsl_launcher": Path(str(windows.get("wsl_launcher", WINDOWS_CODEX_HOME / "bin" / "wsl" / "codex"))).expanduser().resolve(),
+        "observed_windows_codex_home": windows_policy["codex_home"],
+        "observed_windows_policy_config": windows_policy["config"],
+        "observed_windows_policy_agents": windows_policy["agents"],
+        "observed_windows_policy_hooks": windows_policy["hooks"],
+        "observed_windows_policy_skills": windows_policy["skills"],
+        "observed_windows_wsl_launcher": windows_policy["wsl_launcher"],
+        # Legacy aliases kept temporarily while callers migrate to observed_* names.
+        "windows_config": windows_policy["config"],
+        "windows_agents": windows_policy["agents"],
+        "windows_hooks": windows_policy["hooks"],
+        "windows_wsl_launcher": windows_policy["wsl_launcher"],
     }
 
 

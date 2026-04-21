@@ -12,9 +12,6 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from audit_workspace import build_windows_runtime_mirror_check
-
-
 ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -47,16 +44,18 @@ def file_hash(path: Path) -> str:
 def runtime_paths(authority: dict[str, Any], linux_codex_home: Path | None, windows_codex_home: Path | None) -> dict[str, Path]:
     runtime = authority.get("generation_targets", {}).get("global_runtime", {})
     linux = runtime.get("linux", {})
-    windows = runtime.get("windows_mirror", {})
+    windows_state = authority.get("windows_app_state", {}) if isinstance(authority.get("windows_app_state"), dict) else {}
 
     linux_root = linux_codex_home.resolve() if linux_codex_home else None
-    windows_root = windows_codex_home.resolve() if windows_codex_home else None
+    windows_root = windows_codex_home.resolve() if windows_codex_home else Path(str(windows_state.get("codex_home", ""))).expanduser().resolve()
 
     linux_agents = (linux_root / "AGENTS.md") if linux_root else Path(linux.get("agents", ""))
     linux_config = (linux_root / "config.toml") if linux_root else Path(linux.get("config", ""))
     linux_user_override_config = (linux_root / "user-config.toml") if linux_root else Path(linux.get("user_override_config", ""))
-    windows_agents = (windows_root / "AGENTS.md") if windows_root else Path(windows.get("agents", ""))
-    windows_config = (windows_root / "config.toml") if windows_root else Path(windows.get("config", ""))
+    windows_agents = windows_root / "AGENTS.md"
+    windows_config = windows_root / "config.toml"
+    windows_hooks = windows_root / "hooks.json"
+    windows_skills = windows_root / "skills" / "dev-workflow"
 
     return {
         "linux_agents": linux_agents,
@@ -64,6 +63,9 @@ def runtime_paths(authority: dict[str, Any], linux_codex_home: Path | None, wind
         "linux_user_override_config": linux_user_override_config,
         "windows_agents": windows_agents,
         "windows_config": windows_config,
+        "windows_hooks": windows_hooks,
+        "windows_skills": windows_skills,
+        "windows_codex_home": windows_root,
     }
 
 
@@ -107,7 +109,7 @@ def explain_survivor(path: Path, authority: dict[str, Any], runtime: dict[str, P
     if path.resolve() == linux_path.resolve():
         return f"Allowed because it is the generated Linux runtime {kind} target from workspace authority."
     if path.resolve() == windows_path.resolve():
-        return f"Allowed because it is the generated Windows mirror {kind} target from workspace authority."
+        return f"Observed because it is a Windows policy-surface {kind} file that should be removed, not a canonical authority target."
     try:
         path.resolve().relative_to(product_root.resolve())
         return "Allowed because project-specific rules are allowed only inside Dev-Product/<project>."
@@ -167,12 +169,10 @@ def build_git_root_marker_proof(authority: dict[str, Any], runtime: dict[str, Pa
         for item in authority.get("generation_targets", {}).get("global_config", {}).get("project_root_markers", [])
     ]
     linux_markers = parse_markers(runtime["linux_config"])
-    windows_markers = parse_markers(runtime["windows_config"])
     status = (
         "PASS"
         if expected_markers == [".git"]
         and linux_markers == expected_markers
-        and windows_markers == expected_markers
         and audit.get("project_root_markers_git_only") is True
         else "FAIL"
     )
@@ -180,44 +180,35 @@ def build_git_root_marker_proof(authority: dict[str, Any], runtime: dict[str, Pa
         "expected_markers": expected_markers,
         "linux_config_path": str(runtime["linux_config"]),
         "linux_config_markers": linux_markers,
-        "windows_config_path": str(runtime["windows_config"]),
-        "windows_config_markers": windows_markers,
         "audit_report_value": audit.get("project_root_markers_git_only"),
         "status": status,
     }
 
 
-def build_windows_mirror_proof(authority: dict[str, Any], runtime: dict[str, Path], audit: dict[str, Any]) -> dict[str, Any]:
-    live_check = build_windows_runtime_mirror_check(authority, runtime=runtime)
-    audit_check = audit.get("windows_runtime_mirror_check", {})
-    agents = live_check.get("files", {}).get("agents", {})
-    config = live_check.get("files", {}).get("config", {})
-    audit_status = str(audit_check.get("status", "")).strip().upper() if isinstance(audit_check, dict) else ""
-    audit_agrees_with_live_check = None if not audit_status else audit_status == live_check["status"]
-
+def build_windows_policy_surface_proof(runtime: dict[str, Path], audit: dict[str, Any]) -> dict[str, Any]:
+    observed = {
+        "agents": runtime["windows_agents"],
+        "config": runtime["windows_config"],
+        "hooks": runtime["windows_hooks"],
+        "skills": runtime["windows_skills"],
+    }
+    findings = [dict(item) for item in audit.get("windows_policy_surface_findings", []) if isinstance(item, dict)]
+    present_paths = [str(path) for path in observed.values() if path.exists()]
+    audit_status = str(audit.get("windows_policy_surface_status", "")).strip().upper()
+    if audit_status in {"PASS", "WARN", "BLOCKED"}:
+        status = audit_status
+    else:
+        status = "BLOCKED" if present_paths else "PASS"
     return {
-        "linux_agents_path": agents.get("linux_path", str(runtime["linux_agents"])),
-        "windows_agents_path": agents.get("windows_path", str(runtime["windows_agents"])),
-        "linux_agents_sha256": agents.get("linux_sha256", file_hash(runtime["linux_agents"]) if runtime["linux_agents"].exists() else ""),
-        "windows_agents_sha256": agents.get("windows_sha256", file_hash(runtime["windows_agents"]) if runtime["windows_agents"].exists() else ""),
-        "linux_config_path": config.get("linux_path", str(runtime["linux_config"])),
-        "windows_config_path": config.get("windows_path", str(runtime["windows_config"])),
-        "linux_config_sha256": config.get("linux_sha256", file_hash(runtime["linux_config"]) if runtime["linux_config"].exists() else ""),
-        "windows_config_sha256": config.get("windows_sha256", file_hash(runtime["windows_config"]) if runtime["windows_config"].exists() else ""),
-        "expected_generated_header": live_check.get("expected_generated_header", "GENERATED - DO NOT EDIT"),
-        "agents_header_ok": agents.get("windows_generated_header_ok", False),
-        "config_header_ok": config.get("windows_generated_header_ok", False),
-        "agents_body_matches_linux": agents.get("body_matches_linux", False),
-        "config_body_matches_linux": config.get("body_matches_linux", False),
-        "audit_report_value": audit.get("windows_generated_mirror"),
-        "audit_report_matches_linux_value": audit.get("windows_generated_mirror_matches_linux"),
-        "audit_runtime_mirror_status": audit_status,
-        "audit_runtime_mirror_agrees_with_live_check": audit_agrees_with_live_check,
-        "divergence_summary": live_check.get("divergence_summary", []),
-        "agents": agents,
-        "config": config,
-        "source_of_truth_proof": live_check.get("source_of_truth_proof", {}),
-        "status": live_check["status"],
+        "windows_codex_home": str(runtime["windows_codex_home"]),
+        "observed_paths": {name: str(path) for name, path in observed.items()},
+        "present_paths": present_paths,
+        "audit_report_value": audit.get("windows_policy_surface_status"),
+        "audit_windows_app_evidence_status": audit.get("windows_app_evidence_status"),
+        "findings": findings,
+        "unknown_windows_policy_files_blocking": audit.get("unknown_windows_policy_files_blocking", []),
+        "source_of_truth_proof": audit.get("linux_source_of_truth_proof", {}),
+        "status": status,
     }
 
 
@@ -351,7 +342,7 @@ def main() -> int:
 
     hardcoding_audit = build_hardcoding_audit(audit)
     git_root_marker_proof = build_git_root_marker_proof(authority, runtime, audit)
-    windows_mirror_proof = build_windows_mirror_proof(authority, runtime, audit)
+    windows_policy_surface_proof = build_windows_policy_surface_proof(runtime, audit)
     report_status = collapse_statuses(
         [
             scorecard.get("gate_status") or delivery_gate_result["status"],
@@ -359,7 +350,7 @@ def main() -> int:
             audit.get("status") or audit_result["status"],
             hardcoding_audit["status"],
             git_root_marker_proof["status"],
-            windows_mirror_proof["status"],
+            windows_policy_surface_proof["status"],
         ]
     )
 
@@ -394,7 +385,7 @@ def main() -> int:
                 "counts": cleanup_counts(cleanup),
             },
             "git_root_marker_proof": git_root_marker_proof,
-            "windows_mirror_proof": windows_mirror_proof,
+            "windows_policy_surface_proof": windows_policy_surface_proof,
             "startup_workflow_proof": audit.get("startup_workflow_check", {}),
             "global_runtime_proof": audit.get("global_runtime_surface", {}),
             "config_provenance_proof": audit.get("config_provenance", {}),

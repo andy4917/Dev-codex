@@ -62,5 +62,23 @@
     "auth_payloads_are_runtime_state": true,
     "app_memory_is_authority": false,
     "thread_memory_is_authority": false
+  },
+  "windows_bootstrap_boundary": {
+    "repo_managed_surfaces": [
+      "user_level_windows_ssh_config",
+      "codex_app_connection_readiness_evidence"
+    ],
+    "allowed_windows_bootstrap_repairs": [
+      "C:/Users/anise/.ssh/config"
+    ],
+    "app_reads_policy_files_if_present": true,
+    "policy_bearing_forbidden_paths": [
+      "/mnt/c/Users/anise/.codex/config.toml",
+      "/mnt/c/Users/anise/.codex/AGENTS.md",
+      "/mnt/c/Users/anise/.codex/hooks.json",
+      "/mnt/c/Users/anise/.codex/skills/dev-workflow"
+    ],
+    "app_state_role": "evidence_only",
+    "policy_surface_reason": "Codex App can actively read Windows ~/.codex config, AGENTS, hooks, and skills when present, so Dev-Management must not generate policy-bearing files there. Non-generated Windows app or user state remains evidence-only unless manually reviewed."
   }
 }

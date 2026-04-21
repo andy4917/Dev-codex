@@ -107,10 +107,8 @@ def repo_root_from_arg(repo_root: str | Path | None) -> Path:
 def runtime_config_paths(authority: dict[str, Any]) -> dict[str, Path | None]:
     runtime = authority.get("generation_targets", {}).get("global_runtime", {})
     linux = runtime.get("linux", {})
-    windows = runtime.get("windows_mirror", {})
     return {
         "global": Path(str(linux.get("config", Path.home() / ".codex" / "config.toml"))).expanduser().resolve(),
-        "windows_mirror": Path(str(windows.get("config", ""))).expanduser().resolve() if windows.get("config") else None,
         "agents": Path(str(linux.get("agents", Path.home() / ".codex" / "AGENTS.md"))).expanduser().resolve(),
     }
 
@@ -346,11 +344,8 @@ def evaluate_serena(
 ) -> dict[str, Any]:
     config_paths = runtime_config_paths(authority)
     global_config = config_paths["global"]
-    windows_config = config_paths["windows_mirror"]
     expected = dict(policy.get("template", {}))
     global_ok = serena_block_matches(read_mcp_block(global_config, "serena"), expected, policy)
-    windows_present = isinstance(windows_config, Path) and windows_config.exists()
-    windows_ok = windows_present and serena_block_matches(read_mcp_block(windows_config, "serena"), expected, policy)
 
     home = serena_home_path()
     project_dir = repo_root / ".serena"
@@ -393,8 +388,6 @@ def evaluate_serena(
             blockers.append(activation["reason"])
         elif purpose == "app-usability":
             warnings.append(activation["reason"])
-    if not windows_ok:
-        warnings.append("Windows Serena config parity is not confirmed.")
 
     status = "BLOCKED" if blockers else ("WARN" if warnings and purpose == "app-usability" else "PASS")
     summary = "Serena startup sequence is ready for the current diff." if status == "PASS" else "Serena startup sequence is incomplete for the current diff."
@@ -411,11 +404,6 @@ def evaluate_serena(
                 "path": str(global_config),
                 "present": global_config.exists(),
                 "matches_canonical": global_ok,
-            },
-            "windows_mirror": {
-                "path": str(windows_config) if isinstance(windows_config, Path) else "",
-                "present": windows_present,
-                "matches_canonical": windows_ok,
             },
         },
         "runtime": {

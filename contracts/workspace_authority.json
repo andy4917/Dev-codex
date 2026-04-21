@@ -66,9 +66,11 @@
     "Linux-native Codex CLI is canonical agent binary.",
     "Dev-Management Control is the pinned Codex App control thread for readiness and maintenance routing.",
     "Permanent Git worktrees are optional execution conveniences and never policy authority.",
-    "Task worktrees are ephemeral and generated mirrors always bind to the canonical repo root.",
-    "Generated mirrors are outputs only.",
+    "Task worktrees are ephemeral and generated Linux runtime files always bind to the canonical repo root.",
+    "Generated Linux mirrors are outputs only.",
     "Optional user override source is /home/andy4917/.codex/user-config.toml only.",
+    "Windows .codex policy-bearing files are app-readable active settings or instruction surfaces, so they are violations, not Linux runtime outputs.",
+    "Windows app state is evidence only; Windows bootstrap remains SSH config plus Codex App usability, but Windows ~/.codex config or AGENTS must never be repo-generated because Codex App can actively read them.",
     "Windows-mounted Codex launcher is external dependency and forbidden primary runtime.",
     "Hooks are triggers only; audit, tests, and score are the final gates."
   ],
@@ -79,6 +81,25 @@
     "authority_input_allowed": false,
     "optional_user_override_source": "/home/andy4917/.codex/user-config.toml",
     "canonical_repo_root": "/home/andy4917/Dev-Management"
+  },
+  "windows_app_state": {
+    "codex_home": "/mnt/c/Users/anise/.codex",
+    "bootstrap_surfaces": [
+      "user_level_windows_ssh_config",
+      "codex_app_connection_readiness"
+    ],
+    "policy_bearing_relative_paths": [
+      "config.toml",
+      "AGENTS.md",
+      "hooks.json",
+      "skills/dev-workflow"
+    ],
+    "authoritative": false,
+    "evidence_only": true,
+    "app_reads_policy_files_if_present": true,
+    "repo_generation_allowed": false,
+    "known_generated_cleanup_requires_generated_header": true,
+    "unknown_policy_surface_status": "WARN"
   },
   "repair_boundary_summary": {
     "repairable_surfaces": [
@@ -215,7 +236,7 @@
     "repo_must_not_treat_as_repo_owned": [
       "/mnt/c/Users/anise/.codex/bin/wsl/codex"
     ],
-    "repo_must_not_overwrite_external_app_state_except_owned_generated_mirrors": true
+    "repo_must_not_overwrite_external_app_state_except_repo_owned_linux_runtime_outputs": true
   },
   "forbidden_primary_runtime_paths": [
     "/mnt/c/Users/anise/.codex/bin/wsl",
@@ -392,7 +413,7 @@
       {
         "id": "L2",
         "name": "generated_mirror",
-        "role": "Generated Linux and Windows .codex mirrors rendered from authority plus optional user overrides. Generated mirrors are outputs only and must never be treated as render inputs, user override inputs, or authority sources.",
+        "role": "Generated Linux .codex runtime files rendered from authority plus optional user overrides. Linux runtime outputs are outputs only and must never be treated as render inputs, user override inputs, or authority sources.",
         "mutability": "generated_only"
       },
       {
@@ -581,16 +602,7 @@
      "generated_config_role": "generated_mirror",
      "generated_config_outputs_only": true,
      "launcher": "/home/andy4917/.local/bin/codex"
-   },
-      "windows_mirror": {
-        "agents": "/mnt/c/Users/anise/.codex/AGENTS.md",
-        "config": "/mnt/c/Users/anise/.codex/config.toml",
-        "hooks_config": "/mnt/c/Users/anise/.codex/hooks.json",
-        "wsl_launcher": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
-        "generated_config_role": "generated_mirror",
-        "generated_config_outputs_only": true,
-        "generated_header": "GENERATED - DO NOT EDIT"
-      }
+   }
     },
     "scorecard": {
       "policy": "/home/andy4917/Dev-Management/contracts/user_score_policy.json",
@@ -632,11 +644,6 @@
         "linux_command_prefix": "python3",
         "state_root": "/home/andy4917/.codex/state/scorecard-hook",
         "user_prompt_throttle_seconds": 300,
-        "windows_generation_enabled": false,
-        "windows_generation_reason": "disabled by authority because Windows prompt-submit wrappers spawned visible terminal windows and hooks are trigger-only, not final enforcement",
-        "windows_command_prefix": "powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File",
-        "windows_wrapper_path": "/mnt/c/Users/anise/.codex/bin/scorecard-hook-wrapper.ps1",
-        "windows_wrapper_generated_header": "GENERATED - DO NOT EDIT",
         "events": {
           "UserPromptSubmit": {
             "matcher": ".*"
@@ -686,6 +693,9 @@
      "tool_search",
      "undo"
    ],
+      "required_true_features": [
+        "shell_zsh_fork"
+      ],
       "enabled_plugins": [
         "github@openai-curated"
       ]
@@ -694,10 +704,6 @@
       "wsl_symlink": {
         "target": "/home/andy4917/Dev-Workflow/skills",
         "link": "/home/andy4917/.codex/skills/dev-workflow"
-      },
-      "windows_generated_mirror": {
-        "source": "/home/andy4917/Dev-Workflow/skills",
-        "target": "/mnt/c/Users/anise/.codex/skills/dev-workflow"
       }
     }
   }

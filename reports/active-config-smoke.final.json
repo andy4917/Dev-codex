@@ -1,0 +1,52 @@
+{
+  "status": "WARN",
+  "gate_status": "PASS",
+  "checked_at": "2026-04-21T08:28:08.022490+00:00",
+  "authority_path": "/home/andy4917/Dev-Management/contracts/workspace_authority.json",
+  "linux_active_config": {
+    "path": "/home/andy4917/.codex/config.toml",
+    "exists": true,
+    "parse_error": "",
+    "approval_policy": "on-request",
+    "sandbox_mode": "workspace-write",
+    "shell_zsh_fork": true,
+    "canonical_mcp_blocks_present": {
+      "context7": true,
+      "serena": true
+    },
+    "provenance_header": {
+      "status": "PASS",
+      "exists": true,
+      "checks": {
+        "marker": true,
+        "source_authority": true,
+        "source_hash": true,
+        "role": true,
+        "read_by_renderer": true,
+        "user_override_source": true,
+        "optional_user_override": true
+      },
+      "reasons": []
+    }
+  },
+  "windows_policy_surface_status": "WARN",
+  "windows_policy_surface_findings": [
+    {
+      "path": "/mnt/c/Users/anise/.codex/skills/dev-workflow",
+      "kind": "directory",
+      "classification": "unknown_policy_surface",
+      "reason": "Windows skills content is present under app state without a Dev-Management generated marker; treat it as evidence-only and review manually before removal."
+    }
+  ],
+  "known_generated_windows_policy_files_deleted": [],
+  "unknown_windows_policy_files_blocking": [],
+  "unknown_windows_policy_files_observed": [
+    "/mnt/c/Users/anise/.codex/skills/dev-workflow"
+  ],
+  "windows_app_evidence_status": "PASS",
+  "windows_app_evidence_path": "/mnt/c/Users/anise/.codex",
+  "blockers": [],
+  "warnings": [
+    "Windows skills content is present under app state without a Dev-Management generated marker; treat it as evidence-only and review manually before removal."
+  ]
+}

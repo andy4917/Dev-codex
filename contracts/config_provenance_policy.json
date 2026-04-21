@@ -16,6 +16,9 @@
     ]
   },
   "optional_user_override_source": "/home/andy4917/.codex/user-config.toml",
+  "linux_required_true_features": [
+    "shell_zsh_fork"
+  ],
   "blocked_active_feature_flags": [
     "telepathy",
     "workspace_dependencies",
@@ -36,6 +39,17 @@
   "worktree_rules": {
     "generated_mirrors_must_use_canonical_repo_root": true,
     "worktree_attempting_source_of_truth_status": "BLOCKED"
+  },
+  "windows_policy_surface": {
+    "codex_home": "/mnt/c/Users/anise/.codex",
+    "policy_bearing_relative_paths": [
+      "config.toml",
+      "AGENTS.md",
+      "hooks.json",
+      "skills/dev-workflow"
+    ],
+    "known_generated_cleanup_requires_generated_header": true,
+    "unknown_policy_surface_status": "WARN"
   },
   "allowed_replacement_features": [
     "chronicle"

@@ -82,10 +82,20 @@
   },
   "generated_mirror_rules": {
     "linux_mirror": "/home/andy4917/.codex/config.toml",
-    "windows_mirror": "/mnt/c/Users/anise/.codex/config.toml",
     "optional_user_override_source": "/home/andy4917/.codex/user-config.toml",
     "mirrors_are_outputs_only": true,
     "generated_mirror_self_feed_status": "BLOCKED"
+  },
+  "windows_policy_surface_rules": {
+    "codex_home": "/mnt/c/Users/anise/.codex",
+    "policy_bearing_paths": [
+      "/mnt/c/Users/anise/.codex/config.toml",
+      "/mnt/c/Users/anise/.codex/AGENTS.md",
+      "/mnt/c/Users/anise/.codex/hooks.json",
+      "/mnt/c/Users/anise/.codex/skills/dev-workflow"
+    ],
+    "known_generated_cleanup_requires_generated_header": true,
+    "unknown_policy_surface_status": "WARN"
   },
   "worktree_policy": {
     "canonical_repo_root": "/home/andy4917/Dev-Management",
@@ -126,7 +136,7 @@
   "app_surface_rules": {
     "codex_app_role": "primary_user_control_surface",
     "codex_app_remote_session_role": "remote_session_control_surface",
-    "windows_codex_state_role": "observed_runtime_evidence_only",
+    "windows_codex_state_role": "app_state_evidence_only",
     "windows_codex_launcher_role": "external_dependency_forbidden_primary_runtime"
   },
   "release_driven_audit_surfaces": {

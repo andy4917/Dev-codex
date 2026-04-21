@@ -19,10 +19,12 @@ if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
 from check_artifact_hygiene import evaluate_artifact_hygiene
+from check_active_config_smoke import evaluate_active_config_smoke
 from check_config_provenance import evaluate_config_provenance
 from check_hook_readiness import evaluate_hook_readiness
 from check_toolchain_surface import evaluate_toolchain_surface
 from check_windows_app_ssh_readiness import evaluate_windows_app_ssh_readiness
+from devmgmt_runtime.paths import runtime_paths as managed_runtime_paths
 
 
 AUTHORITY_PATH = Path("/home/andy4917/Dev-Management/contracts/workspace_authority.json")
@@ -96,19 +98,14 @@ def text_hash(text: str) -> str:
 
 
 def runtime_paths(authority: dict[str, Any]) -> dict[str, Path]:
-   runtime = authority.get("generation_targets", {}).get("global_runtime", {})
-   linux = runtime.get("linux", {})
-   windows = runtime.get("windows_mirror", {})
-   windows_config = Path(str(windows.get("config", WINDOWS_CODEX / "config.toml"))).expanduser()
-   return {
-       "linux_agents": Path(str(linux.get("agents", HOME / ".codex" / "AGENTS.md"))).expanduser(),
-       "linux_config": Path(str(linux.get("config", HOME / ".codex" / "config.toml"))).expanduser(),
-        "linux_user_override_config": Path(str(linux.get("user_override_config", HOME / ".codex" / "user-config.toml"))).expanduser(),
-       "linux_launcher": Path(str(linux.get("launcher", HOME / ".local" / "bin" / "codex"))).expanduser(),
-       "windows_agents": Path(str(windows.get("agents", WINDOWS_CODEX / "AGENTS.md"))).expanduser(),
-       "windows_config": Path(str(windows.get("config", WINDOWS_CODEX / "config.toml"))).expanduser(),
-       "windows_wsl_launcher": Path(str(windows.get("wsl_launcher", windows_config.parent / "bin" / "wsl" / "codex"))).expanduser(),
-   }
+    paths = managed_runtime_paths(authority)
+    return {
+        **paths,
+        "linux_user_override_config": paths["linux_user_override"],
+        "windows_agents": paths["observed_windows_policy_agents"],
+        "windows_config": paths["observed_windows_policy_config"],
+        "windows_wsl_launcher": paths["observed_windows_wsl_launcher"],
+    }
 
 
 def git_lines(repo_root: Path, *args: str) -> list[str]:
@@ -532,12 +529,10 @@ def build_repair_boundary_check(authority: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def build_windows_source_of_truth_proof(authority: dict[str, Any], runtime: dict[str, Path]) -> dict[str, Any]:
+def build_linux_source_of_truth_proof(authority: dict[str, Any], runtime: dict[str, Path]) -> dict[str, Any]:
     linux_agents = runtime["linux_agents"].resolve()
     linux_config = runtime["linux_config"].resolve()
     linux_user_override = runtime["linux_user_override_config"].resolve()
-    windows_agents = runtime["windows_agents"].resolve()
-    windows_config = runtime["windows_config"].resolve()
     authority_source = str(authority.get("_authority_path", AUTHORITY_PATH))
 
     probe = {
@@ -545,11 +540,9 @@ def build_windows_source_of_truth_proof(authority: dict[str, Any], runtime: dict
         "function": "user_override_config_paths",
         "linux_config_path": str(linux_config),
         "linux_user_override_config_path": str(linux_user_override),
-        "windows_config_path": str(windows_config),
         "returned_paths": [],
         "linux_config_used_as_override_source": False,
         "linux_user_override_used_as_override_source": False,
-        "windows_config_used_as_override_source": False,
         "reasons": [],
         "status": "FAIL",
     }
@@ -559,143 +552,103 @@ def build_windows_source_of_truth_proof(authority: dict[str, Any], runtime: dict
         probe["returned_paths"] = returned_paths
         probe["linux_config_used_as_override_source"] = str(linux_config) in returned_paths
         probe["linux_user_override_used_as_override_source"] = str(linux_user_override) in returned_paths if linux_user_override.exists() else False
-        probe["windows_config_used_as_override_source"] = str(windows_config) in returned_paths
         if probe["linux_config_used_as_override_source"]:
             probe["reasons"].append("render_codex_runtime.py treated the Linux generated config as an override input.")
-        if probe["windows_config_used_as_override_source"]:
-            probe["reasons"].append("render_codex_runtime.py treated the Windows mirror config as an override input.")
+        if linux_user_override.exists() and not probe["linux_user_override_used_as_override_source"]:
+            probe["reasons"].append("render_codex_runtime.py did not expose the dedicated Linux user override path as the optional override input.")
         probe["status"] = "PASS" if not probe["reasons"] else "FAIL"
     except Exception as exc:
         probe["reasons"].append(f"unable to evaluate render_codex_runtime.py user_override_config_paths: {exc}")
 
-    targets_are_distinct = len({linux_agents, linux_config, windows_agents, windows_config}) == 4
+    targets_are_distinct = len({linux_agents, linux_config, linux_user_override}) == 3
     reasons = list(probe["reasons"])
     if not targets_are_distinct:
-        reasons.append("workspace authority does not keep Linux canonical runtime targets distinct from Windows mirror targets.")
+        reasons.append("workspace authority does not keep Linux generated runtime targets distinct from the dedicated user override target.")
 
     status = "PASS" if targets_are_distinct and probe["status"] == "PASS" else "FAIL"
     return {
         "authority_path": authority_source,
         "agents_generation_source": authority_source,
-       "linux_runtime_targets": {
-           "agents": str(linux_agents),
-           "config": str(linux_config),
+        "linux_runtime_targets": {
+            "agents": str(linux_agents),
+            "config": str(linux_config),
             "user_override_config": str(linux_user_override),
-       },
-        "windows_runtime_targets": {
-            "agents": str(windows_agents),
-            "config": str(windows_config),
         },
-        "linux_and_windows_targets_are_distinct": targets_are_distinct,
+        "linux_targets_are_distinct": targets_are_distinct,
         "config_override_probe": probe,
         "reasons": reasons,
         "status": status,
     }
 
 
-def compare_generated_runtime_file(
+def build_windows_policy_surface_check(
+    runtime: dict[str, Path],
+    config_provenance: dict[str, Any],
+    active_config_smoke: dict[str, Any],
     *,
-    label: str,
-    linux_path: Path,
-    windows_path: Path,
-    expected_windows_headers: list[str],
+    linux_source_of_truth_proof: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    linux_exists = linux_path.exists()
-    windows_exists = windows_path.exists()
-    linux_text = read_text(linux_path)
-    windows_text = read_text(windows_path)
-    linux_body = strip_generated_header(linux_text)
-    windows_body = strip_generated_header(windows_text)
-    header_ok = bool(windows_text) and any(windows_text.startswith(header) for header in expected_windows_headers)
-
-    divergence_reasons: list[str] = []
-    if not linux_exists:
-        divergence_reasons.append(f"Linux canonical runtime {label} file is missing: {linux_path}")
-    if not windows_exists:
-        divergence_reasons.append(f"Windows generated mirror {label} file is missing: {windows_path}")
-    if windows_exists and not header_ok:
-        divergence_reasons.append(
-            f"Windows generated mirror {label} file is missing the expected generated header: {expected_windows_headers[0]}"
-        )
-    if linux_exists and windows_exists and linux_body != windows_body:
-        divergence_reasons.append(f"Windows {label} generation diverges from the Linux canonical runtime output.")
-
-    status = "PASS" if not divergence_reasons else "FAIL"
-    return {
-        "label": label,
-        "linux_path": str(linux_path),
-        "windows_path": str(windows_path),
-        "linux_exists": linux_exists,
-        "windows_exists": windows_exists,
-        "linux_sha256": file_hash(linux_path) if linux_exists else "",
-        "windows_sha256": file_hash(windows_path) if windows_exists else "",
-        "linux_body_sha256": text_hash(linux_body) if linux_exists else "",
-        "windows_body_sha256": text_hash(windows_body) if windows_exists else "",
-        "expected_windows_headers": expected_windows_headers,
-        "windows_generated_header_ok": header_ok,
-        "body_matches_linux": linux_exists and windows_exists and linux_body == windows_body,
-        "linux_first_content_line": first_nonempty_line(linux_body),
-        "windows_first_content_line": first_nonempty_line(windows_body),
-        "divergence_reasons": divergence_reasons,
-        "diff_preview": diff_preview(
-            linux_body,
-            windows_body,
-            left_label=str(linux_path),
-            right_label=str(windows_path),
-        ),
-        "status": status,
-    }
-
-
-def build_windows_runtime_mirror_check(
-    authority: dict[str, Any],
-    runtime: dict[str, Path] | None = None,
-    source_of_truth_proof: dict[str, Any] | None = None,
-) -> dict[str, Any]:
-    runtime_paths_map = runtime or runtime_paths(authority)
-    generated_header = str(
-        authority.get("generation_targets", {})
-        .get("global_runtime", {})
-        .get("windows_mirror", {})
-        .get("generated_header", "GENERATED - DO NOT EDIT")
-    ).strip() or "GENERATED - DO NOT EDIT"
-
-    files = {
-        "agents": compare_generated_runtime_file(
-            label="AGENTS.md",
-            linux_path=runtime_paths_map["linux_agents"],
-            windows_path=runtime_paths_map["windows_agents"],
-            expected_windows_headers=[generated_header],
-        ),
-        "config": compare_generated_runtime_file(
-            label="config.toml",
-            linux_path=runtime_paths_map["linux_config"],
-            windows_path=runtime_paths_map["windows_config"],
-            expected_windows_headers=[f"# {generated_header}", generated_header],
-        ),
-    }
-    proof = source_of_truth_proof or build_windows_source_of_truth_proof(authority, runtime_paths_map)
-    divergence_summary = [
-        f"{name}: {reason}"
-        for name, payload in files.items()
-        for reason in payload["divergence_reasons"]
+    findings = [
+        dict(item)
+        for item in config_provenance.get("windows_policy_surface_findings", [])
+        if isinstance(item, dict)
     ]
-    divergence_summary.extend(f"source_of_truth: {reason}" for reason in proof.get("reasons", []))
-
-    all_headers_ok = all(payload["windows_generated_header_ok"] for payload in files.values())
-    all_bodies_match_linux = all(payload["body_matches_linux"] for payload in files.values())
-    status = "PASS" if all(payload["status"] == "PASS" for payload in files.values()) and proof["status"] == "PASS" else "FAIL"
+    known_generated_cleanup_candidates = [
+        str(item.get("path", ""))
+        for item in findings
+        if str(item.get("classification", "")).strip() == "known_generated_cleanup_candidate"
+    ]
+    unknown_observed = [
+        str(item.get("path", ""))
+        for item in findings
+        if str(item.get("classification", "")).strip() == "unknown_policy_surface"
+    ]
+    files = {
+        "config": runtime["observed_windows_policy_config"],
+        "agents": runtime["observed_windows_policy_agents"],
+        "hooks": runtime["observed_windows_policy_hooks"],
+        "skills": runtime["observed_windows_policy_skills"],
+    }
+    app_evidence_status = str(active_config_smoke.get("windows_app_evidence_status", "WARN")).strip() or "WARN"
+    status = (
+        "BLOCKED"
+        if str(config_provenance.get("windows_policy_surface_status", "PASS")) != "PASS"
+        else "WARN"
+        if app_evidence_status != "PASS"
+        else "PASS"
+    )
+    if str(config_provenance.get("windows_policy_surface_status", "PASS")) == "WARN":
+        status = "WARN" if app_evidence_status == "PASS" else "WARN"
+    reasons = [str(item.get("reason", "")) for item in findings if str(item.get("reason", "")).strip()]
+    if app_evidence_status != "PASS":
+        reasons.append("Windows Codex App state evidence was not observed on this host.")
     return {
-        "linux_runtime_root": str(runtime_paths_map["linux_agents"].parent),
-        "windows_runtime_root": str(runtime_paths_map["windows_agents"].parent),
-        "expected_generated_header": generated_header,
-        "mirror_role": "windows_generated_mirror",
-        "canonical_source": "linux_runtime_outputs",
-        "files": files,
-        "all_windows_headers_ok": all_headers_ok,
-        "all_windows_bodies_match_linux": all_bodies_match_linux,
-        "source_of_truth_proof": proof,
-        "divergence_summary": divergence_summary,
+        "windows_observed_root": str(runtime["observed_windows_codex_home"]),
+        "policy_role": "windows_policy_surface_violation",
+        "canonical_source": "linux_runtime_outputs_only",
+        "authoritative": False,
+        "repo_generation_allowed": False,
+        "files": {
+            name: {
+                "path": str(path),
+                "exists": path.exists(),
+                "is_dir": path.is_dir(),
+                "has_generated_header": generated if path.exists() and path.is_file() else False,
+            }
+            for name, path, generated in [
+                ("config", files["config"], files["config"].exists() and read_text(files["config"]).startswith("# GENERATED - DO NOT EDIT")),
+                ("agents", files["agents"], files["agents"].exists() and read_text(files["agents"]).startswith("GENERATED - DO NOT EDIT")),
+                ("hooks", files["hooks"], files["hooks"].exists() and read_text(files["hooks"]).startswith("{")),
+                ("skills", files["skills"], False),
+            ]
+        },
+        "findings": findings,
+        "known_generated_cleanup_candidates": sorted(path for path in known_generated_cleanup_candidates if path),
+        "unknown_windows_policy_files_blocking": [],
+        "unknown_windows_policy_files_observed": sorted(path for path in unknown_observed if path),
+        "windows_app_evidence_status": app_evidence_status,
+        "linux_source_of_truth_proof": linux_source_of_truth_proof or {},
+        "reasons": reasons,
         "status": status,
     }
 
@@ -759,19 +712,8 @@ def build_wsl_launcher_check(
     }
 
 
-def generated_runtime_mirror_matches_linux(
-    *,
-    linux_agents: Path,
-    linux_config: Path,
-    windows_agents: Path,
-    windows_config: Path,
-) -> bool:
-    if not all(path.exists() for path in [linux_agents, linux_config, windows_agents, windows_config]):
-        return False
-    return (
-        strip_generated_header(read_text(linux_agents)) == strip_generated_header(read_text(windows_agents))
-        and strip_generated_header(read_text(linux_config)) == strip_generated_header(read_text(windows_config))
-    )
+def windows_policy_surface_absent(*paths: Path) -> bool:
+    return not any(path.exists() for path in paths)
 
 
 def policy_update_workorder_present(*paths: Path) -> bool:
@@ -865,7 +807,6 @@ def main() -> int:
 
     allowed_agents = {
         str(runtime["linux_agents"]),
-        str(runtime["windows_agents"]),
     }
     product_root = Path(roots["product"])
     scan_roots = [
@@ -876,7 +817,7 @@ def main() -> int:
     agents_files: list[Path] = []
     for base in scan_roots:
         agents_files.extend(find_paths(base, lambda p: p.name == "AGENTS.md", authority, quarantine_root))
-    for path in [runtime["linux_agents"], runtime["windows_agents"]]:
+    for path in [runtime["linux_agents"], runtime["observed_windows_policy_agents"]]:
         if path.exists():
             agents_files.append(path)
     agents_files = sorted(set(agents_files))
@@ -887,11 +828,10 @@ def main() -> int:
 
     allowed_configs = {
         str(runtime["linux_config"]),
-        str(runtime["windows_config"]),
     }
     config_files = [
         path
-        for path in [runtime["linux_config"], runtime["windows_config"]]
+        for path in [runtime["linux_config"], runtime["observed_windows_policy_config"]]
         if path.exists()
     ]
     if product_root.exists():
@@ -923,11 +863,6 @@ def main() -> int:
     linux_agents = runtime["linux_agents"]
     global_config = runtime["linux_config"]
     project_root_marker_ok = global_config.exists() and 'project_root_markers = [".git"]' in read_text(global_config)
-    windows_agents = runtime["windows_agents"]
-    windows_config = runtime["windows_config"]
-    windows_runtime_mirror_check = build_windows_runtime_mirror_check(authority, runtime=runtime)
-    windows_generated_header_ok = windows_runtime_mirror_check["all_windows_headers_ok"]
-    windows_generated_body_matches_linux = windows_runtime_mirror_check["all_windows_bodies_match_linux"]
     global_runtime_surface = build_global_runtime_surface_check(Path(roots["management"]))
     wsl_launcher_check = build_wsl_launcher_check(authority, runtime=runtime)
     git_surface_drift = build_git_surface_drift_check()
@@ -935,6 +870,14 @@ def main() -> int:
     instruction_guard_policy = build_instruction_guard_policy_check(Path(roots["management"]))
     repair_boundary = build_repair_boundary_check(authority)
     config_provenance = evaluate_config_provenance(Path(roots["management"]))
+    active_config_smoke = evaluate_active_config_smoke(Path(roots["management"]))
+    linux_source_of_truth_proof = build_linux_source_of_truth_proof(authority, runtime)
+    windows_policy_surface_check = build_windows_policy_surface_check(
+        runtime,
+        config_provenance,
+        active_config_smoke,
+        linux_source_of_truth_proof=linux_source_of_truth_proof,
+    )
     toolchain_surface = evaluate_toolchain_surface(Path(roots["management"]))
     hook_readiness = evaluate_hook_readiness(Path(roots["management"]))
     artifact_hygiene = evaluate_artifact_hygiene(Path(roots["management"]))
@@ -966,7 +909,15 @@ def main() -> int:
                 quarantine_root,
             )
         )
-    files_to_scan.extend(path for path in [windows_agents, windows_config] if path.exists())
+    files_to_scan.extend(
+        path
+        for path in [
+            runtime["observed_windows_policy_agents"],
+            runtime["observed_windows_policy_config"],
+            runtime["observed_windows_policy_hooks"],
+        ]
+        if path.exists() and path.is_file()
+    )
     old_path_refs = text_paths(files_to_scan, authority["hardcoding_definition"]["path_rules"]["legacy_repo_paths_to_remove"])
     historical_allowlist = set(authority["hardcoding_definition"]["path_rules"].get("historical_evidence_allowlist", []))
     old_path_refs = [
@@ -1020,9 +971,10 @@ def main() -> int:
         bool(product_rule_leaks),
         not quarantine_root_ok,
         not project_root_marker_ok,
-        windows_runtime_mirror_check["status"] != "PASS",
+        windows_policy_surface_check["status"] == "BLOCKED",
         canonical_execution_surface["status"] != "PASS",
         config_provenance.get("gate_status", config_provenance.get("status")) == "BLOCKED",
+        active_config_smoke.get("gate_status", active_config_smoke.get("status")) == "BLOCKED",
         toolchain_surface["status"] == "BLOCKED",
         hook_readiness["status"] == "BLOCKED",
         artifact_hygiene["status"] == "BLOCKED",
@@ -1035,6 +987,7 @@ def main() -> int:
     ]
     warning_conditions = [
         global_runtime_surface.get("status") == "WARN",
+        windows_policy_surface_check["status"] == "WARN",
         wsl_launcher_check["status"] == "WARN",
         git_surface_drift["status"] == "WARN",
         windows_app_ssh_readiness["status"] == "WARN",
@@ -1061,11 +1014,16 @@ def main() -> int:
         "project_rule_leaks": sorted(set(product_rule_leaks)),
         "quarantine_root_policy_ok": quarantine_root_ok,
         "project_root_markers_git_only": project_root_marker_ok,
-        "windows_generated_mirror": windows_generated_header_ok,
-        "windows_generated_mirror_matches_linux": windows_generated_body_matches_linux,
-        "windows_runtime_mirror_check": windows_runtime_mirror_check,
+        "windows_policy_surface_status": config_provenance.get("windows_policy_surface_status", "PASS"),
+        "windows_policy_surface_findings": config_provenance.get("windows_policy_surface_findings", []),
+        "known_generated_windows_policy_files_deleted": config_provenance.get("known_generated_windows_policy_files_deleted", []),
+        "unknown_windows_policy_files_blocking": config_provenance.get("unknown_windows_policy_files_blocking", []),
+        "windows_app_evidence_status": active_config_smoke.get("windows_app_evidence_status", "WARN"),
+        "windows_policy_surface_check": windows_policy_surface_check,
         "codex_app_installed_release": release_report or {"status": "WARN", "reason": "installed app release evidence report is missing"},
         "config_provenance": config_provenance,
+        "active_config_smoke": active_config_smoke,
+        "linux_source_of_truth_proof": linux_source_of_truth_proof,
         "generated_mirror_contract": config_provenance.get("generated_mirror_contract", {}),
         "toolchain_surface": toolchain_surface,
         "hook_readiness": hook_readiness,

@@ -69,13 +69,13 @@ class DriftAuditTests(unittest.TestCase):
                     "linux": {
                         "config": str(linux_codex / "config.toml"),
                     },
-                    "windows_mirror": {
-                        "config": str(windows_codex / "config.toml"),
-                    },
                 },
                 "global_config": {
                     "project_root_markers": [".git"],
                 },
+            },
+            "windows_app_state": {
+                "codex_home": str(windows_codex),
             },
         }
         _write_json(repo_root / "contracts" / "workspace_authority.json", authority)

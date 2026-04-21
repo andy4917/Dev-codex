@@ -38,35 +38,26 @@ class AuditWorkspaceContractTests(unittest.TestCase):
         self.assertFalse(self.module.quarantine_root_policy_ok(Path("/home/andy4917/Dev-Management/quarantine/2026-04-16")))
         self.assertTrue(self.module.quarantine_root_policy_ok(Path("/home/andy4917/Dev-Management/quarantine")))
 
-    def test_windows_source_of_truth_proof_uses_dedicated_user_override_input_only(self) -> None:
+    def test_linux_source_of_truth_proof_uses_dedicated_user_override_input_only(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             tmp = Path(tmpdir)
             linux_agents = tmp / "linux" / "AGENTS.md"
             linux_config = tmp / "linux" / "config.toml"
             linux_user_override = tmp / "linux" / "user-config.toml"
-            windows_agents = tmp / "windows" / "AGENTS.md"
-            windows_config = tmp / "windows" / "config.toml"
 
             linux_agents.parent.mkdir(parents=True)
-            windows_agents.parent.mkdir(parents=True)
             linux_agents.write_text("# Generated Codex Workspace Contract\n", encoding="utf-8")
             linux_config.write_text('# GENERATED - DO NOT EDIT\napproval_policy = "on-request"\n', encoding="utf-8")
             linux_user_override.write_text('model_reasoning_effort = "high"\n', encoding="utf-8")
-            windows_agents.write_text("GENERATED - DO NOT EDIT\n\n# Generated Codex Workspace Contract\n", encoding="utf-8")
-            windows_config.write_text('# GENERATED - DO NOT EDIT\napproval_policy = "on-request"\n', encoding="utf-8")
 
             authority = {
+                "_authority_path": str(tmp / "repo" / "contracts" / "workspace_authority.json"),
                 "generation_targets": {
                     "global_runtime": {
                         "linux": {
                             "agents": str(linux_agents),
                             "config": str(linux_config),
                             "user_override_config": str(linux_user_override),
-                        },
-                        "windows_mirror": {
-                            "agents": str(windows_agents),
-                            "config": str(windows_config),
-                            "generated_header": "GENERATED - DO NOT EDIT",
                         },
                     }
                 }
@@ -75,77 +66,80 @@ class AuditWorkspaceContractTests(unittest.TestCase):
                 "linux_agents": linux_agents,
                 "linux_config": linux_config,
                 "linux_user_override_config": linux_user_override,
-                "windows_agents": windows_agents,
-                "windows_config": windows_config,
             }
 
-            proof = self.module.build_windows_source_of_truth_proof(authority, runtime)
+            proof = self.module.build_linux_source_of_truth_proof(authority, runtime)
 
             self.assertEqual(proof["status"], "PASS")
-            self.assertTrue(proof["linux_and_windows_targets_are_distinct"])
+            self.assertTrue(proof["linux_targets_are_distinct"])
             self.assertFalse(proof["config_override_probe"]["linux_config_used_as_override_source"])
             self.assertTrue(proof["config_override_probe"]["linux_user_override_used_as_override_source"])
-            self.assertFalse(proof["config_override_probe"]["windows_config_used_as_override_source"])
+            self.assertEqual(proof["linux_runtime_targets"]["user_override_config"], str(linux_user_override))
 
-    def test_windows_runtime_mirror_check_reports_divergence_per_file(self) -> None:
+    def test_windows_policy_surface_check_reports_violation_findings(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             tmp = Path(tmpdir)
-            linux_agents = tmp / "linux" / "AGENTS.md"
-            linux_config = tmp / "linux" / "config.toml"
             windows_agents = tmp / "windows" / "AGENTS.md"
             windows_config = tmp / "windows" / "config.toml"
+            windows_hooks = tmp / "windows" / "hooks.json"
+            windows_skills = tmp / "windows" / "skills" / "dev-workflow"
 
-            linux_agents.parent.mkdir(parents=True)
             windows_agents.parent.mkdir(parents=True)
-            linux_agents.write_text("# Generated Codex Workspace Contract\n", encoding="utf-8")
-            linux_config.write_text('approval_policy = "on-request"\n', encoding="utf-8")
             windows_agents.write_text("GENERATED - DO NOT EDIT\n\n# Generated Codex Workspace Contract\n", encoding="utf-8")
             windows_config.write_text('# GENERATED - DO NOT EDIT\napproval_policy = "never"\n', encoding="utf-8")
+            windows_hooks.write_text("{}\n", encoding="utf-8")
+            windows_skills.mkdir(parents=True)
 
-            authority = {
-                "generation_targets": {
-                    "global_runtime": {
-                        "linux": {
-                            "agents": str(linux_agents),
-                            "config": str(linux_config),
-                        },
-                        "windows_mirror": {
-                            "agents": str(windows_agents),
-                            "config": str(windows_config),
-                            "generated_header": "GENERATED - DO NOT EDIT",
-                        },
-                    }
-                }
-            }
             runtime = {
-                "linux_agents": linux_agents,
-                "linux_config": linux_config,
-                "windows_agents": windows_agents,
-                "windows_config": windows_config,
+                "observed_windows_codex_home": windows_agents.parent,
+                "observed_windows_policy_agents": windows_agents,
+                "observed_windows_policy_config": windows_config,
+                "observed_windows_policy_hooks": windows_hooks,
+                "observed_windows_policy_skills": windows_skills,
             }
-            source_of_truth_proof = {
+            linux_source_of_truth_proof = {
                 "status": "PASS",
                 "reasons": [],
             }
+            config_provenance = {
+                "windows_policy_surface_status": "BLOCKED",
+                "windows_policy_surface_findings": [
+                    {
+                        "path": str(windows_agents),
+                        "classification": "known_generated_cleanup_candidate",
+                        "reason": "known generated Windows policy file remains present and should be removed because Codex App can actively read Windows ~/.codex config and instructions.",
+                    },
+                    {
+                        "path": str(windows_config),
+                        "classification": "known_generated_cleanup_candidate",
+                        "reason": "known generated Windows policy file remains present and should be removed because Codex App can actively read Windows ~/.codex config and instructions.",
+                    },
+                    {
+                        "path": str(windows_hooks),
+                        "classification": "unknown_policy_surface",
+                        "reason": "unknown Windows policy-bearing file remains present on an app-readable active surface and requires manual review.",
+                    },
+                ],
+            }
+            active_config_smoke = {
+                "windows_app_evidence_status": "PASS",
+            }
 
-            check = self.module.build_windows_runtime_mirror_check(
-                authority,
+            check = self.module.build_windows_policy_surface_check(
                 runtime=runtime,
-                source_of_truth_proof=source_of_truth_proof,
+                config_provenance=config_provenance,
+                active_config_smoke=active_config_smoke,
+                linux_source_of_truth_proof=linux_source_of_truth_proof,
             )
 
-            self.assertEqual(check["status"], "FAIL")
-            self.assertEqual(check["files"]["agents"]["status"], "PASS")
-            self.assertEqual(check["files"]["config"]["status"], "FAIL")
-            self.assertIn(
-                "Windows config.toml generation diverges from the Linux canonical runtime output.",
-                check["files"]["config"]["divergence_reasons"],
-            )
-            self.assertTrue(check["files"]["config"]["diff_preview"])
-            self.assertIn(
-                "config: Windows config.toml generation diverges from the Linux canonical runtime output.",
-                check["divergence_summary"],
-            )
+            self.assertEqual(check["status"], "BLOCKED")
+            self.assertEqual(check["policy_role"], "windows_policy_surface_violation")
+            self.assertTrue(check["files"]["agents"]["exists"])
+            self.assertTrue(check["files"]["config"]["has_generated_header"])
+            self.assertEqual(check["known_generated_cleanup_candidates"], [str(windows_agents), str(windows_config)])
+            self.assertEqual(check["unknown_windows_policy_files_blocking"], [])
+            self.assertEqual(check["unknown_windows_policy_files_observed"], [str(windows_hooks)])
+            self.assertEqual(check["linux_source_of_truth_proof"]["status"], "PASS")
 
     def test_workspace_dependency_surface_warns_only_when_feature_is_enabled(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -177,7 +171,7 @@ class AuditWorkspaceContractTests(unittest.TestCase):
             self.assertEqual(result["status"], "PASS")
             self.assertFalse(result["feature_enabled"])
 
-    def test_rendered_global_config_includes_model_reasoning_and_features_and_mirrors_match(self) -> None:
+    def test_rendered_global_config_includes_model_reasoning_and_features(self) -> None:
         render = _load_render_module()
         original_template_loader = render.load_context7_template
         original_serena_loader = render.load_serena_template
@@ -188,11 +182,6 @@ class AuditWorkspaceContractTests(unittest.TestCase):
 
         authority = {
             "generation_targets": {
-                "global_runtime": {
-                    "windows_mirror": {
-                        "generated_header": "GENERATED - DO NOT EDIT",
-                    }
-                },
                 "global_config": {
                     "approval_policy": "on-request",
                     "sandbox_mode": "workspace-write",
@@ -210,39 +199,18 @@ class AuditWorkspaceContractTests(unittest.TestCase):
             }
         }
 
-        linux_config = render.render_config(authority, windows=False)
-        windows_config = render.render_config(authority, windows=True)
+        linux_config = render.render_config(authority)
 
         self.assertIn('model = "gpt-5.4"', linux_config)
         self.assertIn('model_reasoning_effort = "high"', linux_config)
         self.assertIn("[features]", linux_config)
         self.assertIn("context7 = true", linux_config)
         self.assertIn("workspace-alignment = true", linux_config)
-        self.assertEqual(self.module.strip_generated_header(linux_config), self.module.strip_generated_header(windows_config))
-
         with tempfile.TemporaryDirectory() as tmpdir:
             tmp = Path(tmpdir)
-            linux_agents = tmp / "linux" / "AGENTS.md"
-            linux_config_path = tmp / "linux" / "config.toml"
             windows_agents = tmp / "windows" / "AGENTS.md"
             windows_config_path = tmp / "windows" / "config.toml"
-
-            linux_agents.parent.mkdir(parents=True)
-            windows_agents.parent.mkdir(parents=True)
-
-            linux_agents.write_text("# Generated Codex Workspace Contract\n", encoding="utf-8")
-            linux_config_path.write_text(linux_config, encoding="utf-8")
-            windows_agents.write_text("GENERATED - DO NOT EDIT\n\n# Generated Codex Workspace Contract\n", encoding="utf-8")
-            windows_config_path.write_text(windows_config, encoding="utf-8")
-
-            self.assertTrue(
-                self.module.generated_runtime_mirror_matches_linux(
-                    linux_agents=linux_agents,
-                    linux_config=linux_config_path,
-                    windows_agents=windows_agents,
-                    windows_config=windows_config_path,
-                )
-            )
+            self.assertTrue(self.module.windows_policy_surface_absent(windows_agents, windows_config_path))
 
     def test_manual_overrides_are_merged_but_structural_features_stay_locked(self) -> None:
         render = _load_render_module()
@@ -388,10 +356,6 @@ trust_level = "trusted"
                 "generation_targets": {
                     "global_runtime": {
                         "linux": {"config": str(linux_config_path), "user_override_config": str(linux_user_override_path)},
-                        "windows_mirror": {
-                            "config": str(windows_config_path),
-                            "generated_header": "GENERATED - DO NOT EDIT",
-                        },
                     },
                     "global_config": {
                         "approval_policy": "on-request",
@@ -412,8 +376,7 @@ trust_level = "trusted"
             }
 
             effective = render.build_effective_global_config(authority)
-            linux_config = render.render_config(authority, windows=False, effective_cfg=effective)
-            windows_config = render.render_config(authority, windows=True, effective_cfg=effective)
+            linux_config = render.render_config(authority, effective_cfg=effective)
 
             self.assertEqual(effective["model_reasoning_effort"], "high")
             self.assertEqual(effective["approval_policy"], "on-request")
@@ -448,7 +411,6 @@ trust_level = "trusted"
             self.assertIn('disabled_tools = ["execute_shell_command", "remove_project"]', linux_config)
             self.assertNotIn('url = "https://invalid.example/mcp"', linux_config)
             self.assertIn("[memories]", linux_config)
-            self.assertEqual(self.module.strip_generated_header(linux_config), self.module.strip_generated_header(windows_config))
 
     def test_rendered_hooks_include_scorecard_runtime_hook_commands(self) -> None:
         render = _load_render_module()
@@ -483,16 +445,12 @@ trust_level = "trusted"
                     "protected_fields": ["canonical_roots"],
                 },
             },
-            "generation_targets": {
-                "global_runtime": {
-                    "linux": {
-                        "launcher": "/home/andy4917/.local/bin/codex",
+                "generation_targets": {
+                    "global_runtime": {
+                        "linux": {
+                            "launcher": "/home/andy4917/.local/bin/codex",
+                        },
                     },
-                    "windows_mirror": {
-                        "wsl_launcher": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
-                        "generated_header": "GENERATED - DO NOT EDIT",
-                    }
-                },
                 "scorecard": {
                     "policy": "/home/andy4917/Dev-Management/contracts/user_score_policy.json",
                     "disqualifiers": "/home/andy4917/Dev-Management/contracts/disqualifier_policy.json",
@@ -508,9 +466,6 @@ trust_level = "trusted"
                         "script": "/home/andy4917/Dev-Management/scripts/scorecard_runtime_hook.py",
                         "linux_command_prefix": "python3",
                         "windows_generation_enabled": False,
-                        "windows_command_prefix": "powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File",
-                        "windows_wrapper_path": "/mnt/c/Users/anise/.codex/bin/scorecard-hook-wrapper.ps1",
-                        "windows_wrapper_generated_header": "GENERATED - DO NOT EDIT",
                         "events": {
                             "UserPromptSubmit": {"matcher": ".*"},
                         },
@@ -533,7 +488,8 @@ trust_level = "trusted"
         self.assertIn("Required scorecard layer command", rendered_agents)
         self.assertIn("run_score_layer.py --json", rendered_agents)
         self.assertIn("Codex App is the primary user control surface and remote session control surface", rendered_agents)
-        self.assertIn("Generated config mirrors are outputs only", rendered_agents)
+        self.assertIn("Linux generated runtime files are outputs only", rendered_agents)
+        self.assertIn("must not generate policy-bearing Windows ~/.codex", rendered_agents)
         self.assertIn("Optional user override source is /home/andy4917/.codex/user-config.toml only", rendered_agents)
         self.assertIn("Linux-native Codex CLI on the canonical remote login-shell PATH is the canonical agent binary", rendered_agents)
         self.assertIn("PATH contamination is a client-surface warning only", rendered_agents)
@@ -598,16 +554,14 @@ trust_level = "trusted"
                     "/mnt/c/Users/anise/.codex/tmp/arg0",
                     ".codex/bin/wsl/codex",
                 ],
+                "windows_app_state": {
+                    "codex_home": str(windows_config.parent),
+                },
                 "generation_targets": {
                     "global_runtime": {
                         "linux": {
                             "launcher": str(linux_launcher),
                             "config": str(linux_config),
-                        },
-                        "windows_mirror": {
-                            "config": str(windows_config),
-                            "wsl_launcher": str(windows_launcher),
-                            "generated_header": "GENERATED - DO NOT EDIT",
                         },
                     }
                 }

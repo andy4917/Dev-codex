@@ -45,6 +45,7 @@ class VerifyMigrationEvidenceTests(unittest.TestCase):
             # Generated Codex Workspace Contract
 
             - Authority file: `{repo_root / 'contracts' / 'workspace_authority.json'}`
+            - Windows `.codex` policy-bearing files are forbidden active surfaces because Codex App can read them.
             - Use `.git` as the only project root marker.
             """
         )
@@ -54,6 +55,9 @@ class VerifyMigrationEvidenceTests(unittest.TestCase):
             sandbox_mode = "workspace-write"
             web_search = "cached"
             project_root_markers = [".git"]
+
+            [features]
+            shell_zsh_fork = true
 
             [projects."{repo_root}"]
             trust_level = "trusted"
@@ -67,9 +71,7 @@ class VerifyMigrationEvidenceTests(unittest.TestCase):
         )
 
         _write_text(linux_codex / "AGENTS.md", agents_body)
-        _write_text(windows_codex / "AGENTS.md", f"GENERATED - DO NOT EDIT\n\n{agents_body}")
         _write_text(linux_codex / "config.toml", config_body)
-        _write_text(windows_codex / "config.toml", f"# GENERATED - DO NOT EDIT\n{config_body}")
         _write_text(project_root / "AGENTS.md", "# Product rules\n")
         _write_text(project_root / ".codex" / "config.toml", 'project_root_markers = [".git"]\n')
         _write_text(project_root / "contracts" / "project_policy.json", "{}\n")
@@ -80,6 +82,9 @@ class VerifyMigrationEvidenceTests(unittest.TestCase):
                 "workflow": str(workflow_root),
                 "product": str(product_root),
             },
+            "windows_app_state": {
+                "codex_home": str(windows_codex),
+            },
             "cleanup_policy": {
                 "quarantine_root": str(quarantine_root),
             },
@@ -88,11 +93,7 @@ class VerifyMigrationEvidenceTests(unittest.TestCase):
                     "linux": {
                         "agents": str(linux_codex / "AGENTS.md"),
                         "config": str(linux_codex / "config.toml"),
-                    },
-                    "windows_mirror": {
-                        "agents": str(windows_codex / "AGENTS.md"),
-                        "config": str(windows_codex / "config.toml"),
-                        "generated_header": "GENERATED - DO NOT EDIT",
+                        "user_override_config": str(linux_codex / "user-config.toml"),
                     },
                 },
                 "global_config": {
@@ -179,28 +180,37 @@ class VerifyMigrationEvidenceTests(unittest.TestCase):
             f"""\
             #!/usr/bin/env python3
             import json
-            import sys
             from pathlib import Path
 
             repo_root = Path.cwd()
-            report_path = repo_root / "reports" / "audit.final.json"
-            report_path.parent.mkdir(parents=True, exist_ok=True)
+            linux_agents = Path({str(linux_codex / "AGENTS.md")!r})
+            linux_config = Path({str(linux_codex / "config.toml")!r})
+            project_agents = Path({str(project_root / "AGENTS.md")!r})
+            project_config = Path({str(project_root / ".codex" / "config.toml")!r})
+            windows_agents = Path({str(windows_codex / "AGENTS.md")!r})
+            windows_config = Path({str(windows_codex / "config.toml")!r})
+            windows_hooks = Path({str(windows_codex / "hooks.json")!r})
+            windows_skills = Path({str(windows_codex / "skills" / "dev-workflow")!r})
+
+            observed = [windows_agents, windows_config, windows_hooks, windows_skills]
+            findings = []
+            for path in observed:
+                if not path.exists():
+                    continue
+                findings.append({{
+                    "path": str(path),
+                    "classification": "known_generated_cleanup_candidate" if path.is_dir() or path.read_text(encoding="utf-8", errors="ignore").startswith(("GENERATED - DO NOT EDIT", "# GENERATED - DO NOT EDIT")) else "unknown_policy_surface",
+                    "reason": "Windows policy-bearing file remains present on an app-readable active surface and must be removed.",
+                }})
+
             report = {{
                 "authority_path": str(repo_root / "contracts" / "workspace_authority.json"),
                 "trusted_projects": [str(repo_root), str(repo_root.parent / "Dev-Workflow"), str(repo_root.parent / "Dev-Product")],
-                "agents_files": [
-                    str(Path({str(linux_codex / 'AGENTS.md')!r})),
-                    str(Path({str(project_root / 'AGENTS.md')!r})),
-                    str(Path({str(windows_codex / 'AGENTS.md')!r})),
-                ],
-                "config_files": [
-                    str(Path({str(linux_codex / 'config.toml')!r})),
-                    str(Path({str(project_root / '.codex' / 'config.toml')!r})),
-                    str(Path({str(windows_codex / 'config.toml')!r})),
-                ],
+                "agents_files": [str(linux_agents), str(project_agents)] + ([str(windows_agents)] if windows_agents.exists() else []),
+                "config_files": [str(linux_config), str(project_config)] + ([str(windows_config)] if windows_config.exists() else []),
                 "contracts_dirs": [
                     str(repo_root / "contracts"),
-                    str(Path({str(project_root / 'contracts')!r})),
+                    str(Path({str(project_root / "contracts")!r})),
                 ],
                 "violations": {{
                     "unexpected_agents": [],
@@ -209,10 +219,15 @@ class VerifyMigrationEvidenceTests(unittest.TestCase):
                 }},
                 "project_rule_leaks": [],
                 "project_root_markers_git_only": True,
-                "windows_generated_mirror": True,
-                "old_path_refs_outside_quarantine": [],
-                "status": "PASS",
+                "windows_policy_surface_status": "BLOCKED" if findings else "PASS",
+                "windows_policy_surface_findings": findings,
+                "unknown_windows_policy_files_blocking": [item["path"] for item in findings if item["classification"] == "unknown_policy_surface"],
+                "windows_app_evidence_status": "PASS",
+                "linux_source_of_truth_proof": {{"status": "PASS"}},
+                "status": "BLOCKED" if findings else "PASS",
             }}
+            report_path = repo_root / "reports" / "audit.final.json"
+            report_path.parent.mkdir(parents=True, exist_ok=True)
             report_path.write_text(json.dumps(report, indent=2) + "\\n", encoding="utf-8")
             print(json.dumps(report))
             raise SystemExit(0)
@@ -266,23 +281,22 @@ class VerifyMigrationEvidenceTests(unittest.TestCase):
             }
             self.assertIn("generated Linux runtime", surviving_agents[str(linux_codex / "AGENTS.md")])
             self.assertIn("project-specific rules are allowed", surviving_agents[str(repo_root.parent / "Dev-Product" / "reservation-system" / "AGENTS.md")])
-            self.assertIn("generated Windows mirror", surviving_agents[str(windows_codex / "AGENTS.md")])
+            self.assertNotIn(str(windows_codex / "AGENTS.md"), surviving_agents)
 
             surviving_configs = {
                 item["path"]: item["justification"] for item in payload["migration_evidence"]["surviving_config_files"]
             }
             self.assertIn("generated Linux runtime", surviving_configs[str(linux_codex / "config.toml")])
             self.assertIn("project-specific rules are allowed", surviving_configs[str(repo_root.parent / "Dev-Product" / "reservation-system" / ".codex" / "config.toml")])
-            self.assertIn("generated Windows mirror", surviving_configs[str(windows_codex / "config.toml")])
+            self.assertNotIn(str(windows_codex / "config.toml"), surviving_configs)
 
             cleanup = payload["migration_evidence"]["cleanup_summary"]
             self.assertEqual(cleanup["counts"]["quarantined"], 1)
             self.assertEqual(cleanup["counts"]["deleted"], 1)
-            self.assertTrue(payload["migration_evidence"]["git_root_marker_proof"]["status"] == "PASS")
-            self.assertTrue(payload["migration_evidence"]["windows_mirror_proof"]["status"] == "PASS")
-            self.assertEqual(payload["migration_evidence"]["windows_mirror_proof"]["agents"]["status"], "PASS")
-            self.assertEqual(payload["migration_evidence"]["windows_mirror_proof"]["config"]["status"], "PASS")
-            self.assertEqual(payload["migration_evidence"]["windows_mirror_proof"]["source_of_truth_proof"]["status"], "PASS")
+            self.assertEqual(payload["migration_evidence"]["git_root_marker_proof"]["status"], "PASS")
+            self.assertEqual(payload["migration_evidence"]["windows_policy_surface_proof"]["status"], "PASS")
+            self.assertEqual(payload["migration_evidence"]["windows_policy_surface_proof"]["present_paths"], [])
+            self.assertEqual(payload["migration_evidence"]["windows_policy_surface_proof"]["source_of_truth_proof"]["status"], "PASS")
             self.assertEqual(payload["migration_evidence"]["hardcoding_legacy_duplicate_audit"]["status"], "PASS")
 
     def test_entrypoint_continues_after_blocked_gate_and_returns_blocked(self) -> None:
@@ -317,8 +331,9 @@ class VerifyMigrationEvidenceTests(unittest.TestCase):
             self.assertEqual(payload["command_results"]["delivery_gate_verify"]["exit_code"], 2)
             self.assertEqual(payload["command_results"]["export_user_score_summary"]["exit_code"], 0)
             self.assertEqual(payload["command_results"]["audit_workspace_write_report"]["exit_code"], 0)
+            self.assertEqual(payload["migration_evidence"]["windows_policy_surface_proof"]["status"], "PASS")
 
-    def test_entrypoint_fails_when_windows_runtime_mirror_diverges(self) -> None:
+    def test_entrypoint_blocks_when_windows_policy_surface_is_present(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             repo_root, linux_codex, windows_codex = self._build_workspace(Path(tmpdir))
             output_path = repo_root / "reports" / "migration-verification.json"
@@ -346,21 +361,22 @@ class VerifyMigrationEvidenceTests(unittest.TestCase):
                 encoding="utf-8",
             )
 
-            self.assertEqual(result.returncode, 1, msg=result.stderr)
+            self.assertEqual(result.returncode, 2, msg=result.stderr)
             payload = json.loads(output_path.read_text(encoding="utf-8"))
-            proof = payload["migration_evidence"]["windows_mirror_proof"]
-            self.assertEqual(payload["status"], "FAIL")
-            self.assertEqual(proof["status"], "FAIL")
-            self.assertEqual(proof["config"]["status"], "FAIL")
-            self.assertIn(
-                "Windows config.toml generation diverges from the Linux canonical runtime output.",
-                proof["config"]["divergence_reasons"],
-            )
-            self.assertIn(
-                "config: Windows config.toml generation diverges from the Linux canonical runtime output.",
-                proof["divergence_summary"],
-            )
+            proof = payload["migration_evidence"]["windows_policy_surface_proof"]
+            self.assertEqual(payload["status"], "BLOCKED")
+            self.assertEqual(proof["status"], "BLOCKED")
+            self.assertEqual(proof["present_paths"], [str(windows_codex / "config.toml")])
             self.assertEqual(proof["source_of_truth_proof"]["status"], "PASS")
+            self.assertEqual(proof["audit_report_value"], "BLOCKED")
+
+            surviving_configs = {
+                item["path"]: item["justification"] for item in payload["migration_evidence"]["surviving_config_files"]
+            }
+            self.assertIn(
+                "should be removed, not a canonical authority target",
+                surviving_configs[str(windows_codex / "config.toml")],
+            )
 
 
 if __name__ == "__main__":

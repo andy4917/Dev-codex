@@ -114,23 +114,20 @@ class RepairCodexDesktopRuntimeTests(unittest.TestCase):
                 "/mnt/c/Users/anise/.codex/tmp/arg0",
                 ".codex/bin/wsl/codex",
             ],
+            "windows_app_state": {
+                "codex_home": str(windows_codex),
+            },
             "generation_targets": {
                 "global_config": {"model_reasoning_effort": "high"},
-                    "global_runtime": {
-                        "linux": {
-                            "agents": str(linux_codex / "AGENTS.md"),
-                            "config": str(linux_codex / "config.toml"),
-                            "hooks_config": str(linux_codex / "hooks.json"),
-                            "launcher": str(linux_launcher),
-                        },
-                        "windows_mirror": {
-                            "agents": str(windows_codex / "AGENTS.md"),
-                            "config": str(windows_codex / "config.toml"),
-                            "hooks_config": str(windows_codex / "hooks.json"),
-                            "wsl_launcher": str(windows_launcher),
-                        },
+                "global_runtime": {
+                    "linux": {
+                        "agents": str(linux_codex / "AGENTS.md"),
+                        "config": str(linux_codex / "config.toml"),
+                        "hooks_config": str(linux_codex / "hooks.json"),
+                        "launcher": str(linux_launcher),
                     },
                 },
+            },
             "runtime_layering": {
                 "restore_seed_policy": {
                     "preferred_windows_access_host": "wsl.localhost",
@@ -160,7 +157,7 @@ class RepairCodexDesktopRuntimeTests(unittest.TestCase):
             management_root / "reports" / "audit.final.json",
             {
                 "status": "PASS",
-                "windows_runtime_mirror_check": {"status": "PASS"},
+                "windows_policy_surface_check": {"status": "PASS"},
                 "wsl_launcher_check": {"status": "PASS"},
                 "runtime_restore_seed_violations": [],
             },
@@ -315,7 +312,7 @@ class RepairCodexDesktopRuntimeTests(unittest.TestCase):
             sys.argv = previous_argv
         return exit_code, stdout.getvalue() + stderr.getvalue()
 
-    def test_runtime_restore_codex_home_prefers_authority_windows_mirror_when_restore_state_exists(self) -> None:
+    def test_runtime_restore_codex_home_prefers_windows_app_state_when_restore_state_exists(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             tmp = Path(tmpdir)
             linux_codex = tmp / "linux" / ".codex"
@@ -324,10 +321,12 @@ class RepairCodexDesktopRuntimeTests(unittest.TestCase):
             _write_json(windows_codex / ".codex-global-state.json", {})
 
             authority = {
+                "windows_app_state": {
+                    "codex_home": str(windows_codex),
+                },
                 "generation_targets": {
                     "global_runtime": {
                         "linux": {"agents": str(linux_codex / "AGENTS.md")},
-                        "windows_mirror": {"agents": str(windows_codex / "AGENTS.md")},
                     }
                 }
             }
@@ -447,10 +446,12 @@ class RepairCodexDesktopRuntimeTests(unittest.TestCase):
                     "product": str(product_root),
                     "reservation-system": str(reservation_root),
                 },
+                "windows_app_state": {
+                    "codex_home": str(windows_codex),
+                },
                 "generation_targets": {
                     "global_runtime": {
                         "linux": {"agents": str(linux_codex / "AGENTS.md"), "config": str(linux_codex / "config.toml")},
-                        "windows_mirror": {"agents": str(windows_codex / "AGENTS.md"), "config": str(windows_codex / "config.toml")},
                     },
                     "global_config": {"model_reasoning_effort": "high"},
                 },
@@ -705,7 +706,7 @@ class RepairCodexDesktopRuntimeTests(unittest.TestCase):
 
         self.assertEqual(exit_code, 0)
         self.assertEqual(report["unexpected_resume_root_rewrites"], [])
-        self.assertEqual(report["baseline"]["windows_runtime_mirror_check_status"], "PASS")
+        self.assertEqual(report["baseline"]["windows_policy_surface_status"], "PASS")
         self.assertEqual(report["baseline"]["wsl_launcher_check_status"], "PASS")
         self.assertEqual(report["baseline"]["runtime_restore_seed_violations_count"], 0)
 

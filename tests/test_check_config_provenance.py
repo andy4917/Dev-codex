@@ -33,6 +33,7 @@ class CheckConfigProvenanceTests(unittest.TestCase):
         return {
             "canonical_roots": {"management": str(tmp / "repo")},
             "hardcoding_definition": {"feature_rules": {"forbidden_feature_flags": ["telepathy", "workspace_dependencies"]}},
+            "windows_app_state": {"codex_home": str(tmp / "windows-home" / ".codex")},
             "generation_targets": {
                 "global_runtime": {
                     "linux": {
@@ -41,20 +42,30 @@ class CheckConfigProvenanceTests(unittest.TestCase):
                         "hooks_config": str(tmp / "linux-hooks.json"),
                         "user_override_config": str(tmp / "user-config.toml"),
                     },
-                    "windows_mirror": {
-                        "config": str(tmp / "windows-config.toml"),
-                        "agents": str(tmp / "windows-agents.md"),
-                        "hooks_config": str(tmp / "windows-hooks.json"),
-                    },
                 }
             },
         }
 
     def _write_json(self, path: Path, payload: object) -> None:
+        path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+    def _write_policy(self, repo_root: Path) -> None:
+        self._write_json(
+            repo_root / "contracts" / "config_provenance_policy.json",
+            {
+                "blocked_active_feature_flags": ["telepathy", "workspace_dependencies"],
+                "blocked_generated_config_values": {
+                    "approval_policy": ["never"],
+                    "sandbox_mode": ["danger-full-access"],
+                },
+                "linux_required_true_features": [],
+            },
+        )
 
     def _write_generated(self, path: Path, authority: dict[str, object], body: str = "") -> None:
         header = self.module.expected_header(authority)
+        path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(
             "\n".join([
                 "# GENERATED - DO NOT EDIT",
@@ -80,11 +91,11 @@ class CheckConfigProvenanceTests(unittest.TestCase):
             authority = self._authority(tmp)
             authority["generation_targets"]["global_runtime"]["linux"]["user_override_config"] = str(tmp / "linux-config.toml")
             authority_path = tmp / "repo" / "contracts" / "workspace_authority.json"
-            authority_path.parent.mkdir(parents=True)
             self._write_json(authority_path, authority)
+            self._write_policy(tmp / "repo")
             with patch.object(self.module, "AUTHORITY_PATH", authority_path), patch.object(self.module, "WINDOWS_CODEX_HOME", tmp / "missing-app-state"):
                 self._write_generated(tmp / "linux-config.toml", authority, 'approval_policy = "on-request"\nsandbox_mode = "workspace-write"\n[features]\nchronicle = true')
-                self._write_generated(tmp / "windows-config.toml", authority, 'approval_policy = "on-request"\nsandbox_mode = "workspace-write"')
+                self._write_generated(tmp / "windows-home" / ".codex" / "config.toml", authority, 'approval_policy = "on-request"\nsandbox_mode = "workspace-write"')
                 report = self.module.evaluate_config_provenance(tmp / "repo")
         self.assertEqual(report["status"], "BLOCKED")
         self.assertIn("linux generated mirror is being used as an override source", report["generated_mirror_contract"]["self_feed_reasons"])
@@ -94,26 +105,26 @@ class CheckConfigProvenanceTests(unittest.TestCase):
             tmp = Path(tmpdir)
             authority = self._authority(tmp)
             authority_path = tmp / "repo" / "contracts" / "workspace_authority.json"
-            authority_path.parent.mkdir(parents=True)
             self._write_json(authority_path, authority)
+            self._write_policy(tmp / "repo")
             with patch.object(self.module, "AUTHORITY_PATH", authority_path), patch.object(self.module, "WINDOWS_CODEX_HOME", tmp / "missing-app-state"):
                 self._write_generated(tmp / "linux-config.toml", authority, 'approval_policy = "on-request"\nsandbox_mode = "workspace-write"\n[features]\nchronicle = true')
-                self._write_generated(tmp / "windows-config.toml", authority, 'approval_policy = "on-request"\nsandbox_mode = "workspace-write"')
                 (tmp / "user-config.toml").write_text('approval_policy = "on-request"\n', encoding="utf-8")
                 report = self.module.evaluate_config_provenance(tmp / "repo")
         self.assertEqual(report["generated_mirror_contract"]["status"], "PASS")
-        self.assertEqual(report["status"], "PASS")
+        self.assertEqual(report["gate_status"], "PASS")
+        self.assertEqual(report["status"], "WARN")
+        self.assertEqual(report["windows_policy_surface_status"], "PASS")
 
     def test_telepathy_active_config_is_blocked(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             tmp = Path(tmpdir)
             authority = self._authority(tmp)
             authority_path = tmp / "repo" / "contracts" / "workspace_authority.json"
-            authority_path.parent.mkdir(parents=True)
             self._write_json(authority_path, authority)
+            self._write_policy(tmp / "repo")
             with patch.object(self.module, "AUTHORITY_PATH", authority_path), patch.object(self.module, "WINDOWS_CODEX_HOME", tmp / "missing-app-state"):
                 self._write_generated(tmp / "linux-config.toml", authority, 'approval_policy = "on-request"\nsandbox_mode = "workspace-write"\n[features]\ntelepathy = true')
-                self._write_generated(tmp / "windows-config.toml", authority, 'approval_policy = "on-request"\nsandbox_mode = "workspace-write"')
                 report = self.module.evaluate_config_provenance(tmp / "repo")
         self.assertEqual(report["status"], "BLOCKED")
         self.assertIn("active telepathy flag detected", report["blocked_reasons"])
@@ -123,11 +134,10 @@ class CheckConfigProvenanceTests(unittest.TestCase):
             tmp = Path(tmpdir)
             authority = self._authority(tmp)
             authority_path = tmp / "repo" / "contracts" / "workspace_authority.json"
-            authority_path.parent.mkdir(parents=True)
             self._write_json(authority_path, authority)
+            self._write_policy(tmp / "repo")
             with patch.object(self.module, "AUTHORITY_PATH", authority_path), patch.object(self.module, "WINDOWS_CODEX_HOME", tmp / "missing-app-state"):
                 self._write_generated(tmp / "linux-config.toml", authority, 'approval_policy = "never"\nsandbox_mode = "danger-full-access"')
-                self._write_generated(tmp / "windows-config.toml", authority, 'approval_policy = "on-request"\nsandbox_mode = "workspace-write"')
                 report = self.module.evaluate_config_provenance(tmp / "repo")
         self.assertEqual(report["status"], "BLOCKED")
         self.assertIn("generated config still contains approval_policy=never", report["blocked_reasons"])
@@ -138,11 +148,10 @@ class CheckConfigProvenanceTests(unittest.TestCase):
             tmp = Path(tmpdir)
             authority = self._authority(tmp)
             authority_path = tmp / "repo" / "contracts" / "workspace_authority.json"
-            authority_path.parent.mkdir(parents=True)
             self._write_json(authority_path, authority)
+            self._write_policy(tmp / "repo")
             with patch.object(self.module, "AUTHORITY_PATH", authority_path), patch.object(self.module, "WINDOWS_CODEX_HOME", tmp / "missing-app-state"):
                 (tmp / "linux-config.toml").write_text('approval_policy = "on-request"\n', encoding="utf-8")
-                self._write_generated(tmp / "windows-config.toml", authority, 'approval_policy = "on-request"')
                 report = self.module.evaluate_config_provenance(tmp / "repo")
         self.assertIn(report["generated_headers"][str(tmp / "linux-config.toml")]["status"], {"WARN", "BLOCKED"})
 
@@ -152,14 +161,31 @@ class CheckConfigProvenanceTests(unittest.TestCase):
             authority = self._authority(tmp)
             authority["hardcoding_definition"]["feature_rules"]["forbidden_feature_flags"].append("use_agent_identity")
             authority_path = tmp / "repo" / "contracts" / "workspace_authority.json"
-            authority_path.parent.mkdir(parents=True)
             self._write_json(authority_path, authority)
+            self._write_policy(tmp / "repo")
             with patch.object(self.module, "AUTHORITY_PATH", authority_path), patch.object(self.module, "WINDOWS_CODEX_HOME", tmp / "missing-app-state"):
                 self._write_generated(tmp / "linux-config.toml", authority, 'approval_policy = "on-request"\nsandbox_mode = "workspace-write"\n[features]\nuse_agent_identity = true')
-                self._write_generated(tmp / "windows-config.toml", authority, 'approval_policy = "on-request"\nsandbox_mode = "workspace-write"')
                 report = self.module.evaluate_config_provenance(tmp / "repo")
         self.assertEqual(report["status"], "BLOCKED")
         self.assertIn("active forbidden feature flag detected: use_agent_identity", report["blocked_reasons"])
+
+    def test_unknown_windows_policy_surface_is_warn_only(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp = Path(tmpdir)
+            authority = self._authority(tmp)
+            authority_path = tmp / "repo" / "contracts" / "workspace_authority.json"
+            self._write_json(authority_path, authority)
+            self._write_policy(tmp / "repo")
+            with patch.object(self.module, "AUTHORITY_PATH", authority_path), patch.object(self.module, "WINDOWS_CODEX_HOME", tmp / "windows-home" / ".codex"):
+                self._write_generated(tmp / "linux-config.toml", authority, 'approval_policy = "on-request"\nsandbox_mode = "workspace-write"\n[features]\nshell_zsh_fork = true')
+                windows_config = tmp / "windows-home" / ".codex" / "config.toml"
+                windows_config.parent.mkdir(parents=True, exist_ok=True)
+                windows_config.write_text('approval_policy = "on-request"\n', encoding="utf-8")
+                report = self.module.evaluate_config_provenance(tmp / "repo")
+        self.assertEqual(report["gate_status"], "PASS")
+        self.assertEqual(report["status"], "WARN")
+        self.assertEqual(report["windows_policy_surface_status"], "WARN")
+        self.assertEqual(report["unknown_windows_policy_files_observed"], [str(windows_config)])
 
     def test_worktree_cannot_become_source_of_truth(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -170,11 +196,10 @@ class CheckConfigProvenanceTests(unittest.TestCase):
             authority["authority_root"] = str(canonical_root)
             authority["canonical_roots"] = {"management": str(canonical_root)}
             authority_path = worktree_root / "contracts" / "workspace_authority.json"
-            authority_path.parent.mkdir(parents=True)
             self._write_json(authority_path, authority)
+            self._write_policy(canonical_root)
             with patch.object(self.module, "AUTHORITY_PATH", authority_path), patch.object(self.module, "WINDOWS_CODEX_HOME", tmp / "missing-app-state"):
                 self._write_generated(tmp / "linux-config.toml", authority, 'approval_policy = "on-request"\nsandbox_mode = "workspace-write"')
-                self._write_generated(tmp / "windows-config.toml", authority, 'approval_policy = "on-request"\nsandbox_mode = "workspace-write"')
                 report = self.module.evaluate_config_provenance(worktree_root)
         self.assertEqual(report["status"], "BLOCKED")
         self.assertIn("worktree attempted to use non-canonical authority source", " ".join(report["blocked_reasons"]))

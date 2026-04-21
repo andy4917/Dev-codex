@@ -57,5 +57,18 @@ def run_powershell(command: str, *, cwd: str | Path | None = None, set_userprofi
     if set_userprofile:
         wrapped = f'Set-Location $env:USERPROFILE; {command}'
     safe_cwd = cwd or (WINDOWS_LOCAL_CWD if WINDOWS_LOCAL_CWD.exists() else None)
-    return run_command(["powershell.exe", "-NoProfile", "-Command", wrapped], cwd=safe_cwd)
-
+    return run_command(
+        [
+            "powershell.exe",
+            "-NoLogo",
+            "-NoProfile",
+            "-NonInteractive",
+            "-WindowStyle",
+            "Hidden",
+            "-ExecutionPolicy",
+            "Bypass",
+            "-Command",
+            wrapped,
+        ],
+        cwd=safe_cwd,
+    )

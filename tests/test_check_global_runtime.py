@@ -47,14 +47,14 @@ class CheckGlobalRuntimeTests(unittest.TestCase):
                     "authoritative": False,
                 }
             },
+            "windows_app_state": {
+                "codex_home": "/mnt/c/Users/anise/.codex",
+            },
             "generation_targets": {
                 "global_runtime": {
                     "linux": {
                         "config": str(Path.home() / ".codex" / "config.toml"),
                         "launcher": str(Path.home() / ".local" / "bin" / "codex"),
-                    },
-                    "windows_mirror": {
-                        "config": "/mnt/c/Users/anise/.codex/config.toml",
                     },
                 }
             },
@@ -203,13 +203,14 @@ class CheckGlobalRuntimeTests(unittest.TestCase):
             tmp = Path(tmpdir)
             linux_config = tmp / "linux-config.toml"
             linux_user_override = tmp / "linux-user-config.toml"
-            windows_config = tmp / "windows-config.toml"
+            windows_config = tmp / "windows-home" / ".codex" / "config.toml"
             linux_config.write_text('# GENERATED - DO NOT EDIT\napproval_policy = "on-request"\n', encoding="utf-8")
             linux_user_override.write_text('approval_policy = "never"\n', encoding="utf-8")
+            windows_config.parent.mkdir(parents=True, exist_ok=True)
             windows_config.write_text('# GENERATED - DO NOT EDIT\napproval_policy = "on-request"\n', encoding="utf-8")
             authority["generation_targets"]["global_runtime"]["linux"]["config"] = str(linux_config)
             authority["generation_targets"]["global_runtime"]["linux"]["user_override_config"] = str(linux_user_override)
-            authority["generation_targets"]["global_runtime"]["windows_mirror"]["config"] = str(windows_config)
+            authority["windows_app_state"]["codex_home"] = str(windows_config.parent)
 
             linux_result = self.module.config_surface_classification(linux_config, authority)
             linux_override_result = self.module.config_surface_classification(linux_user_override, authority)
@@ -219,8 +220,8 @@ class CheckGlobalRuntimeTests(unittest.TestCase):
         self.assertTrue(linux_result["repairable"])
         self.assertEqual(linux_override_result["classification"], "user_override")
         self.assertFalse(linux_override_result["repairable"])
-        self.assertEqual(windows_result["classification"], "generated")
-        self.assertTrue(windows_result["repairable"])
+        self.assertEqual(windows_result["classification"], "windows_policy_surface")
+        self.assertFalse(windows_result["repairable"])
 
     def test_path_normalizer_defaults_to_non_repo_owned_without_markers(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

@@ -55,6 +55,12 @@ def load_toml(path: Path) -> dict[str, Any]:
         return tomllib.load(handle)
 
 
+def read_text(path: Path) -> str:
+    if not path.exists():
+        return ""
+    return path.read_text(encoding="utf-8")
+
+
 def ensure_parent(path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -116,8 +122,7 @@ def forbidden_primary_runtime(authority: dict) -> str:
 
 
 def windows_hook_generation_enabled(authority: dict) -> bool:
-    runtime_hook = authority.get("generation_targets", {}).get("scorecard", {}).get("runtime_hook", {})
-    return bool(runtime_hook.get("windows_generation_enabled", True))
+    return False
 
 
 def sync_generated_text(path: Path, text: str | None) -> None:
@@ -219,7 +224,7 @@ def render_agents(authority: dict, windows: bool) -> str:
         f"- Do not keep hardcoded legacy paths, fallback copies, shadow configs, deprecated outputs, or backup policy copies outside the authority file or generated runtime files.\n"
         f"- Project-specific rules are allowed only inside `{roots['product']}/<project>/` as `AGENTS.md`, `.codex/config.toml`, `contracts/`, and truly project-specific verify scripts.\n"
         f"- Treat auth, history, logs, caches, sqlite, recent workspaces, and favorites as runtime state, not policy.\n"
-        f"- Runtime layers are fixed as L0 authority -> L1 user override -> L2 generated mirror -> L3 runtime restore seed -> L4 volatile runtime.\n"
+        f"- Runtime layers are fixed as L0 authority -> L1 user override -> L2 generated Linux runtime -> L3 runtime restore seed -> L4 volatile runtime.\n"
         f"- L1 user override may change only `{', '.join(override['allowed_fields'])}` and must never override `{', '.join(override['protected_fields'])}`.\n"
         f"{structural_override_line}"
         f"- Runtime restore seed is derived-only, preserves named threads, drops stale projectless restore refs, removes stale remote environment state, and prefers `{restore['preferred_windows_access_host']}` UNC roots.\n"
@@ -232,7 +237,8 @@ def render_agents(authority: dict, windows: bool) -> str:
         f"- Linux-native Codex CLI on the canonical remote login-shell PATH is the canonical agent binary.\n"
         f"- Observed app remotes such as `{observed_remote_text or 'andy4917@localhost:22'}` are evidence only and must not be promoted into authority without verification.\n"
         f"- Windows-mounted launchers such as `{forbidden_primary}` are external dependencies and are forbidden as the primary runtime.\n"
-        f"- Generated config mirrors are outputs only. Generated mirrors must never be used as render input, authority input, or optional user override input.\n"
+        f"- Linux generated runtime files are outputs only. Dev-Management must not generate policy-bearing Windows ~/.codex config, AGENTS, hooks, skills, or score wrappers.\n"
+        f"- Windows ~/.codex is app runtime state and evidence only. Inspect it only to classify stale generated artifacts or app-state evidence; do not treat it as a policy surface.\n"
         f"- Optional user override source is /home/andy4917/.codex/user-config.toml only.\n"
         f"- When canonical SSH execution passes, Codex App PATH contamination is a client-surface warning only; it does not replace the canonical execution authority.\n"
         f"- Local shell execution remains blocked while live codex resolution or PATH precedence still points at a forbidden Windows-mounted launcher.\n"
@@ -252,7 +258,7 @@ def render_agents(authority: dict, windows: bool) -> str:
         f"- User app setup path: Restart Codex App -> Settings > Connections -> select {host_alias} -> open /home/andy4917/Dev-Management -> sign in if prompted -> send the readiness prompt.\n"
         f"- Keep a pinned Codex App control thread named `{control_thread.get('name', 'Dev-Management Control')}` on `{control_thread.get('remote_host', host_alias)}` for readiness, runtime checks, config provenance, score layer, audit, startup, artifact hygiene, and task routing.\n"
         f"- The pinned control thread defaults to the local remote project, not Worktree mode, and it is not the execution authority or policy authority. App memories and thread context remain hints only.\n"
-        f"- Persistent ops worktrees are optional and remain non-authority execution surfaces only. Task worktrees are ephemeral by default, generated mirrors must still bind to `{authority.get('canonical_repo_root', roots['management'])}`, and implementation work should use separate scoped worktrees when worktree mode is chosen.\n"
+        f"- Persistent ops worktrees are optional and remain non-authority execution surfaces only. Task worktrees are ephemeral by default, Linux generated runtime files must still bind to `{authority.get('canonical_repo_root', roots['management'])}`, and implementation work should use separate scoped worktrees when worktree mode is chosen.\n"
         f"- If a persistent ops worktree is explicitly enabled later, use it only for recurring audits, report generation, readiness checks, app usability checks, and non-destructive diagnostics.\n"
         f"- User should not manually edit generated config, launcher, PATH, SSH, hooks, or system files unless a Dev-Management report explicitly asks for it.\n"
         f"- Before code work, activate the current project or worktree with Serena when it is available.\n"
@@ -270,11 +276,11 @@ def render_agents(authority: dict, windows: bool) -> str:
         f"  6. Run config provenance check if touching config, app, runtime, or toolchain surfaces.\n"
         f"  7. Run startup workflow check if code modification is requested.\n"
         f"  8. Check Context7 requirement if protected files may change.\n"
-        f"  9. Do not proceed if a generated mirror is being used as an input source.\n"
+        f"  9. Do not proceed if a generated Linux runtime file is being used as an input source.\n"
         f"  10. Do not proceed if the forbidden Windows launcher is the primary runtime.\n"
         f"- During work:\n"
         f"  1. Touch only in-scope files.\n"
-        f"  2. Do not manually edit generated mirrors.\n"
+        f"  2. Do not manually edit generated Linux runtime files.\n"
         f"  3. Do not edit app binaries or external dependencies.\n"
         f"  4. Do not introduce hardcoded user paths unless authority explicitly allows them.\n"
         f"  5. Do not add fallback paths without authority and tests.\n"
@@ -287,14 +293,14 @@ def render_agents(authority: dict, windows: bool) -> str:
         f"  3. Run hardcoded path scan.\n"
         f"  4. Run stale feature flag scan.\n"
         f"  5. Run fallback or legacy wording scan.\n"
-        f"  6. Run generated mirror provenance check.\n"
+        f"  6. Run config provenance and Windows policy-surface checks.\n"
         f"  7. Run config self-feed check.\n"
         f"  8. Run git diff --check.\n"
         f"  9. Run relevant tests.\n"
         f"  10. Report untouched unrelated changes.\n"
         f"  11. Report remaining BLOCKED or WARN items.\n"
         f"  12. Commit only after audit, test, and report status is clear.\n"
-        f"- Mandatory scan keywords: telepathy, workspace_dependencies, danger-full-access, approval_policy = never, sandbox_mode = danger-full-access, fallback, legacy, hardcoded, /mnt/c/Users/anise/.codex/bin/wsl, .codex/tmp/arg0, generated mirror, self-feed, user-config.toml, chronicle.\n"
+        f"- Mandatory scan keywords: telepathy, workspace_dependencies, danger-full-access, approval_policy = never, sandbox_mode = danger-full-access, fallback, legacy, hardcoded, /mnt/c/Users/anise/.codex/bin/wsl, .codex/tmp/arg0, windows policy mirror, self-feed, user-config.toml, chronicle.\n"
         f"- User penalty scorecard is global and canonical at `{scorecard['policy']}` and `{scorecard['disqualifiers']}`.\n"
         f"- Writer self-scoring, writer bonus scores, shadow scores, and fallback scores are forbidden. User review is a protected layer and cannot change without explicit user approval or task request; confirmed work/performance awards are derived automatically, users may add extra awards mid-task only within budget, and the anti-cheat layer denies, penalizes, caps, or disqualifies score manipulation attempts.\n"
         f"- Reviewer truth is append-only runtime state under `{scorecard['reviewer_verdict_root']}`; `{scorecard['review_snapshot']}` is a derived human-readable snapshot only.\n"
@@ -367,6 +373,11 @@ def blocked_feature_overrides(authority: dict) -> set[str]:
 def forbidden_feature_overrides(authority: dict) -> set[str]:
     feature_rules = authority.get("hardcoding_definition", {}).get("feature_rules", {})
     return {str(item).strip() for item in feature_rules.get("forbidden_feature_flags", []) if str(item).strip()}
+
+
+def required_true_features(authority: dict) -> set[str]:
+    cfg = authority.get("generation_targets", {}).get("global_config", {})
+    return {str(item).strip() for item in cfg.get("required_true_features", []) if str(item).strip()}
 
 
 def mcp_server_key_policies(authority: dict) -> dict[str, dict[str, Any]]:
@@ -460,6 +471,7 @@ def build_effective_global_config(authority: dict, override_paths: list[Path] | 
     cfg = authority["generation_targets"]["global_config"]
     blocked_features = blocked_feature_overrides(authority)
     forbidden_features = forbidden_feature_overrides(authority)
+    required_true = required_true_features(authority)
     base_features = {
         str(feature): True
         for feature in cfg.get("enabled_features", [])
@@ -518,6 +530,8 @@ def build_effective_global_config(authority: dict, override_paths: list[Path] | 
                 if str(feature) in blocked_features or str(feature) in forbidden_features or not isinstance(enabled, bool):
                     continue
                 feature_name = str(feature)
+                if feature_name in required_true and enabled is False:
+                    continue
                 if feature_name in base_features and base_features[feature_name] == enabled:
                     continue
                 effective["features"][feature_name] = enabled
@@ -544,6 +558,8 @@ def build_effective_global_config(authority: dict, override_paths: list[Path] | 
     for server_name in known_mcp_servers(authority):
         if server_name in effective["mcp_servers"]:
             effective[server_name] = copy.deepcopy(effective["mcp_servers"][server_name])
+    for feature_name in required_true:
+        effective["features"][feature_name] = True
 
     return effective
 
@@ -601,7 +617,7 @@ def render_mcp_server_lines(authority: dict, server_name: str, payload: dict[str
     return lines
 
 
-def render_config(authority: dict, windows: bool, effective_cfg: dict[str, Any] | None = None) -> str:
+def render_config(authority: dict, effective_cfg: dict[str, Any] | None = None) -> str:
     cfg = effective_cfg or build_effective_global_config(authority)
     trusted = cfg["trusted_projects"]
     lines = generated_mirror_header_lines(authority)
@@ -653,29 +669,21 @@ def render_config(authority: dict, windows: bool, effective_cfg: dict[str, Any] 
 
 
 def render_hooks(authority: dict, windows: bool) -> str | None:
+    if windows:
+        return None
     runtime_hook = authority.get("generation_targets", {}).get("scorecard", {}).get("runtime_hook", {})
     script = str(runtime_hook.get("script", "")).strip()
     events = runtime_hook.get("events", {})
     if not script or not isinstance(events, dict) or not events:
         return None
-    if windows and not windows_hook_generation_enabled(authority):
-        return None
 
     hooks: dict[str, list[dict[str, Any]]] = {}
     linux_prefix = str(runtime_hook.get("linux_command_prefix", "python3")).strip() or "python3"
-    windows_prefix = str(runtime_hook.get("windows_command_prefix", "powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File")).strip() or "powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File"
-    windows_wrapper_path = str(runtime_hook.get("windows_wrapper_path", "")).strip()
     for event_name, payload in events.items():
         matcher = ".*"
         if isinstance(payload, dict):
             matcher = str(payload.get("matcher", ".*")).strip() or ".*"
         command = f"{linux_prefix} {script} --event {event_name}"
-        if windows:
-            wrapper_command_path = linux_path_to_windows_command_path(windows_wrapper_path) if windows_wrapper_path else ""
-            if wrapper_command_path:
-                command = f"{windows_prefix} {wrapper_command_path} -Event {event_name} -AuthorityPath {AUTHORITY_PATH}"
-            else:
-                command = f"{windows_prefix} {script} --event {event_name}"
         hooks[str(event_name)] = [
             {
                 "matcher": matcher,
@@ -702,57 +710,7 @@ def linux_path_to_windows_command_path(raw_path: str) -> str:
 
 
 def render_windows_hook_wrapper(authority: dict) -> str | None:
-    runtime_hook = authority.get("generation_targets", {}).get("scorecard", {}).get("runtime_hook", {})
-    script = str(runtime_hook.get("script", "")).strip()
-    wrapper_path = str(runtime_hook.get("windows_wrapper_path", "")).strip()
-    if not script or not wrapper_path or not windows_hook_generation_enabled(authority):
-        return None
-    generated_header = str(runtime_hook.get("windows_wrapper_generated_header", "GENERATED - DO NOT EDIT")).strip() or "GENERATED - DO NOT EDIT"
-    return (
-        f"# {generated_header}\n"
-        "param(\n"
-        "  [Parameter(Mandatory=$true)][string]$Event,\n"
-        f"  [string]$AuthorityPath = \"{AUTHORITY_PATH}\",\n"
-        f"  [string]$HookScript = \"{script}\"\n"
-        ")\n\n"
-        "$ErrorActionPreference = \"SilentlyContinue\"\n\n"
-        "function Convert-ToLinuxPath([string]$Value) {\n"
-        "  if ([string]::IsNullOrWhiteSpace($Value)) { return \"\" }\n"
-        "  $trimmed = $Value.Trim()\n"
-        "  if ($trimmed.StartsWith('\\\\wsl.localhost\\', [System.StringComparison]::OrdinalIgnoreCase) -or $trimmed.StartsWith('\\\\wsl$\\', [System.StringComparison]::OrdinalIgnoreCase)) {\n"
-        "    $parts = $trimmed -split '\\\\'\n"
-        "    if ($parts.Length -lt 5) { return \"\" }\n"
-        "    $segments = @()\n"
-        "    for ($index = 4; $index -lt $parts.Length; $index++) {\n"
-        "      if ($parts[$index]) { $segments += $parts[$index] }\n"
-        "    }\n"
-        "    if ($segments.Count -eq 0) { return '/' }\n"
-        "    return '/' + ($segments -join '/')\n"
-        "  }\n"
-        "  if ($trimmed -match '^[A-Za-z]:\\\\') {\n"
-        "    $converted = (& wsl.exe wslpath -a \"$trimmed\" 2>$null)\n"
-        "    if ($LASTEXITCODE -eq 0 -and $converted) {\n"
-        "      return (($converted | Out-String).Trim())\n"
-        "    }\n"
-        "  }\n"
-        "  return \"\"\n"
-        "}\n\n"
-        "$cwdPath = \"\"\n"
-        "try { $cwdPath = (Get-Location).ProviderPath } catch { $cwdPath = \"\" }\n"
-        "$linuxCwd = Convert-ToLinuxPath $cwdPath\n"
-        "if ([string]::IsNullOrWhiteSpace($linuxCwd)) { exit 0 }\n"
-        "$output = & wsl.exe python3 $HookScript --event $Event --authority-path $AuthorityPath --cwd $linuxCwd 2>$null\n"
-        "if ($LASTEXITCODE -eq 0 -and $output) {\n"
-        "  if ($output -is [System.Array]) {\n"
-        "    foreach ($line in $output) {\n"
-        "      if (-not [string]::IsNullOrWhiteSpace($line)) { [Console]::Out.WriteLine($line) }\n"
-        "    }\n"
-        "  } else {\n"
-        "    [Console]::Out.WriteLine($output)\n"
-        "  }\n"
-        "}\n"
-        "exit 0\n"
-    )
+    return None
 
 
 def render_linux_launcher(authority: dict, remote_native_codex_path: str = "") -> str | None:
@@ -812,28 +770,16 @@ def main() -> int:
     runtime = authority["generation_targets"]["global_runtime"]
     effective_cfg = build_effective_global_config(authority)
     write_text(Path(runtime["linux"]["agents"]), render_agents(authority, windows=False))
-    write_text(Path(runtime["linux"]["config"]), render_config(authority, windows=False, effective_cfg=effective_cfg))
-    write_text(Path(runtime["windows_mirror"]["agents"]), render_agents(authority, windows=True))
-    write_text(Path(runtime["windows_mirror"]["config"]), render_config(authority, windows=True, effective_cfg=effective_cfg))
+    write_text(Path(runtime["linux"]["config"]), render_config(authority, effective_cfg=effective_cfg))
     linux_hooks = runtime["linux"].get("hooks_config")
     if linux_hooks:
         sync_generated_text(Path(linux_hooks), render_hooks(authority, windows=False))
-    wrapper_path = authority.get("generation_targets", {}).get("scorecard", {}).get("runtime_hook", {}).get("windows_wrapper_path")
-    if wrapper_path:
-        sync_generated_text(Path(wrapper_path), render_windows_hook_wrapper(authority))
-    windows_hooks = runtime["windows_mirror"].get("hooks_config")
-    if windows_hooks:
-        sync_generated_text(Path(windows_hooks), render_hooks(authority, windows=True))
     write_launcher_preview(authority)
     relink(Path.home() / ".codex" / "workspace_authority.json", AUTHORITY_PATH)
 
     if not args.skip_skills:
         skill_cfg = authority["generation_targets"]["skill_exposure"]
         relink(Path(skill_cfg["wsl_symlink"]["link"]), Path(skill_cfg["wsl_symlink"]["target"]))
-        source = Path(skill_cfg["windows_generated_mirror"]["source"])
-        target = Path(skill_cfg["windows_generated_mirror"]["target"])
-        target.parent.mkdir(parents=True, exist_ok=True)
-        sync_tree(source, target)
 
     return 0
 

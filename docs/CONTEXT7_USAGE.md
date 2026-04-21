@@ -44,8 +44,8 @@ The generated runtime keeps:
 ## Runtime Source
 
 - global config: `~/.codex/config.toml` is the runtime source of truth
-- repo config: `.codex/config.toml` is a parity and trusted-project support surface
-- Windows mirror is generated for parity and must not be mistaken for proven runtime readiness
+- repo config: `.codex/config.toml` is a Linux trusted-project support surface
+- Windows `.codex` is app runtime state and evidence only; Dev-Management must not generate Context7-related policy mirrors there
 
 ## Evidence
 

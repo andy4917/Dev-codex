@@ -1,0 +1,50 @@
+{
+  "status": "PASS",
+  "stale_draft_reports": [],
+  "remediation_reports": [
+    "/home/andy4917/Dev-Management/reports/manual-system-remediation-20260421-172001.md"
+  ],
+  "stale_preview_files": [],
+  "transient_files": [],
+  "cleanup_allowed_only_with_explicit_apply": true,
+  "cleanup_applied": true,
+  "quarantine_root": "/home/andy4917/Dev-Management/quarantine/artifact-hygiene/20260421-082651",
+  "quarantined_files": [
+    {
+      "source": "/home/andy4917/Dev-Management/reports/manual-system-remediation-20260421-063444.md",
+      "quarantine_path": "/home/andy4917/Dev-Management/quarantine/artifact-hygiene/20260421-082651/reports/manual-system-remediation-20260421-063444.md"
+    },
+    {
+      "source": "/home/andy4917/Dev-Management/reports/manual-system-remediation-20260421-112829.md",
+      "quarantine_path": "/home/andy4917/Dev-Management/quarantine/artifact-hygiene/20260421-082651/reports/manual-system-remediation-20260421-112829.md"
+    },
+    {
+      "source": "/home/andy4917/Dev-Management/reports/manual-system-remediation-20260421-120815.md",
+      "quarantine_path": "/home/andy4917/Dev-Management/quarantine/artifact-hygiene/20260421-082651/reports/manual-system-remediation-20260421-120815.md"
+    },
+    {
+      "source": "/home/andy4917/Dev-Management/reports/manual-system-remediation-20260421-125212.md",
+      "quarantine_path": "/home/andy4917/Dev-Management/quarantine/artifact-hygiene/20260421-082651/reports/manual-system-remediation-20260421-125212.md"
+    },
+    {
+      "source": "/home/andy4917/Dev-Management/reports/manual-system-remediation-20260421-160853.md",
+      "quarantine_path": "/home/andy4917/Dev-Management/quarantine/artifact-hygiene/20260421-082651/reports/manual-system-remediation-20260421-160853.md"
+    },
+    {
+      "source": "/home/andy4917/Dev-Management/reports/manual-system-remediation-20260421-160921.md",
+      "quarantine_path": "/home/andy4917/Dev-Management/quarantine/artifact-hygiene/20260421-082651/reports/manual-system-remediation-20260421-160921.md"
+    },
+    {
+      "source": "/home/andy4917/Dev-Management/reports/manual-system-remediation-20260421-161815.md",
+      "quarantine_path": "/home/andy4917/Dev-Management/quarantine/artifact-hygiene/20260421-082651/reports/manual-system-remediation-20260421-161815.md"
+    },
+    {
+      "source": "/home/andy4917/Dev-Management/reports/manual-system-remediation-20260421-171910.md",
+      "quarantine_path": "/home/andy4917/Dev-Management/quarantine/artifact-hygiene/20260421-082651/reports/manual-system-remediation-20260421-171910.md"
+    }
+  ],
+  "rollback_procedure": [
+    "Review files under /home/andy4917/Dev-Management/quarantine/artifact-hygiene/20260421-082651",
+    "Move any quarantined file back to its original source path if the cleanup needs to be rolled back."
+  ]
+}

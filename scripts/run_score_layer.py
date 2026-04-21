@@ -28,23 +28,36 @@ def load_score_policy() -> dict[str, Any]:
     return payload if isinstance(payload, dict) else {}
 
 
+def report_candidates(purpose: str, *candidates: str) -> list[str]:
+    ordered = list(candidates)
+    if purpose == "code-modification":
+        root_cause_candidates = []
+        for candidate in ordered:
+            if candidate.endswith(".final.json"):
+                root_cause_candidates.append(candidate.replace(".final.json", ".root-cause-removal.final.json"))
+        ordered = root_cause_candidates + ordered
+    return ordered
+
+
 def evaluate_score_layer(repo_root: str | Path | None = None, *, purpose: str = "code-modification") -> dict[str, Any]:
     root = Path(repo_root).expanduser().resolve() if repo_root else ROOT
     reports = root / "reports"
-    config, config_source, config_missing = load_first_report(reports, ["config-provenance.final.json", "config-provenance.unified-phase.final.json", "config-provenance.unified-phase.json"])
-    runtime, runtime_source, runtime_missing = load_first_report(reports, ["global-runtime.final.json", "global-runtime.unified-phase.final.json", "global-runtime.unified-phase.json", "global-runtime.json"])
-    startup, startup_source, startup_missing = load_first_report(reports, ["startup-workflow.final.json", "startup-workflow.unified-phase.final.json", "startup-workflow.json"])
-    toolchain, toolchain_source, toolchain_missing = load_first_report(reports, ["toolchain-surface.final.json", "toolchain-surface.unified-phase.final.json", "toolchain-surface.unified-phase.json"])
-    hooks, hooks_source, hooks_missing = load_first_report(reports, ["hook-readiness.final.json", "hook-readiness.unified-phase.final.json", "hook-readiness.unified-phase.json"])
-    audit, audit_source, audit_missing = load_first_report(reports, ["audit.final.json", "audit.unified-phase.final.json", "audit.post-export.json"])
-    hygiene, hygiene_source, hygiene_missing = load_first_report(reports, ["artifact-hygiene.final.json", "artifact-hygiene.unified-phase.final.json", "artifact-hygiene.unified-phase.json"])
-    git_surface, git_surface_source, git_surface_missing = load_first_report(reports, ["git-surface.final.json", "git-surface.unified-phase.final.json", "git-surface.json"])
+    config, config_source, config_missing = load_first_report(reports, report_candidates(purpose, "config-provenance.final.json", "config-provenance.unified-phase.final.json", "config-provenance.unified-phase.json"))
+    active_config, active_config_source, active_config_missing = load_first_report(reports, report_candidates(purpose, "active-config-smoke.final.json", "active-config-smoke.unified-phase.final.json", "active-config-smoke.unified-phase.json"))
+    runtime, runtime_source, runtime_missing = load_first_report(reports, report_candidates(purpose, "global-runtime.final.json", "global-runtime.unified-phase.final.json", "global-runtime.unified-phase.json", "global-runtime.json"))
+    startup, startup_source, startup_missing = load_first_report(reports, report_candidates(purpose, "startup-workflow.final.json", "startup-workflow.unified-phase.final.json", "startup-workflow.json"))
+    toolchain, toolchain_source, toolchain_missing = load_first_report(reports, report_candidates(purpose, "toolchain-surface.final.json", "toolchain-surface.unified-phase.final.json", "toolchain-surface.unified-phase.json"))
+    hooks, hooks_source, hooks_missing = load_first_report(reports, report_candidates(purpose, "hook-readiness.final.json", "hook-readiness.unified-phase.final.json", "hook-readiness.unified-phase.json"))
+    audit, audit_source, audit_missing = load_first_report(reports, report_candidates(purpose, "audit.final.json", "audit.unified-phase.final.json", "audit.post-export.json"))
+    hygiene, hygiene_source, hygiene_missing = load_first_report(reports, report_candidates(purpose, "artifact-hygiene.final.json", "artifact-hygiene.unified-phase.final.json", "artifact-hygiene.unified-phase.json"))
+    git_surface, git_surface_source, git_surface_missing = load_first_report(reports, report_candidates(purpose, "git-surface.final.json", "git-surface.unified-phase.final.json", "git-surface.json"))
     score_policy = load_score_policy()
 
     disqualifiers: list[str] = []
     warnings: list[str] = []
     missing_reports = {
         "config_provenance": config_missing,
+        "active_config_smoke": active_config_missing,
         "global_runtime": runtime_missing,
         "startup_workflow": startup_missing,
         "toolchain_surface": toolchain_missing,
@@ -58,6 +71,7 @@ def evaluate_score_layer(repo_root: str | Path | None = None, *, purpose: str = 
             disqualifiers.append(f"missing required evidence report: {label}")
 
     config_gate_status = str(config.get("gate_status", config.get("status", "PASS")))
+    active_config_gate_status = str(active_config.get("gate_status", active_config.get("status", "PASS")))
     runtime_overall_status = str(runtime.get("overall_status", runtime.get("status", "WARN")))
     canonical_execution_status = str(runtime.get("canonical_execution_status", "WARN"))
     hook_status = str(hooks.get("status", "PASS"))
@@ -66,7 +80,9 @@ def evaluate_score_layer(repo_root: str | Path | None = None, *, purpose: str = 
     startup_status = str(startup.get("status", "PASS"))
 
     if config_gate_status == "BLOCKED":
-        disqualifiers.append("generated mirror self-feed or stale active config")
+        disqualifiers.append("Linux generated config provenance or Windows policy surface is blocked")
+    if active_config_gate_status == "BLOCKED":
+        disqualifiers.append("active config smoke is blocked")
     if runtime_overall_status == "BLOCKED" or canonical_execution_status == "BLOCKED":
         disqualifiers.append("canonical runtime readiness is blocked")
 
@@ -104,6 +120,8 @@ def evaluate_score_layer(repo_root: str | Path | None = None, *, purpose: str = 
             warnings.append("startup gate is degraded")
     if str(runtime.get("client_surface_status", "PASS")) == "WARN":
         warnings.append("client surface PATH contamination remains a warning")
+    if active_config_gate_status == "WARN":
+        warnings.append("active config smoke reported warnings")
     if audit_status == "WARN":
         warnings.append("workspace audit still reports warnings")
     if str(git_surface.get("status", "PASS")) == "WARN":
@@ -123,10 +141,11 @@ def evaluate_score_layer(repo_root: str | Path | None = None, *, purpose: str = 
             "python3 -m unittest tests.test_audit_workspace_contract tests.test_repair_codex_desktop_runtime tests.test_verify_migration_evidence tests.test_check_startup_workflow",
             "python3 -m unittest tests.test_check_global_runtime tests.test_check_agent_instruction tests.test_git_surface",
             "python3 -m unittest tests.test_activate_canonical_runtime tests.test_run_canonical_command tests.test_repair_serena_startup",
-            "python3 -m unittest tests.test_check_config_provenance tests.test_check_toolchain_surface tests.test_check_hook_readiness tests.test_codex_app_usability tests.test_app_thread_worktree_policy tests.test_score_layer",
+            "python3 -m unittest tests.test_check_config_provenance tests.test_check_active_config_smoke tests.test_check_toolchain_surface tests.test_check_hook_readiness tests.test_codex_app_usability tests.test_app_thread_worktree_policy tests.test_score_layer",
         ],
         "report_sources": {
             "config_provenance": config_source,
+            "active_config_smoke": active_config_source,
             "global_runtime": runtime_source,
             "startup_workflow": startup_source,
             "toolchain_surface": toolchain_source,
@@ -135,7 +154,7 @@ def evaluate_score_layer(repo_root: str | Path | None = None, *, purpose: str = 
             "artifact_hygiene": hygiene_source,
             "git_surface": git_surface_source,
         },
-        "evidence_files": [config_source, runtime_source, startup_source, toolchain_source, hooks_source, audit_source, hygiene_source, git_surface_source],
+        "evidence_files": [config_source, active_config_source, runtime_source, startup_source, toolchain_source, hooks_source, audit_source, hygiene_source, git_surface_source],
         "score_policy_path": str(SCORE_POLICY_PATH),
         "worktree_policy": score_policy.get("worktree_policy", {}),
     }

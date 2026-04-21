@@ -4,12 +4,12 @@
 # authority file: /home/andy4917/Dev-Management/contracts/workspace_authority.json
 # canonical remote execution surface: ssh-devmgmt-wsl (devmgmt-wsl)
 # canonical agent binary: Linux-native Codex CLI on the remote login-shell PATH
-# forbidden primary runtime: <unset-forbidden-primary-runtime>
+# forbidden primary runtime: /mnt/c/Users/anise/.codex/bin/wsl/codex
 # failure mode: exit 127 if the canonical SSH runtime or remote codex command is unavailable
 set -euo pipefail
 
 host_alias="devmgmt-wsl"
-repo_root="/mnt/c/Users/anise/AppData/Local/Temp/tmpfzf_wdcu/Dev-Management"
+repo_root="/home/andy4917/Dev-Management"
 remote_cmd=$(python3 - "$repo_root" "$@" <<'PY'
 import shlex
 import sys

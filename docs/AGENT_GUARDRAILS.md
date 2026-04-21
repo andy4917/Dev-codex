@@ -7,7 +7,8 @@
 - Treat `devmgmt-wsl` as the canonical remote execution surface.
 - Treat Linux-native Codex CLI as the canonical agent binary.
 - Treat Dev-Management as the policy authority and runtime authority.
-- Treat generated mirrors as outputs only.
+- Treat Linux generated runtime files as outputs only.
+- Treat Windows `.codex` as app runtime state and evidence only.
 - Treat the pinned `Dev-Management Control` thread as a routing and maintenance surface only.
 - Treat persistent ops worktrees as optional execution conveniences only.
 
@@ -16,14 +17,15 @@
 - runtime authority conflict: Codex App is the primary user control surface, but execution authority belongs to `devmgmt-wsl` and Linux-native Codex CLI
 - Serena-first unmet: activation, onboarding, or latest activation evidence is incomplete
 - Context7 evidence missing: protected dependency, API, config, or migration change requires real evidence
-- generated mirror blocked: generated mirrors cannot be used as authority or override inputs
+- generated runtime blocked: Linux generated runtime files cannot be used as authority or override inputs
 - hooks trigger only: hooks may trigger checks, but audit, tests, and score layer are the final gates
 - unrelated dirty changes present: report them and leave them untouched
 
 ## Editing Rules
 
-- Do not manually edit generated config, shim, hook, or AGENTS mirrors.
-- Do not use `/home/andy4917/.codex/config.toml` or `/mnt/c/Users/anise/.codex/config.toml` as override input.
+- Do not manually edit generated Linux config, shim, hook, or AGENTS files.
+- Do not use `/home/andy4917/.codex/config.toml` as override input.
+- Do not generate or rely on Windows `.codex` config, AGENTS, hooks, skills, or score wrappers.
 - Use `/home/andy4917/.codex/user-config.toml` only for allowed global user overrides.
 - Do not add hardcoded fallback paths or reintroduce `/mnt/c/Users/anise/.codex/bin/wsl/codex` as a primary runtime target.
 - Treat app memories, projectless chat state, and restore seed as hints only.

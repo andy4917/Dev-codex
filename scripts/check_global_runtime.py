@@ -8,16 +8,22 @@ import re
 import shlex
 import shutil
 import subprocess
+import sys
 from datetime import datetime
 from pathlib import Path
 from typing import Any
+
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from devmgmt_runtime.paths import runtime_paths as managed_runtime_paths
 
 from check_config_provenance import evaluate_config_provenance
 from check_windows_app_ssh_readiness import evaluate_windows_app_ssh_readiness
 from render_codex_runtime import GENERATED_RUNTIME_HEADER, preview_linux_launcher_path, render_linux_launcher
 
 
-ROOT = Path(__file__).resolve().parents[1]
 AUTHORITY_PATH = ROOT / "contracts" / "workspace_authority.json"
 DEFAULT_OUTPUT_PATH = ROOT / "reports" / "global-runtime.json"
 PATH_NORMALIZER = Path.home() / ".config" / "shell" / "wsl-runtime-paths.sh"
@@ -109,18 +115,6 @@ def run_ssh(host: str, command: str) -> dict[str, Any]:
     }
 
 
-def runtime_paths(authority: dict[str, Any]) -> dict[str, Path]:
-   runtime = authority.get("generation_targets", {}).get("global_runtime", {})
-   linux = runtime.get("linux", {})
-   windows = runtime.get("windows_mirror", {})
-   return {
-       "linux_config": Path(str(linux.get("config", Path.home() / ".codex" / "config.toml"))).expanduser(),
-        "linux_user_override_config": Path(str(linux.get("user_override_config", Path.home() / ".codex" / "user-config.toml"))).expanduser(),
-       "windows_config": Path(str(windows.get("config", "/mnt/c/Users/anise/.codex/config.toml"))).expanduser(),
-       "linux_launcher": Path(str(linux.get("launcher", Path.home() / ".local" / "bin" / "codex"))).expanduser(),
-   }
-
-
 def forbidden_runtime_paths(authority: dict[str, Any]) -> list[str]:
     return [str(item).strip() for item in authority.get("forbidden_primary_runtime_paths", []) if str(item).strip()]
 
@@ -175,15 +169,15 @@ def parse_type_a_paths(lines: list[str]) -> list[str]:
 
 def config_surface_classification(path: Path, authority: dict[str, Any]) -> dict[str, Any]:
     text = read_text(path)
-    runtime = runtime_paths(authority)
-    windows_target = runtime["windows_config"].resolve()
+    runtime = managed_runtime_paths(authority)
+    windows_target = runtime["observed_windows_policy_config"].resolve()
     linux_target = runtime["linux_config"].resolve()
-    user_override_target = runtime["linux_user_override_config"].resolve()
+    user_override_target = runtime["linux_user_override"].resolve()
     classification = "unmanaged"
     repairable = False
     if path.exists() and path.resolve() == windows_target:
-        classification = "generated"
-        repairable = True
+        classification = "windows_policy_surface"
+        repairable = False
     elif path.exists() and path.resolve() == linux_target:
         classification = "generated"
         repairable = True
@@ -372,7 +366,7 @@ def local_runtime_probe(authority: dict[str, Any]) -> dict[str, Any]:
     command_v = run_local_shell("command -v codex || true")
     type_a = run_local_shell("type -a codex || true")
     path_lines = parse_lines(run_local_shell("printf '%s\\n' \"$PATH\" | tr ':' '\\n'")["stdout"])
-    paths = runtime_paths(authority)
+    paths = managed_runtime_paths(authority)
     preview_launcher = preview_linux_launcher_path(authority)
     launcher_text = read_text(paths["linux_launcher"])
     launcher_target = extract_wrapper_target(launcher_text)
@@ -427,8 +421,8 @@ def local_runtime_probe(authority: dict[str, Any]) -> dict[str, Any]:
         },
         "local_path_precedence_status": local_path_precedence(path_lines, authority, paths["linux_launcher"]),
         "config_surfaces": {
-            "linux": config_surface_classification(paths["linux_config"], authority),
-            "windows_mirror": config_surface_classification(paths["windows_config"], authority),
+            "linux_generated": config_surface_classification(paths["linux_config"], authority),
+            "windows_policy_surface": config_surface_classification(paths["observed_windows_policy_config"], authority),
         },
         "local_wrapper_probe": {
             "path": str(paths["linux_launcher"]),
@@ -464,7 +458,7 @@ def remote_runtime_probe(authority: dict[str, Any], host_alias: str, repo_root: 
     command_v_value = str(command_v["stdout"]).strip()
     type_a_lines = parse_lines(str(type_a["stdout"]))
     type_a_paths = parse_type_a_paths(type_a_lines)
-    paths = runtime_paths(authority)
+    paths = managed_runtime_paths(authority)
     preview_launcher = preview_linux_launcher_path(authority)
     command_info = classify_codex_candidate(
         command_v_value,
@@ -701,7 +695,13 @@ def summarize_path_contamination(local: dict[str, Any], remote: dict[str, Any]) 
     }
 
 
-def evaluate_global_runtime(repo_root: str | Path | None = None, *, mode: str = "auto", ssh_host: str = "") -> dict[str, Any]:
+def evaluate_global_runtime(
+    repo_root: str | Path | None = None,
+    *,
+    mode: str = "auto",
+    ssh_host: str = "",
+    windows_app_ssh_readiness: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     authority = load_authority(repo_root)
     repo_path = Path(repo_root).expanduser().resolve() if repo_root else ROOT
     surface = canonical_surface(authority)
@@ -716,7 +716,7 @@ def evaluate_global_runtime(repo_root: str | Path | None = None, *, mode: str = 
     else:
         remote = skipped_remote_runtime_probe("canonical SSH runtime is not the selected execution authority for this workspace")
     config_provenance = evaluate_config_provenance(repo_path)
-    windows_app_ssh_readiness = evaluate_windows_app_ssh_readiness(repo_path)
+    windows_app_ssh_readiness = windows_app_ssh_readiness or evaluate_windows_app_ssh_readiness(repo_path)
     wrapper_target_safety_status = render_wrapper_target_safety(authority)
     preview_path = write_preview_wrapper(authority)
 

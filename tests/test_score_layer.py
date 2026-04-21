@@ -37,6 +37,7 @@ class ScoreLayerTests(unittest.TestCase):
             tmp = Path(tmpdir)
             reports = tmp / "reports"
             self._write_json(reports / "config-provenance.unified-phase.final.json", {"status": "BLOCKED"})
+            self._write_json(reports / "active-config-smoke.unified-phase.final.json", {"status": "PASS", "gate_status": "PASS"})
             self._write_json(reports / "global-runtime.unified-phase.final.json", {"remote_codex_resolution_status": {"status": "PASS"}, "client_surface_status": "PASS"})
             self._write_json(reports / "toolchain-surface.unified-phase.final.json", {"status": "PASS"})
             self._write_json(reports / "artifact-hygiene.unified-phase.final.json", {"status": "PASS", "transient_files": []})
@@ -52,6 +53,7 @@ class ScoreLayerTests(unittest.TestCase):
             tmp = Path(tmpdir)
             reports = tmp / "reports"
             self._write_json(reports / "config-provenance.unified-phase.final.json", {"status": "PASS"})
+            self._write_json(reports / "active-config-smoke.unified-phase.final.json", {"status": "PASS", "gate_status": "PASS"})
             self._write_json(reports / "global-runtime.unified-phase.final.json", {"remote_codex_resolution_status": {"status": "PASS"}, "client_surface_status": "PASS"})
             self._write_json(reports / "toolchain-surface.unified-phase.final.json", {"status": "PASS"})
             self._write_json(reports / "artifact-hygiene.unified-phase.final.json", {"status": "PASS", "transient_files": []})
@@ -67,6 +69,7 @@ class ScoreLayerTests(unittest.TestCase):
             tmp = Path(tmpdir)
             reports = tmp / "reports"
             self._write_json(reports / "config-provenance.unified-phase.final.json", {"status": "PASS", "gate_status": "PASS"})
+            self._write_json(reports / "active-config-smoke.unified-phase.final.json", {"status": "PASS", "gate_status": "PASS"})
             self._write_json(reports / "global-runtime.unified-phase.final.json", {"overall_status": "PASS", "canonical_execution_status": "PASS", "remote_codex_resolution_status": {"status": "PASS"}, "client_surface_status": "PASS"})
             self._write_json(reports / "toolchain-surface.unified-phase.final.json", {"status": "PASS"})
             self._write_json(reports / "artifact-hygiene.unified-phase.final.json", {"status": "PASS", "transient_files": []})
@@ -90,6 +93,7 @@ class ScoreLayerTests(unittest.TestCase):
             tmp = Path(tmpdir)
             reports = tmp / "reports"
             self._write_json(reports / "config-provenance.unified-phase.final.json", {"status": "PASS", "gate_status": "PASS"})
+            self._write_json(reports / "active-config-smoke.unified-phase.final.json", {"status": "PASS", "gate_status": "PASS"})
             self._write_json(reports / "global-runtime.unified-phase.final.json", {"overall_status": "PASS", "canonical_execution_status": "PASS", "remote_codex_resolution_status": {"status": "PASS"}, "client_surface_status": "PASS"})
             self._write_json(reports / "startup-workflow.unified-phase.final.json", {"status": "PASS"})
             self._write_json(reports / "toolchain-surface.unified-phase.final.json", {"status": "PASS"})
@@ -106,6 +110,7 @@ class ScoreLayerTests(unittest.TestCase):
             tmp = Path(tmpdir)
             reports = tmp / "reports"
             self._write_json(reports / "config-provenance.final.json", {"status": "PASS", "gate_status": "PASS"})
+            self._write_json(reports / "active-config-smoke.final.json", {"status": "PASS", "gate_status": "PASS"})
             self._write_json(reports / "global-runtime.final.json", {"overall_status": "WARN", "canonical_execution_status": "PASS", "remote_codex_resolution_status": {"status": "PASS"}, "client_surface_status": "WARN"})
             self._write_json(reports / "startup-workflow.final.json", {"status": "WARN"})
             self._write_json(reports / "toolchain-surface.final.json", {"status": "PASS"})
@@ -122,6 +127,7 @@ class ScoreLayerTests(unittest.TestCase):
             tmp = Path(tmpdir)
             reports = tmp / "reports"
             self._write_json(reports / "config-provenance.final.json", {"status": "PASS", "gate_status": "PASS"})
+            self._write_json(reports / "active-config-smoke.final.json", {"status": "PASS", "gate_status": "PASS"})
             self._write_json(reports / "global-runtime.final.json", {"overall_status": "PASS", "canonical_execution_status": "PASS", "remote_codex_resolution_status": {"status": "PASS"}, "client_surface_status": "PASS"})
             self._write_json(reports / "startup-workflow.final.json", {"status": "PASS"})
             self._write_json(reports / "toolchain-surface.final.json", {"status": "PASS"})
@@ -131,6 +137,26 @@ class ScoreLayerTests(unittest.TestCase):
             self._write_json(reports / "git-surface.final.json", {"status": "BLOCKED"})
             report = self.module.evaluate_score_layer(tmp, purpose="app-usability")
         self.assertEqual(report["status"], "BLOCKED")
+
+    def test_code_modification_prefers_root_cause_reports_when_present(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp = Path(tmpdir)
+            reports = tmp / "reports"
+            self._write_json(reports / "config-provenance.root-cause-removal.final.json", {"status": "PASS", "gate_status": "PASS"})
+            self._write_json(reports / "active-config-smoke.root-cause-removal.final.json", {"status": "PASS", "gate_status": "PASS"})
+            self._write_json(reports / "global-runtime.root-cause-removal.final.json", {"overall_status": "PASS", "canonical_execution_status": "PASS", "remote_codex_resolution_status": {"status": "PASS"}, "client_surface_status": "PASS"})
+            self._write_json(reports / "toolchain-surface.root-cause-removal.final.json", {"status": "PASS"})
+            self._write_json(reports / "hook-readiness.root-cause-removal.final.json", {"status": "PASS", "hook_only_enforcement_claim": False})
+            self._write_json(reports / "artifact-hygiene.root-cause-removal.final.json", {"status": "PASS"})
+            self._write_json(reports / "startup-workflow.root-cause-removal.final.json", {"status": "BLOCKED"})
+            self._write_json(reports / "audit.root-cause-removal.final.json", {"status": "FAIL"})
+            self._write_json(reports / "git-surface.final.json", {"status": "PASS"})
+            self._write_json(reports / "startup-workflow.final.json", {"status": "PASS"})
+            self._write_json(reports / "audit.final.json", {"status": "PASS"})
+            report = self.module.evaluate_score_layer(tmp, purpose="code-modification")
+        self.assertEqual(report["status"], "BLOCKED")
+        self.assertTrue(report["report_sources"]["startup_workflow"].endswith("startup-workflow.root-cause-removal.final.json"))
+        self.assertTrue(report["report_sources"]["audit"].endswith("audit.root-cause-removal.final.json"))
 
 
 if __name__ == "__main__":

@@ -11,6 +11,7 @@
         "generated mirror self-feed",
         "forbidden Windows launcher primary runtime",
         "active stale config flag",
+        "Dev-Management generated Windows policy-bearing file present",
         "Windows app SSH unreachable"
       ]
     }

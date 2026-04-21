@@ -8,7 +8,8 @@
 - `devmgmt-wsl` is the canonical remote execution surface.
 - Linux-native Codex CLI on the remote login-shell PATH is the canonical agent binary.
 - `/mnt/c/Users/anise/.codex/bin/wsl/codex` is an external dependency and forbidden primary runtime.
-- Generated mirrors are outputs only; use `/home/andy4917/.codex/user-config.toml` for allowed global overrides.
+- Linux generated runtime files are outputs only; use `/home/andy4917/.codex/user-config.toml` for allowed global overrides.
+- Windows `.codex` is app runtime state and evidence only and must not contain Dev-Management-generated policy files.
 - Keep a pinned `Dev-Management Control` thread for readiness, maintenance routing, and non-destructive diagnostics.
 - Persistent ops worktrees are optional, non-authoritative, and must never replace the canonical repo root.
 - Default implementation work to task-scoped ephemeral worktrees when Worktree mode is used.
@@ -46,13 +47,13 @@
 - hooks are trigger-only and not the final enforcement surface
 - app update or settings sync cannot redefine Dev-Management authority
 - a pinned control thread is allowed, but thread context and app memory remain hints only
-- generated mirrors always bind to the canonical repo root, never a task worktree root
+- Linux generated runtime files always bind to the canonical repo root, never a task worktree root
 
 ## Failure Handling
 
 - canonical SSH runtime unavailable => BLOCKED
 - remote codex still resolving through Windows-mounted launcher => BLOCKED
-- generated mirror self-feed => BLOCKED
+- generated Linux runtime self-feed => BLOCKED
 - stale active config flags => BLOCKED
 - missing Context7 for protected change => BLOCKED
 - missing Serena activation for general code modification => BLOCKED

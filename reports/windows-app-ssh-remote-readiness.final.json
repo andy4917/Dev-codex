@@ -15,7 +15,13 @@
     "stderr": "",
     "command": [
       "powershell.exe",
+      "-NoLogo",
       "-NoProfile",
+      "-NonInteractive",
+      "-WindowStyle",
+      "Hidden",
+      "-ExecutionPolicy",
+      "Bypass",
       "-Command",
       "& \"$env:WINDIR\\System32\\OpenSSH\\ssh.exe\" -V"
     ]
@@ -27,7 +33,13 @@
     "stderr": "",
     "command": [
       "powershell.exe",
+      "-NoLogo",
       "-NoProfile",
+      "-NonInteractive",
+      "-WindowStyle",
+      "Hidden",
+      "-ExecutionPolicy",
+      "Bypass",
       "-Command",
       "Set-Location $env:USERPROFILE; & \"$env:WINDIR\\System32\\OpenSSH\\ssh.exe\" -o BatchMode=yes devmgmt-wsl hostname"
     ]

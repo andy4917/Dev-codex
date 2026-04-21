@@ -95,11 +95,10 @@ disabled_tools = ["execute_shell_command", "remove_project"]
                         "config": str(linux_codex / "config.toml"),
                         "agents": str(linux_codex / "AGENTS.md"),
                     },
-                    "windows_mirror": {
-                        "config": str(windows_codex / "config.toml"),
-                        "agents": str(windows_codex / "AGENTS.md"),
-                    },
                 }
+            },
+            "windows_app_state": {
+                "codex_home": str(windows_codex),
             },
         }
         context7_policy = {

@@ -10,7 +10,7 @@
 
 - Codex App drives the session, but Serena activation belongs to `devmgmt-wsl` and the canonical Linux execution surface.
 - Linux-native Codex CLI and Serena MCP must agree on the current repo root for authority work.
-- Windows-side Serena state is not authoritative for the Linux repo.
+- Windows-side Serena state and Windows `.codex` app state are not authoritative for the Linux repo.
 
 ## Readiness Semantics
 

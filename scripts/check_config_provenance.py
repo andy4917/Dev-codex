@@ -76,14 +76,52 @@ def load_toml(path: Path) -> dict[str, Any]:
         return tomllib.load(handle)
 
 
+def required_true_features(policy: dict[str, Any], authority: dict[str, Any]) -> set[str]:
+    from_policy = {str(item).strip() for item in policy.get("linux_required_true_features", []) if str(item).strip()}
+    if from_policy:
+        return from_policy
+    cfg = authority.get("generation_targets", {}).get("global_config", {})
+    return {str(item).strip() for item in cfg.get("required_true_features", []) if str(item).strip()}
+
+
+def generated_header_present(path: Path) -> bool:
+    text = read_text(path)
+    return text.startswith("# GENERATED - DO NOT EDIT") or text.startswith("GENERATED - DO NOT EDIT")
+
+
+def generated_directory_marker_present(path: Path) -> bool:
+    if not path.exists() or not path.is_dir():
+        return False
+    marker_names = {
+        ".devmgmt-generated",
+        ".generated-by-dev-management",
+        ".devmgmt-mirror-manifest.json",
+    }
+    for marker in marker_names:
+        if (path / marker).exists():
+            return True
+    return False
+
+
+def windows_policy_paths(paths: dict[str, Path]) -> list[Path]:
+    return [
+        paths["observed_windows_policy_config"],
+        paths["observed_windows_policy_agents"],
+        paths["observed_windows_policy_hooks"],
+        paths["observed_windows_policy_skills"],
+    ]
+
+
 def classify_path(path: Path, authority_path: Path, paths: dict[str, Path]) -> str:
     resolved = path.expanduser().resolve()
     if resolved == authority_path.resolve() or resolved.parent == authority_path.parent.resolve():
         return "source_of_truth"
     if resolved == paths["linux_user_override"]:
         return "optional_user_override_source"
-    if resolved in {paths["linux_config"], paths["windows_config"], paths["linux_agents"], paths["windows_agents"], paths["linux_hooks"], paths["windows_hooks"]}:
+    if resolved in {paths["linux_config"], paths["linux_agents"], paths["linux_hooks"]}:
         return "generated_mirror"
+    if resolved in {item.resolve() for item in windows_policy_paths(paths)}:
+        return "windows_policy_surface"
     if str(resolved).startswith(str(WINDOWS_CODEX_HOME)):
         return "app_state"
     return "unknown"
@@ -102,13 +140,13 @@ def header_status(path: Path, authority: dict[str, Any], authority_path: Path, p
         }
         if not path.exists():
             return {"status": "WARN", "exists": False, "checks": checks, "reasons": ["generated AGENTS mirror is missing"]}
-        expected = render_agents(authority, windows=path.resolve() == paths["windows_agents"])
+        expected = render_agents(authority, windows=False)
         reasons = [f"missing AGENTS provenance field: {key}" for key, ok in checks.items() if not ok]
         if text != expected:
             reasons.append("generated AGENTS mirror payload no longer matches the current authority render")
         return {"status": "WARN" if reasons else "PASS", "exists": True, "checks": checks, "reasons": reasons}
     if path.name == "hooks.json":
-        expected = render_hooks(authority, windows=path.resolve() == paths["windows_hooks"])
+        expected = render_hooks(authority, windows=False)
         if expected is None:
             return {"status": "PASS", "exists": path.exists(), "checks": {"expected_generation": False}, "reasons": []}
         if not path.exists():
@@ -140,10 +178,20 @@ def header_status(path: Path, authority: dict[str, Any], authority_path: Path, p
     return {"status": status, "exists": True, "checks": checks, "reasons": reasons}
 
 
-def config_policy_findings(path: Path, policy: dict[str, Any], classification: str) -> dict[str, Any]:
+def config_policy_findings(path: Path, policy: dict[str, Any], classification: str, authority: dict[str, Any]) -> dict[str, Any]:
     payload = load_toml(path)
     features = payload.get("features", {}) if isinstance(payload, dict) else {}
-    blocked_flags = set(policy.get("blocked_active_feature_flags", []))
+    blocked_flags = {
+        str(item).strip()
+        for item in policy.get("blocked_active_feature_flags", [])
+        if str(item).strip()
+    }
+    blocked_flags.update(
+        str(item).strip()
+        for item in authority.get("hardcoding_definition", {}).get("feature_rules", {}).get("forbidden_feature_flags", [])
+        if str(item).strip()
+    )
+    required_true = required_true_features(policy, authority)
     active_forbidden = sorted(str(feature) for feature, enabled in features.items() if enabled and str(feature) in blocked_flags)
     reasons: list[str] = []
     workspace_reauthorized = bool(policy.get("workspace_dependencies_reauthorized", False))
@@ -160,12 +208,72 @@ def config_policy_findings(path: Path, policy: dict[str, Any], classification: s
         reasons.append("generated config still contains approval_policy=never")
     if classification == "generated_mirror" and str(payload.get("sandbox_mode", "")).strip() in set(blocked_values.get("sandbox_mode", [])):
         reasons.append("generated config still contains sandbox_mode=danger-full-access")
+    if classification == "generated_mirror":
+        for feature in sorted(required_true):
+            if features.get(feature) is not True:
+                reasons.append(f"required active feature missing from linux generated config: {feature}")
+    if classification == "optional_user_override_source":
+        for feature in sorted(required_true):
+            if features.get(feature) is False:
+                reasons.append(f"user override attempted to disable required active feature: {feature}")
     return {
         "status": "BLOCKED" if reasons else "PASS",
         "blocked_reasons": reasons,
         "features": features,
         "approval_policy": str(payload.get("approval_policy", "")),
         "sandbox_mode": str(payload.get("sandbox_mode", "")),
+    }
+
+
+def windows_policy_surface_report(paths: dict[str, Path], authority: dict[str, Any] | None = None) -> dict[str, Any]:
+    findings: list[dict[str, Any]] = []
+    known_generated_cleanup_candidates: list[str] = []
+    unknown_observed: list[str] = []
+    expected_linux_hooks = render_hooks(authority or {}, windows=False) if authority else None
+    for path in windows_policy_paths(paths):
+        if not path.exists():
+            continue
+        if path.is_dir():
+            classification = "known_generated_cleanup_candidate" if generated_directory_marker_present(path) else "unknown_policy_surface"
+            reason = (
+                "known generated Windows skills surface remains present and should be removed because Dev-Management must not generate policy-bearing Windows ~/.codex content."
+                if classification == "known_generated_cleanup_candidate"
+                else "Windows skills content is present under app state without a Dev-Management generated marker; treat it as evidence-only and review manually before removal."
+            )
+            findings.append({"path": str(path), "kind": "directory", "classification": classification, "reason": reason})
+            if classification == "known_generated_cleanup_candidate":
+                known_generated_cleanup_candidates.append(str(path))
+            else:
+                unknown_observed.append(str(path))
+            continue
+        is_generated_hook = path.name == "hooks.json" and expected_linux_hooks is not None and read_text(path) == expected_linux_hooks
+        if generated_header_present(path) or is_generated_hook:
+            findings.append(
+                {
+                    "path": str(path),
+                    "kind": "file",
+                    "classification": "known_generated_cleanup_candidate",
+                    "reason": "known generated Windows policy file remains present and should be removed because Codex App can actively read Windows ~/.codex config and instructions.",
+                }
+            )
+            known_generated_cleanup_candidates.append(str(path))
+            continue
+        findings.append(
+            {
+                "path": str(path),
+                "kind": "file",
+                "classification": "unknown_policy_surface",
+                "reason": "unknown Windows policy-bearing file remains present on an app-readable active surface and requires manual review.",
+            }
+        )
+        unknown_observed.append(str(path))
+    status = "BLOCKED" if known_generated_cleanup_candidates else "WARN" if unknown_observed else "PASS"
+    return {
+        "status": status,
+        "findings": findings,
+        "known_generated_cleanup_candidates": known_generated_cleanup_candidates,
+        "unknown_observed": unknown_observed,
+        "unknown_blocking": [],
     }
 
 
@@ -189,8 +297,8 @@ def evaluate_config_provenance(repo_root: str | Path | None = None) -> dict[str,
     )
     paths = runtime_paths(authority)
     override_source_paths = [str(item) for item in user_override_config_paths(authority)]
-    mirrors = [paths["linux_config"], paths["windows_config"], paths["linux_agents"], paths["windows_agents"], paths["linux_hooks"], paths["windows_hooks"]]
-    classifications = {str(path): classify_path(path, repo_authority_path, paths) for path in [*mirrors, paths["linux_user_override"], repo_authority_path]}
+    mirrors = [paths["linux_config"], paths["linux_agents"], paths["linux_hooks"]]
+    classifications = {str(path): classify_path(path, repo_authority_path, paths) for path in [*mirrors, paths["linux_user_override"], repo_authority_path, *windows_policy_paths(paths)]}
     self_feed_reasons: list[str] = []
     if raw_authority_path.resolve() != repo_authority_path.resolve():
         self_feed_reasons.append(
@@ -198,17 +306,33 @@ def evaluate_config_provenance(repo_root: str | Path | None = None) -> dict[str,
         )
     if str(paths["linux_config"]) in override_source_paths:
         self_feed_reasons.append("linux generated mirror is being used as an override source")
-    if str(paths["windows_config"]) in override_source_paths:
-        self_feed_reasons.append("windows generated mirror is being used as an override source")
     allowed_override = str(policy.get("optional_user_override_source", str(paths["linux_user_override"])))
     if any(path != allowed_override for path in override_source_paths):
         self_feed_reasons.append(f"optional user override source drifted away from {allowed_override}")
     generated_headers = {str(path): header_status(path, authority, repo_authority_path, policy) for path in mirrors}
-    active_config_findings = {str(path): config_policy_findings(path, policy, classifications[str(path)]) for path in [paths["linux_config"], paths["windows_config"], paths["linux_user_override"]]}
+    active_config_findings = {str(path): config_policy_findings(path, policy, classifications[str(path)], authority) for path in [paths["linux_config"], paths["linux_user_override"]]}
+    windows_policy_surface = windows_policy_surface_report(paths, authority)
     blocked_reasons = list(self_feed_reasons)
     blocked_reasons.extend(reason for payload in active_config_findings.values() for reason in payload.get("blocked_reasons", []))
     blocked_reasons.extend(f"{path_text}: {reason}" for path_text, payload in generated_headers.items() if payload["status"] == "BLOCKED" for reason in payload.get("reasons", []))
-    warnings = ["Windows Codex app state exists as evidence only and must not be treated as authority"] if WINDOWS_CODEX_HOME.exists() else []
+    blocked_reasons.extend(
+        str(item.get("reason", ""))
+        for item in windows_policy_surface.get("findings", [])
+        if str(item.get("classification", "")).strip() == "known_generated_cleanup_candidate"
+    )
+    app_state_surface = {
+        "status": "PASS" if WINDOWS_CODEX_HOME.exists() else "WARN",
+        "path": str(WINDOWS_CODEX_HOME),
+        "classification": "app_state_evidence_only",
+        "exists": WINDOWS_CODEX_HOME.exists(),
+        "reason": "" if WINDOWS_CODEX_HOME.exists() else "Windows Codex App state was not observed on this host.",
+    }
+    warnings = [app_state_surface["reason"]] if app_state_surface["status"] == "WARN" and app_state_surface["reason"] else []
+    warnings.extend(
+        str(item.get("reason", ""))
+        for item in windows_policy_surface.get("findings", [])
+        if str(item.get("classification", "")).strip() == "unknown_policy_surface"
+    )
     status = collapse_status(["BLOCKED" if blocked_reasons else "", "WARN" if warnings else ""])
     return {
         "status": status,
@@ -232,7 +356,12 @@ def evaluate_config_provenance(repo_root: str | Path | None = None) -> dict[str,
         "classifications": classifications,
         "generated_headers": generated_headers,
         "active_config_findings": active_config_findings,
-        "app_state_surface": {"status": "WARN" if WINDOWS_CODEX_HOME.exists() else "PASS", "path": str(WINDOWS_CODEX_HOME), "classification": "app_state"},
+        "windows_policy_surface_status": windows_policy_surface.get("status", "PASS"),
+        "windows_policy_surface_findings": windows_policy_surface.get("findings", []),
+        "known_generated_windows_policy_files_deleted": [],
+        "unknown_windows_policy_files_blocking": windows_policy_surface.get("unknown_blocking", []),
+        "unknown_windows_policy_files_observed": windows_policy_surface.get("unknown_observed", []),
+        "app_state_surface": app_state_surface,
         "blocked_reasons": blocked_reasons,
         "warnings": warnings,
     }
