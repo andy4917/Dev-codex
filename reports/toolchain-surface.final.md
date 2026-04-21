@@ -8,3 +8,5 @@
 
 ## Warnings
 - Multiple terminal PATH mismatch is present.
+- Hook readiness is degraded or advisory-only.
+- Windows hooks are intentionally disabled and remain non-authoritative trigger surfaces only.

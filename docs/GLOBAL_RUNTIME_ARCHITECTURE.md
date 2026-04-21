@@ -14,6 +14,8 @@ Align Codex App main control, SSH remote execution, Linux-native Codex CLI, and 
 - Dev-Management is the policy authority and runtime authority.
 - Generated config mirrors are outputs only.
 - Windows-mounted Codex launcher paths remain forbidden as the primary runtime.
+- Dev-Management Control is the pinned Codex App control thread for readiness and maintenance routing.
+- Permanent Git worktrees are optional execution conveniences and never policy authority.
 
 ## Current vs Desired
 
@@ -45,6 +47,17 @@ Codex App on Windows
 - `ssh_devmgmt_wsl`: `canonical_remote_execution_surface`
 - `linux_native_codex_cli`: `canonical_agent_binary`
 - `dev_management`: `policy_authority`, `runtime_authority`, `source_of_truth`
+
+## Control Thread And Worktrees
+
+- Keep a pinned Codex App control thread named `Dev-Management Control` on `devmgmt-wsl`, project `/home/andy4917/Dev-Management`.
+- That control thread is allowed and recommended, but it is not execution authority and not policy authority.
+- App memory, thread memory, and restore state are hints only.
+- Default the control thread to the local remote project, not Worktree mode.
+- Persistent ops worktrees are optional and non-authoritative. Use them only for recurring audits, report generation, readiness checks, app usability checks, and non-destructive diagnostics.
+- Implementation work should default to task-scoped ephemeral worktrees.
+- Reports from worktrees must declare `active_worktree_root` and `canonical_repo_root`.
+- Generated mirrors always bind to the canonical repo root, never a task worktree root.
 
 ## Generated Mirrors
 

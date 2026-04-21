@@ -1,7 +1,8 @@
 {
   "version": 1,
-  "schema_version": "2026-04-21.modular-app-usability",
+  "schema_version": "2026-04-21.control-thread-worktree-policy",
   "authority_root": "/home/andy4917/Dev-Management",
+  "canonical_repo_root": "/home/andy4917/Dev-Management",
   "canonical_roots": {
     "management": "/home/andy4917/Dev-Management",
     "workflow": "/home/andy4917/Dev-Workflow",
@@ -47,8 +48,8 @@
       "final_authority": false
     },
     "score_policy": {
-      "kind": "workspace_authority_section",
-      "section": "score_policy",
+      "path": "/home/andy4917/Dev-Management/contracts/score_policy.json",
+      "kind": "standalone_contract",
       "references": [
         "/home/andy4917/Dev-Management/contracts/user_score_policy.json",
         "/home/andy4917/Dev-Management/contracts/disqualifier_policy.json"
@@ -63,6 +64,9 @@
     "Dev-Management is policy/runtime authority.",
     "devmgmt-wsl is canonical remote execution surface.",
     "Linux-native Codex CLI is canonical agent binary.",
+    "Dev-Management Control is the pinned Codex App control thread for readiness and maintenance routing.",
+    "Permanent Git worktrees are optional execution conveniences and never policy authority.",
+    "Task worktrees are ephemeral and generated mirrors always bind to the canonical repo root.",
     "Generated mirrors are outputs only.",
     "Optional user override source is /home/andy4917/.codex/user-config.toml only.",
     "Windows-mounted Codex launcher is external dependency and forbidden primary runtime.",
@@ -73,7 +77,8 @@
     "outputs_only": true,
     "render_input_allowed": false,
     "authority_input_allowed": false,
-    "optional_user_override_source": "/home/andy4917/.codex/user-config.toml"
+    "optional_user_override_source": "/home/andy4917/.codex/user-config.toml",
+    "canonical_repo_root": "/home/andy4917/Dev-Management"
   },
   "repair_boundary_summary": {
     "repairable_surfaces": [
@@ -93,6 +98,7 @@
     "final_gate_owner": "audit_workspace.py + run_score_layer.py"
   },
   "score_policy": {
+    "contract_path": "/home/andy4917/Dev-Management/contracts/score_policy.json",
     "final_gate": [
       "/home/andy4917/Dev-Management/scripts/audit_workspace.py",
       "/home/andy4917/Dev-Management/scripts/run_score_layer.py"
@@ -116,6 +122,30 @@
       "user_score_policy": "/home/andy4917/Dev-Management/contracts/user_score_policy.json",
       "disqualifier_policy": "/home/andy4917/Dev-Management/contracts/disqualifier_policy.json"
     }
+  },
+  "control_thread_policy": {
+    "name": "Dev-Management Control",
+    "remote_host": "devmgmt-wsl",
+    "project_path": "/home/andy4917/Dev-Management",
+    "default_mode": "local_remote_project",
+    "default_worktree_mode": false,
+    "purpose": [
+      "readiness",
+      "runtime_checks",
+      "config_provenance",
+      "score_layer",
+      "audit",
+      "startup",
+      "artifact_hygiene",
+      "task_routing"
+    ],
+    "thread_context_is_authority": false
+  },
+  "worktree_policy_summary": {
+    "persistent_ops_worktree_allowed": false,
+    "persistent_ops_worktree_is_authority": false,
+    "task_worktrees_are_ephemeral": true,
+    "generated_mirrors_must_use_canonical_repo_root": true
   },
   "surface_roles": {
     "codex_app": [
@@ -244,6 +274,7 @@
           "human_bottleneck_rules.json",
           "instruction_guard_policy.json",
           "memory_policy.json",
+          "score_policy.json",
           "serena_policy.json",
           "spawn_policy.json",
           "syncthing_policy.json",
@@ -584,6 +615,7 @@
       ],
       "required_policy_hash_targets": [
         "/home/andy4917/Dev-Management/contracts/workspace_authority.json",
+        "/home/andy4917/Dev-Management/contracts/score_policy.json",
         "/home/andy4917/Dev-Management/contracts/user_score_policy.json",
         "/home/andy4917/Dev-Management/contracts/disqualifier_policy.json"
       ],
@@ -600,6 +632,8 @@
         "linux_command_prefix": "python3",
         "state_root": "/home/andy4917/.codex/state/scorecard-hook",
         "user_prompt_throttle_seconds": 300,
+        "windows_generation_enabled": false,
+        "windows_generation_reason": "disabled by authority because Windows prompt-submit wrappers spawned visible terminal windows and hooks are trigger-only, not final enforcement",
         "windows_command_prefix": "powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File",
         "windows_wrapper_path": "/mnt/c/Users/anise/.codex/bin/scorecard-hook-wrapper.ps1",
         "windows_wrapper_generated_header": "GENERATED - DO NOT EDIT",

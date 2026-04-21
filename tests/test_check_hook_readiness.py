@@ -110,6 +110,21 @@ class CheckHookReadinessTests(unittest.TestCase):
         self.assertEqual(report["status"], "BLOCKED")
         self.assertTrue(report["hook_only_enforcement_claim"])
 
+    def test_windows_hooks_can_be_intentionally_disabled(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp = Path(tmpdir)
+            authority = self._authority(tmp)
+            authority["generation_targets"]["scorecard"]["runtime_hook"]["windows_generation_enabled"] = False
+            authority["generation_targets"]["scorecard"]["runtime_hook"]["windows_generation_reason"] = "disabled for terminal churn"
+            authority_path = tmp / "repo" / "contracts" / "workspace_authority.json"
+            authority_path.parent.mkdir(parents=True)
+            self._write_json(authority_path, authority)
+            with patch.object(self.module, "AUTHORITY_PATH", authority_path):
+                (tmp / "linux-hooks.json").write_text(self.module.render_hooks(authority, windows=False), encoding="utf-8")
+                report = self.module.evaluate_hook_readiness(tmp / "repo")
+        self.assertEqual(report["status"], "WARN")
+        self.assertFalse(report["windows_generation_enabled"])
+
 
 if __name__ == "__main__":
     unittest.main()

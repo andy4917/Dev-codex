@@ -81,6 +81,8 @@ class CodexAppUsabilityTests(unittest.TestCase):
             },
             "observed_remote_evidence": {},
             "canonical_remote_execution_surface": {"id": "ssh-devmgmt-wsl", "host_alias": "devmgmt-wsl"},
+            "control_thread_policy": {"name": "Dev-Management Control", "remote_host": "devmgmt-wsl"},
+            "worktree_policy_summary": {"persistent_ops_worktree_allowed": False, "task_worktrees_are_ephemeral": True},
             "hardcoding_definition": {"feature_rules": {"forbidden_feature_flags": ["telepathy", "workspace_dependencies"]}},
         }
 
@@ -115,6 +117,10 @@ class CodexAppUsabilityTests(unittest.TestCase):
                 self.module,
                 "evaluate_toolchain_surface",
                 return_value={"status": "PASS"},
+            ), patch.object(
+                self.module,
+                "evaluate_git_surfaces",
+                return_value={"status": "WARN"},
             ), patch.object(
                 self.module,
                 "evaluate_hook_readiness",
@@ -153,6 +159,7 @@ class CodexAppUsabilityTests(unittest.TestCase):
         self.assertEqual(report["status"], "APP_READY_WITH_WARNINGS")
         self.assertEqual(report["windows_app_ssh_status"], "PASS")
         self.assertEqual(report["serena_status"], "WARN")
+        self.assertEqual(report["control_thread_status"], "PASS")
 
     def test_app_not_ready_when_remote_codex_is_blocked(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -185,6 +192,10 @@ class CodexAppUsabilityTests(unittest.TestCase):
                 self.module,
                 "evaluate_toolchain_surface",
                 return_value={"status": "BLOCKED"},
+            ), patch.object(
+                self.module,
+                "evaluate_git_surfaces",
+                return_value={"status": "WARN"},
             ), patch.object(
                 self.module,
                 "evaluate_hook_readiness",
@@ -225,9 +236,12 @@ class CodexAppUsabilityTests(unittest.TestCase):
 
     def test_generated_agents_include_app_setup_guidance(self) -> None:
         authority = self._authority(ROOT)
+        authority["control_thread_policy"] = {"name": "Dev-Management Control", "remote_host": "devmgmt-wsl"}
+        authority["worktree_policy_summary"] = {"persistent_ops_worktree_allowed": False, "task_worktrees_are_ephemeral": True}
         agents = self.render.render_agents(authority, windows=False)
         self.assertIn("User app setup path: Restart Codex App -> Settings > Connections -> select devmgmt-wsl", agents)
         self.assertIn("Optional user override source is /home/andy4917/.codex/user-config.toml only.", agents)
+        self.assertIn("Dev-Management Control", agents)
 
 
 if __name__ == "__main__":

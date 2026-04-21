@@ -80,6 +80,8 @@ def evaluate_toolchain_surface(repo_root: str | Path | None = None) -> dict[str,
         warnings.append("Hook readiness is degraded or advisory-only.")
     if hooks_report and hooks_report.get("hook_only_enforcement_claim") is True:
         blocked.append("Hooks are being used as the sole enforcement surface.")
+    if hooks_report and hooks_report.get("windows_generation_enabled") is False:
+        warnings.append("Windows hooks are intentionally disabled and remain non-authoritative trigger surfaces only.")
 
     required_usage_keys = [str(item) for item in policy.get("usage_provenance", {}).get("required_keys", [])]
     missing_usage_keys = [key for key in required_usage_keys if key not in usage_report]

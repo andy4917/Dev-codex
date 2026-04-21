@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "purpose_profiles": {
+    "code-modification": {
+      "default": true,
+      "serena_startup_blocked": "BLOCKED"
+    },
+    "app-usability": {
+      "serena_startup_blocked": "WARN",
+      "non_downgradable_blockers": [
+        "generated mirror self-feed",
+        "forbidden Windows launcher primary runtime",
+        "active stale config flag",
+        "Windows app SSH unreachable"
+      ]
+    }
+  },
+  "control_thread_policy": {
+    "allowed": true,
+    "name": "Dev-Management Control",
+    "is_execution_authority": false,
+    "is_policy_authority": false,
+    "thread_context_is_hint_only": true
+  },
+  "worktree_policy": {
+    "canonical_repo_root": "/home/andy4917/Dev-Management",
+    "persistent_ops_worktree_allowed_only_when_explicitly_enabled": true,
+    "persistent_ops_worktree_is_authority": false,
+    "task_worktrees_are_ephemeral": true,
+    "generated_mirrors_must_use_canonical_repo_root": true,
+    "stale_persistent_worktree_status": "WARN",
+    "branch_lock_conflict_status": "BLOCKED",
+    "worktree_source_of_truth_escalation_status": "BLOCKED"
+  },
+  "references": {
+    "user_score_policy": "/home/andy4917/Dev-Management/contracts/user_score_policy.json",
+    "disqualifier_policy": "/home/andy4917/Dev-Management/contracts/disqualifier_policy.json"
+  }
+}

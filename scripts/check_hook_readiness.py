@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-from render_codex_runtime import render_hooks, render_windows_hook_wrapper
+from render_codex_runtime import render_hooks, render_windows_hook_wrapper, windows_hook_generation_enabled
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -42,9 +42,11 @@ def collapse_status(values: list[str]) -> str:
     return "PASS"
 
 
-def text_matches_expected(path: Path | None, expected: str) -> bool:
+def text_matches_expected(path: Path | None, expected: str | None) -> bool:
+    if expected is None:
+        return path is None or not path.exists()
     if path is None:
-        return True
+        return False
     if not path.exists() or not path.is_file():
         return False
     return path.read_text(encoding="utf-8") == expected
@@ -60,13 +62,14 @@ def evaluate_hook_readiness(repo_root: str | Path | None = None) -> dict[str, An
     runtime = authority.get("generation_targets", {}).get("global_runtime", {})
     runtime_hook = authority.get("generation_targets", {}).get("scorecard", {}).get("runtime_hook", {})
     runtime_hook_role = str(runtime_hook.get("role", "")).strip()
+    windows_enabled = windows_hook_generation_enabled(authority)
     linux_hooks_path = Path(str(runtime.get("linux", {}).get("hooks_config", Path.home() / ".codex" / "hooks.json"))).expanduser().resolve()
     windows_hooks_path = Path(str(runtime.get("windows_mirror", {}).get("hooks_config", "/mnt/c/Users/anise/.codex/hooks.json"))).expanduser().resolve()
     raw_wrapper_path = str(runtime_hook.get("windows_wrapper_path", "")).strip()
     wrapper_path = Path(raw_wrapper_path).expanduser() if raw_wrapper_path else None
-    expected_linux = render_hooks(authority, windows=False) or ""
-    expected_windows = render_hooks(authority, windows=True) or ""
-    expected_wrapper = render_windows_hook_wrapper(authority) or ""
+    expected_linux = render_hooks(authority, windows=False)
+    expected_windows = render_hooks(authority, windows=True)
+    expected_wrapper = render_windows_hook_wrapper(authority)
     linux_ok = text_matches_expected(linux_hooks_path, expected_linux)
     windows_ok = text_matches_expected(windows_hooks_path, expected_windows)
     wrapper_ok = text_matches_expected(wrapper_path, expected_wrapper)
@@ -76,20 +79,31 @@ def evaluate_hook_readiness(repo_root: str | Path | None = None) -> dict[str, An
         "Hooks are trigger-only. Audit, tests, and score layer remain the final enforcement gates.",
         "Windows hook behavior may be unsupported or degraded and must not be treated as authoritative enforcement.",
     ]
+    if not windows_enabled:
+        warnings.append(str(runtime_hook.get("windows_generation_reason", "Windows hooks are intentionally disabled by authority.")))
     status = collapse_status(
         [
             "BLOCKED" if hook_only_enforcement_claim else "",
+            "WARN" if not windows_enabled else "",
             "WARN" if not (linux_ok and windows_ok and wrapper_ok) else "",
         ]
     )
+    windows_hooks_configured = expected_windows is not None
+    windows_wrapper_configured = bool(wrapper_path) and expected_wrapper is not None
     return {
         "status": status,
         "runtime_hook_role": runtime_hook_role or "unset",
         "trigger_only": trigger_only,
         "hook_only_enforcement_claim": hook_only_enforcement_claim,
-        "linux_hooks": {"path": str(linux_hooks_path), "matches_generated": linux_ok},
-        "windows_hooks": {"path": str(windows_hooks_path), "matches_generated": windows_ok},
-        "windows_wrapper": {"path": str(wrapper_path) if wrapper_path else "", "configured": bool(wrapper_path), "matches_generated": wrapper_ok},
+        "windows_generation_enabled": windows_enabled,
+        "windows_generation_reason": str(runtime_hook.get("windows_generation_reason", "")).strip(),
+        "linux_hooks": {"path": str(linux_hooks_path), "configured": expected_linux is not None, "matches_generated": linux_ok},
+        "windows_hooks": {"path": str(windows_hooks_path), "configured": windows_hooks_configured, "matches_generated": windows_ok},
+        "windows_wrapper": {
+            "path": str(wrapper_path) if wrapper_path else "",
+            "configured": windows_wrapper_configured,
+            "matches_generated": wrapper_ok,
+        },
         "warnings": warnings,
     }
 
@@ -104,6 +118,8 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"- Status: {report.get('status', 'WARN')}",
         f"- Runtime hook role: {report.get('runtime_hook_role', 'unset')}",
         f"- Trigger only: {str(report.get('trigger_only', True)).lower()}",
+        f"- Windows generation enabled: {str(report.get('windows_generation_enabled', True)).lower()}",
+        f"- Windows generation reason: {report.get('windows_generation_reason', '') or '(none)'}",
         f"- Linux hooks match generated: {str(linux_hooks.get('matches_generated', False)).lower()}",
         f"- Windows hooks match generated: {str(windows_hooks.get('matches_generated', False)).lower()}",
         f"- Windows wrapper matches generated: {str(windows_wrapper.get('matches_generated', False)).lower()}",

@@ -45,10 +45,10 @@
         "windows_path": "/mnt/c/Users/anise/.codex/AGENTS.md",
         "linux_exists": true,
         "windows_exists": true,
-        "linux_sha256": "a0ca9ad94a48aae3eb028a59bd2c62e0e77ff992a42aa1a5c6bbb36adf43783c",
-        "windows_sha256": "a0ca9ad94a48aae3eb028a59bd2c62e0e77ff992a42aa1a5c6bbb36adf43783c",
-        "linux_body_sha256": "e8a765ce22f247325d3b6364c79ba8ef061c11cedd5fb02ba70efaeb702d59e8",
-        "windows_body_sha256": "e8a765ce22f247325d3b6364c79ba8ef061c11cedd5fb02ba70efaeb702d59e8",
+        "linux_sha256": "068941d75a24bd569bcc305d8969ac175a69452ed3dffe376c4d2fa1cbe05b79",
+        "windows_sha256": "068941d75a24bd569bcc305d8969ac175a69452ed3dffe376c4d2fa1cbe05b79",
+        "linux_body_sha256": "295a46cf1c357dea002e97070da5faff3214d9f4d86017ac52b4465ba825d848",
+        "windows_body_sha256": "295a46cf1c357dea002e97070da5faff3214d9f4d86017ac52b4465ba825d848",
         "expected_windows_headers": [
           "GENERATED - DO NOT EDIT"
         ],
@@ -66,8 +66,8 @@
         "windows_path": "/mnt/c/Users/anise/.codex/config.toml",
         "linux_exists": true,
         "windows_exists": true,
-        "linux_sha256": "8840bb587de3948edc3f7303161f301a5a1a578d69ab32c738ec3d17b2a55644",
-        "windows_sha256": "4a8f0f2fbf7ee2795631c8f282d08214f72160cdbd80c5063e4621f68f97d4bb",
+        "linux_sha256": "ce6513382cf0a693b84c629ff3e9720cd2ef3b8fa09275efd02f09a195a9a2fc",
+        "windows_sha256": "c76500eacaf7bc1432af6b4e52865c4c2f8942a6d05cedc0f4fca271b578109f",
         "linux_body_sha256": "eb7a2aca8c52dada6b9ba26a14f7a72839089dc3df67b063b23ea2ff275c5ce9",
         "windows_body_sha256": "eb7a2aca8c52dada6b9ba26a14f7a72839089dc3df67b063b23ea2ff275c5ce9",
         "expected_windows_headers": [
@@ -264,16 +264,21 @@
   "config_provenance": {
     "status": "WARN",
     "gate_status": "PASS",
-    "checked_at": "2026-04-21T03:11:09.019302+00:00",
+    "checked_at": "2026-04-21T03:52:55.066018+00:00",
     "authority_path": "/home/andy4917/Dev-Management/contracts/workspace_authority.json",
-    "authority_hash": "df6ed1768a2c6940b38faabcec1f6eea9672748428cde12869e0f58687ba8ec1",
+    "raw_authority_probe_path": "/home/andy4917/Dev-Management/contracts/workspace_authority.json",
+    "authority_hash": "7a9c3bebf203a303131ed02a2b4e50f8ff2e7b7f163028957e4f26082df1f5f8",
+    "canonical_repo_root": "/home/andy4917/Dev-Management",
+    "active_worktree_root": "/home/andy4917/Dev-Management",
     "policy_path": "/home/andy4917/Dev-Management/contracts/config_provenance_policy.json",
     "allowed_optional_user_override_source": "/home/andy4917/.codex/user-config.toml",
     "override_source_paths": [],
     "generated_mirror_contract": {
       "status": "PASS",
       "self_feed_reasons": [],
-      "mirrors_are_outputs_only": true
+      "mirrors_are_outputs_only": true,
+      "canonical_repo_root": "/home/andy4917/Dev-Management",
+      "active_worktree_root": "/home/andy4917/Dev-Management"
     },
     "classifications": {
       "/home/andy4917/.codex/config.toml": "generated_mirror",
@@ -347,10 +352,9 @@
       },
       "/mnt/c/Users/anise/.codex/hooks.json": {
         "status": "PASS",
-        "exists": true,
+        "exists": false,
         "checks": {
-          "expected_generation": true,
-          "matches_render": true
+          "expected_generation": false
         },
         "reasons": []
       }
@@ -443,7 +447,9 @@
   "generated_mirror_contract": {
     "status": "PASS",
     "self_feed_reasons": [],
-    "mirrors_are_outputs_only": true
+    "mirrors_are_outputs_only": true,
+    "canonical_repo_root": "/home/andy4917/Dev-Management",
+    "active_worktree_root": "/home/andy4917/Dev-Management"
   },
   "toolchain_surface": {
     "status": "WARN",
@@ -727,49 +733,59 @@
       ]
     },
     "warnings": [
-      "Multiple terminal PATH mismatch is present."
+      "Multiple terminal PATH mismatch is present.",
+      "Hook readiness is degraded or advisory-only.",
+      "Windows hooks are intentionally disabled and remain non-authoritative trigger surfaces only."
     ],
     "blocked_reasons": []
   },
   "hook_readiness": {
-    "status": "PASS",
+    "status": "WARN",
     "runtime_hook_role": "trigger_only",
     "trigger_only": true,
     "hook_only_enforcement_claim": false,
+    "windows_generation_enabled": false,
+    "windows_generation_reason": "disabled by authority because Windows prompt-submit wrappers spawned visible terminal windows and hooks are trigger-only, not final enforcement",
     "linux_hooks": {
       "path": "/home/andy4917/.codex/hooks.json",
+      "configured": true,
       "matches_generated": true
     },
     "windows_hooks": {
       "path": "/mnt/c/Users/anise/.codex/hooks.json",
+      "configured": false,
       "matches_generated": true
     },
     "windows_wrapper": {
       "path": "/mnt/c/Users/anise/.codex/bin/scorecard-hook-wrapper.ps1",
-      "configured": true,
+      "configured": false,
       "matches_generated": true
     },
     "warnings": [
       "Hooks are trigger-only. Audit, tests, and score layer remain the final enforcement gates.",
-      "Windows hook behavior may be unsupported or degraded and must not be treated as authoritative enforcement."
+      "Windows hook behavior may be unsupported or degraded and must not be treated as authoritative enforcement.",
+      "disabled by authority because Windows prompt-submit wrappers spawned visible terminal windows and hooks are trigger-only, not final enforcement"
     ]
   },
   "score_layer": {
     "purpose": "app-usability",
     "status": "WARN",
-    "numeric_score": 80,
+    "numeric_score": 70,
     "disqualifiers": [],
     "warnings": [
       "artifact hygiene still has stale drafts, duplicate remediation reports, or transient artifacts",
+      "hook readiness is degraded and remains advisory only",
       "Serena startup still blocks general code modification, but app usability can proceed with warnings",
       "client surface PATH contamination remains a warning",
-      "workspace audit still reports warnings"
+      "workspace audit still reports warnings",
+      "git surface still reports stale worktrees, drift, or repo-local guard proposals"
     ],
     "cleanup_actions": [],
     "required_tests": [
       "python3 -m unittest tests.test_audit_workspace_contract tests.test_repair_codex_desktop_runtime tests.test_verify_migration_evidence tests.test_check_startup_workflow",
       "python3 -m unittest tests.test_check_global_runtime tests.test_check_agent_instruction tests.test_git_surface",
-      "python3 -m unittest tests.test_activate_canonical_runtime tests.test_run_canonical_command tests.test_repair_serena_startup"
+      "python3 -m unittest tests.test_activate_canonical_runtime tests.test_run_canonical_command tests.test_repair_serena_startup",
+      "python3 -m unittest tests.test_check_config_provenance tests.test_check_toolchain_surface tests.test_check_hook_readiness tests.test_codex_app_usability tests.test_app_thread_worktree_policy tests.test_score_layer"
     ],
     "report_sources": {
       "config_provenance": "/home/andy4917/Dev-Management/reports/config-provenance.final.json",
@@ -778,7 +794,8 @@
       "toolchain_surface": "/home/andy4917/Dev-Management/reports/toolchain-surface.final.json",
       "hook_readiness": "/home/andy4917/Dev-Management/reports/hook-readiness.final.json",
       "audit": "/home/andy4917/Dev-Management/reports/audit.final.json",
-      "artifact_hygiene": "/home/andy4917/Dev-Management/reports/artifact-hygiene.final.json"
+      "artifact_hygiene": "/home/andy4917/Dev-Management/reports/artifact-hygiene.final.json",
+      "git_surface": "/home/andy4917/Dev-Management/reports/git-surface.final.json"
     },
     "evidence_files": [
       "/home/andy4917/Dev-Management/reports/config-provenance.final.json",
@@ -787,8 +804,20 @@
       "/home/andy4917/Dev-Management/reports/toolchain-surface.final.json",
       "/home/andy4917/Dev-Management/reports/hook-readiness.final.json",
       "/home/andy4917/Dev-Management/reports/audit.final.json",
-      "/home/andy4917/Dev-Management/reports/artifact-hygiene.final.json"
-    ]
+      "/home/andy4917/Dev-Management/reports/artifact-hygiene.final.json",
+      "/home/andy4917/Dev-Management/reports/git-surface.final.json"
+    ],
+    "score_policy_path": "/home/andy4917/Dev-Management/contracts/score_policy.json",
+    "worktree_policy": {
+      "canonical_repo_root": "/home/andy4917/Dev-Management",
+      "persistent_ops_worktree_allowed_only_when_explicitly_enabled": true,
+      "persistent_ops_worktree_is_authority": false,
+      "task_worktrees_are_ephemeral": true,
+      "generated_mirrors_must_use_canonical_repo_root": true,
+      "stale_persistent_worktree_status": "WARN",
+      "branch_lock_conflict_status": "BLOCKED",
+      "worktree_source_of_truth_escalation_status": "BLOCKED"
+    }
   },
   "artifact_hygiene": {
     "status": "WARN",
@@ -796,7 +825,8 @@
     "remediation_reports": [
       "/home/andy4917/Dev-Management/reports/manual-system-remediation-20260421-063444.md",
       "/home/andy4917/Dev-Management/reports/manual-system-remediation-20260421-112829.md",
-      "/home/andy4917/Dev-Management/reports/manual-system-remediation-20260421-120815.md"
+      "/home/andy4917/Dev-Management/reports/manual-system-remediation-20260421-120815.md",
+      "/home/andy4917/Dev-Management/reports/manual-system-remediation-20260421-125212.md"
     ],
     "stale_preview_files": [],
     "transient_files": [],
@@ -1157,72 +1187,53 @@
     "repo_reports": [
       {
         "repo_root": "/home/andy4917/Dev-Management",
+        "canonical_repo_root": "/home/andy4917/Dev-Management",
+        "active_worktree_root": "/home/andy4917/Dev-Management",
         "status": "present",
         "dirty": [
-          " M contracts/toolchain_policy.json",
+          " M contracts/app_surface_policy.json",
+          " M contracts/config_provenance_policy.json",
+          " M contracts/execution_surfaces.json",
           " M contracts/workspace_authority.json",
+          " M devmgmt_runtime/authority.py",
+          " M devmgmt_runtime/paths.py",
           " M docs/AGENT_GUARDRAILS.md",
+          " M docs/CODEX_APP_USER_SETUP.md",
           " M docs/GLOBAL_RUNTIME_ARCHITECTURE.md",
-          " M docs/LOCAL_ENVIRONMENTS.md",
           " M docs/RUNBOOK.md",
-          " M docs/SERENA_USAGE.md",
-          " M docs/WINDOWS_WSL_RUNTIME_MODEL.md",
+          " M reports/artifact-hygiene.final.json",
           " M reports/audit.final.json",
+          " M reports/config-provenance.final.json",
+          " M reports/config-provenance.final.md",
+          " M reports/global-runtime.final.json",
           " M reports/global-runtime.json",
-          " M reports/toolchain-usage.session.json",
-          " M scripts/audit_workspace.py",
+          " M reports/hook-readiness.final.json",
+          " M reports/hook-readiness.final.md",
+          " M reports/score-layer.final.json",
+          " M reports/score-layer.final.md",
+          " M reports/serena-startup.final-dry-run.json",
+          " M reports/startup-workflow.final.json",
+          " M reports/toolchain-surface.final.json",
+          " M reports/toolchain-surface.final.md",
+          " M scripts/activate_codex_app_usability.py",
           " M scripts/check_config_provenance.py",
+          " M scripts/check_git_surface.py",
           " M scripts/check_hook_readiness.py",
-          " M scripts/check_startup_workflow.py",
           " M scripts/check_toolchain_surface.py",
-          " M scripts/check_windows_app_ssh_readiness.py",
           " M scripts/render_codex_runtime.py",
           " M scripts/run_score_layer.py",
-          " M tests/test_check_startup_workflow.py",
+          " M tests/test_audit_workspace_contract.py",
+          " M tests/test_check_config_provenance.py",
+          " M tests/test_check_hook_readiness.py",
           " M tests/test_check_toolchain_surface.py",
+          " M tests/test_codex_app_usability.py",
+          " M tests/test_git_surface.py",
           " M tests/test_score_layer.py",
-          " M tests/test_windows_app_ssh_readiness.py",
-          "?? contracts/app_surface_policy.json",
-          "?? contracts/config_provenance_policy.json",
-          "?? devmgmt_runtime/",
-          "?? docs/CODEX_APP_USER_SETUP.md",
-          "?? reports/app-usability.final-dry-run.json",
-          "?? reports/app-usability.final-dry-run.md",
-          "?? reports/artifact-hygiene.final.json",
-          "?? reports/artifact-hygiene.final.md",
-          "?? reports/audit.pre-modular-app-finalization.json",
-          "?? reports/codex-app-usability-final.json",
-          "?? reports/codex-app-usability-final.md",
-          "?? reports/config-provenance.final.json",
-          "?? reports/config-provenance.final.md",
-          "?? reports/config-provenance.pre-modular-app-finalization.json",
-          "?? reports/config-provenance.pre-modular-app-finalization.md",
-          "?? reports/git-surface.pre-modular-app-finalization.json",
-          "?? reports/global-runtime.final.json",
-          "?? reports/global-runtime.pre-modular-app-finalization.json",
-          "?? reports/hook-readiness.final.json",
-          "?? reports/hook-readiness.final.md",
-          "?? reports/instruction-guard.pre-modular-app-finalization.json",
-          "?? reports/linux-native-codex-cli-activation.final.json",
-          "?? reports/linux-native-codex-cli-activation.final.md",
-          "?? reports/manual-system-remediation-20260421-112829.md",
-          "?? reports/manual-system-remediation-20260421-120815.md",
-          "?? reports/modularization-compatibility-review.json",
-          "?? reports/modularization-compatibility-review.md",
-          "?? reports/score-layer.final.json",
-          "?? reports/score-layer.final.md",
-          "?? reports/serena-startup.final-dry-run.json",
-          "?? reports/startup-workflow.final.json",
-          "?? reports/startup-workflow.pre-modular-app-finalization.json",
-          "?? reports/toolchain-surface.final.json",
-          "?? reports/toolchain-surface.final.md",
-          "?? reports/toolchain-surface.pre-modular-app-finalization.json",
-          "?? reports/toolchain-surface.pre-modular-app-finalization.md",
-          "?? reports/windows-app-ssh-remote-readiness.final.json",
-          "?? reports/windows-app-ssh-remote-readiness.final.md",
-          "?? scripts/activate_codex_app_usability.py",
-          "?? tests/test_codex_app_usability.py",
-          "?? tests/test_devmgmt_runtime_helpers.py"
+          "?? contracts/score_policy.json",
+          "?? reports/git-surface.final.json",
+          "?? reports/git-surface.final.md",
+          "?? reports/manual-system-remediation-20260421-125212.md",
+          "?? tests/test_app_thread_worktree_policy.py"
         ],
         "local_config": {
           "available": true,
@@ -1243,12 +1254,33 @@
         "is_worktree": false,
         "is_sparse_checkout": false,
         "superproject": "",
+        "worktree_inventory": {
+          "canonical_repo_root": "/home/andy4917/Dev-Management",
+          "active_worktree_root": "/home/andy4917/Dev-Management",
+          "current_branch": "codex/runtime-safety-iaw-authority-v13r",
+          "git_common_dir": ".git",
+          "is_linked_worktree": false,
+          "worktrees": [
+            {
+              "worktree": "/home/andy4917/Dev-Management",
+              "head": "f169c37954e6d7239ae497840f4efd15d8d66d42",
+              "branch": "refs/heads/codex/runtime-safety-iaw-authority-v13r"
+            }
+          ],
+          "stale_worktrees": [],
+          "duplicate_branch_checkouts": {},
+          "current_branch_conflict": false
+        },
+        "worktree_policy_status": "PASS",
+        "branch_lock_status": "PASS",
         "warnings": [
           "repo is dirty"
         ]
       },
       {
         "repo_root": "/home/andy4917/Dev-Workflow",
+        "canonical_repo_root": "/home/andy4917/Dev-Workflow",
+        "active_worktree_root": "/home/andy4917/Dev-Workflow",
         "status": "present",
         "dirty": [
           " M scripts/delivery_gate.py",
@@ -1273,12 +1305,33 @@
         "is_worktree": false,
         "is_sparse_checkout": false,
         "superproject": "",
+        "worktree_inventory": {
+          "canonical_repo_root": "/home/andy4917/Dev-Workflow",
+          "active_worktree_root": "/home/andy4917/Dev-Workflow",
+          "current_branch": "codex/runtime-safety-iaw-authority-v13r",
+          "git_common_dir": ".git",
+          "is_linked_worktree": false,
+          "worktrees": [
+            {
+              "worktree": "/home/andy4917/Dev-Workflow",
+              "head": "6cfeef251dfb1213e8570b75e283f694c615981d",
+              "branch": "refs/heads/codex/runtime-safety-iaw-authority-v13r"
+            }
+          ],
+          "stale_worktrees": [],
+          "duplicate_branch_checkouts": {},
+          "current_branch_conflict": false
+        },
+        "worktree_policy_status": "PASS",
+        "branch_lock_status": "PASS",
         "warnings": [
           "repo is dirty"
         ]
       },
       {
         "repo_root": "/home/andy4917/Dev-Product/reservation-system",
+        "canonical_repo_root": "/home/andy4917/Dev-Product/reservation-system",
+        "active_worktree_root": "/home/andy4917/Dev-Product/reservation-system",
         "status": "present",
         "dirty": [
           " D .codex_tmp/ota_dom_fallback_handoff.json",
@@ -1385,12 +1438,33 @@
         "is_worktree": false,
         "is_sparse_checkout": false,
         "superproject": "",
+        "worktree_inventory": {
+          "canonical_repo_root": "/home/andy4917/Dev-Product/reservation-system",
+          "active_worktree_root": "/home/andy4917/Dev-Product/reservation-system",
+          "current_branch": "work/ui-workbench-recovery",
+          "git_common_dir": ".git",
+          "is_linked_worktree": false,
+          "worktrees": [
+            {
+              "worktree": "/home/andy4917/Dev-Product/reservation-system",
+              "head": "0cd7efd81604c282df53a5f67ae77d5bf25228de",
+              "branch": "refs/heads/work/ui-workbench-recovery"
+            }
+          ],
+          "stale_worktrees": [],
+          "duplicate_branch_checkouts": {},
+          "current_branch_conflict": false
+        },
+        "worktree_policy_status": "PASS",
+        "branch_lock_status": "PASS",
         "warnings": [
           "repo is dirty"
         ]
       },
       {
         "repo_root": "/home/andy4917/reservation-system",
+        "canonical_repo_root": "/home/andy4917/reservation-system",
+        "active_worktree_root": "/home/andy4917/reservation-system",
         "status": "requested-path-missing",
         "dirty": [],
         "local_config": {
@@ -1403,6 +1477,16 @@
         "is_worktree": false,
         "is_sparse_checkout": false,
         "superproject": "",
+        "worktree_inventory": {
+          "canonical_repo_root": "/home/andy4917/reservation-system",
+          "active_worktree_root": "/home/andy4917/reservation-system",
+          "worktrees": [],
+          "stale_worktrees": [],
+          "duplicate_branch_checkouts": {},
+          "current_branch_conflict": false
+        },
+        "worktree_policy_status": "PASS",
+        "branch_lock_status": "PASS",
         "warnings": []
       }
     ],
@@ -1441,6 +1525,33 @@
         "missing_lines": []
       }
     ],
+    "canonical_repo_root": "/home/andy4917/Dev-Management",
+    "worktree_policy": {
+      "canonical_repo_root": "/home/andy4917/Dev-Management",
+      "persistent_ops_worktree_allowed": false,
+      "persistent_ops_worktree_enablement": "explicit_only",
+      "persistent_ops_worktree_root": "",
+      "persistent_ops_worktree_is_authority": false,
+      "task_worktrees_are_ephemeral": true,
+      "generated_mirrors_must_use_canonical_repo_root": true,
+      "report_identity_fields": [
+        "active_worktree_root",
+        "canonical_repo_root"
+      ],
+      "persistent_ops_worktree_allowed_tasks": [
+        "recurring_audits",
+        "report_generation",
+        "readiness_checks",
+        "app_usability_checks",
+        "non_destructive_diagnostics",
+        "automation_without_source_modification_unless_all_gates_pass"
+      ],
+      "task_worktree_default_for_code_changes": true,
+      "stale_persistent_worktree_status": "WARN",
+      "branch_checked_out_in_multiple_locations_status": "BLOCKED",
+      "worktree_authority_escalation_status": "BLOCKED",
+      "cleanup_and_handoff_required": true
+    },
     "wsl": {
       "global": {
         "available": true,
@@ -1556,6 +1667,7 @@
         "windows": "//wsl.localhost/Ubuntu/home/andy4917/code/reservation-system"
       }
     ],
+    "blocked_reasons": [],
     "warnings": [
       "Windows Git global safe.directory contains stale paths.",
       "Windows Git and WSL Git global config differ.",
@@ -1660,16 +1772,21 @@
     "config_provenance": {
       "status": "WARN",
       "gate_status": "PASS",
-      "checked_at": "2026-04-21T03:11:05.253777+00:00",
+      "checked_at": "2026-04-21T03:52:51.143350+00:00",
       "authority_path": "/home/andy4917/Dev-Management/contracts/workspace_authority.json",
-      "authority_hash": "df6ed1768a2c6940b38faabcec1f6eea9672748428cde12869e0f58687ba8ec1",
+      "raw_authority_probe_path": "/home/andy4917/Dev-Management/contracts/workspace_authority.json",
+      "authority_hash": "7a9c3bebf203a303131ed02a2b4e50f8ff2e7b7f163028957e4f26082df1f5f8",
+      "canonical_repo_root": "/home/andy4917/Dev-Management",
+      "active_worktree_root": "/home/andy4917/Dev-Management",
       "policy_path": "/home/andy4917/Dev-Management/contracts/config_provenance_policy.json",
       "allowed_optional_user_override_source": "/home/andy4917/.codex/user-config.toml",
       "override_source_paths": [],
       "generated_mirror_contract": {
         "status": "PASS",
         "self_feed_reasons": [],
-        "mirrors_are_outputs_only": true
+        "mirrors_are_outputs_only": true,
+        "canonical_repo_root": "/home/andy4917/Dev-Management",
+        "active_worktree_root": "/home/andy4917/Dev-Management"
       },
       "classifications": {
         "/home/andy4917/.codex/config.toml": "generated_mirror",
@@ -1743,10 +1860,9 @@
         },
         "/mnt/c/Users/anise/.codex/hooks.json": {
           "status": "PASS",
-          "exists": true,
+          "exists": false,
           "checks": {
-            "expected_generation": true,
-            "matches_render": true
+            "expected_generation": false
           },
           "reasons": []
         }
@@ -2351,72 +2467,53 @@
     "repo_reports": [
       {
         "repo_root": "/home/andy4917/Dev-Management",
+        "canonical_repo_root": "/home/andy4917/Dev-Management",
+        "active_worktree_root": "/home/andy4917/Dev-Management",
         "status": "present",
         "dirty": [
-          " M contracts/toolchain_policy.json",
+          " M contracts/app_surface_policy.json",
+          " M contracts/config_provenance_policy.json",
+          " M contracts/execution_surfaces.json",
           " M contracts/workspace_authority.json",
+          " M devmgmt_runtime/authority.py",
+          " M devmgmt_runtime/paths.py",
           " M docs/AGENT_GUARDRAILS.md",
+          " M docs/CODEX_APP_USER_SETUP.md",
           " M docs/GLOBAL_RUNTIME_ARCHITECTURE.md",
-          " M docs/LOCAL_ENVIRONMENTS.md",
           " M docs/RUNBOOK.md",
-          " M docs/SERENA_USAGE.md",
-          " M docs/WINDOWS_WSL_RUNTIME_MODEL.md",
+          " M reports/artifact-hygiene.final.json",
           " M reports/audit.final.json",
+          " M reports/config-provenance.final.json",
+          " M reports/config-provenance.final.md",
+          " M reports/global-runtime.final.json",
           " M reports/global-runtime.json",
-          " M reports/toolchain-usage.session.json",
-          " M scripts/audit_workspace.py",
+          " M reports/hook-readiness.final.json",
+          " M reports/hook-readiness.final.md",
+          " M reports/score-layer.final.json",
+          " M reports/score-layer.final.md",
+          " M reports/serena-startup.final-dry-run.json",
+          " M reports/startup-workflow.final.json",
+          " M reports/toolchain-surface.final.json",
+          " M reports/toolchain-surface.final.md",
+          " M scripts/activate_codex_app_usability.py",
           " M scripts/check_config_provenance.py",
+          " M scripts/check_git_surface.py",
           " M scripts/check_hook_readiness.py",
-          " M scripts/check_startup_workflow.py",
           " M scripts/check_toolchain_surface.py",
-          " M scripts/check_windows_app_ssh_readiness.py",
           " M scripts/render_codex_runtime.py",
           " M scripts/run_score_layer.py",
-          " M tests/test_check_startup_workflow.py",
+          " M tests/test_audit_workspace_contract.py",
+          " M tests/test_check_config_provenance.py",
+          " M tests/test_check_hook_readiness.py",
           " M tests/test_check_toolchain_surface.py",
+          " M tests/test_codex_app_usability.py",
+          " M tests/test_git_surface.py",
           " M tests/test_score_layer.py",
-          " M tests/test_windows_app_ssh_readiness.py",
-          "?? contracts/app_surface_policy.json",
-          "?? contracts/config_provenance_policy.json",
-          "?? devmgmt_runtime/",
-          "?? docs/CODEX_APP_USER_SETUP.md",
-          "?? reports/app-usability.final-dry-run.json",
-          "?? reports/app-usability.final-dry-run.md",
-          "?? reports/artifact-hygiene.final.json",
-          "?? reports/artifact-hygiene.final.md",
-          "?? reports/audit.pre-modular-app-finalization.json",
-          "?? reports/codex-app-usability-final.json",
-          "?? reports/codex-app-usability-final.md",
-          "?? reports/config-provenance.final.json",
-          "?? reports/config-provenance.final.md",
-          "?? reports/config-provenance.pre-modular-app-finalization.json",
-          "?? reports/config-provenance.pre-modular-app-finalization.md",
-          "?? reports/git-surface.pre-modular-app-finalization.json",
-          "?? reports/global-runtime.final.json",
-          "?? reports/global-runtime.pre-modular-app-finalization.json",
-          "?? reports/hook-readiness.final.json",
-          "?? reports/hook-readiness.final.md",
-          "?? reports/instruction-guard.pre-modular-app-finalization.json",
-          "?? reports/linux-native-codex-cli-activation.final.json",
-          "?? reports/linux-native-codex-cli-activation.final.md",
-          "?? reports/manual-system-remediation-20260421-112829.md",
-          "?? reports/manual-system-remediation-20260421-120815.md",
-          "?? reports/modularization-compatibility-review.json",
-          "?? reports/modularization-compatibility-review.md",
-          "?? reports/score-layer.final.json",
-          "?? reports/score-layer.final.md",
-          "?? reports/serena-startup.final-dry-run.json",
-          "?? reports/startup-workflow.final.json",
-          "?? reports/startup-workflow.pre-modular-app-finalization.json",
-          "?? reports/toolchain-surface.final.json",
-          "?? reports/toolchain-surface.final.md",
-          "?? reports/toolchain-surface.pre-modular-app-finalization.json",
-          "?? reports/toolchain-surface.pre-modular-app-finalization.md",
-          "?? reports/windows-app-ssh-remote-readiness.final.json",
-          "?? reports/windows-app-ssh-remote-readiness.final.md",
-          "?? scripts/activate_codex_app_usability.py",
-          "?? tests/test_codex_app_usability.py",
-          "?? tests/test_devmgmt_runtime_helpers.py"
+          "?? contracts/score_policy.json",
+          "?? reports/git-surface.final.json",
+          "?? reports/git-surface.final.md",
+          "?? reports/manual-system-remediation-20260421-125212.md",
+          "?? tests/test_app_thread_worktree_policy.py"
         ],
         "local_config": {
           "available": true,
@@ -2437,12 +2534,33 @@
         "is_worktree": false,
         "is_sparse_checkout": false,
         "superproject": "",
+        "worktree_inventory": {
+          "canonical_repo_root": "/home/andy4917/Dev-Management",
+          "active_worktree_root": "/home/andy4917/Dev-Management",
+          "current_branch": "codex/runtime-safety-iaw-authority-v13r",
+          "git_common_dir": ".git",
+          "is_linked_worktree": false,
+          "worktrees": [
+            {
+              "worktree": "/home/andy4917/Dev-Management",
+              "head": "f169c37954e6d7239ae497840f4efd15d8d66d42",
+              "branch": "refs/heads/codex/runtime-safety-iaw-authority-v13r"
+            }
+          ],
+          "stale_worktrees": [],
+          "duplicate_branch_checkouts": {},
+          "current_branch_conflict": false
+        },
+        "worktree_policy_status": "PASS",
+        "branch_lock_status": "PASS",
         "warnings": [
           "repo is dirty"
         ]
       },
       {
         "repo_root": "/home/andy4917/Dev-Workflow",
+        "canonical_repo_root": "/home/andy4917/Dev-Workflow",
+        "active_worktree_root": "/home/andy4917/Dev-Workflow",
         "status": "present",
         "dirty": [
           " M scripts/delivery_gate.py",
@@ -2467,12 +2585,33 @@
         "is_worktree": false,
         "is_sparse_checkout": false,
         "superproject": "",
+        "worktree_inventory": {
+          "canonical_repo_root": "/home/andy4917/Dev-Workflow",
+          "active_worktree_root": "/home/andy4917/Dev-Workflow",
+          "current_branch": "codex/runtime-safety-iaw-authority-v13r",
+          "git_common_dir": ".git",
+          "is_linked_worktree": false,
+          "worktrees": [
+            {
+              "worktree": "/home/andy4917/Dev-Workflow",
+              "head": "6cfeef251dfb1213e8570b75e283f694c615981d",
+              "branch": "refs/heads/codex/runtime-safety-iaw-authority-v13r"
+            }
+          ],
+          "stale_worktrees": [],
+          "duplicate_branch_checkouts": {},
+          "current_branch_conflict": false
+        },
+        "worktree_policy_status": "PASS",
+        "branch_lock_status": "PASS",
         "warnings": [
           "repo is dirty"
         ]
       },
       {
         "repo_root": "/home/andy4917/Dev-Product/reservation-system",
+        "canonical_repo_root": "/home/andy4917/Dev-Product/reservation-system",
+        "active_worktree_root": "/home/andy4917/Dev-Product/reservation-system",
         "status": "present",
         "dirty": [
           " D .codex_tmp/ota_dom_fallback_handoff.json",
@@ -2579,12 +2718,33 @@
         "is_worktree": false,
         "is_sparse_checkout": false,
         "superproject": "",
+        "worktree_inventory": {
+          "canonical_repo_root": "/home/andy4917/Dev-Product/reservation-system",
+          "active_worktree_root": "/home/andy4917/Dev-Product/reservation-system",
+          "current_branch": "work/ui-workbench-recovery",
+          "git_common_dir": ".git",
+          "is_linked_worktree": false,
+          "worktrees": [
+            {
+              "worktree": "/home/andy4917/Dev-Product/reservation-system",
+              "head": "0cd7efd81604c282df53a5f67ae77d5bf25228de",
+              "branch": "refs/heads/work/ui-workbench-recovery"
+            }
+          ],
+          "stale_worktrees": [],
+          "duplicate_branch_checkouts": {},
+          "current_branch_conflict": false
+        },
+        "worktree_policy_status": "PASS",
+        "branch_lock_status": "PASS",
         "warnings": [
           "repo is dirty"
         ]
       },
       {
         "repo_root": "/home/andy4917/reservation-system",
+        "canonical_repo_root": "/home/andy4917/reservation-system",
+        "active_worktree_root": "/home/andy4917/reservation-system",
         "status": "requested-path-missing",
         "dirty": [],
         "local_config": {
@@ -2597,6 +2757,16 @@
         "is_worktree": false,
         "is_sparse_checkout": false,
         "superproject": "",
+        "worktree_inventory": {
+          "canonical_repo_root": "/home/andy4917/reservation-system",
+          "active_worktree_root": "/home/andy4917/reservation-system",
+          "worktrees": [],
+          "stale_worktrees": [],
+          "duplicate_branch_checkouts": {},
+          "current_branch_conflict": false
+        },
+        "worktree_policy_status": "PASS",
+        "branch_lock_status": "PASS",
         "warnings": []
       }
     ],
@@ -2635,6 +2805,33 @@
         "missing_lines": []
       }
     ],
+    "canonical_repo_root": "/home/andy4917/Dev-Management",
+    "worktree_policy": {
+      "canonical_repo_root": "/home/andy4917/Dev-Management",
+      "persistent_ops_worktree_allowed": false,
+      "persistent_ops_worktree_enablement": "explicit_only",
+      "persistent_ops_worktree_root": "",
+      "persistent_ops_worktree_is_authority": false,
+      "task_worktrees_are_ephemeral": true,
+      "generated_mirrors_must_use_canonical_repo_root": true,
+      "report_identity_fields": [
+        "active_worktree_root",
+        "canonical_repo_root"
+      ],
+      "persistent_ops_worktree_allowed_tasks": [
+        "recurring_audits",
+        "report_generation",
+        "readiness_checks",
+        "app_usability_checks",
+        "non_destructive_diagnostics",
+        "automation_without_source_modification_unless_all_gates_pass"
+      ],
+      "task_worktree_default_for_code_changes": true,
+      "stale_persistent_worktree_status": "WARN",
+      "branch_checked_out_in_multiple_locations_status": "BLOCKED",
+      "worktree_authority_escalation_status": "BLOCKED",
+      "cleanup_and_handoff_required": true
+    },
     "wsl": {
       "global": {
         "available": true,
@@ -2750,6 +2947,7 @@
         "windows": "//wsl.localhost/Ubuntu/home/andy4917/code/reservation-system"
       }
     ],
+    "blocked_reasons": [],
     "warnings": [
       "Windows Git global safe.directory contains stale paths.",
       "Windows Git and WSL Git global config differ.",
@@ -2851,16 +3049,21 @@
       "config_provenance": {
         "status": "WARN",
         "gate_status": "PASS",
-        "checked_at": "2026-04-21T03:11:08.020899+00:00",
+        "checked_at": "2026-04-21T03:52:53.889424+00:00",
         "authority_path": "/home/andy4917/Dev-Management/contracts/workspace_authority.json",
-        "authority_hash": "df6ed1768a2c6940b38faabcec1f6eea9672748428cde12869e0f58687ba8ec1",
+        "raw_authority_probe_path": "/home/andy4917/Dev-Management/contracts/workspace_authority.json",
+        "authority_hash": "7a9c3bebf203a303131ed02a2b4e50f8ff2e7b7f163028957e4f26082df1f5f8",
+        "canonical_repo_root": "/home/andy4917/Dev-Management",
+        "active_worktree_root": "/home/andy4917/Dev-Management",
         "policy_path": "/home/andy4917/Dev-Management/contracts/config_provenance_policy.json",
         "allowed_optional_user_override_source": "/home/andy4917/.codex/user-config.toml",
         "override_source_paths": [],
         "generated_mirror_contract": {
           "status": "PASS",
           "self_feed_reasons": [],
-          "mirrors_are_outputs_only": true
+          "mirrors_are_outputs_only": true,
+          "canonical_repo_root": "/home/andy4917/Dev-Management",
+          "active_worktree_root": "/home/andy4917/Dev-Management"
         },
         "classifications": {
           "/home/andy4917/.codex/config.toml": "generated_mirror",
@@ -2934,10 +3137,9 @@
           },
           "/mnt/c/Users/anise/.codex/hooks.json": {
             "status": "PASS",
-            "exists": true,
+            "exists": false,
             "checks": {
-              "expected_generation": true,
-              "matches_render": true
+              "expected_generation": false
             },
             "reasons": []
           }
@@ -3438,7 +3640,7 @@
   "startup_workflow_check": {
     "status": "WARN",
     "summary": "Serena-first and Context7-first startup workflow is incomplete for the current diff.",
-    "generated_at": "2026-04-21T03:11:19.069164+00:00",
+    "generated_at": "2026-04-21T03:53:03.417210+00:00",
     "purpose": "app-usability",
     "mode_requested": "auto",
     "mode_selected": "ssh-managed",
@@ -3451,102 +3653,71 @@
     "changed_paths": [
       "contracts/app_surface_policy.json",
       "contracts/config_provenance_policy.json",
-      "contracts/toolchain_policy.json",
+      "contracts/execution_surfaces.json",
+      "contracts/score_policy.json",
       "contracts/workspace_authority.json",
-      "devmgmt_runtime/__init__.py",
       "devmgmt_runtime/authority.py",
       "devmgmt_runtime/paths.py",
-      "devmgmt_runtime/redaction.py",
-      "devmgmt_runtime/reports.py",
-      "devmgmt_runtime/status.py",
-      "devmgmt_runtime/subprocess_safe.py",
       "docs/AGENT_GUARDRAILS.md",
       "docs/CODEX_APP_USER_SETUP.md",
       "docs/GLOBAL_RUNTIME_ARCHITECTURE.md",
-      "docs/LOCAL_ENVIRONMENTS.md",
       "docs/RUNBOOK.md",
-      "docs/SERENA_USAGE.md",
-      "docs/WINDOWS_WSL_RUNTIME_MODEL.md",
-      "reports/app-usability.final-dry-run.json",
-      "reports/app-usability.final-dry-run.md",
       "reports/artifact-hygiene.final.json",
-      "reports/artifact-hygiene.final.md",
       "reports/audit.final.json",
-      "reports/audit.pre-modular-app-finalization.json",
-      "reports/codex-app-usability-final.json",
-      "reports/codex-app-usability-final.md",
       "reports/config-provenance.final.json",
       "reports/config-provenance.final.md",
-      "reports/config-provenance.pre-modular-app-finalization.json",
-      "reports/config-provenance.pre-modular-app-finalization.md",
-      "reports/git-surface.pre-modular-app-finalization.json",
+      "reports/git-surface.final.json",
+      "reports/git-surface.final.md",
       "reports/global-runtime.final.json",
       "reports/global-runtime.json",
-      "reports/global-runtime.pre-modular-app-finalization.json",
       "reports/hook-readiness.final.json",
       "reports/hook-readiness.final.md",
-      "reports/instruction-guard.pre-modular-app-finalization.json",
-      "reports/linux-native-codex-cli-activation.final.json",
-      "reports/linux-native-codex-cli-activation.final.md",
-      "reports/manual-system-remediation-20260421-112829.md",
-      "reports/manual-system-remediation-20260421-120815.md",
-      "reports/modularization-compatibility-review.json",
-      "reports/modularization-compatibility-review.md",
+      "reports/manual-system-remediation-20260421-125212.md",
       "reports/score-layer.final.json",
       "reports/score-layer.final.md",
       "reports/serena-startup.final-dry-run.json",
       "reports/startup-workflow.final.json",
-      "reports/startup-workflow.pre-modular-app-finalization.json",
       "reports/toolchain-surface.final.json",
       "reports/toolchain-surface.final.md",
-      "reports/toolchain-surface.pre-modular-app-finalization.json",
-      "reports/toolchain-surface.pre-modular-app-finalization.md",
-      "reports/toolchain-usage.session.json",
-      "reports/windows-app-ssh-remote-readiness.final.json",
-      "reports/windows-app-ssh-remote-readiness.final.md",
       "scripts/activate_codex_app_usability.py",
-      "scripts/audit_workspace.py",
       "scripts/check_config_provenance.py",
+      "scripts/check_git_surface.py",
       "scripts/check_hook_readiness.py",
-      "scripts/check_startup_workflow.py",
       "scripts/check_toolchain_surface.py",
-      "scripts/check_windows_app_ssh_readiness.py",
       "scripts/render_codex_runtime.py",
       "scripts/run_score_layer.py",
-      "tests/test_check_startup_workflow.py",
+      "tests/test_app_thread_worktree_policy.py",
+      "tests/test_audit_workspace_contract.py",
+      "tests/test_check_config_provenance.py",
+      "tests/test_check_hook_readiness.py",
       "tests/test_check_toolchain_surface.py",
       "tests/test_codex_app_usability.py",
-      "tests/test_devmgmt_runtime_helpers.py",
-      "tests/test_score_layer.py",
-      "tests/test_windows_app_ssh_readiness.py"
+      "tests/test_git_surface.py",
+      "tests/test_score_layer.py"
     ],
     "workflow_changes": [
       "contracts/app_surface_policy.json",
       "contracts/config_provenance_policy.json",
-      "contracts/toolchain_policy.json",
+      "contracts/execution_surfaces.json",
+      "contracts/score_policy.json",
       "contracts/workspace_authority.json",
-      "devmgmt_runtime/__init__.py",
       "devmgmt_runtime/authority.py",
       "devmgmt_runtime/paths.py",
-      "devmgmt_runtime/redaction.py",
-      "devmgmt_runtime/reports.py",
-      "devmgmt_runtime/status.py",
-      "devmgmt_runtime/subprocess_safe.py",
       "scripts/activate_codex_app_usability.py",
-      "scripts/audit_workspace.py",
       "scripts/check_config_provenance.py",
+      "scripts/check_git_surface.py",
       "scripts/check_hook_readiness.py",
-      "scripts/check_startup_workflow.py",
       "scripts/check_toolchain_surface.py",
-      "scripts/check_windows_app_ssh_readiness.py",
       "scripts/render_codex_runtime.py",
       "scripts/run_score_layer.py",
-      "tests/test_check_startup_workflow.py",
+      "tests/test_app_thread_worktree_policy.py",
+      "tests/test_audit_workspace_contract.py",
+      "tests/test_check_config_provenance.py",
+      "tests/test_check_hook_readiness.py",
       "tests/test_check_toolchain_surface.py",
       "tests/test_codex_app_usability.py",
-      "tests/test_devmgmt_runtime_helpers.py",
-      "tests/test_score_layer.py",
-      "tests/test_windows_app_ssh_readiness.py"
+      "tests/test_git_surface.py",
+      "tests/test_score_layer.py"
     ],
     "blocking_reasons": [],
     "warnings": [

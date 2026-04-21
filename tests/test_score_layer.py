@@ -43,6 +43,7 @@ class ScoreLayerTests(unittest.TestCase):
             self._write_json(reports / "hook-readiness.unified-phase.final.json", {"hook_only_enforcement_claim": False})
             self._write_json(reports / "startup-workflow.unified-phase.final.json", {"status": "PASS"})
             self._write_json(reports / "audit.unified-phase.final.json", {"status": "PASS"})
+            self._write_json(reports / "git-surface.unified-phase.final.json", {"status": "PASS"})
             report = self.module.evaluate_score_layer(tmp)
         self.assertEqual(report["status"], "BLOCKED")
 
@@ -57,6 +58,7 @@ class ScoreLayerTests(unittest.TestCase):
             self._write_json(reports / "hook-readiness.unified-phase.final.json", {"hook_only_enforcement_claim": False})
             self._write_json(reports / "startup-workflow.unified-phase.final.json", {"status": "PASS"})
             self._write_json(reports / "audit.unified-phase.final.json", {"status": "PASS"})
+            self._write_json(reports / "git-surface.unified-phase.final.json", {"status": "PASS"})
             report = self.module.evaluate_score_layer(tmp)
         self.assertEqual(report["status"], "PASS")
 
@@ -71,6 +73,7 @@ class ScoreLayerTests(unittest.TestCase):
             self._write_json(reports / "hook-readiness.unified-phase.final.json", {"status": "PASS", "hook_only_enforcement_claim": False})
             self._write_json(reports / "startup-workflow.unified-phase.final.json", {"status": "PASS"})
             self._write_json(reports / "audit.unified-phase.final.json", {"status": "FAIL"})
+            self._write_json(reports / "git-surface.unified-phase.final.json", {"status": "PASS"})
             report = self.module.evaluate_score_layer(tmp)
         self.assertEqual(report["status"], "BLOCKED")
         self.assertIn("workspace audit final gate blocked", report["disqualifiers"])
@@ -93,6 +96,7 @@ class ScoreLayerTests(unittest.TestCase):
             self._write_json(reports / "hook-readiness.unified-phase.final.json", {"status": "PASS", "hook_only_enforcement_claim": False})
             self._write_json(reports / "artifact-hygiene.unified-phase.final.json", {"status": "PASS", "transient_files": []})
             self._write_json(reports / "audit.post-export.json", {"status": "PASS"})
+            self._write_json(reports / "git-surface.unified-phase.final.json", {"status": "PASS"})
             report = self.module.evaluate_score_layer(tmp)
         self.assertEqual(report["status"], "PASS")
         self.assertTrue(report["report_sources"]["audit"].endswith("audit.post-export.json"))
@@ -108,9 +112,25 @@ class ScoreLayerTests(unittest.TestCase):
             self._write_json(reports / "hook-readiness.final.json", {"status": "PASS", "hook_only_enforcement_claim": False})
             self._write_json(reports / "artifact-hygiene.final.json", {"status": "PASS"})
             self._write_json(reports / "audit.final.json", {"status": "WARN"})
+            self._write_json(reports / "git-surface.final.json", {"status": "WARN"})
             report = self.module.evaluate_score_layer(tmp, purpose="app-usability")
         self.assertEqual(report["status"], "WARN")
         self.assertEqual(report["purpose"], "app-usability")
+
+    def test_branch_lock_conflict_blocks(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp = Path(tmpdir)
+            reports = tmp / "reports"
+            self._write_json(reports / "config-provenance.final.json", {"status": "PASS", "gate_status": "PASS"})
+            self._write_json(reports / "global-runtime.final.json", {"overall_status": "PASS", "canonical_execution_status": "PASS", "remote_codex_resolution_status": {"status": "PASS"}, "client_surface_status": "PASS"})
+            self._write_json(reports / "startup-workflow.final.json", {"status": "PASS"})
+            self._write_json(reports / "toolchain-surface.final.json", {"status": "PASS"})
+            self._write_json(reports / "hook-readiness.final.json", {"status": "PASS", "hook_only_enforcement_claim": False})
+            self._write_json(reports / "artifact-hygiene.final.json", {"status": "PASS"})
+            self._write_json(reports / "audit.final.json", {"status": "PASS"})
+            self._write_json(reports / "git-surface.final.json", {"status": "BLOCKED"})
+            report = self.module.evaluate_score_layer(tmp, purpose="app-usability")
+        self.assertEqual(report["status"], "BLOCKED")
 
 
 if __name__ == "__main__":

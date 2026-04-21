@@ -18,13 +18,49 @@
     "remote_project": "/home/andy4917/Dev-Management",
     "readiness_prompt": "Run Dev-Management app usability readiness check and report PASS/WARN/BLOCKED. Do not modify code unless runtime, config provenance, startup, Context7, and score gates allow it."
   },
+  "control_thread": {
+    "required": true,
+    "name": "Dev-Management Control",
+    "remote_host": "devmgmt-wsl",
+    "project_path": "/home/andy4917/Dev-Management",
+    "purpose": [
+      "readiness",
+      "runtime_checks",
+      "config_provenance",
+      "score_layer",
+      "audit",
+      "startup",
+      "artifact_hygiene",
+      "task_routing"
+    ],
+    "default_mode": "local_remote_project",
+    "default_worktree_mode": false,
+    "thread_context_role": "hint_only",
+    "thread_is_execution_authority": false,
+    "thread_is_policy_authority": false,
+    "must_not": [
+      "bypass_instruction_guard",
+      "bypass_serena_or_context7",
+      "treat_app_memory_as_authority",
+      "treat_generated_mirrors_as_render_input",
+      "use_windows_mounted_launcher_as_primary_runtime",
+      "modify_unrelated_dirty_changes"
+    ]
+  },
+  "worktree_guidance": {
+    "default_for_control_thread": "local_remote_project",
+    "implementation_tasks_should_use_scoped_worktree_mode": true,
+    "persistent_ops_worktree_is_optional": true,
+    "persistent_ops_worktree_is_authority": false
+  },
   "blocked_relation": {
     "description": "Codex App on Windows must not use the Windows-mounted Codex launcher as the primary execution runtime.",
     "forbidden_primary_runtime": "/mnt/c/Users/anise/.codex/bin/wsl/codex"
   },
   "auth_surface": {
     "sign_in_is_user_action": true,
-    "auth_payloads_are_runtime_state": true
+    "auth_payloads_are_runtime_state": true,
+    "app_memory_is_authority": false,
+    "thread_memory_is_authority": false
   }
 }
-

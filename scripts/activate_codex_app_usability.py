@@ -21,6 +21,7 @@ from devmgmt_runtime.subprocess_safe import run_ssh
 from check_artifact_hygiene import evaluate_artifact_hygiene
 from check_config_provenance import evaluate_config_provenance, render_markdown as render_config_markdown
 from check_global_runtime import evaluate_global_runtime
+from check_git_surface import evaluate_git_surfaces, render_text_summary as render_git_surface_summary
 from check_hook_readiness import evaluate_hook_readiness, render_markdown as render_hook_markdown
 from check_startup_workflow import evaluate_startup_workflow
 from check_toolchain_surface import evaluate_toolchain_surface, render_markdown as render_toolchain_markdown
@@ -105,8 +106,12 @@ def render_app_usability_markdown(report: dict[str, Any]) -> str:
         f"- Linux-native Codex CLI: {report['linux_native_codex_cli_status']}",
         f"- Config provenance: {report['config_provenance_status']}",
         f"- Generated AGENTS: {report['generated_agents_status']}",
+        f"- Control thread: {report.get('control_thread_status', 'WARN')}",
+        f"- Canonical repo root: {report.get('canonical_repo_root', '')}",
+        f"- Active worktree root: {report.get('active_worktree_root', '')}",
         f"- Auth readiness: {report['auth_status']}",
         f"- Serena status: {report['serena_status']}",
+        f"- Git surface: {report.get('git_surface_status', 'WARN')}",
         f"- Score status: {report['score_status']}",
         f"- Audit status: {report['audit_status']}",
     ]
@@ -182,6 +187,13 @@ def evaluate_app_usability(
     save_json(toolchain_path, toolchain)
     save_markdown(toolchain_path.with_suffix(".md"), render_toolchain_markdown(toolchain))
     reports_created.extend([str(toolchain_path), str(toolchain_path.with_suffix(".md"))])
+
+    git_surface = evaluate_git_surfaces()
+    management_git_report = next((item for item in git_surface.get("repo_reports", []) if str(item.get("repo_root", "")).endswith("/Dev-Management")), {})
+    git_surface_path = reports_root / "git-surface.final.json"
+    save_json(git_surface_path, git_surface)
+    save_markdown(git_surface_path.with_suffix(".md"), render_git_surface_summary(git_surface) + "\n")
+    reports_created.extend([str(git_surface_path), str(git_surface_path.with_suffix(".md"))])
 
     hooks = evaluate_hook_readiness(root)
     hooks_path = reports_root / "hook-readiness.final.json"
@@ -302,6 +314,8 @@ def evaluate_app_usability(
         warning_reasons.append("Audit still reports warnings.")
     if str(score.get("status", "PASS")) == "WARN":
         warning_reasons.append("Score layer still reports warnings.")
+    if str(git_surface.get("status", "PASS")) == "WARN":
+        warning_reasons.append("Git surface still reports warnings.")
 
     if status_reasons:
         status = "APP_NOT_READY"
@@ -311,13 +325,19 @@ def evaluate_app_usability(
         status = "APP_READY"
 
     steps = app_policy.get("settings_flow", {})
+    control_thread = app_policy.get("control_thread", {}) if isinstance(app_policy.get("control_thread"), dict) else {}
+    if not control_thread:
+        fallback_control_thread = authority.get("control_thread_policy", {})
+        control_thread = fallback_control_thread if isinstance(fallback_control_thread, dict) else {}
     user_actions = [
         "Restart Codex App.",
         f"Open {steps.get('settings_path', 'Settings > Connections')}.",
         f"Enable or select {steps.get('host_alias', host_alias)}.",
         f"Open remote project {steps.get('remote_project', str(root))}.",
         "Complete sign-in if prompted.",
+        f"Pin or keep the {control_thread.get('name', 'Dev-Management Control')} thread.",
         "Send the readiness prompt in the app.",
+        "Use separate Worktree mode only for scoped implementation tasks.",
     ]
     if status == "APP_READY":
         user_actions = user_actions[:]
@@ -342,11 +362,15 @@ def evaluate_app_usability(
         "linux_native_codex_cli_status": str(runtime.get("remote_native_codex_status", {}).get("status", linux_cli.get("status", "WARN"))),
         "config_provenance_status": str(config.get("gate_status", config.get("status", "WARN"))),
         "generated_agents_status": generated_agents_status,
+        "control_thread_status": "PASS" if control_thread.get("name") else "WARN",
         "auth_status": auth_status,
         "serena_status": startup["status"],
         "score_status": str(score.get("status", "WARN")),
         "audit_status": str(audit.get("status", audit.get("gate_status", "WARN"))),
-        "final_user_instructions": "Restart Codex App, open Settings > Connections, select devmgmt-wsl, open /home/andy4917/Dev-Management, sign in if prompted, and send the readiness prompt.",
+        "git_surface_status": str(git_surface.get("status", "WARN")),
+        "canonical_repo_root": str(management_git_report.get("canonical_repo_root", root)),
+        "active_worktree_root": str(management_git_report.get("active_worktree_root", root)),
+        "final_user_instructions": "Restart Codex App, open Settings > Connections, select devmgmt-wsl, open /home/andy4917/Dev-Management, pin or keep the Dev-Management Control thread, sign in if prompted, and send the readiness prompt. Use separate Worktree mode only for scoped implementation tasks.",
     }
     report["reports_created"].extend(
         [

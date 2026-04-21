@@ -1,23 +1,28 @@
 {
-  "status": "PASS",
+  "status": "WARN",
   "runtime_hook_role": "trigger_only",
   "trigger_only": true,
   "hook_only_enforcement_claim": false,
+  "windows_generation_enabled": false,
+  "windows_generation_reason": "disabled by authority because Windows prompt-submit wrappers spawned visible terminal windows and hooks are trigger-only, not final enforcement",
   "linux_hooks": {
     "path": "/home/andy4917/.codex/hooks.json",
+    "configured": true,
     "matches_generated": true
   },
   "windows_hooks": {
     "path": "/mnt/c/Users/anise/.codex/hooks.json",
+    "configured": false,
     "matches_generated": true
   },
   "windows_wrapper": {
     "path": "/mnt/c/Users/anise/.codex/bin/scorecard-hook-wrapper.ps1",
-    "configured": true,
+    "configured": false,
     "matches_generated": true
   },
   "warnings": [
     "Hooks are trigger-only. Audit, tests, and score layer remain the final enforcement gates.",
-    "Windows hook behavior may be unsupported or degraded and must not be treated as authoritative enforcement."
+    "Windows hook behavior may be unsupported or degraded and must not be treated as authoritative enforcement.",
+    "disabled by authority because Windows prompt-submit wrappers spawned visible terminal windows and hooks are trigger-only, not final enforcement"
   ]
 }

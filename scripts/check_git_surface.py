@@ -5,12 +5,19 @@ import argparse
 import json
 import shutil
 import subprocess
+import sys
 from pathlib import Path
 from typing import Any
 
 
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from devmgmt_runtime.paths import git_worktree_inventory
+
 AUTHORITY_PATH = ROOT / "contracts" / "workspace_authority.json"
+EXECUTION_SURFACES_PATH = ROOT / "contracts" / "execution_surfaces.json"
 DEFAULT_OUTPUT_PATH = ROOT / "reports" / "git-surface.json"
 REQUESTED_OPTIONAL_REPO = Path("/home/andy4917/reservation-system")
 PROPOSED_GITATTRIBUTES_LINES = [
@@ -64,6 +71,10 @@ def status_exit_code(status: str) -> int:
 
 def load_authority() -> dict[str, Any]:
     return load_json(AUTHORITY_PATH, default={})
+
+
+def load_execution_surfaces() -> dict[str, Any]:
+    return load_json(EXECUTION_SURFACES_PATH, default={})
 
 
 def canonical_repo_roots(authority: dict[str, Any], extra_roots: list[Path] | None = None) -> list[Path]:
@@ -188,11 +199,34 @@ def stale_safe_directories(lines: list[str]) -> list[str]:
     return sorted(set(stale))
 
 
-def repo_git_probe(repo_root: Path) -> dict[str, Any]:
+def repo_canonical_root(repo_root: Path, authority: dict[str, Any]) -> Path:
+    management = Path(str(authority.get("canonical_roots", {}).get("management", ROOT))).expanduser().resolve()
+    if repo_root.resolve() == management:
+        return management
+    common_dir = run(["git", "-C", str(repo_root), "rev-parse", "--git-common-dir"])
+    raw_common = str(common_dir.get("stdout", "")).strip()
+    if raw_common:
+        common_path = Path(raw_common)
+        if not common_path.is_absolute():
+            common_path = (repo_root / common_path).resolve()
+        if common_path == (management / ".git").resolve():
+            return management
+    return repo_root.resolve()
+
+
+def worktree_policy(execution_surfaces: dict[str, Any]) -> dict[str, Any]:
+    payload = execution_surfaces.get("worktree_policy", {})
+    return payload if isinstance(payload, dict) else {}
+
+
+def repo_git_probe(repo_root: Path, authority: dict[str, Any], execution_surfaces: dict[str, Any]) -> dict[str, Any]:
+    canonical_root = repo_canonical_root(repo_root, authority)
     if not (repo_root / ".git").exists():
         status = "requested-path-missing" if repo_root == REQUESTED_OPTIONAL_REPO else "missing"
         return {
             "repo_root": str(repo_root),
+            "canonical_repo_root": str(canonical_root),
+            "active_worktree_root": str(repo_root.resolve()),
             "status": status,
             "dirty": [],
             "local_config": {"available": False, "lines": [], "map": {}},
@@ -201,6 +235,16 @@ def repo_git_probe(repo_root: Path) -> dict[str, Any]:
             "is_worktree": False,
             "is_sparse_checkout": False,
             "superproject": "",
+            "worktree_inventory": {
+                "canonical_repo_root": str(canonical_root),
+                "active_worktree_root": str(repo_root.resolve()),
+                "worktrees": [],
+                "stale_worktrees": [],
+                "duplicate_branch_checkouts": {},
+                "current_branch_conflict": False,
+            },
+            "worktree_policy_status": "PASS",
+            "branch_lock_status": "PASS",
             "warnings": [],
         }
 
@@ -208,25 +252,44 @@ def repo_git_probe(repo_root: Path) -> dict[str, Any]:
     dirty = run(["git", "-C", str(repo_root), "status", "--short"])
     top_level = run(["git", "-C", str(repo_root), "rev-parse", "--show-toplevel"])
     hooks_path = run(["git", "-C", str(repo_root), "rev-parse", "--git-path", "hooks"])
-    superproject = run(["git", "-C", str(repo_root), "rev-parse", "--show-superproject-working-tree"])
     sparse = run(["git", "-C", str(repo_root), "sparse-checkout", "list"])
+    worktree_inventory = git_worktree_inventory(
+        repo_root,
+        authority if canonical_root == Path(str(authority.get("canonical_roots", {}).get("management", ROOT))).expanduser().resolve() else {"authority_root": str(canonical_root)},
+    )
+    worktree_rules = worktree_policy(execution_surfaces)
 
     warnings: list[str] = []
     if dirty["stdout"].strip():
         warnings.append("repo is dirty")
     if local_config["map"].get("core.autocrlf"):
         warnings.append("repo overrides core.autocrlf locally")
+    if worktree_inventory.get("stale_worktrees"):
+        warnings.append("stale or prunable worktrees were detected")
+    if worktree_inventory.get("current_branch_conflict"):
+        warnings.append("current branch is checked out in multiple worktree locations")
+    persistent_root = str(worktree_rules.get("persistent_ops_worktree_root", "")).strip()
+    if persistent_root and not Path(persistent_root).expanduser().exists():
+        warnings.append("configured persistent ops worktree path is stale or missing")
+
+    worktree_policy_status = "WARN" if worktree_inventory.get("stale_worktrees") or (persistent_root and not Path(persistent_root).expanduser().exists()) else "PASS"
+    branch_lock_status = "BLOCKED" if worktree_inventory.get("current_branch_conflict") else "PASS"
 
     return {
         "repo_root": str(repo_root),
+        "canonical_repo_root": str(canonical_root),
+        "active_worktree_root": str(worktree_inventory.get("active_worktree_root", repo_root.resolve())),
         "status": "present",
         "dirty": [line for line in str(dirty["stdout"]).splitlines() if line.strip()],
         "local_config": local_config,
         "top_level": str(top_level["stdout"]).strip(),
         "hooks_path": str(hooks_path["stdout"]).strip(),
-        "is_worktree": bool(str(superproject["stdout"]).strip()),
+        "is_worktree": bool(worktree_inventory.get("is_linked_worktree")) or str(worktree_inventory.get("active_worktree_root", "")) != str(canonical_root),
         "is_sparse_checkout": bool(sparse["ok"] and str(sparse["stdout"]).strip()),
-        "superproject": str(superproject["stdout"]).strip(),
+        "superproject": "",
+        "worktree_inventory": worktree_inventory,
+        "worktree_policy_status": worktree_policy_status,
+        "branch_lock_status": branch_lock_status,
         "warnings": warnings,
     }
 
@@ -276,6 +339,7 @@ def compare_global_maps(wsl_global: dict[str, Any], windows_global: dict[str, An
 
 def evaluate_git_surfaces(repo_roots: list[Path] | None = None) -> dict[str, Any]:
     authority = load_authority()
+    execution_surfaces = load_execution_surfaces()
     roots = canonical_repo_roots(authority, repo_roots)
     git_exe = first_existing_git_exe()
     wsl_global = probe_git_scope("git", "global")
@@ -292,10 +356,11 @@ def evaluate_git_surfaces(repo_roots: list[Path] | None = None) -> dict[str, Any
     )
     wsl_lfs = git_lfs_available("git")
     windows_lfs = git_lfs_available(str(git_exe)) if git_exe is not None else {"available": False, "stdout": "", "stderr": "git.exe not found"}
-    repos = [repo_git_probe(path) for path in roots]
+    repos = [repo_git_probe(path, authority, execution_surfaces) for path in roots]
     proposals = [dev_management_gitattributes_proposal(path) for path in roots]
 
     warnings: list[str] = []
+    blockers: list[str] = []
     if not windows_global.get("available"):
         warnings.append("Windows Git global config could not be observed from WSL.")
     if stale_safe_directories(wsl_global.get("lines", [])):
@@ -311,14 +376,20 @@ def evaluate_git_surfaces(repo_roots: list[Path] | None = None) -> dict[str, Any
         warnings.append("Git LFS is configured but unavailable in WSL.")
     if any(repo.get("dirty") for repo in repos if repo.get("status") == "present"):
         warnings.append("Dirty repos were detected and are reported only.")
+    if any(repo.get("worktree_policy_status") == "WARN" for repo in repos if repo.get("status") == "present"):
+        warnings.append("Stale or missing persistent worktree evidence was detected.")
+    if any(repo.get("branch_lock_status") == "BLOCKED" for repo in repos if repo.get("status") == "present"):
+        blockers.append("A branch is checked out in multiple worktree locations.")
     if any(item.get("status") == "PROPOSED" for item in proposals):
         warnings.append("Dev-Management repo-local .gitattributes proposal is available.")
 
-    status = "WARN" if warnings else "PASS"
+    status = collapse_status(["BLOCKED" if blockers else "", "WARN" if warnings else ""])
     return {
         "status": status,
         "repo_reports": repos,
         "repo_local_guard_proposals": proposals,
+        "canonical_repo_root": str(repo_canonical_root(Path(str(authority.get("canonical_roots", {}).get("management", ROOT))).expanduser().resolve(), authority)),
+        "worktree_policy": worktree_policy(execution_surfaces),
         "wsl": {
             "global": wsl_global,
             "system": wsl_system,
@@ -333,12 +404,15 @@ def evaluate_git_surfaces(repo_roots: list[Path] | None = None) -> dict[str, Any
             "stale_safe_directories": stale_safe_directories(windows_global.get("lines", [])),
         },
         "global_drift": compare_global_maps(wsl_global, windows_global),
+        "blocked_reasons": blockers,
         "warnings": warnings,
     }
 
 
 def render_text_summary(report: dict[str, Any]) -> str:
     lines = [f"git surface status: {report['status']}"]
+    for blocker in report.get("blocked_reasons", []):
+        lines.append(f"- BLOCKED: {blocker}")
     for warning in report.get("warnings", []):
         lines.append(f"- {warning}")
     for repo in report.get("repo_reports", []):
@@ -347,7 +421,7 @@ def render_text_summary(report: dict[str, Any]) -> str:
             continue
         dirty = len(repo.get("dirty", []))
         lines.append(
-            f"- {repo['repo_root']}: dirty={dirty}, sparse={repo.get('is_sparse_checkout')}, worktree={repo.get('is_worktree')}"
+            f"- {repo['repo_root']}: dirty={dirty}, sparse={repo.get('is_sparse_checkout')}, worktree={repo.get('is_worktree')}, active_worktree_root={repo.get('active_worktree_root')}, canonical_repo_root={repo.get('canonical_repo_root')}"
         )
     return "\n".join(lines)
 

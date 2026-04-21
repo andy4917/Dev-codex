@@ -120,6 +120,68 @@ class GitSurfaceTests(unittest.TestCase):
         self.assertEqual(management_proposal["status"], "PROPOSED")
         self.assertEqual(other_proposal["status"], "WAIVED")
 
+    def test_stale_worktree_warns(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo = Path(tmpdir) / "repo"
+            (repo / ".git").mkdir(parents=True)
+            repo_probe = {
+                "repo_root": str(repo),
+                "status": "present",
+                "dirty": [],
+                "is_sparse_checkout": False,
+                "is_worktree": True,
+                "worktree_policy_status": "WARN",
+                "branch_lock_status": "PASS",
+                "active_worktree_root": str(repo / "task-worktree"),
+                "canonical_repo_root": str(repo),
+            }
+            with patch.object(self.module, "load_authority", return_value={"canonical_roots": {}}), patch.object(
+                self.module, "load_execution_surfaces", return_value={"worktree_policy": {}}
+            ), patch.object(
+                self.module, "canonical_repo_roots", return_value=[repo]
+            ), patch.object(
+                self.module, "first_existing_git_exe", return_value=None
+            ), patch.object(
+                self.module, "probe_git_scope", return_value={"available": False, "lines": [], "map": {}}
+            ), patch.object(
+                self.module, "git_lfs_available", return_value={"available": False}
+            ), patch.object(
+                self.module, "repo_git_probe", return_value=repo_probe
+            ):
+                report = self.module.evaluate_git_surfaces()
+        self.assertEqual(report["status"], "WARN")
+
+    def test_branch_lock_conflict_blocks(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo = Path(tmpdir) / "repo"
+            (repo / ".git").mkdir(parents=True)
+            repo_probe = {
+                "repo_root": str(repo),
+                "status": "present",
+                "dirty": [],
+                "is_sparse_checkout": False,
+                "is_worktree": True,
+                "worktree_policy_status": "PASS",
+                "branch_lock_status": "BLOCKED",
+                "active_worktree_root": str(repo / "task-worktree"),
+                "canonical_repo_root": str(repo),
+            }
+            with patch.object(self.module, "load_authority", return_value={"canonical_roots": {}}), patch.object(
+                self.module, "load_execution_surfaces", return_value={"worktree_policy": {}}
+            ), patch.object(
+                self.module, "canonical_repo_roots", return_value=[repo]
+            ), patch.object(
+                self.module, "first_existing_git_exe", return_value=None
+            ), patch.object(
+                self.module, "probe_git_scope", return_value={"available": False, "lines": [], "map": {}}
+            ), patch.object(
+                self.module, "git_lfs_available", return_value={"available": False}
+            ), patch.object(
+                self.module, "repo_git_probe", return_value=repo_probe
+            ):
+                report = self.module.evaluate_git_surfaces()
+        self.assertEqual(report["status"], "BLOCKED")
+
 
 if __name__ == "__main__":
     unittest.main()

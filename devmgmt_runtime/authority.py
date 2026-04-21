@@ -25,6 +25,27 @@ def load_authority(repo_root: str | Path | None = None, *, authority_path: str |
     return payload if isinstance(payload, dict) else {}
 
 
+def canonical_repo_root(authority: dict[str, Any], fallback_repo_root: str | Path | None = None) -> Path:
+    roots = authority.get("canonical_roots", {}) if isinstance(authority.get("canonical_roots"), dict) else {}
+    candidates = [
+        authority.get("authority_root"),
+        roots.get("management"),
+        authority.get("canonical_remote_execution_surface", {}).get("repo_root") if isinstance(authority.get("canonical_remote_execution_surface"), dict) else None,
+        authority.get("canonical_execution_surface", {}).get("repo_root") if isinstance(authority.get("canonical_execution_surface"), dict) else None,
+        fallback_repo_root,
+        DEFAULT_AUTHORITY_PATH.parents[1],
+    ]
+    for candidate in candidates:
+        if not candidate:
+            continue
+        return Path(str(candidate)).expanduser().resolve()
+    return DEFAULT_AUTHORITY_PATH.parents[1]
+
+
+def canonical_authority_path(authority: dict[str, Any], fallback_repo_root: str | Path | None = None) -> Path:
+    return canonical_repo_root(authority, fallback_repo_root) / "contracts" / "workspace_authority.json"
+
+
 def module_registry(authority: dict[str, Any]) -> dict[str, Any]:
     payload = authority.get("module_registry", {})
     return payload if isinstance(payload, dict) else {}
@@ -33,4 +54,3 @@ def module_registry(authority: dict[str, Any]) -> dict[str, Any]:
 def module_contract(authority: dict[str, Any], module_name: str) -> dict[str, Any]:
     payload = module_registry(authority).get(module_name, {})
     return payload if isinstance(payload, dict) else {}
-

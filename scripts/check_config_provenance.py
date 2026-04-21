@@ -15,9 +15,9 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from devmgmt_runtime.authority import authority_path_for, load_authority
+from devmgmt_runtime.authority import authority_path_for, canonical_authority_path, canonical_repo_root, load_authority
 from devmgmt_runtime.paths import WINDOWS_CODEX_HOME, runtime_paths
-from devmgmt_runtime.reports import save_json
+from devmgmt_runtime.reports import load_json, save_json
 from devmgmt_runtime.status import collapse_status, status_exit_code
 from render_codex_runtime import render_agents, render_hooks, user_override_config_paths
 
@@ -41,6 +41,8 @@ def load_policy(repo_root: str | Path | None = None) -> dict[str, Any]:
 
 def authority_hash(path: Path | None = None) -> str:
     target = path or AUTHORITY_PATH
+    if not target.exists():
+        return ""
     return hashlib.sha256(target.read_bytes()).hexdigest()
 
 
@@ -169,8 +171,12 @@ def config_policy_findings(path: Path, policy: dict[str, Any], classification: s
 
 def evaluate_config_provenance(repo_root: str | Path | None = None) -> dict[str, Any]:
     authority = load_authority(repo_root)
-    repo_authority_path = authority_path_for(repo_root, authority_path=AUTHORITY_PATH)
-    policy = load_policy(repo_root)
+    raw_authority_path = authority_path_for(repo_root, authority_path=AUTHORITY_PATH)
+    repo_authority_path = canonical_authority_path(authority, repo_root)
+    active_worktree_root = Path(repo_root).expanduser().resolve() if repo_root else ROOT.resolve()
+    canonical_root = canonical_repo_root(authority, repo_root)
+    policy_path = canonical_root / "contracts" / "config_provenance_policy.json"
+    policy = load_json(policy_path, default={}) if policy_path.exists() else load_policy(repo_root)
     if not policy.get("blocked_active_feature_flags"):
         policy["blocked_active_feature_flags"] = authority.get("hardcoding_definition", {}).get("feature_rules", {}).get("forbidden_feature_flags", [])
     policy.setdefault("workspace_dependencies_reauthorized", False)
@@ -186,6 +192,10 @@ def evaluate_config_provenance(repo_root: str | Path | None = None) -> dict[str,
     mirrors = [paths["linux_config"], paths["windows_config"], paths["linux_agents"], paths["windows_agents"], paths["linux_hooks"], paths["windows_hooks"]]
     classifications = {str(path): classify_path(path, repo_authority_path, paths) for path in [*mirrors, paths["linux_user_override"], repo_authority_path]}
     self_feed_reasons: list[str] = []
+    if raw_authority_path.resolve() != repo_authority_path.resolve():
+        self_feed_reasons.append(
+            f"worktree attempted to use non-canonical authority source: {raw_authority_path}"
+        )
     if str(paths["linux_config"]) in override_source_paths:
         self_feed_reasons.append("linux generated mirror is being used as an override source")
     if str(paths["windows_config"]) in override_source_paths:
@@ -205,11 +215,20 @@ def evaluate_config_provenance(repo_root: str | Path | None = None) -> dict[str,
         "gate_status": "BLOCKED" if blocked_reasons else "PASS",
         "checked_at": datetime.now(timezone.utc).isoformat(),
         "authority_path": str(repo_authority_path),
+        "raw_authority_probe_path": str(raw_authority_path),
         "authority_hash": authority_hash(repo_authority_path),
-        "policy_path": str((Path(repo_root).expanduser().resolve() if repo_root else ROOT) / "contracts" / "config_provenance_policy.json"),
+        "canonical_repo_root": str(canonical_root),
+        "active_worktree_root": str(active_worktree_root),
+        "policy_path": str(policy_path),
         "allowed_optional_user_override_source": str(paths["linux_user_override"]),
         "override_source_paths": override_source_paths,
-        "generated_mirror_contract": {"status": "BLOCKED" if self_feed_reasons else "PASS", "self_feed_reasons": self_feed_reasons, "mirrors_are_outputs_only": True},
+        "generated_mirror_contract": {
+            "status": "BLOCKED" if self_feed_reasons else "PASS",
+            "self_feed_reasons": self_feed_reasons,
+            "mirrors_are_outputs_only": True,
+            "canonical_repo_root": str(canonical_root),
+            "active_worktree_root": str(active_worktree_root),
+        },
         "classifications": classifications,
         "generated_headers": generated_headers,
         "active_config_findings": active_config_findings,
@@ -229,6 +248,9 @@ def render_markdown(report: dict[str, Any]) -> str:
         "# Config Provenance",
         "",
         f"- Status: {status}",
+        f"- Canonical repo root: {report.get('canonical_repo_root', '')}",
+        f"- Active worktree root: {report.get('active_worktree_root', '')}",
+        f"- Authority source path: {report.get('authority_path', '')}",
         f"- Allowed optional user override: {override_source}",
         f"- Override sources: {', '.join(str(item) for item in override_sources) or '(none)'}",
     ]

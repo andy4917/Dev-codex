@@ -5,6 +5,7 @@
     "outputs_only": true,
     "read_by_renderer": false,
     "user_override_source": false,
+    "canonical_repo_root": "/home/andy4917/Dev-Management",
     "required_header_fields": [
       "source_authority",
       "source_hash",
@@ -32,8 +33,11 @@
       "danger-full-access"
     ]
   },
+  "worktree_rules": {
+    "generated_mirrors_must_use_canonical_repo_root": true,
+    "worktree_attempting_source_of_truth_status": "BLOCKED"
+  },
   "allowed_replacement_features": [
     "chronicle"
   ]
 }
-

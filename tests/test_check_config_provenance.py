@@ -161,6 +161,24 @@ class CheckConfigProvenanceTests(unittest.TestCase):
         self.assertEqual(report["status"], "BLOCKED")
         self.assertIn("active forbidden feature flag detected: use_agent_identity", report["blocked_reasons"])
 
+    def test_worktree_cannot_become_source_of_truth(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp = Path(tmpdir)
+            canonical_root = tmp / "repo-main"
+            worktree_root = tmp / "repo-worktree"
+            authority = self._authority(tmp)
+            authority["authority_root"] = str(canonical_root)
+            authority["canonical_roots"] = {"management": str(canonical_root)}
+            authority_path = worktree_root / "contracts" / "workspace_authority.json"
+            authority_path.parent.mkdir(parents=True)
+            self._write_json(authority_path, authority)
+            with patch.object(self.module, "AUTHORITY_PATH", authority_path), patch.object(self.module, "WINDOWS_CODEX_HOME", tmp / "missing-app-state"):
+                self._write_generated(tmp / "linux-config.toml", authority, 'approval_policy = "on-request"\nsandbox_mode = "workspace-write"')
+                self._write_generated(tmp / "windows-config.toml", authority, 'approval_policy = "on-request"\nsandbox_mode = "workspace-write"')
+                report = self.module.evaluate_config_provenance(worktree_root)
+        self.assertEqual(report["status"], "BLOCKED")
+        self.assertIn("worktree attempted to use non-canonical authority source", " ".join(report["blocked_reasons"]))
+
 
 if __name__ == "__main__":
     unittest.main()

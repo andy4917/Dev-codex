@@ -9,6 +9,9 @@
 - Linux-native Codex CLI on the remote login-shell PATH is the canonical agent binary.
 - `/mnt/c/Users/anise/.codex/bin/wsl/codex` is an external dependency and forbidden primary runtime.
 - Generated mirrors are outputs only; use `/home/andy4917/.codex/user-config.toml` for allowed global overrides.
+- Keep a pinned `Dev-Management Control` thread for readiness, maintenance routing, and non-destructive diagnostics.
+- Persistent ops worktrees are optional, non-authoritative, and must never replace the canonical repo root.
+- Default implementation work to task-scoped ephemeral worktrees when Worktree mode is used.
 
 ## Preflight
 
@@ -21,6 +24,7 @@
 7. `python3 scripts/check_startup_workflow.py --mode ssh-managed --json`
 8. `python3 scripts/audit_workspace.py --json`
 9. `python3 scripts/activate_codex_app_usability.py --dry-run --json` when the goal is app readiness rather than general code modification
+10. If working in a worktree, confirm `active_worktree_root` and `canonical_repo_root` before modifications
 
 ## Verify Loop
 
@@ -41,6 +45,8 @@
 - local shell direct execution remains blocked when forbidden launcher paths are primary
 - hooks are trigger-only and not the final enforcement surface
 - app update or settings sync cannot redefine Dev-Management authority
+- a pinned control thread is allowed, but thread context and app memory remain hints only
+- generated mirrors always bind to the canonical repo root, never a task worktree root
 
 ## Failure Handling
 

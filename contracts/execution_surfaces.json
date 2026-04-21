@@ -87,12 +87,41 @@
     "mirrors_are_outputs_only": true,
     "generated_mirror_self_feed_status": "BLOCKED"
   },
+  "worktree_policy": {
+    "canonical_repo_root": "/home/andy4917/Dev-Management",
+    "persistent_ops_worktree_allowed": false,
+    "persistent_ops_worktree_enablement": "explicit_only",
+    "persistent_ops_worktree_root": "",
+    "persistent_ops_worktree_is_authority": false,
+    "task_worktrees_are_ephemeral": true,
+    "generated_mirrors_must_use_canonical_repo_root": true,
+    "report_identity_fields": [
+      "active_worktree_root",
+      "canonical_repo_root"
+    ],
+    "persistent_ops_worktree_allowed_tasks": [
+      "recurring_audits",
+      "report_generation",
+      "readiness_checks",
+      "app_usability_checks",
+      "non_destructive_diagnostics",
+      "automation_without_source_modification_unless_all_gates_pass"
+    ],
+    "task_worktree_default_for_code_changes": true,
+    "stale_persistent_worktree_status": "WARN",
+    "branch_checked_out_in_multiple_locations_status": "BLOCKED",
+    "worktree_authority_escalation_status": "BLOCKED",
+    "cleanup_and_handoff_required": true
+  },
   "git_surface_drift_rules": {
     "mixed_windows_and_wsl_execution_status": "BLOCKED",
     "windows_git_observation_only": true,
     "local_dirty_state_status": "WARN",
     "lfs_missing_status": "WARN",
-    "stale_safe_directory_status": "WARN"
+    "stale_safe_directory_status": "WARN",
+    "stale_persistent_worktree_status": "WARN",
+    "branch_checked_out_in_multiple_locations_status": "BLOCKED",
+    "worktree_authority_escalation_status": "BLOCKED"
   },
   "app_surface_rules": {
     "codex_app_role": "primary_user_control_surface",

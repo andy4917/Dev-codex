@@ -507,6 +507,7 @@ trust_level = "trusted"
                     "runtime_hook": {
                         "script": "/home/andy4917/Dev-Management/scripts/scorecard_runtime_hook.py",
                         "linux_command_prefix": "python3",
+                        "windows_generation_enabled": False,
                         "windows_command_prefix": "powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File",
                         "windows_wrapper_path": "/mnt/c/Users/anise/.codex/bin/scorecard-hook-wrapper.ps1",
                         "windows_wrapper_generated_header": "GENERATED - DO NOT EDIT",
@@ -517,10 +518,12 @@ trust_level = "trusted"
                 }
             }
         }
+        authority["control_thread_policy"] = {"name": "Dev-Management Control", "remote_host": "devmgmt-wsl"}
+        authority["worktree_policy_summary"] = {"persistent_ops_worktree_allowed": False, "task_worktrees_are_ephemeral": True}
 
         rendered_agents = render.render_agents(authority, windows=False)
         linux_hooks = json.loads(render.render_hooks(authority, windows=False))
-        windows_hooks = json.loads(render.render_hooks(authority, windows=True))
+        windows_hooks = render.render_hooks(authority, windows=True)
         wrapper = render.render_windows_hook_wrapper(authority)
         launcher_script = render.render_linux_launcher(authority)
 
@@ -540,20 +543,17 @@ trust_level = "trusted"
         self.assertIn("telepathy, workspace_dependencies, danger-full-access", rendered_agents)
         self.assertIn("activate the current project or worktree with Serena", rendered_agents)
         self.assertIn("Use Context7 before changing external libraries", rendered_agents)
+        self.assertIn("Dev-Management Control", rendered_agents)
+        self.assertIn("Persistent ops worktrees are optional", rendered_agents)
         self.assertIn("/home/andy4917/.codex/state/iaw/gate-receipts", rendered_agents)
         self.assertEqual(set(linux_hooks["hooks"]), {"UserPromptSubmit"})
         self.assertEqual(
             linux_hooks["hooks"]["UserPromptSubmit"][0]["hooks"][0]["command"],
             "python3 /home/andy4917/Dev-Management/scripts/scorecard_runtime_hook.py --event UserPromptSubmit",
         )
-        self.assertEqual(
-            windows_hooks["hooks"]["UserPromptSubmit"][0]["hooks"][0]["command"],
-            "powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File C:/Users/anise/.codex/bin/scorecard-hook-wrapper.ps1 -Event UserPromptSubmit -AuthorityPath /home/andy4917/Dev-Management/contracts/workspace_authority.json",
-        )
-        self.assertIsNotNone(wrapper)
+        self.assertIsNone(windows_hooks)
+        self.assertIsNone(wrapper)
         self.assertIsNotNone(launcher_script)
-        self.assertIn("Convert-ToLinuxPath", wrapper)
-        self.assertIn("wsl.exe python3 $HookScript", wrapper)
         self.assertIn('host_alias="devmgmt-wsl"', launcher_script)
         self.assertIn("canonical agent binary: Linux-native Codex CLI", launcher_script)
         self.assertIn("forbidden primary runtime: /mnt/c/Users/anise/.codex/bin/wsl/codex", launcher_script)

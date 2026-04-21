@@ -94,6 +94,20 @@ class CheckToolchainSurfaceTests(unittest.TestCase):
                 report = self.module.evaluate_toolchain_surface(tmp)
         self.assertEqual(report["status"], "BLOCKED")
 
+    def test_windows_hooks_disabled_warns_but_does_not_block(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp = Path(tmpdir)
+            reports = tmp / "reports"
+            reports.mkdir()
+            (tmp / ".codex").mkdir()
+            (tmp / ".codex" / "config.toml").write_text('[features]\nchronicle = true\n', encoding="utf-8")
+            (reports / "toolchain-usage.session.json").write_text(json.dumps({"skills": ["env-audit"], "subagents": ["contracts_docs_review"]}), encoding="utf-8")
+            (reports / "codex-app-installed-release-impact.unified-phase.json").write_text(json.dumps({"status": "PASS"}), encoding="utf-8")
+            (reports / "hook-readiness.final.json").write_text(json.dumps({"status": "WARN", "hook_only_enforcement_claim": False, "windows_generation_enabled": False}), encoding="utf-8")
+            with patch.dict(os.environ, {"HOME": str(tmp)}), patch.object(self.module, "evaluate_global_runtime", return_value={"remote_codex_resolution_status": {"status": "PASS"}, "overall_status": "PASS"}):
+                report = self.module.evaluate_toolchain_surface(tmp)
+        self.assertEqual(report["status"], "WARN")
+
 
 if __name__ == "__main__":
     unittest.main()

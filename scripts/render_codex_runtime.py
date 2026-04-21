@@ -115,6 +115,11 @@ def forbidden_primary_runtime(authority: dict) -> str:
     return ""
 
 
+def windows_hook_generation_enabled(authority: dict) -> bool:
+    runtime_hook = authority.get("generation_targets", {}).get("scorecard", {}).get("runtime_hook", {})
+    return bool(runtime_hook.get("windows_generation_enabled", True))
+
+
 def sync_generated_text(path: Path, text: str | None) -> None:
     if text is None:
         if path.is_dir() and not path.is_symlink():
@@ -184,6 +189,8 @@ def render_agents(authority: dict, windows: bool) -> str:
     override = layering["user_override_policy"]
     runtime_hook = scorecard.get("runtime_hook", {})
     hook_events = [str(name) for name in runtime_hook.get("events", {}).keys()]
+    control_thread = authority.get("control_thread_policy", {})
+    worktree_policy = authority.get("worktree_policy_summary", {})
     blocked_features = [str(item) for item in override.get("blocked_feature_overrides", [])]
     header = GENERATED_RUNTIME_HEADER + "\n\n"
     structural_override_line = ""
@@ -198,6 +205,10 @@ def render_agents(authority: dict, windows: bool) -> str:
         hook_notice = (
             "- Generated runtime hooks may replay the scorecard close-out reminder for configured runtime events, "
             "but audit, tests, and score layer remain the final enforcement gates.\n"
+        )
+    if hook_events and not windows_hook_generation_enabled(authority):
+        hook_notice = (
+            "- Generated runtime hooks remain trigger-only. Windows prompt-submit wrappers are intentionally disabled to avoid visible terminal churn; audit, tests, and score layer remain the final enforcement gates.\n"
         )
     return (
         f"{header}"
@@ -239,6 +250,10 @@ def render_agents(authority: dict, windows: bool) -> str:
         f"    -> primary execution runtime\n"
         f"- Do not hand-edit generated AGENTS, config, shim, or preview runtime files; rerender them from the authority repo instead.\n"
         f"- User app setup path: Restart Codex App -> Settings > Connections -> select {host_alias} -> open /home/andy4917/Dev-Management -> sign in if prompted -> send the readiness prompt.\n"
+        f"- Keep a pinned Codex App control thread named `{control_thread.get('name', 'Dev-Management Control')}` on `{control_thread.get('remote_host', host_alias)}` for readiness, runtime checks, config provenance, score layer, audit, startup, artifact hygiene, and task routing.\n"
+        f"- The pinned control thread defaults to the local remote project, not Worktree mode, and it is not the execution authority or policy authority. App memories and thread context remain hints only.\n"
+        f"- Persistent ops worktrees are optional and remain non-authority execution surfaces only. Task worktrees are ephemeral by default, generated mirrors must still bind to `{authority.get('canonical_repo_root', roots['management'])}`, and implementation work should use separate scoped worktrees when worktree mode is chosen.\n"
+        f"- If a persistent ops worktree is explicitly enabled later, use it only for recurring audits, report generation, readiness checks, app usability checks, and non-destructive diagnostics.\n"
         f"- User should not manually edit generated config, launcher, PATH, SSH, hooks, or system files unless a Dev-Management report explicitly asks for it.\n"
         f"- Before code work, activate the current project or worktree with Serena when it is available.\n"
         f"- Check Serena onboarding and project memories before major code changes.\n"
@@ -643,6 +658,8 @@ def render_hooks(authority: dict, windows: bool) -> str | None:
     events = runtime_hook.get("events", {})
     if not script or not isinstance(events, dict) or not events:
         return None
+    if windows and not windows_hook_generation_enabled(authority):
+        return None
 
     hooks: dict[str, list[dict[str, Any]]] = {}
     linux_prefix = str(runtime_hook.get("linux_command_prefix", "python3")).strip() or "python3"
@@ -688,7 +705,7 @@ def render_windows_hook_wrapper(authority: dict) -> str | None:
     runtime_hook = authority.get("generation_targets", {}).get("scorecard", {}).get("runtime_hook", {})
     script = str(runtime_hook.get("script", "")).strip()
     wrapper_path = str(runtime_hook.get("windows_wrapper_path", "")).strip()
-    if not script or not wrapper_path:
+    if not script or not wrapper_path or not windows_hook_generation_enabled(authority):
         return None
     generated_header = str(runtime_hook.get("windows_wrapper_generated_header", "GENERATED - DO NOT EDIT")).strip() or "GENERATED - DO NOT EDIT"
     return (

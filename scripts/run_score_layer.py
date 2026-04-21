@@ -12,12 +12,20 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from devmgmt_runtime.reports import load_first_report, save_json
+from devmgmt_runtime.reports import load_first_report, load_json, save_json
 from devmgmt_runtime.status import collapse_status, status_exit_code
 
 
 DEFAULT_OUTPUT_PATH = ROOT / "reports" / "score-layer.unified-phase.json"
 PURPOSE_CHOICES = ("code-modification", "app-usability")
+SCORE_POLICY_PATH = ROOT / "contracts" / "score_policy.json"
+
+
+def load_score_policy() -> dict[str, Any]:
+    if not SCORE_POLICY_PATH.exists():
+        return {}
+    payload = load_json(SCORE_POLICY_PATH, default={})
+    return payload if isinstance(payload, dict) else {}
 
 
 def evaluate_score_layer(repo_root: str | Path | None = None, *, purpose: str = "code-modification") -> dict[str, Any]:
@@ -30,6 +38,8 @@ def evaluate_score_layer(repo_root: str | Path | None = None, *, purpose: str = 
     hooks, hooks_source, hooks_missing = load_first_report(reports, ["hook-readiness.final.json", "hook-readiness.unified-phase.final.json", "hook-readiness.unified-phase.json"])
     audit, audit_source, audit_missing = load_first_report(reports, ["audit.final.json", "audit.unified-phase.final.json", "audit.post-export.json"])
     hygiene, hygiene_source, hygiene_missing = load_first_report(reports, ["artifact-hygiene.final.json", "artifact-hygiene.unified-phase.final.json", "artifact-hygiene.unified-phase.json"])
+    git_surface, git_surface_source, git_surface_missing = load_first_report(reports, ["git-surface.final.json", "git-surface.unified-phase.final.json", "git-surface.json"])
+    score_policy = load_score_policy()
 
     disqualifiers: list[str] = []
     warnings: list[str] = []
@@ -41,6 +51,7 @@ def evaluate_score_layer(repo_root: str | Path | None = None, *, purpose: str = 
         "hook_readiness": hooks_missing,
         "audit": audit_missing,
         "artifact_hygiene": hygiene_missing,
+        "git_surface": git_surface_missing,
     }
     for label, missing in missing_reports.items():
         if missing:
@@ -79,6 +90,8 @@ def evaluate_score_layer(repo_root: str | Path | None = None, *, purpose: str = 
         disqualifiers.append("startup gate remains blocked for the requested purpose")
     if audit_status in {"BLOCKED", "FAIL"}:
         disqualifiers.append("workspace audit final gate blocked")
+    if str(git_surface.get("status", "PASS")) == "BLOCKED":
+        disqualifiers.append("git surface reports a branch lock conflict or blocked worktree condition")
 
     if hygiene_status == "WARN":
         warnings.append("artifact hygiene still has stale drafts, duplicate remediation reports, or transient artifacts")
@@ -93,6 +106,8 @@ def evaluate_score_layer(repo_root: str | Path | None = None, *, purpose: str = 
         warnings.append("client surface PATH contamination remains a warning")
     if audit_status == "WARN":
         warnings.append("workspace audit still reports warnings")
+    if str(git_surface.get("status", "PASS")) == "WARN":
+        warnings.append("git surface still reports stale worktrees, drift, or repo-local guard proposals")
 
     status = collapse_status(["BLOCKED" if disqualifiers else "", "WARN" if warnings else ""])
     base_score = 100
@@ -108,6 +123,7 @@ def evaluate_score_layer(repo_root: str | Path | None = None, *, purpose: str = 
             "python3 -m unittest tests.test_audit_workspace_contract tests.test_repair_codex_desktop_runtime tests.test_verify_migration_evidence tests.test_check_startup_workflow",
             "python3 -m unittest tests.test_check_global_runtime tests.test_check_agent_instruction tests.test_git_surface",
             "python3 -m unittest tests.test_activate_canonical_runtime tests.test_run_canonical_command tests.test_repair_serena_startup",
+            "python3 -m unittest tests.test_check_config_provenance tests.test_check_toolchain_surface tests.test_check_hook_readiness tests.test_codex_app_usability tests.test_app_thread_worktree_policy tests.test_score_layer",
         ],
         "report_sources": {
             "config_provenance": config_source,
@@ -117,8 +133,11 @@ def evaluate_score_layer(repo_root: str | Path | None = None, *, purpose: str = 
             "hook_readiness": hooks_source,
             "audit": audit_source,
             "artifact_hygiene": hygiene_source,
+            "git_surface": git_surface_source,
         },
-        "evidence_files": [config_source, runtime_source, startup_source, toolchain_source, hooks_source, audit_source, hygiene_source],
+        "evidence_files": [config_source, runtime_source, startup_source, toolchain_source, hooks_source, audit_source, hygiene_source, git_surface_source],
+        "score_policy_path": str(SCORE_POLICY_PATH),
+        "worktree_policy": score_policy.get("worktree_policy", {}),
     }
 
 
