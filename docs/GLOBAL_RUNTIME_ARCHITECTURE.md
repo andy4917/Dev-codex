@@ -17,6 +17,7 @@ Align Codex App main control, SSH remote execution, Linux-native Codex CLI, and 
 - Windows `.codex` is app runtime state and evidence only.
 - Dev-Management must not generate policy-bearing Windows `.codex` files.
 - Windows-mounted Codex launcher paths remain forbidden as the primary runtime.
+- Tracked source rollback uses Git history, and generated output rollback uses regeneration rather than backup copies.
 - Dev-Management Control is the pinned Codex App control thread for readiness and maintenance routing.
 - Permanent Git worktrees are optional execution conveniences and never policy authority.
 

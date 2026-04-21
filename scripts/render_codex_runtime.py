@@ -329,7 +329,7 @@ def render_agents(authority: dict, windows: bool) -> str:
         f"- Required scorecard summary command: `python {scorecard['summary_export']}`\n"
         f"- Required scorecard layer command: `python {score_layer_command} --json`\n"
         f"- Required final verification command: `python {roots['management']}/scripts/audit_workspace.py --write-report`\n"
-        f"- Ambiguous cleanup targets go to `{cleanup['quarantine_root']}` before deletion.\n"
+        f"- Quarantine at `{cleanup['quarantine_root']}` is inert evidence only; remove stale legacy surfaces outright unless deletion would lose necessary forensic context.\n"
     )
 
 

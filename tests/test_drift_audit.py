@@ -30,9 +30,7 @@ class DriftAuditTests(unittest.TestCase):
         project_root = product_root / "reservation-system"
         quarantine_root = repo_root / "quarantine" / "2026-04-16"
         linux_codex = root / "linux-home" / ".codex"
-        windows_codex = root / "windows-home" / ".codex"
-
-        for path in [repo_root, workflow_root, project_root, quarantine_root, linux_codex, windows_codex]:
+        for path in [repo_root, workflow_root, project_root, quarantine_root, linux_codex]:
             path.mkdir(parents=True, exist_ok=True)
 
         (repo_root / ".git").mkdir(exist_ok=True)
@@ -43,8 +41,6 @@ class DriftAuditTests(unittest.TestCase):
         _write_text(project_root / ".codex" / "config.toml", 'project_root_markers = [".git"]\n')
         _write_text(project_root / "contracts" / "project_policy.json", "{}\n")
         _write_text(linux_codex / "config.toml", 'project_root_markers = [".git"]\n')
-        _write_text(windows_codex / "config.toml", '# GENERATED - DO NOT EDIT\nproject_root_markers = [".git"]\n')
-
         authority = {
             "canonical_roots": {
                 "management": str(repo_root),
@@ -73,9 +69,6 @@ class DriftAuditTests(unittest.TestCase):
                 "global_config": {
                     "project_root_markers": [".git"],
                 },
-            },
-            "windows_app_state": {
-                "codex_home": str(windows_codex),
             },
         }
         _write_json(repo_root / "contracts" / "workspace_authority.json", authority)

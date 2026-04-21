@@ -198,48 +198,6 @@
       "node_bundle": "export NVM_DIR=\"$HOME/.nvm\" && . \"$NVM_DIR/nvm.sh\" && nvm install --lts && nvm alias default 'lts/*' && corepack enable && corepack prepare pnpm@latest --activate && (command -v yarn >/dev/null 2>&1 || npm install -g yarn)"
     }
   },
-  "parity_groups": [
-    {
-      "name": "git",
-      "windows": "git",
-      "wsl": "git"
-    },
-    {
-      "name": "python",
-      "windows": "python",
-      "wsl": "python3"
-    },
-    {
-      "name": "uv",
-      "windows": "uv",
-      "wsl": "uv"
-    },
-    {
-      "name": "node",
-      "windows": "node",
-      "wsl": "node"
-    },
-    {
-      "name": "npm",
-      "windows": "npm",
-      "wsl": "npm"
-    },
-    {
-      "name": "corepack",
-      "windows": "corepack",
-      "wsl": "corepack"
-    },
-    {
-      "name": "pnpm",
-      "windows": "pnpm",
-      "wsl": "pnpm"
-    },
-    {
-      "name": "syncthing",
-      "windows": "syncthing",
-      "wsl": "syncthing"
-    }
-  ],
   "blocked_conditions": [
     "administrator_privilege_required",
     "reboot_required",

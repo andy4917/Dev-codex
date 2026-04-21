@@ -112,7 +112,7 @@ class RepairCodexDesktopRuntimeTests(unittest.TestCase):
             "forbidden_primary_runtime_paths": [
                 "/mnt/c/Users/anise/.codex/bin/wsl",
                 "/mnt/c/Users/anise/.codex/tmp/arg0",
-                ".codex/bin/wsl/codex",
+                "/mnt/c/Users/anise/.codex/bin/wsl/codex",
             ],
             "windows_app_state": {
                 "codex_home": str(windows_codex),
@@ -151,8 +151,26 @@ class RepairCodexDesktopRuntimeTests(unittest.TestCase):
             "legacy_mount": {"blocked_prefixes": []},
             "stale_workspace_markers": ["windows-user-mount"],
         }
+        path_policy = {
+            "canonical_execution_host": "devmgmt-wsl",
+            "canonical_roots": {
+                "dev_management": str(management_root),
+                "dev_product": str(product_root),
+            },
+            "runtime_paths": {
+                "codex_cli_bin": "/usr/local/bin/codex",
+                "codex_user_home": str(linux_codex),
+                "windows_codex_home": str(windows_codex),
+            },
+            "forbidden_primary_paths": [
+                "/mnt/c/Users/anise/.codex/bin/wsl",
+                "/mnt/c/Users/anise/.codex/tmp/arg0",
+                "/mnt/c/Users/anise/.codex/bin/wsl/codex",
+            ],
+        }
         _write_json(management_root / "contracts" / "workspace_authority.json", authority)
         _write_json(management_root / "contracts" / "environment_sync_policy.json", policy)
+        _write_json(management_root / "contracts" / "path_authority_policy.json", path_policy)
         _write_json(
             management_root / "reports" / "audit.final.json",
             {
@@ -499,6 +517,127 @@ class RepairCodexDesktopRuntimeTests(unittest.TestCase):
         self.assertEqual(repaired["active-workspace-roots"][0], preferred_root)
         self.assertEqual(repaired["project-order"][0], preferred_root)
 
+    def test_repair_global_state_normalizes_localhost_remote_connections_and_clears_noise(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp = Path(tmpdir)
+            linux_codex = tmp / "linux" / ".codex"
+            windows_codex = tmp / "windows" / ".codex"
+            management_root = tmp / "Dev-Management"
+            management_root.mkdir(parents=True)
+            self.module.resolve_codex_home = lambda: linux_codex
+
+            authority = {
+                "canonical_roots": {
+                    "management": str(management_root),
+                },
+                "canonical_execution_surface": {
+                    "host_alias": "devmgmt-wsl",
+                },
+                "generation_targets": {
+                    "global_runtime": {
+                        "linux": {"agents": str(linux_codex / "AGENTS.md"), "config": str(linux_codex / "config.toml")},
+                    },
+                    "global_config": {"model_reasoning_effort": "high"},
+                },
+                "runtime_layering": {
+                    "restore_seed_policy": {
+                        "preferred_windows_access_host": "wsl.localhost",
+                        "allowed_windows_access_hosts": ["wsl.localhost", "wsl$"],
+                        "default_active_workspace_root": "management",
+                        "open_target_global": "wsl",
+                        "integrated_terminal_shell": "wsl",
+                        "follow_up_queue_mode": "steer",
+                        "conversation_detail_mode": "steps",
+                    }
+                },
+            }
+            policy = {
+                "canonical_wsl": {"preferred_windows_access_host": "wsl.localhost", "windows_access_hosts": ["wsl.localhost", "wsl$"]},
+                "legacy_mount": {"blocked_prefixes": []},
+                "stale_workspace_markers": ["windows-user-mount"],
+            }
+            (linux_codex / "config.toml").parent.mkdir(parents=True, exist_ok=True)
+            (linux_codex / "config.toml").write_text('model_reasoning_effort = "high"\n', encoding="utf-8")
+            stale_root = self.module.to_unc_path(management_root, "wsl$")
+            canonical_root = self.module.to_unc_path(management_root, "wsl.localhost")
+            _write_json(
+                windows_codex / ".codex-global-state.json",
+                {
+                    "runCodexInWindowsSubsystemForLinux": True,
+                    "active-workspace-roots": [stale_root],
+                    "electron-saved-workspace-roots": [stale_root, "/mnt/c/Users/anise/Documents/Codex"],
+                    "project-order": [str(management_root)],
+                    "selected-remote-host-id": "remote-ssh-codex-managed:localhost",
+                    "remote-connection-auto-connect-by-host-id": {
+                        "remote-ssh-codex-managed:localhost": True,
+                        "remote-ssh-codex-managed:devmgmt-wsl": True,
+                        "stale-host": True,
+                    },
+                    "codex-managed-remote-connections": [
+                        {
+                            "hostId": "remote-ssh-codex-managed:localhost",
+                            "displayName": "localhost",
+                            "source": "manual",
+                            "autoConnect": True,
+                            "sshAlias": "localhost",
+                            "sshHost": "127.0.0.1",
+                            "sshPort": "22",
+                        },
+                        {
+                            "hostId": "remote-ssh-codex-managed:devmgmt-wsl",
+                            "displayName": "devmgmt-wsl",
+                            "source": "codex-managed",
+                            "autoConnect": True,
+                            "sshAlias": None,
+                            "sshHost": "andy4917@127.0.0.1",
+                            "sshPort": 22,
+                            "identity": "C:\\Users\\anise\\.ssh\\codex_wsl_ed25519",
+                        }
+                    ],
+                    "electron-persisted-atom-state": {
+                        "environment": {
+                            "workspace_dir": stale_root,
+                            "repo_map": {
+                                "repo": {
+                                    "repository_full_name": "andy4917/Dev-Management",
+                                    "workspace_root": stale_root,
+                                },
+                            },
+                        }
+                    },
+                },
+            )
+
+            result = self.module.repair_global_state(authority, policy, windows_codex, preferred_active_root=stale_root)
+            repaired = self.module.load_json(windows_codex / ".codex-global-state.json", default={})
+
+        self.assertTrue(result["changed"])
+        self.assertFalse(repaired["runCodexInWindowsSubsystemForLinux"])
+        self.assertNotIn("environment", repaired.get("electron-persisted-atom-state", {}))
+        self.assertEqual(repaired["active-workspace-roots"], [canonical_root])
+        self.assertEqual(repaired["electron-saved-workspace-roots"], [canonical_root])
+        self.assertEqual(repaired["project-order"][0], canonical_root)
+        self.assertEqual(repaired["selected-remote-host-id"], "remote-ssh-codex-managed:devmgmt-wsl")
+        self.assertEqual(
+            repaired["remote-connection-auto-connect-by-host-id"],
+            {"remote-ssh-codex-managed:devmgmt-wsl": True},
+        )
+        self.assertEqual(
+            repaired["codex-managed-remote-connections"],
+            [
+                {
+                    "hostId": "remote-ssh-codex-managed:devmgmt-wsl",
+                    "displayName": "devmgmt-wsl",
+                    "source": "codex-managed",
+                    "autoConnect": False,
+                    "sshAlias": "devmgmt-wsl",
+                    "sshHost": "devmgmt-wsl",
+                    "sshPort": 22,
+                    "identity": None,
+                }
+            ],
+        )
+
     def test_repair_sessions_and_threads_db_use_recovered_thread_root(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             tmp = Path(tmpdir)
@@ -643,7 +782,8 @@ class RepairCodexDesktopRuntimeTests(unittest.TestCase):
         self.assertEqual(repaired["projectless-thread-ids"], [])
         self.assertEqual(report["mode"], "apply")
         self.assertTrue(report["applied_changes"])
-        self.assertTrue(report["backup"]["created"])
+        self.assertFalse(report["backup"]["created"])
+        self.assertEqual(report["backup"]["policy"], "backup_forbidden")
 
     def test_apply_repairs_linux_launcher_shim(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

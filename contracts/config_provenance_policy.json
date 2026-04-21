@@ -16,9 +16,19 @@
     ]
   },
   "optional_user_override_source": "/home/andy4917/.codex/user-config.toml",
-  "linux_required_true_features": [
-    "shell_zsh_fork"
-  ],
+  "linux_required_true_features": [],
+  "feature_dependency_rules": {
+    "shell_zsh_fork": {
+      "required_when_true": [
+        "zsh_path"
+      ],
+      "path_must_be_absolute": true,
+      "path_must_not_start_with": [
+        "/mnt/c"
+      ],
+      "path_must_exist": true
+    }
+  },
   "blocked_active_feature_flags": [
     "telepathy",
     "workspace_dependencies",

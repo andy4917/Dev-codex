@@ -15,7 +15,23 @@
   "settings_flow": {
     "settings_path": "Settings > Connections",
     "host_alias": "devmgmt-wsl",
+    "manual_add_host_path": "Connections > Add host > devmgmt-wsl",
+    "auto_discovery_not_guaranteed": true,
+    "required_windows_bootstrap_features": [
+      "remote_control",
+      "remote_connections"
+    ],
+    "windows_ssh_config_path": "C:/Users/anise/.ssh/config",
+    "require_direct_top_level_host_alias": true,
     "remote_project": "/home/andy4917/Dev-Management",
+    "require_remote_project_open_proof": true,
+    "user_result_values": [
+      "listed + project opened",
+      "manual add worked + project opened",
+      "manual add failed",
+      "project open failed",
+      "sign-in blocker"
+    ],
     "readiness_prompt": "Run Dev-Management readiness after Windows .codex root-cause cleanup and report APP_READY / APP_READY_WITH_WARNINGS / APP_NOT_READY. Do not modify code unless runtime, config provenance, Serena/Context7, score, and audit gates allow it."
   },
   "control_thread": {
@@ -71,6 +87,7 @@
     "allowed_windows_bootstrap_repairs": [
       "C:/Users/anise/.ssh/config"
     ],
+    "codex_app_discovery_requires_direct_top_level_host_alias": true,
     "app_reads_policy_files_if_present": true,
     "policy_bearing_relative_paths": [
       "config.toml",

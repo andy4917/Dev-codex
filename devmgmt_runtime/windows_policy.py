@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import os
+import tomllib
 from pathlib import Path
 from typing import Any
 
@@ -32,6 +33,7 @@ SKILL_MANIFEST_NAMES = {
     "requirements.txt",
     "setup.py",
 }
+WINDOWS_BOOTSTRAP_FEATURES = ("remote_control", "remote_connections")
 
 
 def read_text(path: Path) -> str:
@@ -50,6 +52,56 @@ def sha256(path: Path) -> str:
 
 def generated_header_present(path: Path) -> bool:
     return read_text(path).startswith(GENERATED_FILE_HEADERS)
+
+
+def _loads_toml(text: str) -> dict[str, Any]:
+    try:
+        payload = tomllib.loads(text)
+    except tomllib.TOMLDecodeError:
+        return {}
+    return payload if isinstance(payload, dict) else {}
+
+
+def is_structural_devmgmt_windows_config(text: str) -> bool:
+    payload = _loads_toml(text)
+    if not payload:
+        return False
+    features = payload.get("features", {}) if isinstance(payload.get("features"), dict) else {}
+    if not features:
+        return False
+    feature_keys = sorted(str(key) for key in features.keys())
+    if feature_keys != sorted(WINDOWS_BOOTSTRAP_FEATURES):
+        allowed_feature_keys = {"chronicle", "memories", *WINDOWS_BOOTSTRAP_FEATURES}
+        if not set(feature_keys).issubset(allowed_feature_keys):
+            return False
+    if any(features.get(key) is not True for key in WINDOWS_BOOTSTRAP_FEATURES):
+        return False
+    projects = payload.get("projects", {}) if isinstance(payload.get("projects"), dict) else {}
+    project_keys = [str(key) for key in projects.keys()]
+    project_refs_devmgmt = any(Path(key).is_absolute() and "Dev-Management" in key for key in project_keys)
+    # Structural Dev-Management bootstrap residue may keep model/trusted-project state,
+    # but it must not carry broader policy tables such as approval, sandbox, or plugins.
+    forbidden_top_level = {"approval_policy", "sandbox_mode", "mcp_servers", "projects", "plugins"}
+    if any(key in payload for key in forbidden_top_level - {"projects"}):
+        return False
+    allowed_top_level = {"features", "model", "model_reasoning_effort", "projects", "ux", "workspace_preference", "memories"}
+    if not set(str(key) for key in payload.keys()).issubset(allowed_top_level):
+        return False
+    return bool(project_refs_devmgmt or "model" in payload or "model_reasoning_effort" in payload)
+
+
+def is_structural_devmgmt_agents_surface(text: str) -> bool:
+    normalized = text.replace("\r\n", "\n")
+    return (
+        "Generated Codex Workspace Contract" in normalized
+        or "Windows ~/.codex is app runtime state and evidence only." in normalized
+        or "Authority file:" in normalized and "contracts/workspace_authority.json" in normalized
+    )
+
+
+def is_structural_devmgmt_hook_surface(text: str) -> bool:
+    normalized = text.replace("\r\n", "\n")
+    return "scorecard_runtime_hook.py" in normalized or "UserPromptSubmit" in normalized
 
 
 def generated_directory_marker_present(path: Path) -> bool:
@@ -216,11 +268,11 @@ def classify_windows_policy_candidate(
             payload.update(
                 {
                     "classification": "generated_policy_surface",
-                    "disposition": "INERT_QUARANTINE",
-                    "operation": "quarantine",
+                    "disposition": "REMOVE_NOW",
+                    "operation": "remove",
                     "status": "BLOCKED",
                     "repo_owned": True,
-                    "reason": "directory carries a Dev-Management generated marker or symlink and should be inert-quarantined",
+                    "reason": "directory carries a Dev-Management generated marker or symlink and must be removed instead of preserved as backup residue",
                 }
             )
             return payload
@@ -244,11 +296,50 @@ def classify_windows_policy_candidate(
         payload.update(
             {
                 "classification": "generated_policy_surface",
-                "disposition": "INERT_QUARANTINE",
-                "operation": "quarantine",
+                "disposition": "REMOVE_NOW",
+                "operation": "remove",
                 "status": "BLOCKED",
                 "repo_owned": True,
-                "reason": "file carries a Dev-Management generated marker or matches the generated Linux hooks payload and should be inert-quarantined",
+                "reason": "file carries a Dev-Management generated marker or matches the generated Linux hooks payload and must be removed instead of preserved as backup residue",
+            }
+        )
+        return payload
+
+    if path.name == "config.toml" and is_structural_devmgmt_windows_config(text):
+        payload.update(
+            {
+                "classification": "stale_devmgmt_bootstrap_config",
+                "disposition": "REMOVE_NOW",
+                "operation": "remove",
+                "status": "BLOCKED",
+                "repo_owned": True,
+                "reason": "Windows .codex config contains only Dev-Management bootstrap feature flags and must be removed instead of preserved as a policy surface",
+            }
+        )
+        return payload
+
+    if path.name == "AGENTS.md" and is_structural_devmgmt_agents_surface(text):
+        payload.update(
+            {
+                "classification": "stale_devmgmt_agents_surface",
+                "disposition": "REMOVE_NOW",
+                "operation": "remove",
+                "status": "BLOCKED",
+                "repo_owned": True,
+                "reason": "Windows AGENTS content is structurally a Dev-Management-generated policy mirror and must be removed",
+            }
+        )
+        return payload
+
+    if path.name == "hooks.json" and is_structural_devmgmt_hook_surface(text):
+        payload.update(
+            {
+                "classification": "stale_devmgmt_hook_surface",
+                "disposition": "REMOVE_NOW",
+                "operation": "remove",
+                "status": "BLOCKED",
+                "repo_owned": True,
+                "reason": "Windows hooks content is structurally a Dev-Management-generated policy surface and must be removed",
             }
         )
         return payload
@@ -272,7 +363,7 @@ def windows_policy_surface_report(
     expected_linux_hooks: str | None = None,
 ) -> dict[str, Any]:
     findings: list[dict[str, Any]] = []
-    inert_quarantine_candidates: list[str] = []
+    known_generated_cleanup_candidates: list[str] = []
     remove_now_candidates: list[str] = []
     manual_remediation_candidates: list[str] = []
     accepted_nonblocking_candidates: list[str] = []
@@ -288,9 +379,9 @@ def windows_policy_surface_report(
         if not finding["present"]:
             continue
         findings.append(finding)
-        if finding["disposition"] == "INERT_QUARANTINE":
-            inert_quarantine_candidates.append(str(path))
-        elif finding["disposition"] == "REMOVE_NOW":
+        if finding["classification"] == "generated_policy_surface":
+            known_generated_cleanup_candidates.append(str(path))
+        if finding["disposition"] == "REMOVE_NOW":
             remove_now_candidates.append(str(path))
         elif finding["disposition"] == "MANUAL_REMEDIATION":
             manual_remediation_candidates.append(str(path))
@@ -299,7 +390,7 @@ def windows_policy_surface_report(
 
     status = (
         "BLOCKED"
-        if inert_quarantine_candidates or remove_now_candidates
+        if known_generated_cleanup_candidates or remove_now_candidates
         else "WARN"
         if manual_remediation_candidates or accepted_nonblocking_candidates
         else "PASS"
@@ -307,7 +398,7 @@ def windows_policy_surface_report(
     return {
         "status": status,
         "findings": findings,
-        "known_generated_cleanup_candidates": sorted(inert_quarantine_candidates),
+        "known_generated_cleanup_candidates": sorted(set(known_generated_cleanup_candidates)),
         "remove_now_candidates": sorted(remove_now_candidates),
         "manual_remediation_candidates": sorted(manual_remediation_candidates),
         "accepted_nonblocking_candidates": sorted(accepted_nonblocking_candidates),

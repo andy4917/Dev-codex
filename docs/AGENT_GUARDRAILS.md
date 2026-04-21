@@ -31,6 +31,7 @@
 - Use `$HOME/.codex/user-config.toml` only for allowed global user overrides.
 - Do not add hardcoded fallback paths or reintroduce the Windows-mounted Codex launcher as a primary runtime target.
 - Use `pathlib.Path` for path operations and fail fast before file access.
+- Tracked source rollback uses Git history, and generated output rollback uses regeneration rather than backup files.
 - Treat app memories, projectless chat state, and restore seed as hints only.
 - Do not let a worktree, thread, or app memory become a source of truth.
 - Do not claim hook-only enforcement.
@@ -43,3 +44,4 @@
 - When worktree mode is in use, record both `active_worktree_root` and `canonical_repo_root`.
 - During work, touch only in-scope files and record subagent, skill, plugin, hook, and workspace dependency usage when used.
 - After work, run path preflight, hardcoding scans, stale feature scans, config provenance checks, artifact hygiene checks, `git diff --check`, and relevant tests before commit.
+- Leave quarantine as inert evidence only; never preserve executable, importable, or fallback-ready backups there.

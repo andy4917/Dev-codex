@@ -749,12 +749,15 @@ def normalize_localhost_remote_connection(connection: dict[str, Any], *, host_al
     normalized["source"] = "codex-managed"
     normalized["autoConnect"] = False
     normalized["sshAlias"] = host_alias
-    normalized["sshHost"] = normalize_localhost_ssh_host(connection.get("sshHost", "localhost"))
+    # Prefer alias-driven transport so the desktop app resolves the canonical
+    # WSL SSH config entry instead of rehydrating ad-hoc localhost details.
+    normalized["sshHost"] = host_alias
     ssh_port = connection.get("sshPort", 22)
     try:
         normalized["sshPort"] = int(str(ssh_port).strip()) if str(ssh_port).strip() else 22
     except ValueError:
         normalized["sshPort"] = 22
+    normalized["identity"] = None
     return normalized
 
 
@@ -783,6 +786,7 @@ def normalize_codex_managed_remote_connections(
 
     canonical_surface = authority.get("canonical_execution_surface", {})
     canonical_alias = str(canonical_surface.get("host_alias", "devmgmt-wsl")).strip() or "devmgmt-wsl"
+    canonical_host_id = localhost_remote_host_id(canonical_alias)
     changed = False
     ordered_host_ids: list[str] = []
     connections_by_host_id: dict[str, dict[str, Any]] = {}
@@ -811,6 +815,16 @@ def normalize_codex_managed_remote_connections(
         if normalized_connection != connection:
             changed = True
 
+    if canonical_host_id in connections_by_host_id:
+        canonical_connection = normalize_localhost_remote_connection(
+            connections_by_host_id[canonical_host_id],
+            host_alias=canonical_alias,
+        )
+        if connections_by_host_id[canonical_host_id] != canonical_connection:
+            connections_by_host_id[canonical_host_id] = canonical_connection
+            changed = True
+        localhost_host_ids.add(canonical_host_id)
+
     normalized_connections = [connections_by_host_id[host_id] for host_id in ordered_host_ids]
     normalized_connections.extend(passthrough_connections)
     if normalized_connections != connections:
@@ -824,8 +838,20 @@ def clear_stale_remote_selection_noise(
     *,
     known_host_ids: set[str],
     localhost_host_ids: set[str],
+    host_alias: str,
 ) -> bool:
     changed = False
+    canonical_host_id = localhost_remote_host_id(host_alias)
+    if canonical_host_id in known_host_ids or canonical_host_id in localhost_host_ids:
+        if str(state.get("selected-remote-host-id", "")).strip() != canonical_host_id:
+            state["selected-remote-host-id"] = canonical_host_id
+            changed = True
+        desired_auto_connect = {canonical_host_id: True}
+        if state.get("remote-connection-auto-connect-by-host-id") != desired_auto_connect:
+            state["remote-connection-auto-connect-by-host-id"] = desired_auto_connect
+            changed = True
+        return changed
+
     selected_host = str(state.get("selected-remote-host-id", "")).strip()
     if "selected-remote-host-id" in state and (not selected_host or selected_host in localhost_host_ids or selected_host not in known_host_ids):
         state.pop("selected-remote-host-id", None)
@@ -892,6 +918,8 @@ def repair_global_state(
     previous_projectless = list(state.get("projectless-thread-ids", []))
     previous_hints = dict(state.get("thread-workspace-root-hints", {}))
     changed = False
+    canonical_surface = authority.get("canonical_execution_surface", {})
+    canonical_alias = str(canonical_surface.get("host_alias", "devmgmt-wsl")).strip() or "devmgmt-wsl"
 
     if remove_stale_environment(state, stale_markers=stale_markers):
         changed = True
@@ -902,6 +930,7 @@ def repair_global_state(
         state,
         known_host_ids=remote_host_ids,
         localhost_host_ids=localhost_host_ids,
+        host_alias=canonical_alias,
     ):
         changed = True
 
@@ -1151,7 +1180,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Safely repair Codex desktop runtime restore state.")
     mode_group = parser.add_mutually_exclusive_group()
     mode_group.add_argument("--dry-run", action="store_true", help="Preview runtime changes without mutating live state (default).")
-    mode_group.add_argument("--apply", action="store_true", help="Apply runtime repairs after capturing backups.")
+    mode_group.add_argument("--apply", action="store_true", help="Apply runtime repairs without creating backup copies.")
     parser.add_argument("--runtime-codex-home", default="", help="Override the target Codex home to inspect or repair.")
     parser.add_argument("--report-file", default=str(REPORT_PATH), help="Write the runtime repair report to this path.")
     parser.add_argument(
@@ -1323,57 +1352,14 @@ def build_change_entries(
     return changes, unexpected
 
 
-def collect_backup_targets(
-    *,
-    global_state_result: dict[str, Any],
-    launcher_result: dict[str, Any],
-    local_env_changed: list[str],
-    sessions_changed: list[str],
-    threads_result: dict[str, Any],
-) -> list[Path]:
-    targets: list[Path] = []
-    if global_state_result.get("changed"):
-        targets.append(Path(str(global_state_result.get("path", "")).strip()))
-    if launcher_result.get("needs_repair") and launcher_result.get("live_write_allowed"):
-        targets.append(Path(str(launcher_result.get("path", "")).strip()))
-    targets.extend(Path(path) for path in local_env_changed if str(path).strip())
-    targets.extend(Path(path) for path in sessions_changed if str(path).strip())
-    if int(threads_result.get("changed_rows", 0) or 0) > 0:
-        targets.append(Path(str(threads_result.get("path", "")).strip()))
-    ordered: list[Path] = []
-    seen: set[Path] = set()
-    for path in targets:
-        resolved = path.expanduser().resolve()
-        if resolved in seen or not resolved.exists():
-            continue
-        seen.add(resolved)
-        ordered.append(resolved)
-    return ordered
-
-
-def backup_targets(targets: list[Path], codex_home: Path) -> dict[str, Any]:
-    if not targets:
-        return {"created": False, "root": "", "files": []}
-    timestamp = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
-    backup_root = codex_home / "repair-backups" / timestamp
-    files: list[dict[str, str]] = []
-    for path in targets:
-        try:
-            relative = path.relative_to(codex_home)
-        except ValueError:
-            relative = Path(path.name)
-        destination = backup_root / relative
-        destination.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(path, destination)
-        files.append({"source": str(path), "backup_path": str(destination)})
-    save_json(
-        backup_root / "backup-index.json",
-        {
-            "created_at": datetime.now(timezone.utc).isoformat(),
-            "files": files,
-        },
-    )
-    return {"created": True, "root": str(backup_root), "files": files}
+def disabled_backup_report() -> dict[str, Any]:
+    return {
+        "created": False,
+        "root": "",
+        "files": [],
+        "policy": "backup_forbidden",
+        "reason": "Repair backups are forbidden. Tracked source rollback uses Git history, generated output rollback uses deterministic regeneration, and external runtime changes must be reported directly instead of copied into backup surfaces.",
+    }
 
 
 def main() -> int:
@@ -1479,18 +1465,8 @@ def main() -> int:
     )
 
     applied_changes: list[dict[str, Any]] = []
-    backup = {"created": False, "root": "", "files": []}
+    backup = disabled_backup_report()
     if args.apply:
-        backup = backup_targets(
-            collect_backup_targets(
-                global_state_result=global_state_result,
-                launcher_result=launcher_result,
-                local_env_changed=local_env_changed,
-                sessions_changed=sessions_changed,
-                threads_result=threads_result,
-            ),
-            codex_home,
-        )
         applied_global_state_result = repair_global_state(
             authority,
             policy,

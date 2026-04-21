@@ -12,7 +12,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from devmgmt_runtime.paths import runtime_paths
-from render_codex_runtime import render_hooks, render_windows_hook_wrapper, windows_hook_generation_enabled
+from render_codex_runtime import render_hooks, windows_hook_generation_enabled
 
 AUTHORITY_PATH = ROOT / "contracts" / "workspace_authority.json"
 DEFAULT_OUTPUT_PATH = ROOT / "reports" / "hook-readiness.unified-phase.json"
@@ -71,6 +71,8 @@ def evaluate_hook_readiness(repo_root: str | Path | None = None) -> dict[str, An
     windows_hooks_path = paths["observed_windows_policy_hooks"]
     expected_linux = render_hooks(authority, windows=False)
     linux_ok = text_matches_expected(linux_hooks_path, expected_linux)
+    windows_generated = bool(expected_linux) and text_matches_expected(windows_hooks_path, expected_linux)
+    windows_present = windows_hooks_path.exists()
     trigger_only = runtime_hook_role in {"", "trigger_only"}
     hook_only_enforcement_claim = bool(runtime_hook_role) and runtime_hook_role != "trigger_only"
     warnings = [
@@ -82,7 +84,8 @@ def evaluate_hook_readiness(repo_root: str | Path | None = None) -> dict[str, An
     status = collapse_status(
         [
             "BLOCKED" if hook_only_enforcement_claim else "",
-            "BLOCKED" if windows_hooks_path.exists() else "",
+            "BLOCKED" if windows_generated else "",
+            "WARN" if windows_present and not windows_generated else "",
             "WARN" if not linux_ok else "",
         ]
     )
@@ -96,8 +99,9 @@ def evaluate_hook_readiness(repo_root: str | Path | None = None) -> dict[str, An
         "linux_hooks": {"path": str(linux_hooks_path), "configured": expected_linux is not None, "matches_generated": linux_ok},
         "windows_policy_hooks": {
             "path": str(windows_hooks_path),
-            "present": windows_hooks_path.exists(),
-            "status": "BLOCKED" if windows_hooks_path.exists() else "PASS",
+            "present": windows_present,
+            "classification": "known_generated_cleanup_candidate" if windows_generated else "unknown_policy_surface" if windows_present else "absent",
+            "status": "BLOCKED" if windows_generated else "WARN" if windows_present else "PASS",
         },
         "warnings": warnings,
     }

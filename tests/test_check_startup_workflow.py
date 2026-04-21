@@ -55,10 +55,8 @@ class CheckStartupWorkflowTests(unittest.TestCase):
         repo_root = root / "Dev-Management"
         home = root / "home"
         linux_codex = home / ".codex"
-        windows_codex = root / "windows-home" / ".codex"
         repo_root.mkdir(parents=True)
         linux_codex.mkdir(parents=True)
-        windows_codex.mkdir(parents=True)
 
         config_text = """project_root_markers = [".git"]
 
@@ -81,8 +79,6 @@ args = ["start-mcp-server", "--project-from-cwd", "--context=codex"]
 disabled_tools = ["execute_shell_command", "remove_project"]
 """
         _write_text(linux_codex / "config.toml", config_text)
-        _write_text(windows_codex / "config.toml", config_text)
-
         authority = {
             "canonical_roots": {
                 "management": str(repo_root),
@@ -98,7 +94,7 @@ disabled_tools = ["execute_shell_command", "remove_project"]
                 }
             },
             "windows_app_state": {
-                "codex_home": str(windows_codex),
+                "codex_home": str(root / "windows-home" / ".codex"),
             },
         }
         context7_policy = {

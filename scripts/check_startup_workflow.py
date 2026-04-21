@@ -28,6 +28,7 @@ SERENA_ACTIVATION_FAILURE_PATTERNS = (
     re.compile(r"not activating any project", re.IGNORECASE),
 )
 STARTUP_OPTIONAL_GLOBS = (
+    ".serena/logs/**",
     "docs/**",
     "reports/**",
     "quarantine/**",

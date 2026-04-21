@@ -13,6 +13,10 @@ DEFAULT_OUTPUT_PATH = ROOT / "reports" / "artifact-hygiene.unified-phase.json"
 TRANSIENT_SUFFIXES = (".tmp", ".bak", ".old", ".orig")
 QUARANTINE_SCRIPT_SUFFIXES = {".bat", ".cmd", ".exe", ".ps1", ".sh"}
 QUARANTINE_IMPORTABLE_SUFFIXES = {".py"}
+REMOVE_ONLY_QUARANTINE_PREFIXES = {
+    ("runtime-wrapper-backups",),
+    ("windows-codex-policy-mirrors",),
+}
 ACTIVE_QUARANTINE_REFERENCE_KEYWORDS = (
     "importlib",
     "python",
@@ -25,28 +29,6 @@ ACTIVE_QUARANTINE_REFERENCE_KEYWORDS = (
 def save_json(path: Path, payload: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-
-
-def write_manifest(quarantine_root: Path, quarantined: list[dict[str, str]]) -> Path:
-    manifest = {
-        "generated_at": datetime.now(timezone.utc).isoformat(),
-        "quarantine_root": str(quarantine_root),
-        "classification": "inert_evidence_only",
-        "reason": "Superseded remediation reports, stale preview files, and transient artifacts were quarantined as inert evidence.",
-        "inert_guarantees": [
-            "quarantined artifacts are not active policy sources",
-            "quarantined artifacts must not be executed or imported",
-            "restoration requires explicit manual review",
-        ],
-        "items": quarantined,
-    }
-    manifest_path = quarantine_root / "MANIFEST.json"
-    save_json(manifest_path, manifest)
-    try:
-        manifest_path.chmod(0o644)
-    except OSError:
-        pass
-    return manifest_path
 
 
 def collapse_status(values: list[str]) -> str:
@@ -78,20 +60,28 @@ def scan_quarantine_root(quarantine_root: Path) -> dict[str, list[str]]:
     importable_files: list[str] = []
     cli_files: list[str] = []
     manifest_files: list[str] = []
+    stale_payload_files: list[str] = []
     if not quarantine_root.exists():
         return {
             "executable_files": executable_files,
             "importable_files": importable_files,
             "cli_files": cli_files,
             "manifest_files": manifest_files,
+            "stale_payload_files": stale_payload_files,
         }
 
     for path in sorted(quarantine_root.rglob("*")):
         if not path.is_file():
             continue
+        try:
+            relative = path.relative_to(quarantine_root)
+        except ValueError:
+            relative = path
         if path.name == "MANIFEST.json":
             manifest_files.append(str(path))
             continue
+        if relative.parts[:1] in REMOVE_ONLY_QUARANTINE_PREFIXES:
+            stale_payload_files.append(str(path))
         if is_executable(path):
             executable_files.append(str(path))
         suffix = path.suffix.lower()
@@ -104,6 +94,7 @@ def scan_quarantine_root(quarantine_root: Path) -> dict[str, list[str]]:
         "importable_files": importable_files,
         "cli_files": cli_files,
         "manifest_files": manifest_files,
+        "stale_payload_files": stale_payload_files,
     }
 
 
@@ -209,8 +200,8 @@ def evaluate_artifact_hygiene(repo_root: str | Path | None = None) -> dict[str, 
                 path,
                 category="stale_draft_report",
                 status="WARN",
-                disposition="INERT_QUARANTINE",
-                reason="stale draft report should be quarantined or removed from active reports",
+                disposition="REMOVE_NOW",
+                reason="stale draft report should be removed from active reports rather than preserved as a backup surface",
             )
             for path in stale_drafts
         )
@@ -222,8 +213,8 @@ def evaluate_artifact_hygiene(repo_root: str | Path | None = None) -> dict[str, 
                     str(path),
                     category="superseded_remediation_report",
                     status="WARN",
-                    disposition="INERT_QUARANTINE",
-                    reason="older remediation draft remains beside the latest final remediation evidence",
+                    disposition="REMOVE_NOW",
+                    reason="older remediation draft remains beside the latest final remediation evidence and should not stay as an active backup surface",
                 )
             )
     if preview_scan["stale_preview_files"]:
@@ -233,8 +224,8 @@ def evaluate_artifact_hygiene(repo_root: str | Path | None = None) -> dict[str, 
                 path,
                 category="stale_generated_runtime_preview",
                 status="WARN",
-                disposition="INERT_QUARANTINE",
-                reason="generated-runtime-preview should retain only the current inert preview evidence",
+                disposition="REMOVE_NOW",
+                reason="generated-runtime-preview should retain only the current inert preview evidence and remove stale preview copies",
             )
             for path in preview_scan["stale_preview_files"]
         )
@@ -249,6 +240,18 @@ def evaluate_artifact_hygiene(repo_root: str | Path | None = None) -> dict[str, 
                 reason="backup or scratch file should not remain on active repo surfaces",
             )
             for path in transient
+        )
+    if quarantine_scan["stale_payload_files"]:
+        blocked.append("quarantine still contains remove-only generated mirror or wrapper payloads")
+        findings.extend(
+            finding(
+                path,
+                category="stale_quarantine_payload",
+                status="BLOCKED",
+                disposition="REMOVE_NOW",
+                reason="generated mirror, wrapper backup, or similar stale payload must be removed rather than preserved in quarantine",
+            )
+            for path in quarantine_scan["stale_payload_files"]
         )
 
     if preview_scan["preview_executable_files"]:
@@ -314,10 +317,10 @@ def evaluate_artifact_hygiene(repo_root: str | Path | None = None) -> dict[str, 
 
     status = collapse_status(["BLOCKED" if blocked else "", "WARN" if warnings else ""])
     cleanup_actions = [
-        "Quarantine stale drafts, superseded remediation reports, stale preview files, and transient backups with --apply-cleanup."
+        "Remove stale drafts, stale preview files, transient backups, and stale remove-only quarantine payloads with --apply-cleanup."
     ] if warnings else []
     if blocked:
-        cleanup_actions.append("Remove executable/importable quarantine content and active quarantine references before closeout.")
+        cleanup_actions.append("Remove executable/importable quarantine content, stale generated quarantine payloads, and active quarantine references before closeout.")
 
     return {
         "status": status,
@@ -329,6 +332,7 @@ def evaluate_artifact_hygiene(repo_root: str | Path | None = None) -> dict[str, 
         "quarantine_executable_files": quarantine_scan["executable_files"],
         "quarantine_importable_files": quarantine_scan["importable_files"],
         "quarantine_cli_files": quarantine_scan["cli_files"],
+        "quarantine_stale_payload_files": quarantine_scan["stale_payload_files"],
         "quarantine_manifest_files": quarantine_scan["manifest_files"],
         "active_quarantine_reference_hits": active_references,
         "findings": findings,
@@ -340,48 +344,44 @@ def evaluate_artifact_hygiene(repo_root: str | Path | None = None) -> dict[str, 
 def apply_cleanup(repo_root: str | Path | None = None) -> dict[str, Any]:
     root = Path(repo_root).expanduser().resolve() if repo_root else ROOT
     current = evaluate_artifact_hygiene(root)
-    quarantined: list[dict[str, str]] = []
-    stamp = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
-    quarantine_root = root / "quarantine" / "artifact-hygiene" / stamp
-    quarantine_root.mkdir(parents=True, exist_ok=True)
+    removed: list[dict[str, str]] = []
 
-    def quarantine_path(path: Path) -> Path:
-        try:
-            relative = path.relative_to(root)
-        except ValueError:
-            relative = Path(path.name)
-        target = quarantine_root / relative
-        target.parent.mkdir(parents=True, exist_ok=True)
-        path.rename(target)
-        quarantined.append({"source": str(path), "quarantine_path": str(target)})
-        return target
+    def remove_path(path: Path) -> None:
+        if not path.exists() and not path.is_symlink():
+            return
+        source = str(path)
+        if path.is_symlink() or path.is_file():
+            path.unlink()
+        else:
+            return
+        removed.append({"source": source, "action": "removed"})
 
     for raw_path in current.get("stale_draft_reports", []):
         path = Path(raw_path)
         if path.exists() and path.is_file():
-            quarantine_path(path)
-    remediation_reports = [Path(item) for item in current.get("remediation_reports", [])]
-    if len(remediation_reports) > 1:
-        for path in remediation_reports[:-1]:
-            if path.exists() and path.is_file():
-                quarantine_path(path)
+            remove_path(path)
+    remediation_reports = [Path(raw_path) for raw_path in current.get("remediation_reports", [])]
+    for path in remediation_reports[:-1]:
+        if path.exists() and path.is_file():
+            remove_path(path)
     for raw_path in current.get("stale_preview_files", []):
         path = Path(raw_path)
         if path.exists() and path.is_file():
-            quarantine_path(path)
+            remove_path(path)
     for raw_path in current.get("transient_files", []):
         path = Path(raw_path)
         if path.exists() and path.is_file() and root in path.parents:
-            quarantine_path(path)
-    manifest_path = write_manifest(quarantine_root, quarantined)
+            remove_path(path)
+    for raw_path in current.get("quarantine_stale_payload_files", []):
+        path = Path(raw_path)
+        if path.exists() and path.is_file() and root in path.parents:
+            remove_path(path)
     refreshed = evaluate_artifact_hygiene(root)
     refreshed["cleanup_applied"] = True
-    refreshed["quarantine_root"] = str(quarantine_root)
-    refreshed["manifest_path"] = str(manifest_path)
-    refreshed["quarantined_files"] = quarantined
+    refreshed["removed_files"] = removed
     refreshed["rollback_procedure"] = [
-        f"Review files under {quarantine_root}",
-        "Move any quarantined file back to its original source path if the cleanup needs to be rolled back.",
+        "Tracked source rollback uses Git history.",
+        "Generated output rollback uses deterministic regeneration, not backup copies.",
     ]
     return refreshed
 
@@ -390,7 +390,6 @@ def render_markdown(report: dict[str, Any]) -> str:
     lines = ["# Artifact Hygiene", "", f"- Status: {report['status']}"]
     if report.get("cleanup_applied"):
         lines.append("- Cleanup applied: true")
-        lines.append(f"- Quarantine root: {report.get('quarantine_root', '')}")
     for key in (
         "stale_draft_reports",
         "remediation_reports",
@@ -400,6 +399,7 @@ def render_markdown(report: dict[str, Any]) -> str:
         "quarantine_executable_files",
         "quarantine_importable_files",
         "quarantine_cli_files",
+        "quarantine_stale_payload_files",
     ):
         values = report.get(key, [])
         if values:
@@ -411,9 +411,9 @@ def render_markdown(report: dict[str, Any]) -> str:
             f"- {item['path']}:{item['line']} :: {item['text']}"
             for item in report["active_quarantine_reference_hits"]
         )
-    if report.get("quarantined_files"):
-        lines.extend(["", "## quarantined_files"])
-        lines.extend(f"- {item['source']} -> {item['quarantine_path']}" for item in report["quarantined_files"])
+    if report.get("removed_files"):
+        lines.extend(["", "## removed_files"])
+        lines.extend(f"- {item['source']}" for item in report["removed_files"])
     return "\n".join(lines) + "\n"
 
 

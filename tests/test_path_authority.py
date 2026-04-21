@@ -229,6 +229,16 @@ class PathAuthorityTests(unittest.TestCase):
             report = path_authority.validate_env_alignment(policy, env=env)
         self.assertEqual(report["status"], "BLOCKED")
 
+    def test_path_authority_rejects_workspace_mirror_divergence(self) -> None:
+        with self._tempdir() as tmpdir:
+            repo, _codex_bin = self._build_repo(Path(tmpdir))
+            authority_path = repo / "contracts" / "workspace_authority.json"
+            authority = json.loads(authority_path.read_text(encoding="utf-8"))
+            authority["canonical_roots"]["management"] = str(repo.parent / "shadow-management")
+            authority_path.write_text(json.dumps(authority, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+            with self.assertRaises(ValueError):
+                path_authority.load_path_policy(repo)
+
     def test_forbidden_windows_codex_path_is_blocked(self) -> None:
         with self._tempdir() as tmpdir:
             repo, _codex_bin = self._build_repo(Path(tmpdir))

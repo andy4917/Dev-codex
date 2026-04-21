@@ -589,13 +589,13 @@
   ],
   "cleanup_policy": {
     "quarantine_root": "/home/andy4917/Dev-Management/quarantine",
-    "ambiguous_items": "move_to_quarantine",
+    "ambiguous_items": "remove_or_inert_archive_only_when_forensic_context_requires_retention",
     "exact_duplicates": "delete_only_after_checksum_match_or_generated_match",
-    "legacy_backups": "move_to_quarantine",
-    "legacy_hooks": "move_to_quarantine",
+    "legacy_backups": "remove_now",
+    "legacy_hooks": "remove_now",
     "runtime_state": "preserve_as_state_not_policy",
     "repo_local_global_policy": "move_out_of_product_repo",
-    "old_marker_files": "move_to_quarantine",
+    "old_marker_files": "remove_or_inert_archive_only_when_forensic_context_requires_retention",
     "final_rescan_required": true
   },
   "generation_targets": {

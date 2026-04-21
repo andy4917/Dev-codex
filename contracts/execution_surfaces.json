@@ -88,11 +88,11 @@
   },
   "windows_policy_surface_rules": {
     "codex_home": "/mnt/c/Users/anise/.codex",
-    "policy_bearing_paths": [
-      "/mnt/c/Users/anise/.codex/config.toml",
-      "/mnt/c/Users/anise/.codex/AGENTS.md",
-      "/mnt/c/Users/anise/.codex/hooks.json",
-      "/mnt/c/Users/anise/.codex/skills/dev-workflow"
+    "policy_bearing_relative_paths": [
+      "config.toml",
+      "AGENTS.md",
+      "hooks.json",
+      "skills/dev-workflow"
     ],
     "known_generated_cleanup_requires_generated_header": true,
     "unknown_policy_surface_status": "WARN"

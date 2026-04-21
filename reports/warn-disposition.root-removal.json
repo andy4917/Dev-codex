@@ -1,0 +1,139 @@
+{
+  "generated_at": "2026-04-21T17:55:49.756409+00:00",
+  "repo_root": "/home/andy4917/Dev-Management",
+  "status": "BLOCKED",
+  "entries": [
+    {
+      "id": "path_preflight.env_absent",
+      "evidence": [
+        "reports/path-preflight.root-removal.final.json"
+      ],
+      "root_cause": ".env is optional and absent in this workspace.",
+      "disposition": "ACCEPTED_NONBLOCKING",
+      "action_taken": "Left bootstrap optional; helper-based path resolution passes without direnv.",
+      "owner": "workspace",
+      "remaining_risk": "Developers do not get exported convenience vars unless they create .env.",
+      "blocks_app_usability": false,
+      "blocks_code_modification": false,
+      "test_coverage": [
+        "tests.test_path_authority"
+      ]
+    },
+    {
+      "id": "path_preflight.direnv_missing",
+      "evidence": [
+        "reports/path-preflight.root-removal.final.json"
+      ],
+      "root_cause": "direnv is not installed on this machine.",
+      "disposition": "ACCEPTED_NONBLOCKING",
+      "action_taken": "Kept direnv optional; non-interactive helper resolution remains PASS.",
+      "owner": "workspace",
+      "remaining_risk": "Shell bootstrap convenience is unavailable until direnv is installed.",
+      "blocks_app_usability": false,
+      "blocks_code_modification": false,
+      "test_coverage": [
+        "tests.test_path_authority"
+      ]
+    },
+    {
+      "id": "windows_app.global_state_backups",
+      "evidence": [
+        "/mnt/c/Users/anise/.codex/.codex-global-state.json.bak-20260422-global-state-full-repair",
+        "/mnt/c/Users/anise/.codex/.codex-global-state.json.bak-20260422-host-alias-hardening",
+        "/mnt/c/Users/anise/.codex/.codex-global-state.json.bak-20260422-last-chance-fix",
+        "/mnt/c/Users/anise/.codex/.codex-global-state.json.bak-20260422-remote-app-fix"
+      ],
+      "root_cause": "External Windows Codex app-state backups predate this root-removal pass.",
+      "disposition": "MANUAL_REMEDIATION",
+      "action_taken": "Left untouched because they are external user/app state, not repo authority.",
+      "owner": "user",
+      "remaining_risk": "Old app-state snapshots remain outside repo control and may confuse manual investigation.",
+      "blocks_app_usability": false,
+      "blocks_code_modification": false,
+      "test_coverage": [
+        "tests.test_codex_app_usability"
+      ]
+    },
+    {
+      "id": "global_runtime.client_path_contamination",
+      "evidence": [
+        "reports/global-runtime.root-removal.final.json"
+      ],
+      "root_cause": "Codex App client session still injects /mnt/c-backed launcher and tmp arg0 paths into PATH.",
+      "disposition": "ACCEPTED_NONBLOCKING",
+      "action_taken": "Kept canonical SSH runtime authoritative and blocked Windows launcher promotion instead of editing external PATH.",
+      "owner": "user",
+      "remaining_risk": "Local terminal evidence remains noisy and should not be used as authority.",
+      "blocks_app_usability": false,
+      "blocks_code_modification": false,
+      "test_coverage": [
+        "tests.test_check_global_runtime"
+      ]
+    },
+    {
+      "id": "toolchain.workspace_dependency_tools_disabled",
+      "evidence": [
+        "reports/toolchain-surface.root-removal.final.json"
+      ],
+      "root_cause": "Workspace dependency tools are disabled in current Codex App settings.",
+      "disposition": "ACCEPTED_NONBLOCKING",
+      "action_taken": "Reported only; authority/runtime verification does not require those tools.",
+      "owner": "user",
+      "remaining_risk": "Future tasks that need workspace dependency tooling will require settings change.",
+      "blocks_app_usability": false,
+      "blocks_code_modification": false,
+      "test_coverage": [
+        "tests.test_check_toolchain_surface"
+      ]
+    },
+    {
+      "id": "startup.serena_onboarding",
+      "evidence": [
+        "reports/startup-workflow.closeout-v2.final.json"
+      ],
+      "root_cause": "Serena onboarding has not been completed for /home/andy4917/Dev-Management.",
+      "disposition": "MANUAL_REMEDIATION",
+      "action_taken": "Reported blocker; no fake onboarding evidence was created.",
+      "owner": "user",
+      "remaining_risk": "Code-modification gate remains blocked until Serena onboarding is completed.",
+      "blocks_app_usability": false,
+      "blocks_code_modification": true,
+      "test_coverage": [
+        "tests.test_check_startup_workflow"
+      ]
+    },
+    {
+      "id": "startup.serena_activation",
+      "evidence": [
+        "reports/startup-workflow.closeout-v2.final.json"
+      ],
+      "root_cause": "Latest Serena MCP log shows the session started without activating the current project.",
+      "disposition": "MANUAL_REMEDIATION",
+      "action_taken": "Reported blocker; no synthetic activation evidence was created.",
+      "owner": "user",
+      "remaining_risk": "Audit and score remain blocked for code modification until a real activated session is observed.",
+      "blocks_app_usability": false,
+      "blocks_code_modification": true,
+      "test_coverage": [
+        "tests.test_check_startup_workflow"
+      ]
+    },
+    {
+      "id": "global_runtime.app_project_unobserved",
+      "evidence": [
+        "reports/global-runtime.root-removal.final.json"
+      ],
+      "root_cause": "Codex App has not yet proven that /home/andy4917/Dev-Management opened on devmgmt-wsl after cleanup.",
+      "disposition": "MANUAL_REMEDIATION",
+      "action_taken": "Left user-facing app proof as manual evidence rather than reintroducing Windows bootstrap policy files.",
+      "owner": "user",
+      "remaining_risk": "App-usability proof remains incomplete until the user opens the remote project and confirms it.",
+      "blocks_app_usability": true,
+      "blocks_code_modification": false,
+      "test_coverage": [
+        "tests.test_windows_app_ssh_readiness",
+        "tests.test_codex_app_usability"
+      ]
+    }
+  ]
+}

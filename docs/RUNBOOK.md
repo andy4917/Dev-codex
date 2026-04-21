@@ -11,6 +11,7 @@
 - The Windows-mounted Codex launcher is an external dependency and forbidden primary runtime.
 - Linux generated runtime files are outputs only; use `$HOME/.codex/user-config.toml` for allowed global overrides.
 - Windows `.codex` is app runtime state and evidence only and must not contain Dev-Management-generated policy files.
+- Tracked source rollback uses Git history, and generated output rollback uses deterministic regeneration rather than `.bak` or fallback copies.
 - Windows Codex App bootstrap must preserve `[features] remote_control = true` and `remote_connections = true`; removing `remote_connections` hides the Connections UI.
 - Keep a pinned `Dev-Management Control` thread for readiness, maintenance routing, and non-destructive diagnostics.
 - Persistent ops worktrees are optional, non-authoritative, and must never replace the canonical repo root.
@@ -53,6 +54,7 @@
 - app update or settings sync cannot redefine Dev-Management authority
 - a pinned control thread is allowed, but thread context and app memory remain hints only
 - Linux generated runtime files always bind to the canonical repo root, never a task worktree root
+- quarantine is inert evidence only and must not be executable, importable, or treated as a restore source
 
 ## Failure Handling
 

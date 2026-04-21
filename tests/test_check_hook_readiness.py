@@ -75,7 +75,7 @@ class CheckHookReadinessTests(unittest.TestCase):
                 report = self.module.evaluate_hook_readiness(tmp / "repo")
         self.assertEqual(report["status"], "WARN")
 
-    def test_windows_policy_hooks_present_block(self) -> None:
+    def test_unknown_windows_policy_hooks_warn(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             tmp = Path(tmpdir)
             authority = self._authority(tmp)
@@ -88,8 +88,26 @@ class CheckHookReadinessTests(unittest.TestCase):
                 windows_hooks.parent.mkdir(parents=True, exist_ok=True)
                 windows_hooks.write_text('{"hooks": {}}\n', encoding="utf-8")
                 report = self.module.evaluate_hook_readiness(tmp / "repo")
-        self.assertEqual(report["status"], "BLOCKED")
+        self.assertEqual(report["status"], "WARN")
         self.assertTrue(report["windows_policy_hooks"]["present"])
+        self.assertEqual(report["windows_policy_hooks"]["classification"], "unknown_policy_surface")
+
+    def test_generated_windows_policy_hooks_block(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp = Path(tmpdir)
+            authority = self._authority(tmp)
+            authority_path = tmp / "repo" / "contracts" / "workspace_authority.json"
+            authority_path.parent.mkdir(parents=True)
+            self._write_json(authority_path, authority)
+            with patch.object(self.module, "AUTHORITY_PATH", authority_path):
+                generated = self.module.render_hooks(authority, windows=False)
+                (tmp / "linux-hooks.json").write_text(generated, encoding="utf-8")
+                windows_hooks = tmp / "windows-home" / ".codex" / "hooks.json"
+                windows_hooks.parent.mkdir(parents=True, exist_ok=True)
+                windows_hooks.write_text(generated, encoding="utf-8")
+                report = self.module.evaluate_hook_readiness(tmp / "repo")
+        self.assertEqual(report["status"], "BLOCKED")
+        self.assertEqual(report["windows_policy_hooks"]["classification"], "known_generated_cleanup_candidate")
 
     def test_non_trigger_only_hook_role_blocks(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

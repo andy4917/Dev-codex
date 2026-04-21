@@ -1,0 +1,21 @@
+{
+  "generated_at": "2026-04-21T00:00:00+00:00",
+  "quarantine_root": "/home/andy4917/Dev-Management/quarantine/2026-04-16",
+  "classification": "inert_evidence_only",
+  "reason": "Legacy quarantined virtual-environment stubs were reduced to inert directory evidence with executable symlinks removed.",
+  "inert_guarantees": [
+    "legacy quarantine content must not be executed",
+    "legacy quarantine content must not be imported",
+    "legacy quarantine content must not be restored automatically"
+  ],
+  "removed_executable_symlinks": [
+    "/home/andy4917/Dev-Management/quarantine/2026-04-16/preexisting-dev-management-agent/.venv/bin/python",
+    "/home/andy4917/Dev-Management/quarantine/2026-04-16/preexisting-dev-management-agent/.venv/bin/python3",
+    "/home/andy4917/Dev-Management/quarantine/2026-04-16/preexisting-dev-management-agent/.venv/bin/python3.12",
+    "/home/andy4917/Dev-Management/quarantine/2026-04-16/preexisting-dev-management-agent/.venv/lib64",
+    "/home/andy4917/Dev-Management/quarantine/2026-04-16/reservation-system-runtime/.venv.broken-20260417-2100/bin/python",
+    "/home/andy4917/Dev-Management/quarantine/2026-04-16/reservation-system-runtime/.venv.broken-20260417-2100/bin/python3",
+    "/home/andy4917/Dev-Management/quarantine/2026-04-16/reservation-system-runtime/.venv.broken-20260417-2100/bin/python3.12",
+    "/home/andy4917/Dev-Management/quarantine/2026-04-16/reservation-system-runtime/.venv.broken-20260417-2100/lib64"
+  ]
+}

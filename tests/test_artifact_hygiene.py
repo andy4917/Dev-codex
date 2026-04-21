@@ -58,11 +58,10 @@ class ArtifactHygieneTests(unittest.TestCase):
             latest_remediation.write_text("two\n", encoding="utf-8")
             report = self.module.apply_cleanup(tmp)
             self.assertTrue(report["cleanup_applied"])
-            quarantined_sources = {item["source"] for item in report["quarantined_files"]}
-            self.assertIn(str(draft), quarantined_sources)
-            self.assertIn(str(old_remediation), quarantined_sources)
-            self.assertNotIn(str(latest_remediation), quarantined_sources)
-            self.assertIn("quarantine", report["quarantine_root"])
+            removed_sources = {item["source"] for item in report["removed_files"]}
+            self.assertIn(str(draft), removed_sources)
+            self.assertIn(str(old_remediation), removed_sources)
+            self.assertNotIn(str(latest_remediation), removed_sources)
             self.assertFalse(draft.exists())
             self.assertFalse(old_remediation.exists())
             self.assertTrue(latest_remediation.exists())

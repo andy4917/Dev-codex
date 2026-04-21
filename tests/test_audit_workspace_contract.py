@@ -107,13 +107,13 @@ class AuditWorkspaceContractTests(unittest.TestCase):
                     {
                         "path": str(windows_agents),
                         "classification": "generated_policy_surface",
-                        "disposition": "INERT_QUARANTINE",
+                        "disposition": "REMOVE_NOW",
                         "reason": "known generated Windows policy file remains present and should be removed because Codex App can actively read Windows ~/.codex config and instructions.",
                     },
                     {
                         "path": str(windows_config),
                         "classification": "generated_policy_surface",
-                        "disposition": "INERT_QUARANTINE",
+                        "disposition": "REMOVE_NOW",
                         "reason": "known generated Windows policy file remains present and should be removed because Codex App can actively read Windows ~/.codex config and instructions.",
                     },
                     {

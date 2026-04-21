@@ -1,0 +1,23 @@
+{
+  "generated_at": "2026-04-21T00:00:00+00:00",
+  "quarantine_root": "/home/andy4917/Dev-Management/quarantine/windows-codex-policy-mirrors/20260421-081829",
+  "classification": "inert_evidence_only",
+  "reason": "Dev-Management-generated Windows .codex policy-bearing files were quarantined and must remain inert.",
+  "inert_guarantees": [
+    "files in this quarantine root must not be executed",
+    "files in this quarantine root must not be imported",
+    "files in this quarantine root must not be read as active policy source"
+  ],
+  "items": [
+    {
+      "source_path": "/mnt/c/Users/anise/.codex/AGENTS.md",
+      "quarantine_path": "/home/andy4917/Dev-Management/quarantine/windows-codex-policy-mirrors/20260421-081829/AGENTS.md",
+      "action": "quarantined"
+    },
+    {
+      "source_path": "/mnt/c/Users/anise/.codex/config.toml",
+      "quarantine_path": "/home/andy4917/Dev-Management/quarantine/windows-codex-policy-mirrors/20260421-081829/config.toml",
+      "action": "quarantined"
+    }
+  ]
+}

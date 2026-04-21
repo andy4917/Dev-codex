@@ -107,7 +107,45 @@ class WindowsCodexPolicyMirrorRemovalTests(unittest.TestCase):
         self.assertEqual(skill["operation"], "retain")
         self.assertEqual(skill["disposition"], "MANUAL_REMEDIATION")
 
-    def test_apply_quarantines_generated_files_and_removes_skill_mirror(self) -> None:
+    def test_structural_windows_config_without_generated_header_is_remove_now(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp = Path(tmpdir)
+            repo_root = tmp / "repo"
+            workflow_root = tmp / "Dev-Workflow"
+            linux_home = tmp / "linux-home" / ".codex"
+            windows_home = tmp / "windows-home" / ".codex"
+            authority = self._authority(repo_root, linux_home, windows_home, workflow_root)
+            _write_json(repo_root / "contracts" / "workspace_authority.json", authority)
+            linux_home.mkdir(parents=True, exist_ok=True)
+            windows_home.mkdir(parents=True, exist_ok=True)
+            (windows_home / "config.toml").write_text(
+                "\n".join(
+                    [
+                        'model = "gpt-5.4"',
+                        'model_reasoning_effort = "high"',
+                        "",
+                        "[features]",
+                        "chronicle = true",
+                        "memories = true",
+                        "remote_connections = true",
+                        "remote_control = true",
+                        "",
+                        f'[projects."{repo_root}"]',
+                        'trust_level = "trusted"',
+                        "",
+                    ]
+                ),
+                encoding="utf-8",
+            )
+
+            report = self.module.build_report(repo_root, apply=False)
+
+        by_path = {item["path"]: item for item in report["candidates"]}
+        config = by_path[str(windows_home / "config.toml")]
+        self.assertEqual(config["operation"], "remove")
+        self.assertEqual(config["disposition"], "REMOVE_NOW")
+
+    def test_apply_removes_generated_files_and_skill_mirror(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             tmp = Path(tmpdir)
             repo_root = tmp / "repo"
@@ -131,14 +169,11 @@ class WindowsCodexPolicyMirrorRemovalTests(unittest.TestCase):
 
             first = self.module.build_report(repo_root, apply=True)
             second = self.module.build_report(repo_root, apply=True)
-            manifest_path = Path(first["manifest_path"])
-
-            self.assertTrue(manifest_path.exists())
-
         self.assertFalse((windows_home / "config.toml").exists())
         self.assertFalse((windows_home / "AGENTS.md").exists())
         self.assertFalse((windows_home / "skills" / "dev-workflow").exists())
         self.assertEqual(len(first["applied_changes"]), 3)
+        self.assertEqual({item["action"] for item in first["applied_changes"]}, {"removed"})
         self.assertEqual(second["summary"]["generated_candidates"], 0)
         self.assertEqual(second["summary"]["remove_now_candidates"], 0)
 

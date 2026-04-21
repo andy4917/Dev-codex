@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import shlex
 import shutil
@@ -281,6 +282,31 @@ def choose_identity_file() -> str:
     return candidates[0][1]
 
 
+def _sha256_text(text: str) -> str:
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+def readiness_fingerprint(host_alias: str) -> dict[str, Any]:
+    windows_config_text = read_text(WINDOWS_SSH_CONFIG)
+    aliases = concrete_top_level_host_aliases(windows_config_text)
+    bootstrap = bootstrap_status()
+    app_config_text = read_text(WINDOWS_APP_CONFIG)
+    return {
+        "host_alias": host_alias,
+        "windows_ssh_config": str(WINDOWS_SSH_CONFIG),
+        "windows_ssh_config_sha256": _sha256_text(windows_config_text),
+        "concrete_top_level_host_aliases": aliases,
+        "host_alias_visible_to_codex_app_discovery": host_alias in aliases,
+        "identity_file": choose_identity_file(),
+        "windows_app_config": str(WINDOWS_APP_CONFIG),
+        "windows_app_config_sha256": _sha256_text(app_config_text),
+        "bootstrap_features_ready": bool(bootstrap.get("bootstrap_features_ready")),
+        "remote_control_enabled": bool(bootstrap.get("remote_control_enabled")),
+        "remote_connections_enabled": bool(bootstrap.get("remote_connections_enabled")),
+        "agents_is_inert_empty": bool(bootstrap.get("agents_is_inert_empty")),
+    }
+
+
 def render_alias(host_alias: str) -> str:
     return "\n".join([
         MARKER_BEGIN,
@@ -408,6 +434,7 @@ def build_live_report(
         "app_remote_project_path": remote_project_path,
         "blocking_domain": blocking_domain,
         "windows_app_bootstrap": bootstrap,
+        "readiness_fingerprint": readiness_fingerprint(host_alias),
         "hard_acceptance": {
             "codex_app_remote_project_opened": project_state == "OPENED",
             "remote_project_path": remote_project_path,
@@ -532,6 +559,40 @@ def reassess_report(payload: dict[str, Any]) -> dict[str, Any]:
     return report
 
 
+def cache_validation(report: dict[str, Any]) -> dict[str, Any]:
+    host_alias = str(report.get("host_alias", "devmgmt-wsl")).strip() or "devmgmt-wsl"
+    current = readiness_fingerprint(host_alias)
+    cached = report.get("readiness_fingerprint")
+    if not isinstance(cached, dict):
+        return {
+            "status": "MISSING_FINGERPRINT",
+            "current": current,
+            "cached": cached,
+            "mismatched_fields": [],
+        }
+    tracked_fields = [
+        "host_alias",
+        "windows_ssh_config",
+        "windows_ssh_config_sha256",
+        "concrete_top_level_host_aliases",
+        "host_alias_visible_to_codex_app_discovery",
+        "identity_file",
+        "windows_app_config",
+        "windows_app_config_sha256",
+        "bootstrap_features_ready",
+        "remote_control_enabled",
+        "remote_connections_enabled",
+        "agents_is_inert_empty",
+    ]
+    mismatched_fields = [field for field in tracked_fields if cached.get(field) != current.get(field)]
+    return {
+        "status": "PASS" if not mismatched_fields else "MISMATCH",
+        "current": current,
+        "cached": cached,
+        "mismatched_fields": mismatched_fields,
+    }
+
+
 def _cache_metadata(path: Path) -> dict[str, Any]:
     if not path.exists():
         return {"exists": False, "cache_status": "missing", "cache_age_seconds": None}
@@ -555,6 +616,7 @@ def _decorate_report(
     payload = hydrate_report_fields(report)
     warnings = list(payload.get("warnings", [])) if isinstance(payload.get("warnings"), list) else []
     user_actions = list(payload.get("user_action_required", [])) if isinstance(payload.get("user_action_required"), list) else []
+    validation = cache_validation(payload)
     refresh_action = (
         "Run `python3 scripts/check_windows_app_ssh_readiness.py --refresh-windows-ssh --json` to refresh Windows SSH readiness."
     )
@@ -564,6 +626,19 @@ def _decorate_report(
         user_actions = list(payload.get("user_action_required", [])) if isinstance(payload.get("user_action_required"), list) else []
     if "host_alias_visible_to_codex_app_discovery" not in report or "app_connections_status" not in report:
         warnings.append("Cached Windows SSH readiness predates direct Host alias discovery checks; run an explicit refresh.")
+        if refresh_action not in user_actions:
+            user_actions.append(refresh_action)
+        payload["status"] = "WARN"
+    if probe_source == "cached_report" and validation["status"] == "MISSING_FINGERPRINT":
+        warnings.append("Cached Windows SSH readiness is missing a state fingerprint; run an explicit refresh before trusting it.")
+        if refresh_action not in user_actions:
+            user_actions.append(refresh_action)
+        payload["status"] = "WARN"
+    elif probe_source == "cached_report" and validation["status"] == "MISMATCH":
+        mismatched = ", ".join(validation["mismatched_fields"]) or "unknown fields"
+        warnings.append(
+            f"Cached Windows SSH readiness no longer matches the current Windows SSH/bootstrap state ({mismatched}); run an explicit refresh."
+        )
         if refresh_action not in user_actions:
             user_actions.append(refresh_action)
         payload["status"] = "WARN"
@@ -590,6 +665,7 @@ def _decorate_report(
     payload["warnings"] = warnings
     payload["probe_source"] = probe_source
     payload["cache_status"] = cache_status
+    payload["cache_validation"] = validation
     payload["cache_path"] = str(cache_path)
     payload["cache_age_seconds"] = cache_age_seconds
     payload["live_probe_permitted"] = live_probe_permitted
@@ -629,6 +705,7 @@ def _missing_cache_report(repo_root: str | Path | None = None) -> dict[str, Any]
         "app_remote_project_path": str(repo_root or ROOT),
         "blocking_domain": "ui_evidence",
         "windows_app_bootstrap": bootstrap_status(),
+        "readiness_fingerprint": readiness_fingerprint(host_alias),
         "hard_acceptance": {
             "codex_app_remote_project_opened": False,
             "remote_project_path": str(repo_root or ROOT),
@@ -741,7 +818,7 @@ def evaluate_windows_app_ssh_readiness(
         if app_remote_project_path:
             cached_report["app_remote_project_path"] = app_remote_project_path
         cache_status = "fresh" if float(metadata["cache_age_seconds"] or 0.0) <= float(cache_ttl_seconds) else "stale"
-        return _decorate_report(
+        decorated = _decorate_report(
             cached_report,
             probe_source="cached_report",
             cache_path=cache_path,
@@ -749,6 +826,28 @@ def evaluate_windows_app_ssh_readiness(
             cache_age_seconds=metadata["cache_age_seconds"],
             live_probe_permitted=live_probe_permitted,
         )
+        if live_probe_permitted and str(decorated.get("cache_validation", {}).get("status", "PASS")) != "PASS":
+            live = build_live_report(
+                repo_root,
+                apply_user_level=apply_user_level,
+                app_host_listed_in_connections=app_host_listed_in_connections,
+                manual_add_host_worked=manual_add_host_worked,
+                app_remote_project_opened=app_remote_project_opened,
+                app_remote_project_not_opened=app_remote_project_not_opened,
+                app_remote_project_unobserved=app_remote_project_unobserved,
+                app_remote_project_path=app_remote_project_path,
+            )
+            report = _decorate_report(
+                live,
+                probe_source="live_probe",
+                cache_path=cache_path,
+                cache_status="fresh",
+                cache_age_seconds=0.0,
+                live_probe_permitted=True,
+            )
+            _persist_cache(report, cache_path)
+            return report
+        return decorated
 
     if live_probe_permitted:
         live = build_live_report(
