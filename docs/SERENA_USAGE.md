@@ -18,6 +18,7 @@
 - onboarding memory cannot be forged
 - latest `not activating any project` evidence keeps startup blocked until fresh activation proof exists
 - if activation proof remains unavailable, only activation-bootstrap-scoped work is allowed
+- app usability readiness may still be WARN rather than BLOCKED while Serena blocks general code modification
 
 ## Repair Boundary
 

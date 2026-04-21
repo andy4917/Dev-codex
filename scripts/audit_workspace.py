@@ -443,10 +443,10 @@ def load_script_function(script_name: str, function_name: str):
     return getattr(module, function_name)
 
 
-def build_startup_workflow_check(management_root: Path) -> dict[str, Any]:
+def build_startup_workflow_check(management_root: Path, *, purpose: str = "code-modification") -> dict[str, Any]:
     try:
         evaluator = load_script_function("check_startup_workflow.py", "evaluate_startup_workflow")
-        payload = evaluator(management_root)
+        payload = evaluator(management_root, purpose=purpose)
         if isinstance(payload, dict):
             return payload
         return {
@@ -853,6 +853,7 @@ def main() -> int:
     parser.add_argument("--write-report", action="store_true", help="Write the audit report to the default report path.")
     parser.add_argument("--json", action="store_true", help="Print JSON to stdout.")
     parser.add_argument("--output-file", default="", help="Optional explicit report output path.")
+    parser.add_argument("--purpose", choices=["code-modification", "app-usability"], default="code-modification")
     args = parser.parse_args()
 
     authority = load_authority()
@@ -940,10 +941,13 @@ def main() -> int:
     windows_app_ssh_readiness = evaluate_windows_app_ssh_readiness(Path(roots["management"]))
     release_report = load_json(REPORTS_ROOT / "codex-app-installed-release-impact.unified-phase.json", default={})
     score_layer = load_json(
-        REPORTS_ROOT / "score-layer.unified-phase.final.json",
+        REPORTS_ROOT / "score-layer.final.json",
         load_json(
-            REPORTS_ROOT / "score-layer.unified-phase.json",
-            default={"status": "PASS", "missing": True, "warnings": ["run_score_layer.py after audit to finalize score evidence"]},
+            REPORTS_ROOT / "score-layer.unified-phase.final.json",
+            load_json(
+                REPORTS_ROOT / "score-layer.unified-phase.json",
+                default={"status": "PASS", "missing": True, "warnings": ["run_score_layer.py after audit to finalize score evidence"]},
+            ),
         ),
     )
     quarantine_root_ok = quarantine_root_policy_ok(quarantine_root)
@@ -978,7 +982,7 @@ def main() -> int:
         runtime_restore_seed_violations
     )
     score_policy_tamper_events = detect_score_policy_tamper_events(Path(roots["management"]), Path(roots["workflow"]))
-    startup_workflow_check = build_startup_workflow_check(Path(roots["management"]))
+    startup_workflow_check = build_startup_workflow_check(Path(roots["management"]), purpose=args.purpose)
     tamper_events = build_tamper_events(
         old_path_refs=old_path_refs,
         forbidden_features=forbidden_feature_findings,
@@ -1023,8 +1027,7 @@ def main() -> int:
         hook_readiness["status"] == "BLOCKED",
         artifact_hygiene["status"] == "BLOCKED",
         windows_app_ssh_readiness["status"] == "BLOCKED",
-        str(score_layer.get("status", "PASS")) == "BLOCKED" and not bool(score_layer.get("missing", False)),
-        startup_workflow_check["status"] != "PASS",
+        startup_workflow_check["status"] == "BLOCKED",
         instruction_guard_policy["status"] != "PASS",
         bool(forbidden_feature_findings),
         bool(old_path_refs),
@@ -1038,15 +1041,17 @@ def main() -> int:
         hook_readiness["status"] == "WARN",
         artifact_hygiene["status"] == "WARN",
         bool(warning_runtime_restore_seed_violations),
-        str(score_layer.get("status", "PASS")) == "WARN" and not bool(score_layer.get("missing", False)),
+        str(score_layer.get("status", "PASS")) in {"WARN", "BLOCKED"} and not bool(score_layer.get("missing", False)),
         str((release_report or {}).get("status", "PASS")) == "WARN",
         repair_readiness.get("status") != "PASS",
+        startup_workflow_check["status"] == "WARN",
     ]
     gate_status = "BLOCKED" if any(blocking_conditions) else "WARN" if any(warning_conditions) else "PASS"
 
     report = {
         "phase": str(args.phase).strip() or "final",
         "blocking_only": bool(args.blocking_only),
+        "purpose": args.purpose,
         "authority_path": str(AUTHORITY_PATH),
         "trusted_projects": trusted_projects,
         "agents_files": [str(p) for p in sorted(agents_files)],

@@ -20,6 +20,7 @@
 6. `python3 scripts/check_agent_instruction.py --instruction "<task>"`
 7. `python3 scripts/check_startup_workflow.py --mode ssh-managed --json`
 8. `python3 scripts/audit_workspace.py --json`
+9. `python3 scripts/activate_codex_app_usability.py --dry-run --json` when the goal is app readiness rather than general code modification
 
 ## Verify Loop
 
@@ -50,6 +51,7 @@
 - missing Context7 for protected change => BLOCKED
 - missing Serena activation for general code modification => BLOCKED
 - workspace dependency tools disabled but unused => PASS or WARN depending on workflow need
+- app usability may be WARN when Serena still blocks general code modification but app SSH, remote codex, config provenance, and auth flow are ready
 
 ## Close-Out
 

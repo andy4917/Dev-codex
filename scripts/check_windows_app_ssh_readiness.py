@@ -2,44 +2,31 @@
 from __future__ import annotations
 
 import argparse
-import json
 import shutil
-import subprocess
+import sys
 from datetime import datetime
 from pathlib import Path
 from typing import Any
 
 
 ROOT = Path(__file__).resolve().parents[1]
-AUTHORITY_PATH = ROOT / "contracts" / "workspace_authority.json"
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from devmgmt_runtime.authority import load_authority
+from devmgmt_runtime.paths import canonical_surface
+from devmgmt_runtime.reports import save_json
+from devmgmt_runtime.status import collapse_status, status_exit_code
+from devmgmt_runtime.subprocess_safe import run_powershell
+
+
 DEFAULT_OUTPUT_PATH = ROOT / "reports" / "windows-app-ssh-remote-readiness.unified-phase.json"
+AUTHORITY_PATH = ROOT / "contracts" / "workspace_authority.json"
 WINDOWS_SSH_CONFIG = Path("/mnt/c/Users/anise/.ssh/config")
+WSL_SSH_CONFIG = Path("/home/andy4917/.ssh/config")
+WSL_SSH_MANAGED_CONFIG = Path("/home/andy4917/.ssh/config.d/dev-management.conf")
 MARKER_BEGIN = "# BEGIN DEV-MANAGEMENT devmgmt-wsl"
 MARKER_END = "# END DEV-MANAGEMENT devmgmt-wsl"
-
-
-def load_json(path: Path, default: Any | None = None) -> Any:
-    if not path.exists():
-        return {} if default is None else default
-    return json.loads(path.read_text(encoding="utf-8"))
-
-
-def save_json(path: Path, payload: Any) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-
-
-def status_exit_code(status: str) -> int:
-    if status == "PASS":
-        return 0
-    if status == "WARN":
-        return 1
-    return 2
-
-
-def load_authority(repo_root: str | Path | None = None) -> dict[str, Any]:
-    authority_path = AUTHORITY_PATH if repo_root is None else Path(repo_root).expanduser().resolve() / "contracts" / "workspace_authority.json"
-    return load_json(authority_path, default={})
 
 
 def read_text(path: Path) -> str:
@@ -48,15 +35,12 @@ def read_text(path: Path) -> str:
     return path.read_text(encoding="utf-8")
 
 
+def run_windows_ssh_version() -> dict[str, Any]:
+    return run_powershell('& "$env:WINDIR\\System32\\OpenSSH\\ssh.exe" -V', set_userprofile=False)
+
+
 def run_windows_ssh(host_alias: str) -> dict[str, Any]:
-    command = f'Set-Location $env:USERPROFILE; & "$env:WINDIR\\System32\\OpenSSH\\ssh.exe" -o BatchMode=yes {host_alias} hostname'
-    result = subprocess.run(["powershell.exe", "-NoProfile", "-Command", command], check=False, capture_output=True, text=True, encoding="utf-8")
-    return {
-        "ok": result.returncode == 0,
-        "exit_code": result.returncode,
-        "stdout": result.stdout.strip(),
-        "stderr": result.stderr.strip(),
-    }
+    return run_powershell(f'& "$env:WINDIR\\System32\\OpenSSH\\ssh.exe" -o BatchMode=yes {host_alias} hostname')
 
 
 def choose_identity_file() -> str:
@@ -82,7 +66,7 @@ def render_alias(host_alias: str) -> str:
 
 def ensure_alias(host_alias: str, *, apply: bool) -> tuple[bool, list[str]]:
     text = read_text(WINDOWS_SSH_CONFIG)
-    if MARKER_BEGIN in text and f"Host {host_alias}" in text:
+    if f"Host {host_alias}" in text:
         return False, []
     backups: list[str] = []
     if apply:
@@ -96,34 +80,68 @@ def ensure_alias(host_alias: str, *, apply: bool) -> tuple[bool, list[str]]:
     return True, backups
 
 
+def simple_user_instruction(status: str, host_alias: str) -> str:
+    if status == "PASS":
+        return f"Open Codex App Settings > Connections and select {host_alias}."
+    if status == "WARN":
+        return f"Open Codex App Settings > Connections, verify {host_alias}, then retry the remote connection."
+    return f"Add or repair the Windows user SSH alias for {host_alias}, then reopen Codex App Settings > Connections."
+
+
 def evaluate_windows_app_ssh_readiness(repo_root: str | Path | None = None, *, apply_user_level: bool = False) -> dict[str, Any]:
-    authority = load_authority(repo_root)
-    surface = authority.get("canonical_remote_execution_surface", authority.get("canonical_execution_surface", {}))
-    host_alias = str(surface.get("host_alias", "devmgmt-wsl"))
+    authority = load_authority(repo_root, authority_path=AUTHORITY_PATH)
+    surface = canonical_surface(authority)
+    host_alias = str(surface.get("host_alias", "devmgmt-wsl")).strip() or "devmgmt-wsl"
     alias_present = f"Host {host_alias}" in read_text(WINDOWS_SSH_CONFIG)
     backups: list[str] = []
     changed = False
     if apply_user_level and not alias_present:
         changed, backups = ensure_alias(host_alias, apply=True)
         alias_present = f"Host {host_alias}" in read_text(WINDOWS_SSH_CONFIG)
-    probe = run_windows_ssh(host_alias) if alias_present else {"ok": False, "exit_code": None, "stdout": "", "stderr": "alias missing"}
-    status = "PASS" if alias_present and probe["ok"] else "WARN" if alias_present else "BLOCKED"
+    ssh_version = run_windows_ssh_version()
+    probe = run_windows_ssh(host_alias) if alias_present else {"ok": False, "exit_code": None, "stdout": "", "stderr": "alias missing", "command": ""}
+    status = collapse_status([
+        "PASS" if alias_present and bool(probe.get("ok")) else "",
+        "WARN" if alias_present and not bool(probe.get("ok")) else "",
+        "BLOCKED" if not alias_present else "",
+    ])
     warnings = [] if status == "PASS" else ["Windows app-side SSH alias is missing or Windows ssh.exe cannot yet reach devmgmt-wsl."]
     return {
         "status": status,
+        "scope": "app-usability",
         "host_alias": host_alias,
+        "windows_ssh_dir": str(WINDOWS_SSH_CONFIG.parent),
         "windows_ssh_config": str(WINDOWS_SSH_CONFIG),
+        "wsl_user_ssh_config": str(WSL_SSH_CONFIG),
+        "wsl_managed_ssh_config": str(WSL_SSH_MANAGED_CONFIG),
         "alias_present": alias_present,
         "identity_file": choose_identity_file(),
+        "ssh_exe_version": ssh_version,
         "probe": probe,
         "applied": changed,
         "backups": backups,
+        "repairable_user_level": True,
+        "system_config_modified": False,
+        "windows_path_modified": False,
+        "simple_user_instruction": simple_user_instruction(status, host_alias),
+        "user_action_required": [] if status == "PASS" else [simple_user_instruction(status, host_alias)],
         "warnings": warnings,
     }
 
 
 def render_markdown(report: dict[str, Any]) -> str:
-    lines = ["# Windows App SSH Readiness", "", f"- Status: {report['status']}", f"- Alias present: {str(report['alias_present']).lower()}", f"- Identity file: {report['identity_file']}", f"- Probe ok: {str(report['probe']['ok']).lower()}"]
+    probe = report.get("probe", {}) if isinstance(report.get("probe"), dict) else {}
+    ssh_version = report.get("ssh_exe_version", {}) if isinstance(report.get("ssh_exe_version"), dict) else {}
+    lines = [
+        "# Windows App SSH Readiness",
+        "",
+        f"- Status: {report['status']}",
+        f"- Alias present: {str(report.get('alias_present', False)).lower()}",
+        f"- Identity file: {report.get('identity_file', '~/.ssh/devmgmt_wsl_ed25519')}",
+        f"- Probe ok: {str(probe.get('ok', False)).lower()}",
+        f"- Windows ssh.exe version probe ok: {str(ssh_version.get('ok', False)).lower()}",
+        f"- User action: {report.get('simple_user_instruction', '')}",
+    ]
     for item in report.get("warnings", []):
         lines.append(f"- Warning: {item}")
     return "\n".join(lines) + "\n"
@@ -141,6 +159,8 @@ def main() -> int:
     save_json(output_path, report)
     output_path.with_suffix(".md").write_text(render_markdown(report), encoding="utf-8")
     if args.json:
+        import json
+
         print(json.dumps(report, ensure_ascii=False, indent=2))
     else:
         print(render_markdown(report), end="")

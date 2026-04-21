@@ -22,6 +22,7 @@ from check_global_runtime import evaluate_global_runtime
 
 
 STARTUP_REPORT_NAME = "startup-workflow.json"
+PURPOSE_CHOICES = ("code-modification", "app-usability")
 SERENA_ACTIVATION_FAILURE_PATTERNS = (
     re.compile(r"no project root found", re.IGNORECASE),
     re.compile(r"not activating any project", re.IGNORECASE),
@@ -340,6 +341,8 @@ def evaluate_serena(
     authority: dict[str, Any],
     policy: dict[str, Any],
     changed_paths: list[str],
+    *,
+    purpose: str = "code-modification",
 ) -> dict[str, Any]:
     config_paths = runtime_config_paths(authority)
     global_config = config_paths["global"]
@@ -356,7 +359,7 @@ def evaluate_serena(
     activation = serena_activation_status(home)
     deterministic_repair = serena_deterministic_repair_available()
 
-    required = bool(changed_paths)
+    required = bool(changed_paths) and purpose != "app-usability"
     warnings: list[str] = []
     blockers: list[str] = []
 
@@ -375,16 +378,25 @@ def evaluate_serena(
             blockers.append("serena init has not been completed")
         else:
             warnings.append("serena init has not been completed")
-    if required and not (project_dir / "project.yml").exists():
-        blockers.append("Serena project metadata is missing for the current repo")
-    if required and not onboarding_performed:
-        blockers.append("Serena onboarding has not been performed for the current repo")
-    if required and activation["status"] != "PASS":
-        blockers.append(activation["reason"])
+    if not (project_dir / "project.yml").exists():
+        if required:
+            blockers.append("Serena project metadata is missing for the current repo")
+        elif purpose == "app-usability":
+            warnings.append("Serena project metadata is missing for the current repo")
+    if not onboarding_performed:
+        if required:
+            blockers.append("Serena onboarding has not been performed for the current repo")
+        elif purpose == "app-usability":
+            warnings.append("Serena onboarding has not been performed for the current repo")
+    if activation["status"] != "PASS":
+        if required:
+            blockers.append(activation["reason"])
+        elif purpose == "app-usability":
+            warnings.append(activation["reason"])
     if not windows_ok:
         warnings.append("Windows Serena config parity is not confirmed.")
 
-    status = "PASS" if not blockers else "BLOCKED"
+    status = "BLOCKED" if blockers else ("WARN" if warnings and purpose == "app-usability" else "PASS")
     summary = "Serena startup sequence is ready for the current diff." if status == "PASS" else "Serena startup sequence is incomplete for the current diff."
 
     return {
@@ -470,7 +482,12 @@ def selected_startup_mode(authority: dict[str, Any], requested_mode: str) -> str
     return requested_mode
 
 
-def evaluate_startup_workflow(repo_root: str | Path | None = None, *, mode: str = "auto") -> dict[str, Any]:
+def evaluate_startup_workflow(
+    repo_root: str | Path | None = None,
+    *,
+    mode: str = "auto",
+    purpose: str = "code-modification",
+) -> dict[str, Any]:
     root = repo_root_from_arg(repo_root)
     authority = load_json(root / "contracts" / "workspace_authority.json", default={})
     context7_policy = load_json(root / "contracts" / "context7_policy.json", default={})
@@ -480,19 +497,25 @@ def evaluate_startup_workflow(repo_root: str | Path | None = None, *, mode: str 
     selected_mode = selected_startup_mode(authority, mode)
     runtime_gate = evaluate_global_runtime(root, mode=selected_mode)
 
-    serena = evaluate_serena(root, authority, serena_policy, startup_changes)
+    serena = evaluate_serena(root, authority, serena_policy, startup_changes, purpose=purpose)
     context7 = evaluate_context7(root, authority, context7_policy, changed_paths)
     blockers = [*serena["blockers"], *context7["blockers"]]
     warnings = [*serena["warnings"], *context7["warnings"]]
     if selected_mode == "ssh-managed" and runtime_gate.get("ssh_canonical_runtime", {}).get("canonical_ssh_runtime_status", {}).get("status") != "PASS":
         blockers.append("canonical SSH runtime is unavailable for startup verification")
-    status = "PASS" if not blockers else "BLOCKED"
+    if blockers:
+        status = "BLOCKED"
+    elif warnings and purpose == "app-usability":
+        status = "WARN"
+    else:
+        status = "PASS"
     summary = "Serena-first and Context7-first startup workflow is ready for the current diff." if status == "PASS" else "Serena-first and Context7-first startup workflow is incomplete for the current diff."
 
     return {
         "status": status,
         "summary": summary,
         "generated_at": utc_timestamp(),
+        "purpose": purpose,
         "mode_requested": mode,
         "mode_selected": selected_mode,
         "repo_root": str(root),
@@ -516,11 +539,12 @@ def main() -> int:
     parser.add_argument("--repo-root", default="")
     parser.add_argument("--output-file", default="")
     parser.add_argument("--mode", choices=["auto", "local", "ssh-managed"], default="auto")
+    parser.add_argument("--purpose", choices=PURPOSE_CHOICES, default="code-modification")
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args()
 
     repo_root = repo_root_from_arg(args.repo_root or None)
-    report = evaluate_startup_workflow(repo_root, mode=args.mode)
+    report = evaluate_startup_workflow(repo_root, mode=args.mode, purpose=args.purpose)
     output_path = Path(args.output_file).expanduser().resolve() if args.output_file else repo_root / "reports" / STARTUP_REPORT_NAME
     save_json(output_path, report)
     print(json.dumps(report, ensure_ascii=False, indent=2))

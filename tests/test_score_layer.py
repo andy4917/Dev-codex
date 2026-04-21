@@ -97,6 +97,21 @@ class ScoreLayerTests(unittest.TestCase):
         self.assertEqual(report["status"], "PASS")
         self.assertTrue(report["report_sources"]["audit"].endswith("audit.post-export.json"))
 
+    def test_app_usability_warns_when_startup_is_warn(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp = Path(tmpdir)
+            reports = tmp / "reports"
+            self._write_json(reports / "config-provenance.final.json", {"status": "PASS", "gate_status": "PASS"})
+            self._write_json(reports / "global-runtime.final.json", {"overall_status": "WARN", "canonical_execution_status": "PASS", "remote_codex_resolution_status": {"status": "PASS"}, "client_surface_status": "WARN"})
+            self._write_json(reports / "startup-workflow.final.json", {"status": "WARN"})
+            self._write_json(reports / "toolchain-surface.final.json", {"status": "PASS"})
+            self._write_json(reports / "hook-readiness.final.json", {"status": "PASS", "hook_only_enforcement_claim": False})
+            self._write_json(reports / "artifact-hygiene.final.json", {"status": "PASS"})
+            self._write_json(reports / "audit.final.json", {"status": "WARN"})
+            report = self.module.evaluate_score_layer(tmp, purpose="app-usability")
+        self.assertEqual(report["status"], "WARN")
+        self.assertEqual(report["purpose"], "app-usability")
+
 
 if __name__ == "__main__":
     unittest.main()

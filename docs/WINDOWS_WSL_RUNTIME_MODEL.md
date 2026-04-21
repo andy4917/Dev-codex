@@ -2,8 +2,9 @@
 
 ## Access
 
-- Windows is the user/UI plane.
-- WSL Ubuntu is the canonical implementation and verification plane.
+- Windows is the app host and user/UI plane.
+- The canonical success path is Codex App -> SSH -> devmgmt-wsl -> Linux-native Codex CLI -> Dev-Management guard/audit/repair.
+- WSL local shell remains a diagnostic surface unless the canonical remote runtime explicitly delegates to it.
 - Preferred Windows access path is `\\wsl.localhost\Ubuntu\...`.
 - `\\wsl$` remains acceptable for legacy evidence, but `\\wsl.localhost` is the default runtime path.
 
@@ -26,7 +27,7 @@ Higher layers override lower layers. A stale restore can therefore mask correcte
 
 ## Why This Matters
 
-- Linux-native tooling lives in WSL and should be verified there.
-- Windows remains the user/UI plane, but it does not define the canonical repo root.
+- Linux-native tooling lives in devmgmt-wsl and should be verified through the canonical SSH-remote runtime.
+- Windows remains the user/UI plane and SSH client surface, but it does not define the canonical repo root or execution authority.
 - restore artifacts are runtime inputs, not policy; when they drift, rebuild them from source instead of trusting the stale snapshot.
 - old Windows Desktop checkout assumptions are stale evidence and must not be treated as design truth.

@@ -1,0 +1,8 @@
+{
+  "status": "PASS",
+  "preview_path": "/home/andy4917/Dev-Management/reports/generated-runtime-preview/codex-ssh-wrapper.sh",
+  "live_write_allowed": true,
+  "current_target": "",
+  "expected_target": "/home/andy4917/.local/share/dev-management/codex-npm/bin/codex",
+  "reasons": []
+}

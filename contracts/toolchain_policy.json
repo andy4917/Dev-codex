@@ -247,5 +247,51 @@
     "wsl_first_boot_pending",
     "network_or_repository_failure",
     "destructive_overwrite_required"
-  ]
+  ],
+  "app_surface_features": [
+    "remote_connections",
+    "windows_wsl_agent_selection",
+    "integrated_terminal",
+    "multiple_terminals",
+    "plugins",
+    "skills",
+    "subagents",
+    "plugin_mcp_surface",
+    "workspace_dependencies",
+    "hooks",
+    "chronicle",
+    "projectless_chats",
+    "automations",
+    "worktrees",
+    "local_environments",
+    "settings_sync",
+    "computer_use",
+    "in_app_browser",
+    "linux_native_codex_cli",
+    "serena",
+    "context7"
+  ],
+  "usage_provenance": {
+    "report_path": "reports/toolchain-usage.session.json",
+    "required_keys": [
+      "skills",
+      "subagents"
+    ],
+    "projectless_chat_block_when_repo_root_missing": true,
+    "multiple_terminal_path_mismatch_status": "WARN",
+    "selected_execution_terminal_contaminated_status": "BLOCKED",
+    "hooks_are_trigger_only": true
+  },
+  "workspace_dependency_policy": {
+    "disabled_and_unused": "PASS",
+    "disabled_but_required": "WARN",
+    "enabled_but_unaudited": "WARN"
+  },
+  "linux_native_codex_cli_policy": {
+    "user_level_prefix": "/home/andy4917/.local/share/dev-management/codex-npm",
+    "forbidden_primary_runtime_paths": [
+      "/mnt/c/Users/anise/.codex/bin/wsl/codex",
+      ".codex/tmp/arg0"
+    ]
+  }
 }

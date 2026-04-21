@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "generated_mirror_contract": {
+    "role": "generated_mirror",
+    "outputs_only": true,
+    "read_by_renderer": false,
+    "user_override_source": false,
+    "required_header_fields": [
+      "source_authority",
+      "source_hash",
+      "role",
+      "read_by_renderer",
+      "user_override_source",
+      "optional_user_override"
+    ]
+  },
+  "optional_user_override_source": "/home/andy4917/.codex/user-config.toml",
+  "blocked_active_feature_flags": [
+    "telepathy",
+    "workspace_dependencies",
+    "use_agent_identity"
+  ],
+  "conditionally_reauthorizable_feature_flags": [
+    "workspace_dependencies"
+  ],
+  "workspace_dependencies_reauthorized": false,
+  "blocked_generated_config_values": {
+    "approval_policy": [
+      "never"
+    ],
+    "sandbox_mode": [
+      "danger-full-access"
+    ]
+  },
+  "allowed_replacement_features": [
+    "chronicle"
+  ]
+}
+

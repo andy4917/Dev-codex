@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "roles": {
+    "codex_app": [
+      "primary_user_control_surface",
+      "remote_session_control_surface"
+    ],
+    "windows_host": [
+      "app_host",
+      "ssh_client_surface"
+    ],
+    "canonical_remote_execution_surface": "devmgmt-wsl",
+    "canonical_agent_binary": "Linux-native Codex CLI"
+  },
+  "settings_flow": {
+    "settings_path": "Settings > Connections",
+    "host_alias": "devmgmt-wsl",
+    "remote_project": "/home/andy4917/Dev-Management",
+    "readiness_prompt": "Run Dev-Management app usability readiness check and report PASS/WARN/BLOCKED. Do not modify code unless runtime, config provenance, startup, Context7, and score gates allow it."
+  },
+  "blocked_relation": {
+    "description": "Codex App on Windows must not use the Windows-mounted Codex launcher as the primary execution runtime.",
+    "forbidden_primary_runtime": "/mnt/c/Users/anise/.codex/bin/wsl/codex"
+  },
+  "auth_surface": {
+    "sign_in_is_user_action": true,
+    "auth_payloads_are_runtime_state": true
+  }
+}
+

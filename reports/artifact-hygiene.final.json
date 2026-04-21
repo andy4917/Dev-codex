@@ -1,0 +1,12 @@
+{
+  "status": "WARN",
+  "stale_draft_reports": [],
+  "remediation_reports": [
+    "/home/andy4917/Dev-Management/reports/manual-system-remediation-20260421-063444.md",
+    "/home/andy4917/Dev-Management/reports/manual-system-remediation-20260421-112829.md",
+    "/home/andy4917/Dev-Management/reports/manual-system-remediation-20260421-120815.md"
+  ],
+  "stale_preview_files": [],
+  "transient_files": [],
+  "cleanup_allowed_only_with_explicit_apply": true
+}

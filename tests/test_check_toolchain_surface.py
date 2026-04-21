@@ -39,6 +39,7 @@ class CheckToolchainSurfaceTests(unittest.TestCase):
             (tmp / ".codex" / "config.toml").write_text('[features]\nchronicle = true\n[mcp_servers.context7]\nenabled = true\n[plugins."github@openai-curated"]\nenabled = true\n', encoding="utf-8")
             (reports / "workspace-dependency-surface.json").write_text(json.dumps({"tool_status": "DISABLED_IN_APP_SETTINGS", "required_by_workflow": False}), encoding="utf-8")
             (reports / "toolchain-usage.session.json").write_text(json.dumps({"skills": ["env-audit"], "subagents": ["tests_gap_scan"]}), encoding="utf-8")
+            (reports / "codex-app-installed-release-impact.unified-phase.json").write_text(json.dumps({"status": "PASS"}), encoding="utf-8")
             with patch.dict(os.environ, {"HOME": str(tmp)}), patch.object(self.module, "evaluate_global_runtime", return_value={"remote_codex_resolution_status": {"status": "PASS"}, "overall_status": "PASS"}):
                 report = self.module.evaluate_toolchain_surface(tmp)
         self.assertEqual(report["status"], "PASS")
@@ -62,7 +63,34 @@ class CheckToolchainSurfaceTests(unittest.TestCase):
             (tmp / ".codex").mkdir()
             (tmp / ".codex" / "config.toml").write_text('[features]\nchronicle = true\n', encoding="utf-8")
             (reports / "toolchain-usage.session.json").write_text(json.dumps({"skills": [], "subagents": []}), encoding="utf-8")
+            (reports / "codex-app-installed-release-impact.unified-phase.json").write_text(json.dumps({"status": "PASS"}), encoding="utf-8")
             with patch.dict(os.environ, {"HOME": str(tmp)}), patch.object(self.module, "evaluate_global_runtime", return_value={"remote_codex_resolution_status": {"status": "BLOCKED"}, "overall_status": "WARN"}):
+                report = self.module.evaluate_toolchain_surface(tmp)
+        self.assertEqual(report["status"], "BLOCKED")
+
+    def test_projectless_code_modification_without_repo_root_blocks(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp = Path(tmpdir)
+            reports = tmp / "reports"
+            reports.mkdir()
+            (tmp / ".codex").mkdir()
+            (tmp / ".codex" / "config.toml").write_text('[features]\nchronicle = true\n', encoding="utf-8")
+            (reports / "toolchain-usage.session.json").write_text(
+                json.dumps(
+                    {
+                        "skills": ["env-audit"],
+                        "subagents": ["contracts_docs_review"],
+                        "projectless_chat": {
+                            "active": True,
+                            "code_modification_requested": True,
+                            "repo_root_resolved": False,
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (reports / "codex-app-installed-release-impact.unified-phase.json").write_text(json.dumps({"status": "PASS"}), encoding="utf-8")
+            with patch.dict(os.environ, {"HOME": str(tmp)}), patch.object(self.module, "evaluate_global_runtime", return_value={"remote_codex_resolution_status": {"status": "PASS"}, "overall_status": "PASS"}):
                 report = self.module.evaluate_toolchain_surface(tmp)
         self.assertEqual(report["status"], "BLOCKED")
 

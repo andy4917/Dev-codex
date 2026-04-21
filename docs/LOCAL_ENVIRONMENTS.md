@@ -23,5 +23,5 @@
 ## Registration Rule
 
 - register Local Environments from Codex App Settings against the canonical WSL-native repo
-- open the repo through `\\wsl$` or `\\wsl.localhost`
+- prefer the authority-derived wsl.localhost path; keep wsl$ only as legacy evidence, not the default runtime path
 - do not fake registration with docs alone

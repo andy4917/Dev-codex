@@ -95,15 +95,18 @@ def evaluate_hook_readiness(repo_root: str | Path | None = None) -> dict[str, An
 
 
 def render_markdown(report: dict[str, Any]) -> str:
+    linux_hooks = report.get("linux_hooks", {}) if isinstance(report.get("linux_hooks"), dict) else {}
+    windows_hooks = report.get("windows_hooks", {}) if isinstance(report.get("windows_hooks"), dict) else {}
+    windows_wrapper = report.get("windows_wrapper", {}) if isinstance(report.get("windows_wrapper"), dict) else {}
     return "\n".join([
         "# Hook Readiness",
         "",
-        f"- Status: {report['status']}",
-        f"- Runtime hook role: {report['runtime_hook_role']}",
-        f"- Trigger only: {str(report['trigger_only']).lower()}",
-        f"- Linux hooks match generated: {str(report['linux_hooks']['matches_generated']).lower()}",
-        f"- Windows hooks match generated: {str(report['windows_hooks']['matches_generated']).lower()}",
-        f"- Windows wrapper matches generated: {str(report['windows_wrapper']['matches_generated']).lower()}",
+        f"- Status: {report.get('status', 'WARN')}",
+        f"- Runtime hook role: {report.get('runtime_hook_role', 'unset')}",
+        f"- Trigger only: {str(report.get('trigger_only', True)).lower()}",
+        f"- Linux hooks match generated: {str(linux_hooks.get('matches_generated', False)).lower()}",
+        f"- Windows hooks match generated: {str(windows_hooks.get('matches_generated', False)).lower()}",
+        f"- Windows wrapper matches generated: {str(windows_wrapper.get('matches_generated', False)).lower()}",
     ]) + "\n"
 
 

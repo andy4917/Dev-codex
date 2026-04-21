@@ -68,3 +68,10 @@ Codex App on Windows
 - Plugin-provided MCP drift is audit-relevant before code modification.
 - Hooks may trigger checks, but audit, tests, and score layer remain the final gates.
 - `telepathy`, `workspace_dependencies` without re-authorization, `approval_policy = "never"`, and `sandbox_mode = "danger-full-access"` are stale active config blockers.
+
+## App Usability Scope
+
+- Default verification purpose remains code-modification.
+- App-usability is a narrower readiness scope for app restart, Settings > Connections, remote project open, sign-in, and task submission.
+- Serena onboarding or activation may keep code-modification blocked while app-usability is only WARN.
+- Remote SSH failure, forbidden Windows launcher primary runtime, generated mirror self-feed, and stale active config flags remain BLOCKED even for app-usability.

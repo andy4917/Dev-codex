@@ -26,6 +26,7 @@
 - Do not add hardcoded fallback paths or reintroduce `/mnt/c/Users/anise/.codex/bin/wsl/codex` as a primary runtime target.
 - Treat app memories, projectless chat state, and restore seed as hints only.
 - Do not claim hook-only enforcement.
+- For app usability work, keep user actions limited to app restart, Settings > Connections, devmgmt-wsl selection, remote project open, sign-in, and normal task input whenever safe automation exists.
 
 ## Work Pattern
 

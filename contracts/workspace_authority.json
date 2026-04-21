@@ -1,9 +1,121 @@
 {
   "version": 1,
+  "schema_version": "2026-04-21.modular-app-usability",
+  "authority_root": "/home/andy4917/Dev-Management",
   "canonical_roots": {
     "management": "/home/andy4917/Dev-Management",
     "workflow": "/home/andy4917/Dev-Workflow",
     "product": "/home/andy4917/Dev-Product"
+  },
+  "module_registry": {
+    "app_surface_policy": {
+      "path": "/home/andy4917/Dev-Management/contracts/app_surface_policy.json",
+      "kind": "standalone_contract",
+      "final_authority": false
+    },
+    "config_provenance_policy": {
+      "path": "/home/andy4917/Dev-Management/contracts/config_provenance_policy.json",
+      "kind": "standalone_contract",
+      "final_authority": false
+    },
+    "execution_surfaces": {
+      "path": "/home/andy4917/Dev-Management/contracts/execution_surfaces.json",
+      "kind": "standalone_contract",
+      "final_authority": false
+    },
+    "instruction_guard": {
+      "path": "/home/andy4917/Dev-Management/contracts/instruction_guard_policy.json",
+      "kind": "standalone_contract",
+      "final_authority": false
+    },
+    "toolchain_surface_policy": {
+      "path": "/home/andy4917/Dev-Management/contracts/toolchain_policy.json",
+      "kind": "standalone_contract",
+      "final_authority": false
+    },
+    "startup_gates": {
+      "kind": "composite_contract",
+      "paths": [
+        "/home/andy4917/Dev-Management/contracts/serena_policy.json",
+        "/home/andy4917/Dev-Management/contracts/context7_policy.json"
+      ],
+      "final_authority": false
+    },
+    "repair_boundaries": {
+      "kind": "workspace_authority_section",
+      "section": "repair_boundaries",
+      "final_authority": false
+    },
+    "score_policy": {
+      "kind": "workspace_authority_section",
+      "section": "score_policy",
+      "references": [
+        "/home/andy4917/Dev-Management/contracts/user_score_policy.json",
+        "/home/andy4917/Dev-Management/contracts/disqualifier_policy.json"
+      ],
+      "final_authority": false
+    }
+  },
+  "global_invariants": [
+    "Codex App is the primary user control surface.",
+    "Codex App is not execution authority.",
+    "Codex App is not policy authority.",
+    "Dev-Management is policy/runtime authority.",
+    "devmgmt-wsl is canonical remote execution surface.",
+    "Linux-native Codex CLI is canonical agent binary.",
+    "Generated mirrors are outputs only.",
+    "Optional user override source is /home/andy4917/.codex/user-config.toml only.",
+    "Windows-mounted Codex launcher is external dependency and forbidden primary runtime.",
+    "Hooks are triggers only; audit, tests, and score are the final gates."
+  ],
+  "generated_mirror_contract": {
+    "role": "generated_mirror",
+    "outputs_only": true,
+    "render_input_allowed": false,
+    "authority_input_allowed": false,
+    "optional_user_override_source": "/home/andy4917/.codex/user-config.toml"
+  },
+  "repair_boundary_summary": {
+    "repairable_surfaces": [
+      "generated_config_files",
+      "generated_wrapper_files",
+      "generated_report_files",
+      "user_level_windows_ssh_config",
+      "user_level_linux_codex_cli_prefix"
+    ],
+    "report_only_surfaces": [
+      "windows_codex_app_binaries",
+      "windows_codex_launcher_binaries",
+      "windows_global_or_system_git_config",
+      "windows_path",
+      "wsl_system_config"
+    ],
+    "final_gate_owner": "audit_workspace.py + run_score_layer.py"
+  },
+  "score_policy": {
+    "final_gate": [
+      "/home/andy4917/Dev-Management/scripts/audit_workspace.py",
+      "/home/andy4917/Dev-Management/scripts/run_score_layer.py"
+    ],
+    "purpose_profiles": {
+      "code-modification": {
+        "default": true,
+        "serena_startup_blocked": "BLOCKED"
+      },
+      "app-usability": {
+        "serena_startup_blocked": "WARN",
+        "non_downgradable_blockers": [
+          "generated mirror self-feed",
+          "forbidden Windows launcher primary runtime",
+          "active stale config flag",
+          "Windows app SSH unreachable"
+        ]
+      }
+    },
+    "references": {
+      "user_score_policy": "/home/andy4917/Dev-Management/contracts/user_score_policy.json",
+      "disqualifier_policy": "/home/andy4917/Dev-Management/contracts/disqualifier_policy.json"
+    }
   },
   "surface_roles": {
     "codex_app": [
@@ -12,8 +124,7 @@
     ],
     "windows_host": [
       "app_host",
-      "ssh_client_surface",
-      "user_surface"
+      "ssh_client_surface"
     ],
     "windows_codex_state": [
       "live_runtime_surface",
@@ -122,21 +233,25 @@
         "quarantine",
         "runtime_generation_scripts"
       ],
-      "promoted_contracts": [
-        "context7_policy.json",
-        "disqualifier_policy.json",
-        "environment_sync_policy.json",
-        "execution_surfaces.json",
-        "experiment_policy.json",
-        "human_bottleneck_rules.json",
-        "instruction_guard_policy.json",
-        "memory_policy.json",
-        "spawn_policy.json",
-        "syncthing_policy.json",
-        "toolchain_policy.json",
-        "user_score_policy.json"
-      ],
+        "promoted_contracts": [
+          "app_surface_policy.json",
+          "config_provenance_policy.json",
+          "context7_policy.json",
+          "disqualifier_policy.json",
+          "environment_sync_policy.json",
+          "execution_surfaces.json",
+          "experiment_policy.json",
+          "human_bottleneck_rules.json",
+          "instruction_guard_policy.json",
+          "memory_policy.json",
+          "serena_policy.json",
+          "spawn_policy.json",
+          "syncthing_policy.json",
+          "toolchain_policy.json",
+          "user_score_policy.json"
+        ],
       "promoted_docs": [
+        "CODEX_APP_USER_SETUP.md",
         "CLOSE_OUT.md",
         "CONTEXT7_USAGE.md",
         "DEPENDENCY_INVERSION.md",

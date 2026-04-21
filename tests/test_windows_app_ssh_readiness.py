@@ -6,7 +6,6 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
-from types import SimpleNamespace
 from unittest.mock import patch
 
 
@@ -31,7 +30,7 @@ class WindowsAppSshReadinessTests(unittest.TestCase):
         self.module = _load_module()
 
     def _authority(self, tmp: Path) -> dict[str, object]:
-        return {"canonical_execution_surface": {"host_alias": "devmgmt-wsl"}}
+        return {"canonical_remote_execution_surface": {"host_alias": "devmgmt-wsl"}}
 
     def _write_json(self, path: Path, payload: object) -> None:
         path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -46,6 +45,7 @@ class WindowsAppSshReadinessTests(unittest.TestCase):
             with patch.object(self.module, "AUTHORITY_PATH", authority_path), patch.object(self.module, "WINDOWS_SSH_CONFIG", config):
                 report = self.module.evaluate_windows_app_ssh_readiness(tmp / "repo")
         self.assertIn(report["status"], {"BLOCKED", "WARN"})
+        self.assertIn("devmgmt-wsl", report["simple_user_instruction"])
 
     def test_apply_adds_alias_and_preserves_existing_block(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -58,8 +58,9 @@ class WindowsAppSshReadinessTests(unittest.TestCase):
             config = ssh_dir / "config"
             config.write_text("Host wsl-ubuntu\n  HostName localhost\n", encoding="utf-8")
             (ssh_dir / "codex_wsl_ed25519").write_text("dummy", encoding="utf-8")
-            fake = SimpleNamespace(returncode=0, stdout="andy4917\n", stderr="")
-            with patch.object(self.module, "AUTHORITY_PATH", authority_path), patch.object(self.module, "WINDOWS_SSH_CONFIG", config), patch.object(self.module.subprocess, "run", return_value=fake):
+            version = {"ok": True, "exit_code": 0, "stdout": "OpenSSH_for_Windows", "stderr": "", "command": ""}
+            probe = {"ok": True, "exit_code": 0, "stdout": "andy4917\n", "stderr": "", "command": ""}
+            with patch.object(self.module, "AUTHORITY_PATH", authority_path), patch.object(self.module, "WINDOWS_SSH_CONFIG", config), patch.object(self.module, "run_powershell", side_effect=[version, probe]):
                 report = self.module.evaluate_windows_app_ssh_readiness(tmp / "repo", apply_user_level=True)
                 updated = config.read_text(encoding="utf-8")
         self.assertEqual(report["status"], "PASS")

@@ -238,6 +238,8 @@ def render_agents(authority: dict, windows: bool) -> str:
         f"    -> `{forbidden_primary}`\n"
         f"    -> primary execution runtime\n"
         f"- Do not hand-edit generated AGENTS, config, shim, or preview runtime files; rerender them from the authority repo instead.\n"
+        f"- User app setup path: Restart Codex App -> Settings > Connections -> select {host_alias} -> open /home/andy4917/Dev-Management -> sign in if prompted -> send the readiness prompt.\n"
+        f"- User should not manually edit generated config, launcher, PATH, SSH, hooks, or system files unless a Dev-Management report explicitly asks for it.\n"
         f"- Before code work, activate the current project or worktree with Serena when it is available.\n"
         f"- Check Serena onboarding and project memories before major code changes.\n"
         f"- Prefer Serena symbol and reference tools over repeated whole-file reads when Serena is available.\n"

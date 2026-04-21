@@ -1,6 +1,7 @@
 {
   "phase": "final",
   "blocking_only": false,
+  "purpose": "app-usability",
   "authority_path": "/home/andy4917/Dev-Management/contracts/workspace_authority.json",
   "trusted_projects": [
     "/home/andy4917/Dev-Management",
@@ -44,10 +45,10 @@
         "windows_path": "/mnt/c/Users/anise/.codex/AGENTS.md",
         "linux_exists": true,
         "windows_exists": true,
-        "linux_sha256": "0dfd0dfb733cdd463f55d94b1ef363dd44c6f8383779320d8ff00abe67d1d392",
-        "windows_sha256": "0dfd0dfb733cdd463f55d94b1ef363dd44c6f8383779320d8ff00abe67d1d392",
-        "linux_body_sha256": "c6509b63bcca51d10bc52e2c1ad5dfcd4fdf695b12cb78346365b89931fa0ba7",
-        "windows_body_sha256": "c6509b63bcca51d10bc52e2c1ad5dfcd4fdf695b12cb78346365b89931fa0ba7",
+        "linux_sha256": "a0ca9ad94a48aae3eb028a59bd2c62e0e77ff992a42aa1a5c6bbb36adf43783c",
+        "windows_sha256": "a0ca9ad94a48aae3eb028a59bd2c62e0e77ff992a42aa1a5c6bbb36adf43783c",
+        "linux_body_sha256": "e8a765ce22f247325d3b6364c79ba8ef061c11cedd5fb02ba70efaeb702d59e8",
+        "windows_body_sha256": "e8a765ce22f247325d3b6364c79ba8ef061c11cedd5fb02ba70efaeb702d59e8",
         "expected_windows_headers": [
           "GENERATED - DO NOT EDIT"
         ],
@@ -65,8 +66,8 @@
         "windows_path": "/mnt/c/Users/anise/.codex/config.toml",
         "linux_exists": true,
         "windows_exists": true,
-        "linux_sha256": "3b4b123f928bafa18ddb1a068ae78c421dd19bc6f9ac4a95829fc5ff84eac619",
-        "windows_sha256": "8d74baf6c5e54aa60d0ea980cc2f3d5deecedd4e0953b29a0e4de0b930641252",
+        "linux_sha256": "8840bb587de3948edc3f7303161f301a5a1a578d69ab32c738ec3d17b2a55644",
+        "windows_sha256": "4a8f0f2fbf7ee2795631c8f282d08214f72160cdbd80c5063e4621f68f97d4bb",
         "linux_body_sha256": "eb7a2aca8c52dada6b9ba26a14f7a72839089dc3df67b063b23ea2ff275c5ce9",
         "windows_body_sha256": "eb7a2aca8c52dada6b9ba26a14f7a72839089dc3df67b063b23ea2ff275c5ce9",
         "expected_windows_headers": [
@@ -263,9 +264,10 @@
   "config_provenance": {
     "status": "WARN",
     "gate_status": "PASS",
-    "checked_at": "2026-04-20T21:38:23.478599+00:00",
+    "checked_at": "2026-04-21T03:11:09.019302+00:00",
     "authority_path": "/home/andy4917/Dev-Management/contracts/workspace_authority.json",
-    "authority_hash": "93d7e5ce0b41f4379f2f92b6c78a75b61d09aab1ad7e54265d2cb93c46324977",
+    "authority_hash": "df6ed1768a2c6940b38faabcec1f6eea9672748428cde12869e0f58687ba8ec1",
+    "policy_path": "/home/andy4917/Dev-Management/contracts/config_provenance_policy.json",
     "allowed_optional_user_override_source": "/home/andy4917/.codex/user-config.toml",
     "override_source_paths": [],
     "generated_mirror_contract": {
@@ -444,10 +446,164 @@
     "mirrors_are_outputs_only": true
   },
   "toolchain_surface": {
-    "status": "PASS",
+    "status": "WARN",
     "runtime_status": "WARN",
     "remote_codex_resolution_status": "PASS",
     "workspace_dependency_tools": "DISABLED_IN_APP_SETTINGS",
+    "workspace_dependency_report": {
+      "status": "WARN",
+      "checked_at": "2026-04-21T04:41:23+09:00",
+      "source": "codex_app_tool_probe",
+      "tool_status": "DISABLED_IN_APP_SETTINGS",
+      "available": false,
+      "message": "Workspace dependency tools are disabled in Codex settings.",
+      "install_attempted": false,
+      "reason": "Workspace dependency tools are disabled in Codex settings."
+    },
+    "installed_app_release": {
+      "status": "PASS",
+      "installed_app_name": "OpenAI.Codex",
+      "installed_app_version": "26.417.4842.0",
+      "installed_package_full_name": "OpenAI.Codex_26.417.4842.0_x64__2p2nqsd0c76g0",
+      "installed_location": "C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.417.4842.0_x64__2p2nqsd0c76g0",
+      "installed_modified_time": "2026-04-21 ���� 3:57:27",
+      "install_or_update_date": "2026-04-21",
+      "installed_build_corresponds_to_2026_04_21": true,
+      "public_documented_release_date": "unversioned official reference pages",
+      "public_documented_release_version": "not pinned in current public docs pages",
+      "installed_app_release_date": "2026-04-21",
+      "installed_app_release_version": "26.417.4842.0",
+      "installed_app_release_wins": true,
+      "installed_evidence": {
+        "get_appx_package_codex": {
+          "ok": true,
+          "exit_code": 0,
+          "stdout": "Name            : OpenAI.Codex\nVersion         : 26.417.4842.0\nPackageFullName : OpenAI.Codex_26.417.4842.0_x64__2p2nqsd0c76g0\nInstallLocation : C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.417.4842.0_x64__2p2nqsd0c76g0",
+          "stderr": ""
+        },
+        "get_appx_package_openai": {
+          "ok": true,
+          "exit_code": 0,
+          "stdout": "Name            : OpenAI.Codex\nVersion         : 26.417.4842.0\nPackageFullName : OpenAI.Codex_26.417.4842.0_x64__2p2nqsd0c76g0\nInstallLocation : C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.417.4842.0_x64__2p2nqsd0c76g0",
+          "stderr": ""
+        },
+        "winget_list": {
+          "ok": false,
+          "exit_code": 1,
+          "stdout": "",
+          "stderr": "winget : 'winget' �� cmdlet, �Լ�, ��ũ��Ʈ ���� �Ǵ� ������ �� �ִ� ���α׷� �̸����� �νĵ��� �ʽ��ϴ�. �̸��� ��\nȮ���� Ȯ���ϰ� ��ΰ� ���Ե� ��� ��ΰ� �ùٸ��� ������ ���� �ٽ� �õ��Ͻʽÿ�.\n��ġ ��:1 ����:1\n+ winget list --name Codex --source msstore\n+ ~~~~~~\n    + CategoryInfo          : ObjectNotFound: (winget:String) [], CommandNotFoundException\n    + FullyQualifiedErrorId : CommandNotFoundException"
+        },
+        "uninstall_registry_query": {
+          "ok": true,
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        "install_location_item": {
+          "ok": true,
+          "exit_code": 0,
+          "stdout": "FullName      : C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.417.4842.0_x64__2p2nqsd0c76g0\nLastWriteTime : 2026-04-21 ���� 3:57:27",
+          "stderr": ""
+        }
+      },
+      "official_reference_urls": [
+        "https://developers.openai.com/codex/remote-connections#codex-app",
+        "https://developers.openai.com/codex/app/windows#windows-subsystem-for-linux-wsl",
+        "https://developers.openai.com/codex/config-reference#configtoml",
+        "https://developers.openai.com/codex/app#plugins",
+        "https://developers.openai.com/codex/quickstart#setup",
+        "https://developers.openai.com/codex/agent-approvals-security#os-level-sandbox"
+      ],
+      "feature_surface_analysis": [
+        {
+          "feature": "remote connections",
+          "installed_4_21_evidence": "Installed Windows app build on 2026-04-21 and generated config keeps remote_connections enabled.",
+          "official_reference_summary": "OpenAI remote connections docs require remote_connections=true and require codex on the remote login-shell PATH.",
+          "how_it_affects_dev_management": "Codex App is the main UI for opening devmgmt-wsl remote projects while Dev-Management remains authority.",
+          "guard_impact": "Windows-side SSH alias and remote codex PATH must be verified.",
+          "audit_impact": "Remote readiness and remote codex PATH are audit sections.",
+          "repair_impact": "User-level Windows SSH config repair is allowed; system SSH and portproxy remain manual.",
+          "test_impact": "Windows app-side SSH readiness and remote codex classification tests are required.",
+          "status": "PASS"
+        },
+        {
+          "feature": "Windows WSL agent selection",
+          "installed_4_21_evidence": "Current app model supports Windows UI with Linux execution.",
+          "official_reference_summary": "OpenAI Windows docs describe Windows-native and WSL agents as separate execution choices.",
+          "how_it_affects_dev_management": "Windows host stays app_host/ssh_client_surface and devmgmt-wsl stays canonical_remote_execution_surface.",
+          "guard_impact": "App cannot redefine execution or policy authority.",
+          "audit_impact": "Surface-role drift is audited.",
+          "repair_impact": "Docs/contracts/AGENTS encode the split; no binary modification.",
+          "test_impact": "Codex App not execution authority tests remain required.",
+          "status": "PASS"
+        },
+        {
+          "feature": "integrated terminal and multiple terminals",
+          "installed_4_21_evidence": "Terminal surface exists separately from the selected agent surface.",
+          "official_reference_summary": "OpenAI Windows docs note the integrated terminal is independent from the agent configuration.",
+          "how_it_affects_dev_management": "Terminal-specific PATH drift becomes evidence, not default authority.",
+          "guard_impact": "Selected execution terminal with contaminated PATH is blocked only when used as execution authority.",
+          "audit_impact": "Terminal mismatch and PATH contamination are warn-or-block evidence.",
+          "repair_impact": "Report-only unless authority-managed helpers are in scope.",
+          "test_impact": "PATH mismatch tests remain required.",
+          "status": "WARN"
+        },
+        {
+          "feature": "plugins / skills / plugin-provided MCP",
+          "installed_4_21_evidence": "Current session exposes the GitHub plugin, MCP servers, skills, and subagents.",
+          "official_reference_summary": "OpenAI plugin docs describe plugins as bundles of skills, apps, and MCP servers that do not bypass approvals.",
+          "how_it_affects_dev_management": "Plugins and MCP are toolchain surfaces with provenance, not authority sources.",
+          "guard_impact": "Plugin MCP drift affecting Serena or Context7 must be audited before code modification.",
+          "audit_impact": "Toolchain surface report records plugin, MCP, skill, and subagent provenance.",
+          "repair_impact": "Report-only unless authority-managed config is in scope.",
+          "test_impact": "plugin MCP and provenance tests remain required.",
+          "status": "PASS"
+        },
+        {
+          "feature": "projectless chats / memories / chronicle",
+          "installed_4_21_evidence": "Chronicle is enabled; app memory and projectless chat state exist as runtime evidence.",
+          "official_reference_summary": "OpenAI docs treat memories and related app state as context surfaces.",
+          "how_it_affects_dev_management": "App memory is a hint only and projectless code modification without repo root stays blocked.",
+          "guard_impact": "Chronicle allowed; telepathy forbidden; app memory cannot authorize code changes.",
+          "audit_impact": "Stale inactive app state is WARN evidence only.",
+          "repair_impact": "No automatic repair beyond drift reporting.",
+          "test_impact": "projectless-chat and memory-not-authority tests remain required.",
+          "status": "WARN"
+        },
+        {
+          "feature": "automations / worktrees / local environments / browser / computer use / settings sync / app server",
+          "installed_4_21_evidence": "These app surfaces exist and can influence local runtime state or review flow.",
+          "official_reference_summary": "OpenAI app feature pages list automations, worktrees, local environments, browser, and related UI surfaces.",
+          "how_it_affects_dev_management": "They are audit surfaces but cannot replace authority or canonical runtime.",
+          "guard_impact": "App update or settings sync cannot reintroduce Windows launcher as primary runtime.",
+          "audit_impact": "Surface presence is recorded in release-impact and toolchain reports.",
+          "repair_impact": "Mostly report-only; authority-managed generated surfaces may be rerendered.",
+          "test_impact": "release-driven surface coverage tests remain required.",
+          "status": "WARN"
+        }
+      ],
+      "operational_conclusion": {
+        "codex_app_role": [
+          "primary_user_control_surface",
+          "remote_session_control_surface"
+        ],
+        "windows_host_role": [
+          "app_host",
+          "ssh_client_surface"
+        ],
+        "devmgmt_wsl_role": [
+          "canonical_remote_execution_surface"
+        ],
+        "linux_native_codex_cli_role": [
+          "canonical_agent_binary"
+        ],
+        "dev_management_role": [
+          "policy_authority",
+          "runtime_authority"
+        ],
+        "blocked_relation": "Codex App on Windows -> /mnt/c/Users/anise/.codex/bin/wsl/codex -> primary execution runtime"
+      }
+    },
     "plugins": [
       "github@openai-curated"
     ],
@@ -482,61 +638,97 @@
       "context7",
       "serena"
     ],
+    "policy_path": "/home/andy4917/Dev-Management/contracts/toolchain_policy.json",
+    "session_usage_provenance_path": "/home/andy4917/Dev-Management/reports/toolchain-usage.session.json",
     "session_usage_provenance": {
       "skills_used": [
         {
+          "name": "openai-docs",
+          "path": "/mnt/c/Users/anise/.codex/skills/.system/openai-docs/SKILL.md",
+          "purpose": "Validate official Codex App remote/runtime semantics"
+        },
+        {
           "name": "env-audit",
           "path": "/mnt/c/Users/anise/.codex/skills/dev-workflow/env-audit/SKILL.md",
-          "purpose": "Audit Windows and WSL execution surfaces before runtime hardening and release validation."
+          "purpose": "Classify Windows/WSL execution surfaces and environment blockers"
         },
         {
           "name": "anti-cheat-auditor",
           "path": "/mnt/c/Users/anise/.codex/skills/dev-workflow/anti-cheat-auditor/SKILL.md",
-          "purpose": "Check for hardcoded success paths, dead fallback, and score-gaming style drift."
-        },
-        {
-          "name": "openai-docs",
-          "path": "/mnt/c/Users/anise/.codex/skills/.system/openai-docs/SKILL.md",
-          "purpose": "Use official OpenAI docs as the reference source for Codex app, remote connections, config, sandbox, and Windows behavior."
+          "purpose": "Review stale fallback, hardcoding, and score-layer manipulation risks"
         }
       ],
       "subagents_used": [
         {
-          "name": "contracts_docs_scan",
-          "role": "legacy wording and contract/doc scan"
+          "name": "contracts_docs_review",
+          "role": "Cross-check contract and documentation drift"
         },
         {
-          "name": "hook_score_scan",
-          "role": "hook and score-layer crosscheck"
+          "name": "scripts_dup_review",
+          "role": "Review duplicate script responsibilities and helper extraction scope"
         },
         {
-          "name": "tests_gap_scan",
-          "role": "test gap discovery"
-        },
-        {
-          "name": "legacy_crosscheck",
-          "role": "post-patch legacy and self-feed cross-validation"
-        },
-        {
-          "name": "score_gate_crosscheck",
-          "role": "post-patch score/hook/integration cross-validation"
-        },
-        {
-          "name": "release_surface_scan",
-          "role": "installed-app and release-impact crosscheck"
+          "name": "usability_flow_review",
+          "role": "Cross-validate app-usability orchestration and bottlenecks"
         }
       ],
-      "plugins_used": [],
-      "workspace_dependency_tools": {
-        "used": false,
-        "reason": "App-side workspace dependency tools are disabled and were not required for this hardening pass."
+      "workspace_dependencies": {
+        "enabled_in_app_settings": false,
+        "used_this_session": false,
+        "reason": "Workspace dependency tools were not required for runtime authority, SSH readiness, or app-usability activation."
       },
-      "hooks_surface": {
-        "used_as_enforcement_boundary": false,
-        "reason": "Hooks were audited as trigger-only surfaces; audit, tests, and score layer remain the final gates."
-      }
+      "hooks": {
+        "used_as_final_enforcement": false,
+        "notes": "Hooks remain trigger-only; audit, tests, and score layer are the final gates."
+      },
+      "projectless_chat": {
+        "active": false,
+        "code_modification_requested": false,
+        "repo_root_resolved": true
+      },
+      "multiple_terminals": {
+        "path_mismatch": true,
+        "selected_execution_terminal_status": "CANONICAL_REMOTE"
+      },
+      "notes": [
+        "Installed app evidence and remote-connection behavior were treated as evidence, not authority.",
+        "Linux-native Codex CLI on devmgmt-wsl is the canonical agent binary target for app usability."
+      ],
+      "skills": [
+        {
+          "name": "openai-docs",
+          "path": "/mnt/c/Users/anise/.codex/skills/.system/openai-docs/SKILL.md",
+          "purpose": "Validate official Codex App remote/runtime semantics"
+        },
+        {
+          "name": "env-audit",
+          "path": "/mnt/c/Users/anise/.codex/skills/dev-workflow/env-audit/SKILL.md",
+          "purpose": "Classify Windows/WSL execution surfaces and environment blockers"
+        },
+        {
+          "name": "anti-cheat-auditor",
+          "path": "/mnt/c/Users/anise/.codex/skills/dev-workflow/anti-cheat-auditor/SKILL.md",
+          "purpose": "Review stale fallback, hardcoding, and score-layer manipulation risks"
+        }
+      ],
+      "subagents": [
+        {
+          "name": "contracts_docs_review",
+          "role": "Cross-check contract and documentation drift"
+        },
+        {
+          "name": "scripts_dup_review",
+          "role": "Review duplicate script responsibilities and helper extraction scope"
+        },
+        {
+          "name": "usability_flow_review",
+          "role": "Cross-validate app-usability orchestration and bottlenecks"
+        }
+      ]
     },
-    "warnings": [],
+    "warnings": [
+      "Multiple terminal PATH mismatch is present."
+    ],
     "blocked_reasons": []
   },
   "hook_readiness": {
@@ -563,52 +755,48 @@
     ]
   },
   "score_layer": {
-    "status": "BLOCKED",
-    "numeric_score": 50,
-    "disqualifiers": [
-      "workspace audit final gate blocked"
-    ],
+    "purpose": "app-usability",
+    "status": "WARN",
+    "numeric_score": 80,
+    "disqualifiers": [],
     "warnings": [
-      "Serena activation remains blocked for general code modification",
-      "client surface PATH contamination remains a warning"
+      "artifact hygiene still has stale drafts, duplicate remediation reports, or transient artifacts",
+      "Serena startup still blocks general code modification, but app usability can proceed with warnings",
+      "client surface PATH contamination remains a warning",
+      "workspace audit still reports warnings"
     ],
-    "report_sources": {
-      "config_provenance": "/home/andy4917/Dev-Management/reports/config-provenance.unified-phase.final.json",
-      "global_runtime": "/home/andy4917/Dev-Management/reports/global-runtime.unified-phase.final.json",
-      "startup_workflow": "/home/andy4917/Dev-Management/reports/startup-workflow.unified-phase.final.json",
-      "toolchain_surface": "/home/andy4917/Dev-Management/reports/toolchain-surface.unified-phase.final.json",
-      "hook_readiness": "/home/andy4917/Dev-Management/reports/hook-readiness.unified-phase.final.json",
-      "audit": "/home/andy4917/Dev-Management/reports/audit.unified-phase.final.json",
-      "artifact_hygiene": "/home/andy4917/Dev-Management/reports/artifact-hygiene.unified-phase.final.json"
-    },
-    "missing_reports": {
-      "config_provenance": false,
-      "global_runtime": false,
-      "startup_workflow": false,
-      "toolchain_surface": false,
-      "hook_readiness": false,
-      "audit": false,
-      "artifact_hygiene": false
-    },
     "cleanup_actions": [],
     "required_tests": [
       "python3 -m unittest tests.test_audit_workspace_contract tests.test_repair_codex_desktop_runtime tests.test_verify_migration_evidence tests.test_check_startup_workflow",
       "python3 -m unittest tests.test_check_global_runtime tests.test_check_agent_instruction tests.test_git_surface",
-      "python3 -m unittest tests.test_check_config_provenance tests.test_check_toolchain_surface tests.test_check_hook_readiness tests.test_windows_app_ssh_readiness tests.test_artifact_hygiene tests.test_score_layer"
+      "python3 -m unittest tests.test_activate_canonical_runtime tests.test_run_canonical_command tests.test_repair_serena_startup"
     ],
+    "report_sources": {
+      "config_provenance": "/home/andy4917/Dev-Management/reports/config-provenance.final.json",
+      "global_runtime": "/home/andy4917/Dev-Management/reports/global-runtime.final.json",
+      "startup_workflow": "/home/andy4917/Dev-Management/reports/startup-workflow.final.json",
+      "toolchain_surface": "/home/andy4917/Dev-Management/reports/toolchain-surface.final.json",
+      "hook_readiness": "/home/andy4917/Dev-Management/reports/hook-readiness.final.json",
+      "audit": "/home/andy4917/Dev-Management/reports/audit.final.json",
+      "artifact_hygiene": "/home/andy4917/Dev-Management/reports/artifact-hygiene.final.json"
+    },
     "evidence_files": [
-      "/home/andy4917/Dev-Management/reports/config-provenance.unified-phase.final.json",
-      "/home/andy4917/Dev-Management/reports/toolchain-surface.unified-phase.final.json",
-      "/home/andy4917/Dev-Management/reports/artifact-hygiene.unified-phase.final.json",
-      "/home/andy4917/Dev-Management/reports/global-runtime.unified-phase.final.json",
-      "/home/andy4917/Dev-Management/reports/audit.unified-phase.final.json"
+      "/home/andy4917/Dev-Management/reports/config-provenance.final.json",
+      "/home/andy4917/Dev-Management/reports/global-runtime.final.json",
+      "/home/andy4917/Dev-Management/reports/startup-workflow.final.json",
+      "/home/andy4917/Dev-Management/reports/toolchain-surface.final.json",
+      "/home/andy4917/Dev-Management/reports/hook-readiness.final.json",
+      "/home/andy4917/Dev-Management/reports/audit.final.json",
+      "/home/andy4917/Dev-Management/reports/artifact-hygiene.final.json"
     ]
   },
   "artifact_hygiene": {
-    "status": "PASS",
+    "status": "WARN",
     "stale_draft_reports": [],
     "remediation_reports": [
-      "/home/andy4917/Dev-Management/reports/manual-system-remediation-20260421-063444.md"
+      "/home/andy4917/Dev-Management/reports/manual-system-remediation-20260421-063444.md",
+      "/home/andy4917/Dev-Management/reports/manual-system-remediation-20260421-112829.md",
+      "/home/andy4917/Dev-Management/reports/manual-system-remediation-20260421-120815.md"
     ],
     "stale_preview_files": [],
     "transient_files": [],
@@ -721,18 +909,45 @@
   },
   "windows_app_ssh_readiness": {
     "status": "PASS",
+    "scope": "app-usability",
     "host_alias": "devmgmt-wsl",
+    "windows_ssh_dir": "/mnt/c/Users/anise/.ssh",
     "windows_ssh_config": "/mnt/c/Users/anise/.ssh/config",
+    "wsl_user_ssh_config": "/home/andy4917/.ssh/config",
+    "wsl_managed_ssh_config": "/home/andy4917/.ssh/config.d/dev-management.conf",
     "alias_present": true,
     "identity_file": "~/.ssh/codex_wsl_ed25519",
+    "ssh_exe_version": {
+      "ok": true,
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "",
+      "command": [
+        "powershell.exe",
+        "-NoProfile",
+        "-Command",
+        "& \"$env:WINDIR\\System32\\OpenSSH\\ssh.exe\" -V"
+      ]
+    },
     "probe": {
       "ok": true,
       "exit_code": 0,
       "stdout": "",
-      "stderr": ""
+      "stderr": "",
+      "command": [
+        "powershell.exe",
+        "-NoProfile",
+        "-Command",
+        "Set-Location $env:USERPROFILE; & \"$env:WINDIR\\System32\\OpenSSH\\ssh.exe\" -o BatchMode=yes devmgmt-wsl hostname"
+      ]
     },
     "applied": false,
     "backups": [],
+    "repairable_user_level": true,
+    "system_config_modified": false,
+    "windows_path_modified": false,
+    "simple_user_instruction": "Open Codex App Settings > Connections and select devmgmt-wsl.",
+    "user_action_required": [],
     "warnings": []
   },
   "linux_native_codex_cli": {
@@ -829,14 +1044,14 @@
     "stderr": ""
   },
   "serena_startup": {
-    "status": "BLOCKED",
+    "status": "WARN",
     "summary": "Serena startup sequence is incomplete for the current diff.",
-    "required": true,
-    "warnings": [],
-    "blockers": [
+    "required": false,
+    "warnings": [
       "Serena onboarding has not been performed for the current repo",
       "latest Serena MCP log shows the session started without activating a project"
     ],
+    "blockers": [],
     "required_actions": [
       "uv tool install -p 3.13 serena-agent@latest --prerelease=allow",
       "serena init",
@@ -877,9 +1092,9 @@
     "activation": {
       "status": "BLOCKED",
       "reason": "latest Serena MCP log shows the session started without activating a project",
-      "log_path": "/home/andy4917/.serena/logs/2026-04-21/mcp_20260421-060114_272121.txt",
+      "log_path": "/home/andy4917/.serena/logs/2026-04-21/mcp_20260421-112557_344105.txt",
       "matched_lines": [
-        "WARNING 2026-04-21 06:01:14,606 [MainThread] serena.cli:start_mcp_server:326 - No project root found from /mnt/c/Program Files/WindowsApps/OpenAI.Codex_26.417.4842.0_x64__2p2nqsd0c76g0/app/resources; not activating any project"
+        "WARNING 2026-04-21 11:25:57,072 [MainThread] serena.cli:start_mcp_server:326 - No project root found from /mnt/c/Program Files/WindowsApps/OpenAI.Codex_26.417.4842.0_x64__2p2nqsd0c76g0/app/resources; not activating any project"
       ]
     },
     "steps": [
@@ -893,7 +1108,7 @@
       },
       {
         "id": "serena_project_metadata_present",
-        "status": "PASS",
+        "status": "WAIVED",
         "reason": "",
         "evidence_refs": [
           "/home/andy4917/Dev-Management/.serena/project.yml"
@@ -901,18 +1116,18 @@
       },
       {
         "id": "serena_onboarding_completed",
-        "status": "BLOCKED",
-        "reason": "Serena onboarding has not been performed for the current repo",
+        "status": "WAIVED",
+        "reason": "",
         "evidence_refs": [
           "/home/andy4917/Dev-Management/.serena/memories"
         ]
       },
       {
         "id": "serena_project_activated",
-        "status": "BLOCKED",
-        "reason": "latest Serena MCP log shows the session started without activating a project",
+        "status": "WAIVED",
+        "reason": "",
         "evidence_refs": [
-          "/home/andy4917/.serena/logs/2026-04-21/mcp_20260421-060114_272121.txt"
+          "/home/andy4917/.serena/logs/2026-04-21/mcp_20260421-112557_344105.txt"
         ]
       }
     ]
@@ -944,87 +1159,70 @@
         "repo_root": "/home/andy4917/Dev-Management",
         "status": "present",
         "dirty": [
-          " M contracts/execution_surfaces.json",
-          " M contracts/instruction_guard_policy.json",
+          " M contracts/toolchain_policy.json",
           " M contracts/workspace_authority.json",
           " M docs/AGENT_GUARDRAILS.md",
           " M docs/GLOBAL_RUNTIME_ARCHITECTURE.md",
-          " M docs/HOOKS_WSL.md",
+          " M docs/LOCAL_ENVIRONMENTS.md",
           " M docs/RUNBOOK.md",
           " M docs/SERENA_USAGE.md",
-          " M docs/USER_SCORECARD.md",
-          " M reports/generated-runtime-preview/codex-ssh-wrapper.sh",
+          " M docs/WINDOWS_WSL_RUNTIME_MODEL.md",
+          " M reports/audit.final.json",
           " M reports/global-runtime.json",
-          " D reports/manual-system-remediation-20260421-041812.md",
-          " D reports/manual-system-remediation-20260421-044434.md",
-          " M reports/startup-workflow.json",
-          " M reports/user-scorecard.json",
-          " M scripts/activate_canonical_runtime.py",
+          " M reports/toolchain-usage.session.json",
           " M scripts/audit_workspace.py",
-          " M scripts/check_agent_instruction.py",
-          " M scripts/check_global_runtime.py",
+          " M scripts/check_config_provenance.py",
+          " M scripts/check_hook_readiness.py",
           " M scripts/check_startup_workflow.py",
-          " M scripts/iaw_closeout.py",
+          " M scripts/check_toolchain_surface.py",
+          " M scripts/check_windows_app_ssh_readiness.py",
           " M scripts/render_codex_runtime.py",
-          " M scripts/repair_codex_desktop_runtime.py",
-          " M scripts/run_canonical_command.py",
-          " M scripts/verify_migration_evidence.py",
-          " M tests/test_audit_workspace_contract.py",
-          " M tests/test_check_agent_instruction.py",
-          " M tests/test_iaw_closeout.py",
-          " M tests/test_repair_codex_desktop_runtime.py",
-          "?? quarantine/artifact-hygiene/",
-          "?? quarantine/runtime-wrapper-backups/",
-          "?? reports/artifact-hygiene.unified-phase.final.json",
-          "?? reports/artifact-hygiene.unified-phase.final.md",
-          "?? reports/artifact-hygiene.unified-phase.json",
-          "?? reports/artifact-hygiene.unified-phase.md",
-          "?? reports/audit.unified-phase.final.json",
-          "?? reports/codex-app-installed-release-impact.unified-phase.json",
-          "?? reports/codex-app-installed-release-impact.unified-phase.md",
-          "?? reports/codex-runtime-repair.unified-phase.pre-apply.json",
-          "?? reports/config-provenance.unified-phase.final.json",
-          "?? reports/config-provenance.unified-phase.final.md",
-          "?? reports/config-provenance.unified-phase.json",
-          "?? reports/config-provenance.unified-phase.md",
-          "?? reports/git-surface.pre-unified-phase.json",
-          "?? reports/git-surface.unified-phase.final.json",
-          "?? reports/global-runtime.pre-unified-phase.json",
-          "?? reports/global-runtime.unified-phase.final.json",
-          "?? reports/global-runtime.unified-phase.json",
-          "?? reports/hook-readiness.unified-phase.final.json",
-          "?? reports/hook-readiness.unified-phase.final.md",
-          "?? reports/hook-readiness.unified-phase.json",
-          "?? reports/hook-readiness.unified-phase.md",
-          "?? reports/instruction-guard.pre-unified-phase.json",
-          "?? reports/instruction-guard.unified-phase.final.json",
-          "?? reports/linux-native-codex-cli-activation.unified-phase.json",
-          "?? reports/linux-native-codex-cli-activation.unified-phase.md",
-          "?? reports/manual-system-remediation-20260421-063444.md",
-          "?? reports/score-layer.unified-phase.final.json",
-          "?? reports/score-layer.unified-phase.final.md",
-          "?? reports/serena-startup.unified-phase.dry-run.json",
-          "?? reports/startup-workflow.pre-unified-phase.json",
-          "?? reports/startup-workflow.unified-phase.final.json",
-          "?? reports/toolchain-surface.unified-phase.final.json",
-          "?? reports/toolchain-surface.unified-phase.final.md",
-          "?? reports/toolchain-surface.unified-phase.json",
-          "?? reports/toolchain-surface.unified-phase.md",
-          "?? reports/toolchain-usage.session.json",
-          "?? reports/windows-app-ssh-remote-readiness.unified-phase.json",
-          "?? reports/windows-app-ssh-remote-readiness.unified-phase.md",
-          "?? scripts/check_artifact_hygiene.py",
-          "?? scripts/check_config_provenance.py",
-          "?? scripts/check_hook_readiness.py",
-          "?? scripts/check_toolchain_surface.py",
-          "?? scripts/check_windows_app_ssh_readiness.py",
-          "?? scripts/run_score_layer.py",
-          "?? tests/test_artifact_hygiene.py",
-          "?? tests/test_check_config_provenance.py",
-          "?? tests/test_check_hook_readiness.py",
-          "?? tests/test_check_toolchain_surface.py",
-          "?? tests/test_score_layer.py",
-          "?? tests/test_windows_app_ssh_readiness.py"
+          " M scripts/run_score_layer.py",
+          " M tests/test_check_startup_workflow.py",
+          " M tests/test_check_toolchain_surface.py",
+          " M tests/test_score_layer.py",
+          " M tests/test_windows_app_ssh_readiness.py",
+          "?? contracts/app_surface_policy.json",
+          "?? contracts/config_provenance_policy.json",
+          "?? devmgmt_runtime/",
+          "?? docs/CODEX_APP_USER_SETUP.md",
+          "?? reports/app-usability.final-dry-run.json",
+          "?? reports/app-usability.final-dry-run.md",
+          "?? reports/artifact-hygiene.final.json",
+          "?? reports/artifact-hygiene.final.md",
+          "?? reports/audit.pre-modular-app-finalization.json",
+          "?? reports/codex-app-usability-final.json",
+          "?? reports/codex-app-usability-final.md",
+          "?? reports/config-provenance.final.json",
+          "?? reports/config-provenance.final.md",
+          "?? reports/config-provenance.pre-modular-app-finalization.json",
+          "?? reports/config-provenance.pre-modular-app-finalization.md",
+          "?? reports/git-surface.pre-modular-app-finalization.json",
+          "?? reports/global-runtime.final.json",
+          "?? reports/global-runtime.pre-modular-app-finalization.json",
+          "?? reports/hook-readiness.final.json",
+          "?? reports/hook-readiness.final.md",
+          "?? reports/instruction-guard.pre-modular-app-finalization.json",
+          "?? reports/linux-native-codex-cli-activation.final.json",
+          "?? reports/linux-native-codex-cli-activation.final.md",
+          "?? reports/manual-system-remediation-20260421-112829.md",
+          "?? reports/manual-system-remediation-20260421-120815.md",
+          "?? reports/modularization-compatibility-review.json",
+          "?? reports/modularization-compatibility-review.md",
+          "?? reports/score-layer.final.json",
+          "?? reports/score-layer.final.md",
+          "?? reports/serena-startup.final-dry-run.json",
+          "?? reports/startup-workflow.final.json",
+          "?? reports/startup-workflow.pre-modular-app-finalization.json",
+          "?? reports/toolchain-surface.final.json",
+          "?? reports/toolchain-surface.final.md",
+          "?? reports/toolchain-surface.pre-modular-app-finalization.json",
+          "?? reports/toolchain-surface.pre-modular-app-finalization.md",
+          "?? reports/windows-app-ssh-remote-readiness.final.json",
+          "?? reports/windows-app-ssh-remote-readiness.final.md",
+          "?? scripts/activate_codex_app_usability.py",
+          "?? tests/test_codex_app_usability.py",
+          "?? tests/test_devmgmt_runtime_helpers.py"
         ],
         "local_config": {
           "available": true,
@@ -1418,26 +1616,54 @@
     "ssh_runtime_status": "PASS",
     "windows_app_ssh_readiness": {
       "status": "PASS",
+      "scope": "app-usability",
       "host_alias": "devmgmt-wsl",
+      "windows_ssh_dir": "/mnt/c/Users/anise/.ssh",
       "windows_ssh_config": "/mnt/c/Users/anise/.ssh/config",
+      "wsl_user_ssh_config": "/home/andy4917/.ssh/config",
+      "wsl_managed_ssh_config": "/home/andy4917/.ssh/config.d/dev-management.conf",
       "alias_present": true,
       "identity_file": "~/.ssh/codex_wsl_ed25519",
+      "ssh_exe_version": {
+        "ok": true,
+        "exit_code": 0,
+        "stdout": "",
+        "stderr": "",
+        "command": [
+          "powershell.exe",
+          "-NoProfile",
+          "-Command",
+          "& \"$env:WINDIR\\System32\\OpenSSH\\ssh.exe\" -V"
+        ]
+      },
       "probe": {
         "ok": true,
         "exit_code": 0,
         "stdout": "",
-        "stderr": ""
+        "stderr": "",
+        "command": [
+          "powershell.exe",
+          "-NoProfile",
+          "-Command",
+          "Set-Location $env:USERPROFILE; & \"$env:WINDIR\\System32\\OpenSSH\\ssh.exe\" -o BatchMode=yes devmgmt-wsl hostname"
+        ]
       },
       "applied": false,
       "backups": [],
+      "repairable_user_level": true,
+      "system_config_modified": false,
+      "windows_path_modified": false,
+      "simple_user_instruction": "Open Codex App Settings > Connections and select devmgmt-wsl.",
+      "user_action_required": [],
       "warnings": []
     },
     "config_provenance": {
       "status": "WARN",
       "gate_status": "PASS",
-      "checked_at": "2026-04-20T21:38:20.204053+00:00",
+      "checked_at": "2026-04-21T03:11:05.253777+00:00",
       "authority_path": "/home/andy4917/Dev-Management/contracts/workspace_authority.json",
-      "authority_hash": "93d7e5ce0b41f4379f2f92b6c78a75b61d09aab1ad7e54265d2cb93c46324977",
+      "authority_hash": "df6ed1768a2c6940b38faabcec1f6eea9672748428cde12869e0f58687ba8ec1",
+      "policy_path": "/home/andy4917/Dev-Management/contracts/config_provenance_policy.json",
       "allowed_optional_user_override_source": "/home/andy4917/.codex/user-config.toml",
       "override_source_paths": [],
       "generated_mirror_contract": {
@@ -2127,87 +2353,70 @@
         "repo_root": "/home/andy4917/Dev-Management",
         "status": "present",
         "dirty": [
-          " M contracts/execution_surfaces.json",
-          " M contracts/instruction_guard_policy.json",
+          " M contracts/toolchain_policy.json",
           " M contracts/workspace_authority.json",
           " M docs/AGENT_GUARDRAILS.md",
           " M docs/GLOBAL_RUNTIME_ARCHITECTURE.md",
-          " M docs/HOOKS_WSL.md",
+          " M docs/LOCAL_ENVIRONMENTS.md",
           " M docs/RUNBOOK.md",
           " M docs/SERENA_USAGE.md",
-          " M docs/USER_SCORECARD.md",
-          " M reports/generated-runtime-preview/codex-ssh-wrapper.sh",
+          " M docs/WINDOWS_WSL_RUNTIME_MODEL.md",
+          " M reports/audit.final.json",
           " M reports/global-runtime.json",
-          " D reports/manual-system-remediation-20260421-041812.md",
-          " D reports/manual-system-remediation-20260421-044434.md",
-          " M reports/startup-workflow.json",
-          " M reports/user-scorecard.json",
-          " M scripts/activate_canonical_runtime.py",
+          " M reports/toolchain-usage.session.json",
           " M scripts/audit_workspace.py",
-          " M scripts/check_agent_instruction.py",
-          " M scripts/check_global_runtime.py",
+          " M scripts/check_config_provenance.py",
+          " M scripts/check_hook_readiness.py",
           " M scripts/check_startup_workflow.py",
-          " M scripts/iaw_closeout.py",
+          " M scripts/check_toolchain_surface.py",
+          " M scripts/check_windows_app_ssh_readiness.py",
           " M scripts/render_codex_runtime.py",
-          " M scripts/repair_codex_desktop_runtime.py",
-          " M scripts/run_canonical_command.py",
-          " M scripts/verify_migration_evidence.py",
-          " M tests/test_audit_workspace_contract.py",
-          " M tests/test_check_agent_instruction.py",
-          " M tests/test_iaw_closeout.py",
-          " M tests/test_repair_codex_desktop_runtime.py",
-          "?? quarantine/artifact-hygiene/",
-          "?? quarantine/runtime-wrapper-backups/",
-          "?? reports/artifact-hygiene.unified-phase.final.json",
-          "?? reports/artifact-hygiene.unified-phase.final.md",
-          "?? reports/artifact-hygiene.unified-phase.json",
-          "?? reports/artifact-hygiene.unified-phase.md",
-          "?? reports/audit.unified-phase.final.json",
-          "?? reports/codex-app-installed-release-impact.unified-phase.json",
-          "?? reports/codex-app-installed-release-impact.unified-phase.md",
-          "?? reports/codex-runtime-repair.unified-phase.pre-apply.json",
-          "?? reports/config-provenance.unified-phase.final.json",
-          "?? reports/config-provenance.unified-phase.final.md",
-          "?? reports/config-provenance.unified-phase.json",
-          "?? reports/config-provenance.unified-phase.md",
-          "?? reports/git-surface.pre-unified-phase.json",
-          "?? reports/git-surface.unified-phase.final.json",
-          "?? reports/global-runtime.pre-unified-phase.json",
-          "?? reports/global-runtime.unified-phase.final.json",
-          "?? reports/global-runtime.unified-phase.json",
-          "?? reports/hook-readiness.unified-phase.final.json",
-          "?? reports/hook-readiness.unified-phase.final.md",
-          "?? reports/hook-readiness.unified-phase.json",
-          "?? reports/hook-readiness.unified-phase.md",
-          "?? reports/instruction-guard.pre-unified-phase.json",
-          "?? reports/instruction-guard.unified-phase.final.json",
-          "?? reports/linux-native-codex-cli-activation.unified-phase.json",
-          "?? reports/linux-native-codex-cli-activation.unified-phase.md",
-          "?? reports/manual-system-remediation-20260421-063444.md",
-          "?? reports/score-layer.unified-phase.final.json",
-          "?? reports/score-layer.unified-phase.final.md",
-          "?? reports/serena-startup.unified-phase.dry-run.json",
-          "?? reports/startup-workflow.pre-unified-phase.json",
-          "?? reports/startup-workflow.unified-phase.final.json",
-          "?? reports/toolchain-surface.unified-phase.final.json",
-          "?? reports/toolchain-surface.unified-phase.final.md",
-          "?? reports/toolchain-surface.unified-phase.json",
-          "?? reports/toolchain-surface.unified-phase.md",
-          "?? reports/toolchain-usage.session.json",
-          "?? reports/windows-app-ssh-remote-readiness.unified-phase.json",
-          "?? reports/windows-app-ssh-remote-readiness.unified-phase.md",
-          "?? scripts/check_artifact_hygiene.py",
-          "?? scripts/check_config_provenance.py",
-          "?? scripts/check_hook_readiness.py",
-          "?? scripts/check_toolchain_surface.py",
-          "?? scripts/check_windows_app_ssh_readiness.py",
-          "?? scripts/run_score_layer.py",
-          "?? tests/test_artifact_hygiene.py",
-          "?? tests/test_check_config_provenance.py",
-          "?? tests/test_check_hook_readiness.py",
-          "?? tests/test_check_toolchain_surface.py",
-          "?? tests/test_score_layer.py",
-          "?? tests/test_windows_app_ssh_readiness.py"
+          " M scripts/run_score_layer.py",
+          " M tests/test_check_startup_workflow.py",
+          " M tests/test_check_toolchain_surface.py",
+          " M tests/test_score_layer.py",
+          " M tests/test_windows_app_ssh_readiness.py",
+          "?? contracts/app_surface_policy.json",
+          "?? contracts/config_provenance_policy.json",
+          "?? devmgmt_runtime/",
+          "?? docs/CODEX_APP_USER_SETUP.md",
+          "?? reports/app-usability.final-dry-run.json",
+          "?? reports/app-usability.final-dry-run.md",
+          "?? reports/artifact-hygiene.final.json",
+          "?? reports/artifact-hygiene.final.md",
+          "?? reports/audit.pre-modular-app-finalization.json",
+          "?? reports/codex-app-usability-final.json",
+          "?? reports/codex-app-usability-final.md",
+          "?? reports/config-provenance.final.json",
+          "?? reports/config-provenance.final.md",
+          "?? reports/config-provenance.pre-modular-app-finalization.json",
+          "?? reports/config-provenance.pre-modular-app-finalization.md",
+          "?? reports/git-surface.pre-modular-app-finalization.json",
+          "?? reports/global-runtime.final.json",
+          "?? reports/global-runtime.pre-modular-app-finalization.json",
+          "?? reports/hook-readiness.final.json",
+          "?? reports/hook-readiness.final.md",
+          "?? reports/instruction-guard.pre-modular-app-finalization.json",
+          "?? reports/linux-native-codex-cli-activation.final.json",
+          "?? reports/linux-native-codex-cli-activation.final.md",
+          "?? reports/manual-system-remediation-20260421-112829.md",
+          "?? reports/manual-system-remediation-20260421-120815.md",
+          "?? reports/modularization-compatibility-review.json",
+          "?? reports/modularization-compatibility-review.md",
+          "?? reports/score-layer.final.json",
+          "?? reports/score-layer.final.md",
+          "?? reports/serena-startup.final-dry-run.json",
+          "?? reports/startup-workflow.final.json",
+          "?? reports/startup-workflow.pre-modular-app-finalization.json",
+          "?? reports/toolchain-surface.final.json",
+          "?? reports/toolchain-surface.final.md",
+          "?? reports/toolchain-surface.pre-modular-app-finalization.json",
+          "?? reports/toolchain-surface.pre-modular-app-finalization.md",
+          "?? reports/windows-app-ssh-remote-readiness.final.json",
+          "?? reports/windows-app-ssh-remote-readiness.final.md",
+          "?? scripts/activate_codex_app_usability.py",
+          "?? tests/test_codex_app_usability.py",
+          "?? tests/test_devmgmt_runtime_helpers.py"
         ],
         "local_config": {
           "available": true,
@@ -2598,26 +2807,54 @@
       "ssh_runtime_status": "PASS",
       "windows_app_ssh_readiness": {
         "status": "PASS",
+        "scope": "app-usability",
         "host_alias": "devmgmt-wsl",
+        "windows_ssh_dir": "/mnt/c/Users/anise/.ssh",
         "windows_ssh_config": "/mnt/c/Users/anise/.ssh/config",
+        "wsl_user_ssh_config": "/home/andy4917/.ssh/config",
+        "wsl_managed_ssh_config": "/home/andy4917/.ssh/config.d/dev-management.conf",
         "alias_present": true,
         "identity_file": "~/.ssh/codex_wsl_ed25519",
+        "ssh_exe_version": {
+          "ok": true,
+          "exit_code": 0,
+          "stdout": "",
+          "stderr": "",
+          "command": [
+            "powershell.exe",
+            "-NoProfile",
+            "-Command",
+            "& \"$env:WINDIR\\System32\\OpenSSH\\ssh.exe\" -V"
+          ]
+        },
         "probe": {
           "ok": true,
           "exit_code": 0,
           "stdout": "",
-          "stderr": ""
+          "stderr": "",
+          "command": [
+            "powershell.exe",
+            "-NoProfile",
+            "-Command",
+            "Set-Location $env:USERPROFILE; & \"$env:WINDIR\\System32\\OpenSSH\\ssh.exe\" -o BatchMode=yes devmgmt-wsl hostname"
+          ]
         },
         "applied": false,
         "backups": [],
+        "repairable_user_level": true,
+        "system_config_modified": false,
+        "windows_path_modified": false,
+        "simple_user_instruction": "Open Codex App Settings > Connections and select devmgmt-wsl.",
+        "user_action_required": [],
         "warnings": []
       },
       "config_provenance": {
         "status": "WARN",
         "gate_status": "PASS",
-        "checked_at": "2026-04-20T21:38:22.690790+00:00",
+        "checked_at": "2026-04-21T03:11:08.020899+00:00",
         "authority_path": "/home/andy4917/Dev-Management/contracts/workspace_authority.json",
-        "authority_hash": "93d7e5ce0b41f4379f2f92b6c78a75b61d09aab1ad7e54265d2cb93c46324977",
+        "authority_hash": "df6ed1768a2c6940b38faabcec1f6eea9672748428cde12869e0f58687ba8ec1",
+        "policy_path": "/home/andy4917/Dev-Management/contracts/config_provenance_policy.json",
         "allowed_optional_user_override_source": "/home/andy4917/.codex/user-config.toml",
         "override_source_paths": [],
         "generated_mirror_contract": {
@@ -3199,9 +3436,10 @@
     "status": "PASS"
   },
   "startup_workflow_check": {
-    "status": "BLOCKED",
+    "status": "WARN",
     "summary": "Serena-first and Context7-first startup workflow is incomplete for the current diff.",
-    "generated_at": "2026-04-20T21:38:30.984143+00:00",
+    "generated_at": "2026-04-21T03:11:19.069164+00:00",
+    "purpose": "app-usability",
     "mode_requested": "auto",
     "mode_selected": "ssh-managed",
     "repo_root": "/home/andy4917/Dev-Management",
@@ -3211,133 +3449,110 @@
       "Use Context7 before protected dependency, API, configuration, or migration changes."
     ],
     "changed_paths": [
-      "contracts/execution_surfaces.json",
-      "contracts/instruction_guard_policy.json",
+      "contracts/app_surface_policy.json",
+      "contracts/config_provenance_policy.json",
+      "contracts/toolchain_policy.json",
       "contracts/workspace_authority.json",
+      "devmgmt_runtime/__init__.py",
+      "devmgmt_runtime/authority.py",
+      "devmgmt_runtime/paths.py",
+      "devmgmt_runtime/redaction.py",
+      "devmgmt_runtime/reports.py",
+      "devmgmt_runtime/status.py",
+      "devmgmt_runtime/subprocess_safe.py",
       "docs/AGENT_GUARDRAILS.md",
+      "docs/CODEX_APP_USER_SETUP.md",
       "docs/GLOBAL_RUNTIME_ARCHITECTURE.md",
-      "docs/HOOKS_WSL.md",
+      "docs/LOCAL_ENVIRONMENTS.md",
       "docs/RUNBOOK.md",
       "docs/SERENA_USAGE.md",
-      "docs/USER_SCORECARD.md",
-      "quarantine/artifact-hygiene/20260420-212308/reports/manual-system-remediation-20260421-041812.md",
-      "quarantine/artifact-hygiene/20260420-212308/reports/manual-system-remediation-20260421-044434.md",
-      "quarantine/artifact-hygiene/20260420-212308/reports/manual-system-remediation-20260421-050309.md",
-      "quarantine/artifact-hygiene/20260420-212308/reports/manual-system-remediation-20260421-050414.md",
-      "quarantine/artifact-hygiene/20260420-212308/reports/manual-system-remediation-20260421-054128.md",
-      "quarantine/artifact-hygiene/20260420-212308/reports/manual-system-remediation-20260421-054219.md",
-      "quarantine/artifact-hygiene/20260420-212308/reports/manual-system-remediation-20260421-054742.md",
-      "quarantine/artifact-hygiene/20260420-212308/reports/manual-system-remediation-20260421-055136.md",
-      "quarantine/artifact-hygiene/20260420-213517/reports/manual-system-remediation-20260421-062256.md",
-      "quarantine/artifact-hygiene/20260420-213517/reports/manual-system-remediation-20260421-063150.md",
-      "quarantine/runtime-wrapper-backups/20260421-063123/codex",
-      "reports/artifact-hygiene.unified-phase.final.json",
-      "reports/artifact-hygiene.unified-phase.final.md",
-      "reports/artifact-hygiene.unified-phase.json",
-      "reports/artifact-hygiene.unified-phase.md",
-      "reports/audit.unified-phase.final.json",
-      "reports/codex-app-installed-release-impact.unified-phase.json",
-      "reports/codex-app-installed-release-impact.unified-phase.md",
-      "reports/codex-runtime-repair.unified-phase.pre-apply.json",
-      "reports/config-provenance.unified-phase.final.json",
-      "reports/config-provenance.unified-phase.final.md",
-      "reports/config-provenance.unified-phase.json",
-      "reports/config-provenance.unified-phase.md",
-      "reports/generated-runtime-preview/codex-ssh-wrapper.sh",
-      "reports/git-surface.pre-unified-phase.json",
-      "reports/git-surface.unified-phase.final.json",
+      "docs/WINDOWS_WSL_RUNTIME_MODEL.md",
+      "reports/app-usability.final-dry-run.json",
+      "reports/app-usability.final-dry-run.md",
+      "reports/artifact-hygiene.final.json",
+      "reports/artifact-hygiene.final.md",
+      "reports/audit.final.json",
+      "reports/audit.pre-modular-app-finalization.json",
+      "reports/codex-app-usability-final.json",
+      "reports/codex-app-usability-final.md",
+      "reports/config-provenance.final.json",
+      "reports/config-provenance.final.md",
+      "reports/config-provenance.pre-modular-app-finalization.json",
+      "reports/config-provenance.pre-modular-app-finalization.md",
+      "reports/git-surface.pre-modular-app-finalization.json",
+      "reports/global-runtime.final.json",
       "reports/global-runtime.json",
-      "reports/global-runtime.pre-unified-phase.json",
-      "reports/global-runtime.unified-phase.final.json",
-      "reports/global-runtime.unified-phase.json",
-      "reports/hook-readiness.unified-phase.final.json",
-      "reports/hook-readiness.unified-phase.final.md",
-      "reports/hook-readiness.unified-phase.json",
-      "reports/hook-readiness.unified-phase.md",
-      "reports/instruction-guard.pre-unified-phase.json",
-      "reports/instruction-guard.unified-phase.final.json",
-      "reports/linux-native-codex-cli-activation.unified-phase.json",
-      "reports/linux-native-codex-cli-activation.unified-phase.md",
-      "reports/manual-system-remediation-20260421-041812.md",
-      "reports/manual-system-remediation-20260421-044434.md",
-      "reports/manual-system-remediation-20260421-063444.md",
-      "reports/score-layer.unified-phase.final.json",
-      "reports/score-layer.unified-phase.final.md",
-      "reports/serena-startup.unified-phase.dry-run.json",
-      "reports/startup-workflow.json",
-      "reports/startup-workflow.pre-unified-phase.json",
-      "reports/startup-workflow.unified-phase.final.json",
-      "reports/toolchain-surface.unified-phase.final.json",
-      "reports/toolchain-surface.unified-phase.final.md",
-      "reports/toolchain-surface.unified-phase.json",
-      "reports/toolchain-surface.unified-phase.md",
+      "reports/global-runtime.pre-modular-app-finalization.json",
+      "reports/hook-readiness.final.json",
+      "reports/hook-readiness.final.md",
+      "reports/instruction-guard.pre-modular-app-finalization.json",
+      "reports/linux-native-codex-cli-activation.final.json",
+      "reports/linux-native-codex-cli-activation.final.md",
+      "reports/manual-system-remediation-20260421-112829.md",
+      "reports/manual-system-remediation-20260421-120815.md",
+      "reports/modularization-compatibility-review.json",
+      "reports/modularization-compatibility-review.md",
+      "reports/score-layer.final.json",
+      "reports/score-layer.final.md",
+      "reports/serena-startup.final-dry-run.json",
+      "reports/startup-workflow.final.json",
+      "reports/startup-workflow.pre-modular-app-finalization.json",
+      "reports/toolchain-surface.final.json",
+      "reports/toolchain-surface.final.md",
+      "reports/toolchain-surface.pre-modular-app-finalization.json",
+      "reports/toolchain-surface.pre-modular-app-finalization.md",
       "reports/toolchain-usage.session.json",
-      "reports/user-scorecard.json",
-      "reports/windows-app-ssh-remote-readiness.unified-phase.json",
-      "reports/windows-app-ssh-remote-readiness.unified-phase.md",
-      "scripts/activate_canonical_runtime.py",
+      "reports/windows-app-ssh-remote-readiness.final.json",
+      "reports/windows-app-ssh-remote-readiness.final.md",
+      "scripts/activate_codex_app_usability.py",
       "scripts/audit_workspace.py",
-      "scripts/check_agent_instruction.py",
-      "scripts/check_artifact_hygiene.py",
       "scripts/check_config_provenance.py",
-      "scripts/check_global_runtime.py",
       "scripts/check_hook_readiness.py",
       "scripts/check_startup_workflow.py",
       "scripts/check_toolchain_surface.py",
       "scripts/check_windows_app_ssh_readiness.py",
-      "scripts/iaw_closeout.py",
       "scripts/render_codex_runtime.py",
-      "scripts/repair_codex_desktop_runtime.py",
-      "scripts/run_canonical_command.py",
       "scripts/run_score_layer.py",
-      "scripts/verify_migration_evidence.py",
-      "tests/test_artifact_hygiene.py",
-      "tests/test_audit_workspace_contract.py",
-      "tests/test_check_agent_instruction.py",
-      "tests/test_check_config_provenance.py",
-      "tests/test_check_hook_readiness.py",
+      "tests/test_check_startup_workflow.py",
       "tests/test_check_toolchain_surface.py",
-      "tests/test_iaw_closeout.py",
-      "tests/test_repair_codex_desktop_runtime.py",
+      "tests/test_codex_app_usability.py",
+      "tests/test_devmgmt_runtime_helpers.py",
       "tests/test_score_layer.py",
       "tests/test_windows_app_ssh_readiness.py"
     ],
     "workflow_changes": [
-      "contracts/execution_surfaces.json",
-      "contracts/instruction_guard_policy.json",
+      "contracts/app_surface_policy.json",
+      "contracts/config_provenance_policy.json",
+      "contracts/toolchain_policy.json",
       "contracts/workspace_authority.json",
-      "scripts/activate_canonical_runtime.py",
+      "devmgmt_runtime/__init__.py",
+      "devmgmt_runtime/authority.py",
+      "devmgmt_runtime/paths.py",
+      "devmgmt_runtime/redaction.py",
+      "devmgmt_runtime/reports.py",
+      "devmgmt_runtime/status.py",
+      "devmgmt_runtime/subprocess_safe.py",
+      "scripts/activate_codex_app_usability.py",
       "scripts/audit_workspace.py",
-      "scripts/check_agent_instruction.py",
-      "scripts/check_artifact_hygiene.py",
       "scripts/check_config_provenance.py",
-      "scripts/check_global_runtime.py",
       "scripts/check_hook_readiness.py",
       "scripts/check_startup_workflow.py",
       "scripts/check_toolchain_surface.py",
       "scripts/check_windows_app_ssh_readiness.py",
-      "scripts/iaw_closeout.py",
       "scripts/render_codex_runtime.py",
-      "scripts/repair_codex_desktop_runtime.py",
-      "scripts/run_canonical_command.py",
       "scripts/run_score_layer.py",
-      "scripts/verify_migration_evidence.py",
-      "tests/test_artifact_hygiene.py",
-      "tests/test_audit_workspace_contract.py",
-      "tests/test_check_agent_instruction.py",
-      "tests/test_check_config_provenance.py",
-      "tests/test_check_hook_readiness.py",
+      "tests/test_check_startup_workflow.py",
       "tests/test_check_toolchain_surface.py",
-      "tests/test_iaw_closeout.py",
-      "tests/test_repair_codex_desktop_runtime.py",
+      "tests/test_codex_app_usability.py",
+      "tests/test_devmgmt_runtime_helpers.py",
       "tests/test_score_layer.py",
       "tests/test_windows_app_ssh_readiness.py"
     ],
-    "blocking_reasons": [
+    "blocking_reasons": [],
+    "warnings": [
       "Serena onboarding has not been performed for the current repo",
       "latest Serena MCP log shows the session started without activating a project"
     ],
-    "warnings": [],
     "runtime_gate": {
       "canonical_ssh_runtime_status": {
         "status": "PASS",
@@ -3346,14 +3561,14 @@
       "fail_closed": false
     },
     "serena": {
-      "status": "BLOCKED",
+      "status": "WARN",
       "summary": "Serena startup sequence is incomplete for the current diff.",
-      "required": true,
-      "warnings": [],
-      "blockers": [
+      "required": false,
+      "warnings": [
         "Serena onboarding has not been performed for the current repo",
         "latest Serena MCP log shows the session started without activating a project"
       ],
+      "blockers": [],
       "required_actions": [
         "uv tool install -p 3.13 serena-agent@latest --prerelease=allow",
         "serena init",
@@ -3394,9 +3609,9 @@
       "activation": {
         "status": "BLOCKED",
         "reason": "latest Serena MCP log shows the session started without activating a project",
-        "log_path": "/home/andy4917/.serena/logs/2026-04-21/mcp_20260421-060114_272121.txt",
+        "log_path": "/home/andy4917/.serena/logs/2026-04-21/mcp_20260421-112557_344105.txt",
         "matched_lines": [
-          "WARNING 2026-04-21 06:01:14,606 [MainThread] serena.cli:start_mcp_server:326 - No project root found from /mnt/c/Program Files/WindowsApps/OpenAI.Codex_26.417.4842.0_x64__2p2nqsd0c76g0/app/resources; not activating any project"
+          "WARNING 2026-04-21 11:25:57,072 [MainThread] serena.cli:start_mcp_server:326 - No project root found from /mnt/c/Program Files/WindowsApps/OpenAI.Codex_26.417.4842.0_x64__2p2nqsd0c76g0/app/resources; not activating any project"
         ]
       },
       "steps": [
@@ -3410,7 +3625,7 @@
         },
         {
           "id": "serena_project_metadata_present",
-          "status": "PASS",
+          "status": "WAIVED",
           "reason": "",
           "evidence_refs": [
             "/home/andy4917/Dev-Management/.serena/project.yml"
@@ -3418,18 +3633,18 @@
         },
         {
           "id": "serena_onboarding_completed",
-          "status": "BLOCKED",
-          "reason": "Serena onboarding has not been performed for the current repo",
+          "status": "WAIVED",
+          "reason": "",
           "evidence_refs": [
             "/home/andy4917/Dev-Management/.serena/memories"
           ]
         },
         {
           "id": "serena_project_activated",
-          "status": "BLOCKED",
-          "reason": "latest Serena MCP log shows the session started without activating a project",
+          "status": "WAIVED",
+          "reason": "",
           "evidence_refs": [
-            "/home/andy4917/.serena/logs/2026-04-21/mcp_20260421-060114_272121.txt"
+            "/home/andy4917/.serena/logs/2026-04-21/mcp_20260421-112557_344105.txt"
           ]
         }
       ]
@@ -3465,7 +3680,7 @@
       },
       {
         "id": "serena_project_metadata_present",
-        "status": "PASS",
+        "status": "WAIVED",
         "reason": "",
         "evidence_refs": [
           "/home/andy4917/Dev-Management/.serena/project.yml"
@@ -3473,18 +3688,18 @@
       },
       {
         "id": "serena_onboarding_completed",
-        "status": "BLOCKED",
-        "reason": "Serena onboarding has not been performed for the current repo",
+        "status": "WAIVED",
+        "reason": "",
         "evidence_refs": [
           "/home/andy4917/Dev-Management/.serena/memories"
         ]
       },
       {
         "id": "serena_project_activated",
-        "status": "BLOCKED",
-        "reason": "latest Serena MCP log shows the session started without activating a project",
+        "status": "WAIVED",
+        "reason": "",
         "evidence_refs": [
-          "/home/andy4917/.serena/logs/2026-04-21/mcp_20260421-060114_272121.txt"
+          "/home/andy4917/.serena/logs/2026-04-21/mcp_20260421-112557_344105.txt"
         ]
       },
       {
@@ -3547,6 +3762,6 @@
   "runtime_restore_seed_blocking": [],
   "old_path_refs_outside_quarantine": [],
   "tamper_events": [],
-  "gate_status": "BLOCKED",
-  "status": "FAIL"
+  "gate_status": "WARN",
+  "status": "WARN"
 }

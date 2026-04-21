@@ -241,6 +241,19 @@ disabled_tools = ["execute_shell_command", "remove_project"]
             self.assertEqual(report["context7"]["status"], "PASS")
             self.assertEqual(report["context7"]["entries"][0]["resolved_library_id"], "context7-remote-http")
 
+    def test_app_usability_scope_warns_when_serena_is_not_ready(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo_root, home = self._build_repo(Path(tmpdir))
+            self._prepare_serena_ready(repo_root, home, activation_ok=False, onboarding_ok=False)
+            _write_text(repo_root / "scripts" / "task.py", "print('hello')\n")
+
+            with patch.dict(os.environ, self._env(home), clear=False):
+                report = self.checker.evaluate_startup_workflow(repo_root, purpose="app-usability")
+
+            self.assertEqual(report["status"], "WARN")
+            self.assertEqual(report["purpose"], "app-usability")
+            self.assertIn("Serena onboarding has not been performed for the current repo", report["warnings"])
+
     def test_cli_writes_report_file(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             repo_root, home = self._build_repo(Path(tmpdir))

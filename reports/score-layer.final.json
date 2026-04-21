@@ -1,0 +1,36 @@
+{
+  "purpose": "app-usability",
+  "status": "WARN",
+  "numeric_score": 80,
+  "disqualifiers": [],
+  "warnings": [
+    "artifact hygiene still has stale drafts, duplicate remediation reports, or transient artifacts",
+    "Serena startup still blocks general code modification, but app usability can proceed with warnings",
+    "client surface PATH contamination remains a warning",
+    "workspace audit still reports warnings"
+  ],
+  "cleanup_actions": [],
+  "required_tests": [
+    "python3 -m unittest tests.test_audit_workspace_contract tests.test_repair_codex_desktop_runtime tests.test_verify_migration_evidence tests.test_check_startup_workflow",
+    "python3 -m unittest tests.test_check_global_runtime tests.test_check_agent_instruction tests.test_git_surface",
+    "python3 -m unittest tests.test_activate_canonical_runtime tests.test_run_canonical_command tests.test_repair_serena_startup"
+  ],
+  "report_sources": {
+    "config_provenance": "/home/andy4917/Dev-Management/reports/config-provenance.final.json",
+    "global_runtime": "/home/andy4917/Dev-Management/reports/global-runtime.final.json",
+    "startup_workflow": "/home/andy4917/Dev-Management/reports/startup-workflow.final.json",
+    "toolchain_surface": "/home/andy4917/Dev-Management/reports/toolchain-surface.final.json",
+    "hook_readiness": "/home/andy4917/Dev-Management/reports/hook-readiness.final.json",
+    "audit": "/home/andy4917/Dev-Management/reports/audit.final.json",
+    "artifact_hygiene": "/home/andy4917/Dev-Management/reports/artifact-hygiene.final.json"
+  },
+  "evidence_files": [
+    "/home/andy4917/Dev-Management/reports/config-provenance.final.json",
+    "/home/andy4917/Dev-Management/reports/global-runtime.final.json",
+    "/home/andy4917/Dev-Management/reports/startup-workflow.final.json",
+    "/home/andy4917/Dev-Management/reports/toolchain-surface.final.json",
+    "/home/andy4917/Dev-Management/reports/hook-readiness.final.json",
+    "/home/andy4917/Dev-Management/reports/audit.final.json",
+    "/home/andy4917/Dev-Management/reports/artifact-hygiene.final.json"
+  ]
+}

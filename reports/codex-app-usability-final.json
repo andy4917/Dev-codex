@@ -1,0 +1,67 @@
+{
+  "status": "APP_READY_WITH_WARNINGS",
+  "status_reasons": [
+    "Canonical runtime is usable with warnings.",
+    "Serena still blocks general code modification, but app setup/readiness can proceed.",
+    "Toolchain surface still reports warnings.",
+    "Artifact hygiene still reports warnings.",
+    "Audit still reports warnings.",
+    "Score layer still reports warnings."
+  ],
+  "user_action_required": [
+    "Restart Codex App.",
+    "Open Settings > Connections.",
+    "Enable or select devmgmt-wsl.",
+    "Open remote project /home/andy4917/Dev-Management.",
+    "Complete sign-in if prompted.",
+    "Send the readiness prompt in the app."
+  ],
+  "app_settings_steps": [
+    "Restart Codex App.",
+    "Open Settings > Connections.",
+    "Enable or select devmgmt-wsl.",
+    "Open remote project /home/andy4917/Dev-Management.",
+    "Complete sign-in if prompted.",
+    "Send the readiness prompt in the app."
+  ],
+  "agent_actions_applied": [],
+  "agent_actions_skipped": [
+    "Windows user SSH alias unchanged",
+    "Linux-native Codex CLI install skipped",
+    "Live ~/.local/bin/codex wrapper unchanged"
+  ],
+  "files_touched": [],
+  "backups_created": [],
+  "reports_created": [
+    "/home/andy4917/Dev-Management/reports/global-runtime.final.json",
+    "/home/andy4917/Dev-Management/reports/windows-app-ssh-remote-readiness.final.json",
+    "/home/andy4917/Dev-Management/reports/windows-app-ssh-remote-readiness.final.md",
+    "/home/andy4917/Dev-Management/reports/config-provenance.final.json",
+    "/home/andy4917/Dev-Management/reports/config-provenance.final.md",
+    "/home/andy4917/Dev-Management/reports/toolchain-surface.final.json",
+    "/home/andy4917/Dev-Management/reports/toolchain-surface.final.md",
+    "/home/andy4917/Dev-Management/reports/hook-readiness.final.json",
+    "/home/andy4917/Dev-Management/reports/hook-readiness.final.md",
+    "/home/andy4917/Dev-Management/reports/linux-native-codex-cli-activation.final.json",
+    "/home/andy4917/Dev-Management/reports/linux-native-codex-cli-activation.final.md",
+    "/home/andy4917/Dev-Management/reports/startup-workflow.final.json",
+    "/home/andy4917/Dev-Management/reports/serena-startup.final-dry-run.json",
+    "/home/andy4917/Dev-Management/reports/artifact-hygiene.final.json",
+    "/home/andy4917/Dev-Management/reports/score-layer.final.json",
+    "/home/andy4917/Dev-Management/reports/score-layer.final.md",
+    "/home/andy4917/Dev-Management/reports/audit.final.json",
+    "/home/andy4917/Dev-Management/reports/codex-app-usability-final.json",
+    "/home/andy4917/Dev-Management/reports/codex-app-usability-final.md"
+  ],
+  "windows_app_ssh_status": "PASS",
+  "canonical_ssh_runtime_status": "PASS",
+  "remote_codex_status": "PASS",
+  "linux_native_codex_cli_status": "PASS",
+  "config_provenance_status": "PASS",
+  "generated_agents_status": "PASS",
+  "auth_status": "PASS",
+  "serena_status": "WARN",
+  "score_status": "WARN",
+  "audit_status": "WARN",
+  "final_user_instructions": "Restart Codex App, open Settings > Connections, select devmgmt-wsl, open /home/andy4917/Dev-Management, sign in if prompted, and send the readiness prompt."
+}

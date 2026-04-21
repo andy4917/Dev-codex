@@ -1,54 +1,55 @@
 {
   "skills_used": [
     {
+      "name": "openai-docs",
+      "path": "/mnt/c/Users/anise/.codex/skills/.system/openai-docs/SKILL.md",
+      "purpose": "Validate official Codex App remote/runtime semantics"
+    },
+    {
       "name": "env-audit",
       "path": "/mnt/c/Users/anise/.codex/skills/dev-workflow/env-audit/SKILL.md",
-      "purpose": "Audit Windows and WSL execution surfaces before runtime hardening and release validation."
+      "purpose": "Classify Windows/WSL execution surfaces and environment blockers"
     },
     {
       "name": "anti-cheat-auditor",
       "path": "/mnt/c/Users/anise/.codex/skills/dev-workflow/anti-cheat-auditor/SKILL.md",
-      "purpose": "Check for hardcoded success paths, dead fallback, and score-gaming style drift."
-    },
-    {
-      "name": "openai-docs",
-      "path": "/mnt/c/Users/anise/.codex/skills/.system/openai-docs/SKILL.md",
-      "purpose": "Use official OpenAI docs as the reference source for Codex app, remote connections, config, sandbox, and Windows behavior."
+      "purpose": "Review stale fallback, hardcoding, and score-layer manipulation risks"
     }
   ],
   "subagents_used": [
     {
-      "name": "contracts_docs_scan",
-      "role": "legacy wording and contract/doc scan"
+      "name": "contracts_docs_review",
+      "role": "Cross-check contract and documentation drift"
     },
     {
-      "name": "hook_score_scan",
-      "role": "hook and score-layer crosscheck"
+      "name": "scripts_dup_review",
+      "role": "Review duplicate script responsibilities and helper extraction scope"
     },
     {
-      "name": "tests_gap_scan",
-      "role": "test gap discovery"
-    },
-    {
-      "name": "legacy_crosscheck",
-      "role": "post-patch legacy and self-feed cross-validation"
-    },
-    {
-      "name": "score_gate_crosscheck",
-      "role": "post-patch score/hook/integration cross-validation"
-    },
-    {
-      "name": "release_surface_scan",
-      "role": "installed-app and release-impact crosscheck"
+      "name": "usability_flow_review",
+      "role": "Cross-validate app-usability orchestration and bottlenecks"
     }
   ],
-  "plugins_used": [],
-  "workspace_dependency_tools": {
-    "used": false,
-    "reason": "App-side workspace dependency tools are disabled and were not required for this hardening pass."
+  "workspace_dependencies": {
+    "enabled_in_app_settings": false,
+    "used_this_session": false,
+    "reason": "Workspace dependency tools were not required for runtime authority, SSH readiness, or app-usability activation."
   },
-  "hooks_surface": {
-    "used_as_enforcement_boundary": false,
-    "reason": "Hooks were audited as trigger-only surfaces; audit, tests, and score layer remain the final gates."
-  }
+  "hooks": {
+    "used_as_final_enforcement": false,
+    "notes": "Hooks remain trigger-only; audit, tests, and score layer are the final gates."
+  },
+  "projectless_chat": {
+    "active": false,
+    "code_modification_requested": false,
+    "repo_root_resolved": true
+  },
+  "multiple_terminals": {
+    "path_mismatch": true,
+    "selected_execution_terminal_status": "CANONICAL_REMOTE"
+  },
+  "notes": [
+    "Installed app evidence and remote-connection behavior were treated as evidence, not authority.",
+    "Linux-native Codex CLI on devmgmt-wsl is the canonical agent binary target for app usability."
+  ]
 }
