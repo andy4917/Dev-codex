@@ -102,9 +102,6 @@ def runtime_paths(authority: dict[str, Any]) -> dict[str, Path]:
     return {
         **paths,
         "linux_user_override_config": paths["linux_user_override"],
-        "windows_agents": paths["observed_windows_policy_agents"],
-        "windows_config": paths["observed_windows_policy_config"],
-        "windows_wsl_launcher": paths["observed_windows_wsl_launcher"],
     }
 
 
@@ -460,10 +457,20 @@ def build_startup_workflow_check(management_root: Path, *, purpose: str = "code-
         }
 
 
-def build_global_runtime_surface_check(management_root: Path) -> dict[str, Any]:
+def build_global_runtime_surface_check(
+    management_root: Path,
+    *,
+    windows_ssh_readiness_report: str | Path | None = None,
+    no_live_windows_ssh_probe: bool = True,
+) -> dict[str, Any]:
     try:
         evaluator = load_script_function("check_global_runtime.py", "evaluate_global_runtime")
-        payload = evaluator(management_root, mode="auto")
+        payload = evaluator(
+            management_root,
+            mode="auto",
+            windows_ssh_readiness_report=windows_ssh_readiness_report,
+            no_live_windows_ssh_probe=no_live_windows_ssh_probe,
+        )
         return payload if isinstance(payload, dict) else {"status": "BLOCKED", "reason": "unexpected global runtime payload"}
     except Exception as exc:
         return {"status": "BLOCKED", "reason": str(exc)}
@@ -596,12 +603,12 @@ def build_windows_policy_surface_check(
     known_generated_cleanup_candidates = [
         str(item.get("path", ""))
         for item in findings
-        if str(item.get("classification", "")).strip() == "known_generated_cleanup_candidate"
+        if str(item.get("disposition", "")).strip() in {"INERT_QUARANTINE", "REMOVE_NOW"}
     ]
     unknown_observed = [
         str(item.get("path", ""))
         for item in findings
-        if str(item.get("classification", "")).strip() == "unknown_policy_surface"
+        if str(item.get("disposition", "")).strip() in {"MANUAL_REMEDIATION", "ACCEPTED_NONBLOCKING"}
     ]
     files = {
         "config": runtime["observed_windows_policy_config"],
@@ -633,13 +640,13 @@ def build_windows_policy_surface_check(
                 "path": str(path),
                 "exists": path.exists(),
                 "is_dir": path.is_dir(),
-                "has_generated_header": generated if path.exists() and path.is_file() else False,
+                "has_generated_header": generated if path.exists() else False,
             }
             for name, path, generated in [
-                ("config", files["config"], files["config"].exists() and read_text(files["config"]).startswith("# GENERATED - DO NOT EDIT")),
-                ("agents", files["agents"], files["agents"].exists() and read_text(files["agents"]).startswith("GENERATED - DO NOT EDIT")),
-                ("hooks", files["hooks"], files["hooks"].exists() and read_text(files["hooks"]).startswith("{")),
-                ("skills", files["skills"], False),
+                ("config", files["config"], str(files["config"]) in known_generated_cleanup_candidates),
+                ("agents", files["agents"], str(files["agents"]) in known_generated_cleanup_candidates),
+                ("hooks", files["hooks"], str(files["hooks"]) in known_generated_cleanup_candidates),
+                ("skills", files["skills"], str(files["skills"]) in known_generated_cleanup_candidates),
             ]
         },
         "findings": findings,
@@ -796,6 +803,9 @@ def main() -> int:
     parser.add_argument("--json", action="store_true", help="Print JSON to stdout.")
     parser.add_argument("--output-file", default="", help="Optional explicit report output path.")
     parser.add_argument("--purpose", choices=["code-modification", "app-usability"], default="code-modification")
+    parser.add_argument("--refresh-windows-ssh", action="store_true")
+    parser.add_argument("--windows-ssh-readiness-report", default="")
+    parser.add_argument("--no-live-windows-ssh-probe", action="store_true")
     args = parser.parse_args()
 
     authority = load_authority()
@@ -817,7 +827,7 @@ def main() -> int:
     agents_files: list[Path] = []
     for base in scan_roots:
         agents_files.extend(find_paths(base, lambda p: p.name == "AGENTS.md", authority, quarantine_root))
-    for path in [runtime["linux_agents"], runtime["observed_windows_policy_agents"]]:
+    for path in [runtime["linux_agents"]]:
         if path.exists():
             agents_files.append(path)
     agents_files = sorted(set(agents_files))
@@ -829,11 +839,7 @@ def main() -> int:
     allowed_configs = {
         str(runtime["linux_config"]),
     }
-    config_files = [
-        path
-        for path in [runtime["linux_config"], runtime["observed_windows_policy_config"]]
-        if path.exists()
-    ]
+    config_files = [path for path in [runtime["linux_config"]] if path.exists()]
     if product_root.exists():
         for child in product_root.iterdir():
             cfg = child / ".codex" / "config.toml"
@@ -863,7 +869,11 @@ def main() -> int:
     linux_agents = runtime["linux_agents"]
     global_config = runtime["linux_config"]
     project_root_marker_ok = global_config.exists() and 'project_root_markers = [".git"]' in read_text(global_config)
-    global_runtime_surface = build_global_runtime_surface_check(Path(roots["management"]))
+    global_runtime_surface = build_global_runtime_surface_check(
+        Path(roots["management"]),
+        windows_ssh_readiness_report=args.windows_ssh_readiness_report or None,
+        no_live_windows_ssh_probe=True,
+    )
     wsl_launcher_check = build_wsl_launcher_check(authority, runtime=runtime)
     git_surface_drift = build_git_surface_drift_check()
     workspace_dependency_surface = build_workspace_dependency_surface_check(Path(roots["management"]), runtime)
@@ -881,7 +891,13 @@ def main() -> int:
     toolchain_surface = evaluate_toolchain_surface(Path(roots["management"]))
     hook_readiness = evaluate_hook_readiness(Path(roots["management"]))
     artifact_hygiene = evaluate_artifact_hygiene(Path(roots["management"]))
-    windows_app_ssh_readiness = evaluate_windows_app_ssh_readiness(Path(roots["management"]))
+    windows_app_ssh_readiness = evaluate_windows_app_ssh_readiness(
+        Path(roots["management"]),
+        refresh_windows_ssh=bool(args.refresh_windows_ssh),
+        windows_ssh_readiness_report=args.windows_ssh_readiness_report or None,
+        no_live_windows_ssh_probe=bool(args.no_live_windows_ssh_probe),
+        allow_cache_miss_live_probe=False,
+    )
     release_report = load_json(REPORTS_ROOT / "codex-app-installed-release-impact.unified-phase.json", default={})
     score_layer = load_json(
         REPORTS_ROOT / "score-layer.final.json",
@@ -909,15 +925,6 @@ def main() -> int:
                 quarantine_root,
             )
         )
-    files_to_scan.extend(
-        path
-        for path in [
-            runtime["observed_windows_policy_agents"],
-            runtime["observed_windows_policy_config"],
-            runtime["observed_windows_policy_hooks"],
-        ]
-        if path.exists() and path.is_file()
-    )
     old_path_refs = text_paths(files_to_scan, authority["hardcoding_definition"]["path_rules"]["legacy_repo_paths_to_remove"])
     historical_allowlist = set(authority["hardcoding_definition"]["path_rules"].get("historical_evidence_allowlist", []))
     old_path_refs = [

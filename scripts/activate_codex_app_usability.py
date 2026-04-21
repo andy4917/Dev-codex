@@ -85,7 +85,13 @@ def install_linux_codex_cli(*, host_alias: str, allow_install: bool, runtime: di
         'npm install --prefix "$PREFIX" -g @openai/codex@latest; '
         '"$PREFIX/bin/codex" --version'
     )
-    result = run_ssh(host_alias, command)
+    cached_probe = runtime.get("canonical_ssh_probe_cache", {})
+    cache_ready = (
+        isinstance(cached_probe, dict)
+        and str(cached_probe.get("host_alias", "")).strip() == host_alias
+        and str(cached_probe.get("status", "")).strip() == "PASS"
+    )
+    result = run_ssh(host_alias, command, cwd=cached_probe.get("repo_root") if cache_ready else None)
     version = str(result.get("stdout", "")).strip().splitlines()
     return {
         "status": "PASS" if result.get("ok") else "BLOCKED",
@@ -117,6 +123,8 @@ def render_app_usability_markdown(report: dict[str, Any]) -> str:
         f"- Git surface: {report.get('git_surface_status', 'WARN')}",
         f"- Score status: {report['score_status']}",
         f"- Audit status: {report['audit_status']}",
+        f"- Windows SSH probe source: {report.get('windows_app_ssh_probe_source', 'unknown')}",
+        f"- Windows SSH cache status: {report.get('windows_app_ssh_cache_status', 'unknown')}",
     ]
     if report.get("status_reasons"):
         lines.extend(["", "## Status Reasons"])
@@ -127,7 +135,13 @@ def render_app_usability_markdown(report: dict[str, Any]) -> str:
     return "\n".join(lines) + "\n"
 
 
-def run_audit_cli(root: Path, *, purpose: str, output_file: Path) -> dict[str, Any]:
+def run_audit_cli(
+    root: Path,
+    *,
+    purpose: str,
+    output_file: Path,
+    windows_ssh_readiness_report: Path | None = None,
+) -> dict[str, Any]:
     command = [
         "python3",
         str(root / "scripts" / "audit_workspace.py"),
@@ -137,6 +151,14 @@ def run_audit_cli(root: Path, *, purpose: str, output_file: Path) -> dict[str, A
         "--output-file",
         str(output_file),
     ]
+    if windows_ssh_readiness_report is not None:
+        command.extend(
+            [
+                "--windows-ssh-readiness-report",
+                str(windows_ssh_readiness_report),
+                "--no-live-windows-ssh-probe",
+            ]
+        )
     result = subprocess.run(command, check=False, capture_output=True, text=True, encoding="utf-8", cwd=str(root))
     if output_file.exists():
         return load_json(output_file, default={})
@@ -150,6 +172,9 @@ def evaluate_app_usability(
     *,
     apply_user_level: bool = False,
     allow_linux_codex_install: bool = False,
+    refresh_windows_ssh: bool = False,
+    windows_ssh_readiness_report: str | Path | None = None,
+    no_live_windows_ssh_probe: bool = False,
 ) -> dict[str, Any]:
     root = Path(repo_root).expanduser().resolve() if repo_root else ROOT
     authority = load_authority(root)
@@ -161,8 +186,15 @@ def evaluate_app_usability(
     agent_actions_applied: list[str] = []
     agent_actions_skipped: list[str] = []
 
-    windows = evaluate_windows_app_ssh_readiness(root, apply_user_level=apply_user_level)
-    windows_path = reports_root / "windows-app-ssh-remote-readiness.final.json"
+    windows_path = Path(windows_ssh_readiness_report).expanduser().resolve() if windows_ssh_readiness_report else reports_root / "windows-app-ssh-remote-readiness.final.json"
+    windows = evaluate_windows_app_ssh_readiness(
+        root,
+        apply_user_level=apply_user_level,
+        refresh_windows_ssh=refresh_windows_ssh,
+        windows_ssh_readiness_report=windows_path,
+        no_live_windows_ssh_probe=no_live_windows_ssh_probe,
+        allow_cache_miss_live_probe=False,
+    )
     save_json(windows_path, windows)
     save_markdown(windows_path.with_suffix(".md"), render_windows_markdown(windows))
     reports_created.extend([str(windows_path), str(windows_path.with_suffix(".md"))])
@@ -173,7 +205,12 @@ def evaluate_app_usability(
     else:
         agent_actions_skipped.append("Windows user SSH alias unchanged")
 
-    runtime = evaluate_global_runtime(root, windows_app_ssh_readiness=windows)
+    runtime = evaluate_global_runtime(
+        root,
+        windows_app_ssh_readiness=windows,
+        windows_ssh_readiness_report=windows_path,
+        no_live_windows_ssh_probe=True,
+    )
     runtime_path = reports_root / "global-runtime.final.json"
     save_json(runtime_path, runtime)
     reports_created.append(str(runtime_path))
@@ -272,14 +309,14 @@ def evaluate_app_usability(
     reports_created.append(str(hygiene_path))
 
     audit_path = reports_root / "audit.final.json"
-    _pre_score_audit = run_audit_cli(root, purpose="app-usability", output_file=audit_path)
+    _pre_score_audit = run_audit_cli(root, purpose="app-usability", output_file=audit_path, windows_ssh_readiness_report=windows_path)
     score = evaluate_score_layer(root, purpose="app-usability")
     score_path = reports_root / "score-layer.final.json"
     save_json(score_path, score)
     save_markdown(score_path.with_suffix(".md"), render_score_markdown(score))
     reports_created.extend([str(score_path), str(score_path.with_suffix(".md"))])
 
-    audit = run_audit_cli(root, purpose="app-usability", output_file=audit_path)
+    audit = run_audit_cli(root, purpose="app-usability", output_file=audit_path, windows_ssh_readiness_report=windows_path)
     reports_created.append(str(audit_path))
 
     status_reasons: list[str] = []
@@ -368,6 +405,8 @@ def evaluate_app_usability(
         "backups_created": backups_created,
         "reports_created": reports_created,
         "windows_app_ssh_status": windows["status"],
+        "windows_app_ssh_probe_source": str(windows.get("probe_source", "")),
+        "windows_app_ssh_cache_status": str(windows.get("cache_status", "")),
         "canonical_ssh_runtime_status": str(runtime.get("ssh_runtime_status", runtime.get("canonical_execution_status", "WARN"))),
         "remote_codex_status": remote_codex_status,
         "linux_native_codex_cli_status": str(runtime.get("remote_native_codex_status", {}).get("status", linux_cli.get("status", "WARN"))),
@@ -403,12 +442,18 @@ def main() -> int:
     parser.add_argument("--repo-root", default=str(ROOT))
     parser.add_argument("--output-file", default=str(DEFAULT_OUTPUT_PATH))
     parser.add_argument("--json", action="store_true")
+    parser.add_argument("--refresh-windows-ssh", action="store_true")
+    parser.add_argument("--windows-ssh-readiness-report", default="")
+    parser.add_argument("--no-live-windows-ssh-probe", action="store_true")
     args = parser.parse_args()
 
     report = evaluate_app_usability(
         args.repo_root,
         apply_user_level=bool(args.apply_user_level),
         allow_linux_codex_install=bool(args.allow_linux_codex_install),
+        refresh_windows_ssh=bool(args.refresh_windows_ssh),
+        windows_ssh_readiness_report=args.windows_ssh_readiness_report or None,
+        no_live_windows_ssh_probe=bool(args.no_live_windows_ssh_probe),
     )
     output_path = Path(args.output_file).expanduser().resolve()
     save_json(output_path, report)

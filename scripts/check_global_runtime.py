@@ -9,7 +9,6 @@ import shlex
 import shutil
 import subprocess
 import sys
-from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -170,12 +169,17 @@ def parse_type_a_paths(lines: list[str]) -> list[str]:
 def config_surface_classification(path: Path, authority: dict[str, Any]) -> dict[str, Any]:
     text = read_text(path)
     runtime = managed_runtime_paths(authority)
-    windows_target = runtime["observed_windows_policy_config"].resolve()
+    windows_targets = {
+        runtime["observed_windows_policy_config"].resolve(),
+        runtime["observed_windows_policy_agents"].resolve(),
+        runtime["observed_windows_policy_hooks"].resolve(),
+        runtime["observed_windows_policy_skills"].resolve(),
+    }
     linux_target = runtime["linux_config"].resolve()
     user_override_target = runtime["linux_user_override"].resolve()
     classification = "unmanaged"
     repairable = False
-    if path.exists() and path.resolve() == windows_target:
+    if path.exists() and path.resolve() in windows_targets:
         classification = "windows_policy_surface"
         repairable = False
     elif path.exists() and path.resolve() == linux_target:
@@ -356,7 +360,7 @@ def write_preview_wrapper(authority: dict[str, Any]) -> str:
     preview_path.parent.mkdir(parents=True, exist_ok=True)
     preview_path.write_text(render_linux_launcher(authority) or "", encoding="utf-8")
     try:
-        preview_path.chmod(preview_path.stat().st_mode | 0o111)
+        preview_path.chmod(preview_path.stat().st_mode & ~0o111)
     except OSError:
         pass
     return str(preview_path)
@@ -445,18 +449,46 @@ def local_runtime_probe(authority: dict[str, Any]) -> dict[str, Any]:
 
 def remote_runtime_probe(authority: dict[str, Any], host_alias: str, repo_root: Path) -> dict[str, Any]:
     repo_q = shlex.quote(str(repo_root))
-    hostname_result = run_ssh(host_alias, "hostname")
-    pwd_result = run_ssh(host_alias, f"cd {repo_q} && pwd")
-    command_v = run_ssh(host_alias, f"cd {repo_q} && command -v codex || true")
-    type_a = run_ssh(host_alias, f"cd {repo_q} && type -a codex || true")
-    path_result = run_ssh(host_alias, "printf '%s\\n' \"$PATH\" | tr ':' '\\n'")
-    path_entries = parse_lines(str(path_result["stdout"]))
+    combined = run_ssh(
+        host_alias,
+        (
+            f"cd {repo_q} && "
+            "hostname && "
+            "printf '__DEVMGMT_PWD__%s\\n' \"$PWD\" && "
+            "command -v codex || true && "
+            "printf '__DEVMGMT_TYPEA__\\n' && "
+            "type -a codex || true && "
+            "printf '__DEVMGMT_PATH__\\n' && "
+            "printf '%s\\n' \"$PATH\" | tr ':' '\\n'"
+        ),
+    )
+    combined_lines = parse_lines(str(combined["stdout"]))
+    hostname_value = combined_lines[0] if combined_lines else ""
+    pwd_value = ""
+    command_v_value = ""
+    type_a_lines: list[str] = []
+    path_entries: list[str] = []
+    section = "command_v"
+    for raw in combined_lines[1:]:
+        if raw.startswith("__DEVMGMT_PWD__"):
+            pwd_value = raw.replace("__DEVMGMT_PWD__", "", 1).strip()
+            continue
+        if raw == "__DEVMGMT_TYPEA__":
+            section = "type_a"
+            continue
+        if raw == "__DEVMGMT_PATH__":
+            section = "path"
+            continue
+        if section == "command_v" and not command_v_value:
+            command_v_value = raw.strip()
+            continue
+        if section == "type_a":
+            type_a_lines.append(raw)
+            continue
+        if section == "path":
+            path_entries.append(raw)
     contaminated = [entry for entry in path_entries if is_forbidden_runtime_value(entry, authority)]
-    ssh_available = bool(hostname_result["ok"])
-    hostname_value = str(hostname_result["stdout"]).strip()
-    pwd_value = str(pwd_result["stdout"]).strip()
-    command_v_value = str(command_v["stdout"]).strip()
-    type_a_lines = parse_lines(str(type_a["stdout"]))
+    ssh_available = bool(combined["ok"])
     type_a_paths = parse_type_a_paths(type_a_lines)
     paths = managed_runtime_paths(authority)
     preview_launcher = preview_linux_launcher_path(authority)
@@ -532,7 +564,7 @@ def remote_runtime_probe(authority: dict[str, Any], host_alias: str, repo_root: 
         "host_alias": host_alias,
         "hostname": hostname_value,
         "ssh_available": ssh_available,
-        "stderr": str(hostname_result["stderr"] or pwd_result["stderr"] or command_v["stderr"] or path_result["stderr"]).strip(),
+        "stderr": str(combined["stderr"]).strip(),
         "type_a": type_a_lines,
         "type_a_paths": type_a_paths,
         "type_a_candidates": type_candidates,
@@ -546,6 +578,11 @@ def remote_runtime_probe(authority: dict[str, Any], host_alias: str, repo_root: 
         "remote_codex_resolution_status": remote_codex_resolution_status,
         "remote_native_codex_status": remote_native_codex_status,
         "remote_path_contamination_status": remote_path_contamination_status,
+        "canonical_ssh_probe_cache": {
+            "status": "PASS" if ssh_available else "BLOCKED",
+            "host_alias": host_alias,
+            "repo_root": str(repo_root),
+        },
     }
 
 
@@ -624,47 +661,6 @@ def build_wrapper_apply_readiness(
     }
 
 
-def manual_remediation_lines(runtime_report: dict[str, Any], git_report: dict[str, Any], workspace_dependency_report: dict[str, Any] | None = None) -> list[str]:
-    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    workspace_dependency_report = workspace_dependency_report or {}
-    workspace_dependency_status = str(workspace_dependency_report.get("tool_status", "")).strip()
-    return [
-        "# Manual System Remediation",
-        "",
-        f"- Generated at: {timestamp}",
-        "- Windows Codex app and /mnt/c/Users/anise/.codex/bin/wsl/codex are external dependencies and are not repo repair targets.",
-        "- Edit /etc/wsl.conf manually to include:",
-        "  [interop]",
-        "  enabled=true",
-        "  appendWindowsPath=false",
-        "  [boot]",
-        "  systemd=true",
-        "- After editing /etc/wsl.conf, restart WSL manually from PowerShell with: wsl.exe --shutdown",
-        "- Add or verify the user-level SSH alias in ~/.ssh/config.d/dev-management.conf and ensure ~/.ssh/config includes ~/.ssh/config.d/*.conf.",
-        "- If SSH authentication still fails, review authorized_keys markers, private key permissions, and known_hosts manually.",
-        "- Windows PATH is not repo-owned; if Codex app sessions keep injecting .codex/tmp/arg0 or .codex/bin/wsl, treat that as a client-surface warning and correct it outside the repo.",
-        "- Reconcile Windows Git and WSL Git config drift manually. Current Git surface status: " + str(git_report.get("status", "UNKNOWN")),
-        "- Review Windows Git safe.directory, credential helper, core.autocrlf, and LFS settings against the WSL Git configuration before using mixed surfaces.",
-        *([
-            "- Current Codex app settings disable workspace dependency tools; enable Codex dependencies in the app before expecting load/install workspace dependency tools to work."
-        ] if workspace_dependency_status == "DISABLED_IN_APP_SETTINGS" else []),
-        "- Install or expose a Linux-native codex binary inside the canonical SSH runtime if remote native detection remains incomplete.",
-        "- The local PATH normalizer at ~/.config/shell/wsl-runtime-paths.sh is currently not repo-owned; update it manually if you want to strip .codex/tmp/arg0 or .codex/bin/wsl entries.",
-        "- Rollback for user-level SSH activation: remove ~/.ssh/config.d/dev-management.conf, remove the Dev-Management include block from ~/.ssh/config, remove the marker block from authorized_keys, and delete ~/.ssh/devmgmt_wsl_ed25519(.pub) if it was created solely for this runtime.",
-        "- Current canonical execution status: " + str(runtime_report.get("canonical_execution_status", "UNKNOWN")),
-    ]
-
-
-def write_manual_remediation_report(repo_root: Path, runtime_report: dict[str, Any], git_report: dict[str, Any]) -> str:
-    reports_dir = repo_root / "reports"
-    reports_dir.mkdir(parents=True, exist_ok=True)
-    workspace_dependency_report = load_json(reports_dir / "workspace-dependency-surface.json", default={})
-    timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
-    path = reports_dir / f"manual-system-remediation-{timestamp}.md"
-    path.write_text("\n".join(manual_remediation_lines(runtime_report, git_report, workspace_dependency_report)) + "\n", encoding="utf-8")
-    return str(path)
-
-
 def git_diff_check_status(repo_root: Path) -> dict[str, Any]:
     if not (repo_root / ".git").exists():
         return {"status": "WARN", "reason": "repo root does not expose .git during this probe"}
@@ -701,6 +697,9 @@ def evaluate_global_runtime(
     mode: str = "auto",
     ssh_host: str = "",
     windows_app_ssh_readiness: dict[str, Any] | None = None,
+    refresh_windows_ssh: bool = False,
+    windows_ssh_readiness_report: str | Path | None = None,
+    no_live_windows_ssh_probe: bool = False,
 ) -> dict[str, Any]:
     authority = load_authority(repo_root)
     repo_path = Path(repo_root).expanduser().resolve() if repo_root else ROOT
@@ -716,7 +715,13 @@ def evaluate_global_runtime(
     else:
         remote = skipped_remote_runtime_probe("canonical SSH runtime is not the selected execution authority for this workspace")
     config_provenance = evaluate_config_provenance(repo_path)
-    windows_app_ssh_readiness = windows_app_ssh_readiness or evaluate_windows_app_ssh_readiness(repo_path)
+    windows_app_ssh_readiness = windows_app_ssh_readiness or evaluate_windows_app_ssh_readiness(
+        repo_path,
+        refresh_windows_ssh=refresh_windows_ssh,
+        windows_ssh_readiness_report=windows_ssh_readiness_report,
+        no_live_windows_ssh_probe=no_live_windows_ssh_probe,
+        allow_cache_miss_live_probe=False,
+    )
     wrapper_target_safety_status = render_wrapper_target_safety(authority)
     preview_path = write_preview_wrapper(authority)
 
@@ -782,10 +787,13 @@ def evaluate_global_runtime(
         "local_shell_status": local_shell_status,
         "ssh_runtime_status": ssh_runtime_status,
         "windows_app_ssh_readiness": windows_app_ssh_readiness,
+        "windows_app_ssh_probe_source": str(windows_app_ssh_readiness.get("probe_source", "")),
+        "windows_app_ssh_cache_status": str(windows_app_ssh_readiness.get("cache_status", "")),
         "config_provenance": config_provenance,
         "codex_resolution_status": codex_resolution_status,
         "path_contamination_status": path_contamination_status["status"],
         "wrapper_apply_readiness": wrapper_apply_readiness,
+        "canonical_ssh_probe_cache": remote.get("canonical_ssh_probe_cache", {}),
         "canonical_ssh_runtime_status": remote["canonical_ssh_runtime_status"],
         "remote_repo_root_status": remote["remote_repo_root_status"],
         "remote_codex_resolution_status": remote["remote_codex_resolution_status"],
@@ -854,13 +862,19 @@ def main() -> int:
     parser.add_argument("--ssh-host", default="")
     parser.add_argument("--output-file", default=str(DEFAULT_OUTPUT_PATH))
     parser.add_argument("--json", action="store_true")
+    parser.add_argument("--refresh-windows-ssh", action="store_true")
+    parser.add_argument("--windows-ssh-readiness-report", default="")
+    parser.add_argument("--no-live-windows-ssh-probe", action="store_true")
     args = parser.parse_args()
 
-    from check_git_surface import evaluate_git_surfaces
-
-    report = evaluate_global_runtime(args.repo_root, mode=args.mode, ssh_host=args.ssh_host)
-    git_report = evaluate_git_surfaces()
-    report["manual_remediation_report"] = write_manual_remediation_report(Path(args.repo_root).expanduser().resolve(), report, git_report)
+    report = evaluate_global_runtime(
+        args.repo_root,
+        mode=args.mode,
+        ssh_host=args.ssh_host,
+        refresh_windows_ssh=bool(args.refresh_windows_ssh),
+        windows_ssh_readiness_report=args.windows_ssh_readiness_report or None,
+        no_live_windows_ssh_probe=bool(args.no_live_windows_ssh_probe),
+    )
     output_path = Path(args.output_file).expanduser().resolve()
     save_json(output_path, report)
     if args.json:
@@ -868,7 +882,6 @@ def main() -> int:
     else:
         print(render_text_summary(report))
         print(f"wrote {output_path}")
-        print(f"wrote {report['manual_remediation_report']}")
     return status_exit_code(report["overall_status"])
 
 

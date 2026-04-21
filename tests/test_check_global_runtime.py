@@ -272,6 +272,31 @@ class CheckGlobalRuntimeTests(unittest.TestCase):
         self.assertEqual(result["classification"], "repo_generated_ssh_wrapper")
         self.assertFalse(result["native_candidate"])
 
+    def test_default_global_runtime_uses_cached_windows_readiness(self) -> None:
+        authority = self._authority()
+        with patch.object(self.module, "load_authority", return_value=authority), patch.object(
+            self.module, "local_runtime_probe", return_value=self._local_probe(command_v="/usr/local/bin/codex", precedence="PASS")
+        ), patch.object(
+            self.module, "remote_runtime_probe", return_value=self._remote_probe(canonical_status="PASS")
+        ), patch.object(
+            self.module, "render_wrapper_target_safety", return_value={"status": "PASS"}
+        ), patch.object(
+            self.module, "write_preview_wrapper", return_value="/tmp/codex-ssh-wrapper.sh"
+        ), patch.object(
+            self.module, "evaluate_config_provenance", return_value={"status": "PASS"}
+        ), patch.object(
+            self.module, "git_diff_check_status", return_value={"status": "PASS", "reason": ""}
+        ), patch.object(
+            self.module,
+            "evaluate_windows_app_ssh_readiness",
+            return_value={"status": "PASS", "probe_source": "cached_report", "cache_status": "fresh"},
+        ) as windows_readiness:
+            report = self.module.evaluate_global_runtime(ROOT, mode="auto")
+        self.assertEqual(report["overall_status"], "PASS")
+        self.assertEqual(report["windows_app_ssh_probe_source"], "cached_report")
+        self.assertEqual(report["windows_app_ssh_cache_status"], "fresh")
+        self.assertEqual(windows_readiness.call_args.kwargs["allow_cache_miss_live_probe"], False)
+
 
 if __name__ == "__main__":
     unittest.main()

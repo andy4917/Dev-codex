@@ -14,11 +14,16 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from check_config_provenance import header_status, load_policy, windows_policy_surface_report
+from check_config_provenance import (
+    header_status,
+    load_policy,
+    shell_zsh_fork_dependency_reasons,
+)
 from devmgmt_runtime.authority import canonical_authority_path, load_authority
 from devmgmt_runtime.paths import runtime_paths
 from devmgmt_runtime.reports import save_json
 from devmgmt_runtime.status import collapse_status, status_exit_code
+from devmgmt_runtime.windows_policy import windows_policy_surface_report
 
 
 DEFAULT_OUTPUT_PATH = ROOT / "reports" / "active-config-smoke.unified-phase.json"
@@ -61,6 +66,7 @@ def evaluate_active_config_smoke(repo_root: str | Path | None = None) -> dict[st
     approval_policy = str(parsed.get("approval_policy", "")).strip()
     sandbox_mode = str(parsed.get("sandbox_mode", "")).strip()
     shell_zsh_fork = features.get("shell_zsh_fork")
+    zsh_path = str(parsed.get("zsh_path", "")).strip()
 
     if linux_config.exists() and header["status"] != "PASS":
         blockers.extend(f"{linux_config}: {reason}" for reason in header.get("reasons", []))
@@ -73,19 +79,18 @@ def evaluate_active_config_smoke(repo_root: str | Path | None = None) -> dict[st
             blockers.append("Linux active generated config is missing the canonical Context7 MCP block")
         if not isinstance(mcp_servers.get("serena"), dict):
             blockers.append("Linux active generated config is missing the canonical Serena MCP block")
-        if shell_zsh_fork is not True:
-            blockers.append("Linux active generated config must keep features.shell_zsh_fork=true")
+        blockers.extend(shell_zsh_fork_dependency_reasons(parsed, policy))
 
     windows_policy_surface = windows_policy_surface_report(paths, authority)
     blockers.extend(
         str(item.get("reason", ""))
         for item in windows_policy_surface.get("findings", [])
-        if str(item.get("classification", "")).strip() == "known_generated_cleanup_candidate"
+        if str(item.get("disposition", "")).strip() in {"INERT_QUARANTINE", "REMOVE_NOW"}
     )
     warnings.extend(
         str(item.get("reason", ""))
         for item in windows_policy_surface.get("findings", [])
-        if str(item.get("classification", "")).strip() == "unknown_policy_surface"
+        if str(item.get("disposition", "")).strip() in {"MANUAL_REMEDIATION", "ACCEPTED_NONBLOCKING"}
     )
 
     windows_app_evidence_status = "PASS" if paths["observed_windows_codex_home"].exists() else "WARN"
@@ -105,6 +110,7 @@ def evaluate_active_config_smoke(repo_root: str | Path | None = None) -> dict[st
             "approval_policy": approval_policy,
             "sandbox_mode": sandbox_mode,
             "shell_zsh_fork": shell_zsh_fork,
+            "zsh_path": zsh_path,
             "canonical_mcp_blocks_present": {
                 "context7": isinstance(mcp_servers.get("context7"), dict),
                 "serena": isinstance(mcp_servers.get("serena"), dict),
@@ -136,6 +142,7 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"- Approval policy: {active.get('approval_policy', '')}",
         f"- Sandbox mode: {active.get('sandbox_mode', '')}",
         f"- shell_zsh_fork: {active.get('shell_zsh_fork', '')}",
+        f"- zsh_path: {active.get('zsh_path', '') or '(unset)'}",
         f"- Context7 MCP block: {str(mcp.get('context7', False)).lower()}",
         f"- Serena MCP block: {str(mcp.get('serena', False)).lower()}",
         f"- Windows policy surface: {report.get('windows_policy_surface_status', 'WARN')}",

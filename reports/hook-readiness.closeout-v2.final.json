@@ -1,0 +1,24 @@
+{
+  "status": "PASS",
+  "runtime_hook_role": "trigger_only",
+  "trigger_only": true,
+  "hook_only_enforcement_claim": false,
+  "windows_generation_enabled": false,
+  "windows_generation_reason": "Windows policy-bearing hooks are violations, not generated outputs, because Codex App can read Windows ~/.codex surfaces when they exist.",
+  "linux_hooks": {
+    "path": "/home/andy4917/.codex/hooks.json",
+    "configured": true,
+    "matches_generated": true
+  },
+  "windows_policy_hooks": {
+    "path": "/mnt/c/Users/anise/.codex/hooks.json",
+    "present": false,
+    "classification": "absent",
+    "status": "PASS"
+  },
+  "warnings": [
+    "Hooks are trigger-only. Audit, tests, and score layer remain the final enforcement gates.",
+    "Windows app state remains evidence only, but Windows ~/.codex is still app-readable when present and must not carry repo-generated policy hooks.",
+    "Windows hook generation is disabled because Windows policy-bearing hook files are forbidden app-readable surfaces, not authority outputs."
+  ]
+}

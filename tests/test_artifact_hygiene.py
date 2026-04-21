@@ -67,6 +67,31 @@ class ArtifactHygieneTests(unittest.TestCase):
             self.assertFalse(old_remediation.exists())
             self.assertTrue(latest_remediation.exists())
 
+    def test_executable_quarantine_is_blocked(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp = Path(tmpdir)
+            quarantine = tmp / "quarantine" / "sample"
+            quarantine.mkdir(parents=True)
+            offender = quarantine / "run.sh"
+            offender.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+            offender.chmod(0o755)
+            (tmp / "reports").mkdir()
+            report = self.module.evaluate_artifact_hygiene(tmp)
+        self.assertEqual(report["status"], "BLOCKED")
+        self.assertIn(str(offender), report["quarantine_executable_files"])
+        self.assertIn(str(offender), report["quarantine_cli_files"])
+
+    def test_active_quarantine_reference_is_blocked(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp = Path(tmpdir)
+            (tmp / "reports").mkdir()
+            docs = tmp / "docs"
+            docs.mkdir()
+            (docs / "note.md").write_text("Use subprocess on quarantine/tool.py during setup.\n", encoding="utf-8")
+            report = self.module.evaluate_artifact_hygiene(tmp)
+        self.assertEqual(report["status"], "BLOCKED")
+        self.assertTrue(report["active_quarantine_reference_hits"])
+
 
 if __name__ == "__main__":
     unittest.main()

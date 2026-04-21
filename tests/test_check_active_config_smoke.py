@@ -49,7 +49,7 @@ class ActiveConfigSmokeTests(unittest.TestCase):
                     }
                 },
                 "global_config": {
-                    "required_true_features": ["shell_zsh_fork"],
+                    "required_true_features": [],
                 },
             },
         }
@@ -80,14 +80,40 @@ class ActiveConfigSmokeTests(unittest.TestCase):
         )
 
     def test_good_linux_config_and_absent_windows_policy_surface_pass(self) -> None:
-        with tempfile.TemporaryDirectory() as tmpdir:
+        with tempfile.TemporaryDirectory(dir="/tmp") as tmpdir:
             tmp = Path(tmpdir)
             authority = self._authority(tmp)
             authority_path = tmp / "repo" / "contracts" / "workspace_authority.json"
             self._write_json(authority_path, authority)
             self._write_json(
                 tmp / "repo" / "contracts" / "config_provenance_policy.json",
-                {"linux_required_true_features": ["shell_zsh_fork"]},
+                {"linux_required_true_features": [], "feature_dependency_rules": {"shell_zsh_fork": {"required_when_true": ["zsh_path"], "path_must_be_absolute": True, "path_must_not_start_with": ["/mnt/c"], "path_must_exist": True}}},
+            )
+            (tmp / "windows-home" / ".codex").mkdir(parents=True, exist_ok=True)
+            self._write_generated_config(
+                tmp / "linux-home" / ".codex" / "config.toml",
+                authority,
+                'approval_policy = "on-request"\nsandbox_mode = "workspace-write"\n\n[features]\nchronicle = true\n\n[mcp_servers.context7]\nenabled = true\n\n[mcp_servers.serena]\nenabled = true',
+                authority_path=authority_path,
+            )
+
+            with patch.object(self.provenance, "AUTHORITY_PATH", authority_path):
+                report = self.module.evaluate_active_config_smoke(tmp / "repo")
+
+        self.assertEqual(report["status"], "PASS")
+        self.assertEqual(report["gate_status"], "PASS")
+        self.assertIsNone(report["linux_active_config"]["shell_zsh_fork"])
+        self.assertEqual(report["windows_policy_surface_status"], "PASS")
+
+    def test_shell_zsh_fork_without_zsh_path_blocks(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/tmp") as tmpdir:
+            tmp = Path(tmpdir)
+            authority = self._authority(tmp)
+            authority_path = tmp / "repo" / "contracts" / "workspace_authority.json"
+            self._write_json(authority_path, authority)
+            self._write_json(
+                tmp / "repo" / "contracts" / "config_provenance_policy.json",
+                {"linux_required_true_features": [], "feature_dependency_rules": {"shell_zsh_fork": {"required_when_true": ["zsh_path"], "path_must_be_absolute": True, "path_must_not_start_with": ["/mnt/c"], "path_must_exist": True}}},
             )
             self._write_generated_config(
                 tmp / "linux-home" / ".codex" / "config.toml",
@@ -99,33 +125,35 @@ class ActiveConfigSmokeTests(unittest.TestCase):
             with patch.object(self.provenance, "AUTHORITY_PATH", authority_path):
                 report = self.module.evaluate_active_config_smoke(tmp / "repo")
 
-        self.assertEqual(report["status"], "WARN")
-        self.assertEqual(report["gate_status"], "PASS")
-        self.assertEqual(report["linux_active_config"]["shell_zsh_fork"], True)
-        self.assertEqual(report["windows_policy_surface_status"], "PASS")
+        self.assertEqual(report["gate_status"], "BLOCKED")
+        self.assertIn("zsh_path", " ".join(report["blockers"]))
 
-    def test_shell_zsh_fork_false_blocks(self) -> None:
-        with tempfile.TemporaryDirectory() as tmpdir:
+    def test_shell_zsh_fork_with_valid_zsh_path_passes(self) -> None:
+        with tempfile.TemporaryDirectory(dir="/tmp") as tmpdir:
             tmp = Path(tmpdir)
             authority = self._authority(tmp)
             authority_path = tmp / "repo" / "contracts" / "workspace_authority.json"
             self._write_json(authority_path, authority)
             self._write_json(
                 tmp / "repo" / "contracts" / "config_provenance_policy.json",
-                {"linux_required_true_features": ["shell_zsh_fork"]},
+                {"linux_required_true_features": [], "feature_dependency_rules": {"shell_zsh_fork": {"required_when_true": ["zsh_path"], "path_must_be_absolute": True, "path_must_not_start_with": ["/mnt/c"], "path_must_exist": True}}},
             )
+            (tmp / "windows-home" / ".codex").mkdir(parents=True, exist_ok=True)
+            fake_zsh = tmp / "bin" / "zsh"
+            fake_zsh.parent.mkdir(parents=True, exist_ok=True)
+            fake_zsh.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
             self._write_generated_config(
                 tmp / "linux-home" / ".codex" / "config.toml",
                 authority,
-                'approval_policy = "on-request"\nsandbox_mode = "workspace-write"\n\n[features]\nshell_zsh_fork = false\n\n[mcp_servers.context7]\nenabled = true\n\n[mcp_servers.serena]\nenabled = true',
+                f'approval_policy = "on-request"\nsandbox_mode = "workspace-write"\nzsh_path = "{fake_zsh}"\n\n[features]\nshell_zsh_fork = true\n\n[mcp_servers.context7]\nenabled = true\n\n[mcp_servers.serena]\nenabled = true',
                 authority_path=authority_path,
             )
 
             with patch.object(self.provenance, "AUTHORITY_PATH", authority_path):
                 report = self.module.evaluate_active_config_smoke(tmp / "repo")
 
-        self.assertEqual(report["gate_status"], "BLOCKED")
-        self.assertIn("shell_zsh_fork=true", " ".join(report["blockers"]))
+        self.assertEqual(report["status"], "PASS")
+        self.assertEqual(report["gate_status"], "PASS")
 
     def test_windows_policy_file_blocks(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -135,12 +163,12 @@ class ActiveConfigSmokeTests(unittest.TestCase):
             self._write_json(authority_path, authority)
             self._write_json(
                 tmp / "repo" / "contracts" / "config_provenance_policy.json",
-                {"linux_required_true_features": ["shell_zsh_fork"]},
+                {"linux_required_true_features": [], "feature_dependency_rules": {"shell_zsh_fork": {"required_when_true": ["zsh_path"], "path_must_be_absolute": True, "path_must_not_start_with": ["/mnt/c"], "path_must_exist": True}}},
             )
             self._write_generated_config(
                 tmp / "linux-home" / ".codex" / "config.toml",
                 authority,
-                'approval_policy = "on-request"\nsandbox_mode = "workspace-write"\n\n[features]\nshell_zsh_fork = true\n\n[mcp_servers.context7]\nenabled = true\n\n[mcp_servers.serena]\nenabled = true',
+                'approval_policy = "on-request"\nsandbox_mode = "workspace-write"\n\n[features]\nchronicle = true\n\n[mcp_servers.context7]\nenabled = true\n\n[mcp_servers.serena]\nenabled = true',
                 authority_path=authority_path,
             )
             windows_config = tmp / "windows-home" / ".codex" / "config.toml"

@@ -31,11 +31,15 @@ def load_score_policy() -> dict[str, Any]:
 def report_candidates(purpose: str, *candidates: str) -> list[str]:
     ordered = list(candidates)
     if purpose == "code-modification":
+        closeout_candidates = []
+        for candidate in ordered:
+            if candidate.endswith(".final.json"):
+                closeout_candidates.append(candidate.replace(".final.json", ".closeout-v2.final.json"))
         root_cause_candidates = []
         for candidate in ordered:
             if candidate.endswith(".final.json"):
                 root_cause_candidates.append(candidate.replace(".final.json", ".root-cause-removal.final.json"))
-        ordered = root_cause_candidates + ordered
+        ordered = closeout_candidates + root_cause_candidates + ordered
     return ordered
 
 

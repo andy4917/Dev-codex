@@ -1,0 +1,53 @@
+{
+  "purpose": "code-modification",
+  "status": "BLOCKED",
+  "numeric_score": 40,
+  "disqualifiers": [
+    "startup gate remains blocked for the requested purpose",
+    "workspace audit final gate blocked"
+  ],
+  "warnings": [
+    "client surface PATH contamination remains a warning",
+    "git surface still reports stale worktrees, drift, or repo-local guard proposals"
+  ],
+  "cleanup_actions": [],
+  "required_tests": [
+    "python3 -m unittest tests.test_audit_workspace_contract tests.test_repair_codex_desktop_runtime tests.test_verify_migration_evidence tests.test_check_startup_workflow",
+    "python3 -m unittest tests.test_check_global_runtime tests.test_check_agent_instruction tests.test_git_surface",
+    "python3 -m unittest tests.test_activate_canonical_runtime tests.test_run_canonical_command tests.test_repair_serena_startup",
+    "python3 -m unittest tests.test_check_config_provenance tests.test_check_active_config_smoke tests.test_check_toolchain_surface tests.test_check_hook_readiness tests.test_codex_app_usability tests.test_app_thread_worktree_policy tests.test_score_layer"
+  ],
+  "report_sources": {
+    "config_provenance": "/home/andy4917/Dev-Management/reports/config-provenance.closeout-v2.final.json",
+    "active_config_smoke": "/home/andy4917/Dev-Management/reports/active-config-smoke.final.json",
+    "global_runtime": "/home/andy4917/Dev-Management/reports/global-runtime.closeout-v2.final.json",
+    "startup_workflow": "/home/andy4917/Dev-Management/reports/startup-workflow.closeout-v2.final.json",
+    "toolchain_surface": "/home/andy4917/Dev-Management/reports/toolchain-surface.closeout-v2.final.json",
+    "hook_readiness": "/home/andy4917/Dev-Management/reports/hook-readiness.closeout-v2.final.json",
+    "audit": "/home/andy4917/Dev-Management/reports/audit.closeout-v2.final.json",
+    "artifact_hygiene": "/home/andy4917/Dev-Management/reports/artifact-hygiene.closeout-v2.final.json",
+    "git_surface": "/home/andy4917/Dev-Management/reports/git-surface.final.json"
+  },
+  "evidence_files": [
+    "/home/andy4917/Dev-Management/reports/config-provenance.closeout-v2.final.json",
+    "/home/andy4917/Dev-Management/reports/active-config-smoke.final.json",
+    "/home/andy4917/Dev-Management/reports/global-runtime.closeout-v2.final.json",
+    "/home/andy4917/Dev-Management/reports/startup-workflow.closeout-v2.final.json",
+    "/home/andy4917/Dev-Management/reports/toolchain-surface.closeout-v2.final.json",
+    "/home/andy4917/Dev-Management/reports/hook-readiness.closeout-v2.final.json",
+    "/home/andy4917/Dev-Management/reports/audit.closeout-v2.final.json",
+    "/home/andy4917/Dev-Management/reports/artifact-hygiene.closeout-v2.final.json",
+    "/home/andy4917/Dev-Management/reports/git-surface.final.json"
+  ],
+  "score_policy_path": "/home/andy4917/Dev-Management/contracts/score_policy.json",
+  "worktree_policy": {
+    "canonical_repo_root": "/home/andy4917/Dev-Management",
+    "persistent_ops_worktree_allowed_only_when_explicitly_enabled": true,
+    "persistent_ops_worktree_is_authority": false,
+    "task_worktrees_are_ephemeral": true,
+    "generated_mirrors_must_use_canonical_repo_root": true,
+    "stale_persistent_worktree_status": "WARN",
+    "branch_lock_conflict_status": "BLOCKED",
+    "worktree_source_of_truth_escalation_status": "BLOCKED"
+  }
+}

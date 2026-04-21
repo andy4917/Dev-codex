@@ -17,32 +17,11 @@ if str(ROOT) not in sys.path:
 from devmgmt_runtime.authority import load_authority
 from devmgmt_runtime.paths import runtime_paths
 from devmgmt_runtime.reports import save_json
+from devmgmt_runtime.windows_policy import remove_directory_tree, windows_policy_surface_report
 from render_codex_runtime import render_hooks
 
 
 DEFAULT_OUTPUT_PATH = ROOT / "reports" / "windows-codex-policy-mirror-removal.dry-run.json"
-
-
-def read_text(path: Path) -> str:
-    if not path.exists() or not path.is_file():
-        return ""
-    return path.read_text(encoding="utf-8", errors="ignore")
-
-
-def generated_header_present(path: Path) -> bool:
-    text = read_text(path)
-    return text.startswith("# GENERATED - DO NOT EDIT") or text.startswith("GENERATED - DO NOT EDIT")
-
-
-def generated_directory_marker_present(path: Path) -> bool:
-    if not path.exists() or not path.is_dir():
-        return False
-    marker_names = {
-        ".devmgmt-generated",
-        ".generated-by-dev-management",
-        ".devmgmt-mirror-manifest.json",
-    }
-    return any((path / marker).exists() for marker in marker_names)
 
 
 def utc_timestamp() -> str:
@@ -53,54 +32,50 @@ def timestamp_slug() -> str:
     return datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
 
 
-def classify_candidate(path: Path, *, expected_linux_hooks: str | None) -> dict[str, Any]:
+def make_inert(path: Path) -> None:
     if not path.exists():
-        return {
-            "path": str(path),
-            "present": False,
-            "kind": "directory" if path.name == "dev-workflow" else "file",
-            "classification": "absent",
-            "generated_marker_found": False,
-            "reason": "path is absent",
-            "action": "retain",
-            "rollback_path": "",
-        }
-
+        return
     if path.is_dir():
-        generated = path.is_symlink() or generated_directory_marker_present(path)
-        return {
-            "path": str(path),
-            "present": True,
-            "kind": "directory",
-            "classification": "generated_policy_surface" if generated else "unknown_app_or_user_state",
-            "generated_marker_found": generated,
-            "reason": (
-                "directory carries a Dev-Management generated marker or generated symlink and is safe to quarantine"
-                if generated
-                else "directory is inside Windows app state but does not carry a Dev-Management generated marker"
-            ),
-            "action": "quarantine" if generated else "retain",
-            "rollback_path": "",
-        }
+        for child in path.rglob("*"):
+            try:
+                if child.is_dir():
+                    child.chmod(0o755)
+                else:
+                    child.chmod(0o644)
+            except OSError:
+                continue
+        try:
+            path.chmod(0o755)
+        except OSError:
+            pass
+        return
+    try:
+        path.chmod(0o644)
+    except OSError:
+        pass
 
-    text = read_text(path)
-    generated = generated_header_present(path)
-    if path.name == "hooks.json" and expected_linux_hooks and text == expected_linux_hooks:
-        generated = True
-    return {
-        "path": str(path),
-        "present": True,
-        "kind": "file",
-        "classification": "generated_policy_surface" if generated else "unknown_app_or_user_state",
-        "generated_marker_found": generated,
-        "reason": (
-            "file carries a Dev-Management generated header or matches the generated Linux hooks payload and is safe to quarantine"
-            if generated
-            else "file is inside Windows app state but does not carry a Dev-Management generated marker"
-        ),
-        "action": "quarantine" if generated else "retain",
-        "rollback_path": "",
+
+def write_manifest(quarantine_root: Path, applied_changes: list[dict[str, Any]]) -> Path:
+    manifest = {
+        "generated_at": utc_timestamp(),
+        "quarantine_root": str(quarantine_root),
+        "classification": "inert_evidence_only",
+        "reason": "Dev-Management-generated Windows .codex policy-bearing files were quarantined because Windows .codex is not an authority surface.",
+        "inert_guarantees": [
+            "files in this quarantine root must not be executed",
+            "files in this quarantine root must not be imported",
+            "files in this quarantine root must not be read as active policy source",
+            "restoration requires explicit manual review",
+        ],
+        "items": applied_changes,
     }
+    manifest_path = quarantine_root / "MANIFEST.json"
+    save_json(manifest_path, manifest)
+    try:
+        manifest_path.chmod(0o644)
+    except OSError:
+        pass
+    return manifest_path
 
 
 def build_report(repo_root: Path, *, apply: bool) -> dict[str, Any]:
@@ -121,35 +96,77 @@ def build_report(repo_root: Path, *, apply: bool) -> dict[str, Any]:
     ]
 
     quarantine_root = repo_root / "quarantine" / "windows-codex-policy-mirrors" / timestamp_slug()
-    items = [classify_candidate(path, expected_linux_hooks=expected_linux_hooks) for path in [*candidates, *wrapper_candidates]]
+    surface_report = windows_policy_surface_report(paths, authority, expected_linux_hooks=expected_linux_hooks)
+    findings_by_path = {item["path"]: dict(item) for item in surface_report.get("findings", []) if isinstance(item, dict)}
+    items: list[dict[str, Any]] = []
+    for path in [*candidates, *wrapper_candidates]:
+        item = findings_by_path.get(str(path), {})
+        if not item:
+            item = {
+                "path": str(path),
+                "present": False,
+                "kind": "directory" if path.name == "dev-workflow" else "file",
+                "classification": "absent",
+                "disposition": "ACCEPTED_NONBLOCKING",
+                "operation": "retain",
+                "generated_marker_found": False,
+                "reason": "path is absent",
+            }
+        item["rollback_path"] = ""
+        items.append(item)
     applied_changes: list[dict[str, Any]] = []
 
     if apply:
         for item in items:
-            if item["action"] != "quarantine" or not item["present"]:
+            if not item["present"]:
                 continue
             source = Path(item["path"])
-            relative = source.relative_to(windows_home)
-            target = quarantine_root / relative
-            target.parent.mkdir(parents=True, exist_ok=True)
-            shutil.move(str(source), str(target))
-            item["rollback_path"] = str(target)
-            applied_changes.append(
-                {
-                    "source_path": str(source),
-                    "action": "quarantined",
-                    "rollback_path": str(target),
-                }
-            )
+            if item["operation"] == "quarantine":
+                relative = source.relative_to(windows_home)
+                target = quarantine_root / relative
+                target.parent.mkdir(parents=True, exist_ok=True)
+                shutil.move(str(source), str(target))
+                make_inert(target)
+                item["rollback_path"] = str(target)
+                applied_changes.append(
+                    {
+                        "source_path": str(source),
+                        "action": "quarantined",
+                        "rollback_path": str(target),
+                        "inert_after_quarantine": True,
+                    }
+                )
+            elif item["operation"] == "remove":
+                removed_entries = remove_directory_tree(source) if source.is_dir() else 0
+                if source.exists():
+                    source.unlink()
+                    removed_entries += 1
+                item["rollback_path"] = ""
+                applied_changes.append(
+                    {
+                        "source_path": str(source),
+                        "action": "removed",
+                        "rollback_path": "",
+                        "removed_entries": removed_entries,
+                        "rollback_note": "No repo quarantine copy was kept because this surface was classified REMOVE_NOW stale mirror residue.",
+                    }
+                )
+        if applied_changes:
+            manifest_path = write_manifest(quarantine_root, applied_changes)
+        else:
+            manifest_path = quarantine_root / "MANIFEST.json"
     else:
         for item in items:
-            if item["action"] == "quarantine" and item["present"]:
+            if item["operation"] == "quarantine" and item["present"]:
                 item["rollback_path"] = str(quarantine_root / Path(item["path"]).relative_to(windows_home))
+        manifest_path = quarantine_root / "MANIFEST.json"
 
     summary = {
         "generated_candidates": sum(1 for item in items if item["classification"] == "generated_policy_surface"),
-        "unknown_observed": sum(1 for item in items if item["classification"] == "unknown_app_or_user_state"),
-        "quarantined": len(applied_changes),
+        "remove_now_candidates": sum(1 for item in items if item["disposition"] == "REMOVE_NOW"),
+        "manual_remediation_candidates": sum(1 for item in items if item["disposition"] == "MANUAL_REMEDIATION"),
+        "quarantined": sum(1 for item in applied_changes if item["action"] == "quarantined"),
+        "removed": sum(1 for item in applied_changes if item["action"] == "removed"),
     }
     return {
         "generated_at": utc_timestamp(),
@@ -157,11 +174,13 @@ def build_report(repo_root: Path, *, apply: bool) -> dict[str, Any]:
         "mode": "apply" if apply else "dry-run",
         "windows_codex_home": str(windows_home),
         "quarantine_root": str(quarantine_root),
+        "windows_policy_surface_report": surface_report,
         "candidates": items,
         "summary": summary,
+        "manifest_path": str(manifest_path),
         "protected_paths_untouched": [str(path) for path in protected_paths],
         "applied_changes": applied_changes,
-        "app_restart_required": bool(applied_changes or any(item["action"] == "quarantine" and item["present"] for item in items)),
+        "app_restart_required": bool(applied_changes or any(item["operation"] in {"quarantine", "remove"} and item["present"] for item in items)),
     }
 
 

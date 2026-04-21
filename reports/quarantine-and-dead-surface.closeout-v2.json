@@ -1,0 +1,10 @@
+{
+  "status": "PASS",
+  "findings": [],
+  "quarantine_executable_files": [],
+  "quarantine_importable_files": [],
+  "quarantine_cli_files": [],
+  "preview_executable_files": [],
+  "active_quarantine_reference_hits": [],
+  "cleanup_actions": []
+}

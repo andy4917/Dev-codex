@@ -19,6 +19,7 @@ from devmgmt_runtime.authority import authority_path_for, canonical_authority_pa
 from devmgmt_runtime.paths import WINDOWS_CODEX_HOME, runtime_paths
 from devmgmt_runtime.reports import load_json, save_json
 from devmgmt_runtime.status import collapse_status, status_exit_code
+from devmgmt_runtime.windows_policy import windows_policy_surface_report
 from render_codex_runtime import render_agents, render_hooks, user_override_config_paths
 
 
@@ -84,23 +85,30 @@ def required_true_features(policy: dict[str, Any], authority: dict[str, Any]) ->
     return {str(item).strip() for item in cfg.get("required_true_features", []) if str(item).strip()}
 
 
+def shell_zsh_fork_dependency_reasons(payload: dict[str, Any], policy: dict[str, Any]) -> list[str]:
+    features = payload.get("features", {}) if isinstance(payload.get("features"), dict) else {}
+    if features.get("shell_zsh_fork") is not True:
+        return []
+    rules = policy.get("feature_dependency_rules", {}).get("shell_zsh_fork", {})
+    required_when_true = {str(item).strip() for item in rules.get("required_when_true", []) if str(item).strip()}
+    zsh_path = str(payload.get("zsh_path", "")).strip()
+    reasons: list[str] = []
+    if "zsh_path" in required_when_true and not zsh_path:
+        reasons.append("active shell_zsh_fork requires zsh_path to be configured")
+        return reasons
+    if rules.get("path_must_be_absolute") and (not zsh_path or not Path(zsh_path).is_absolute()):
+        reasons.append("active shell_zsh_fork requires zsh_path to be an absolute Linux path")
+    blocked_prefixes = tuple(str(item) for item in rules.get("path_must_not_start_with", []) if str(item))
+    if zsh_path and blocked_prefixes and zsh_path.startswith(blocked_prefixes):
+        reasons.append("active shell_zsh_fork cannot use a /mnt/c-backed zsh_path")
+    if zsh_path and rules.get("path_must_exist") and not Path(zsh_path).exists():
+        reasons.append("active shell_zsh_fork requires zsh_path to exist on the Linux runtime")
+    return reasons
+
+
 def generated_header_present(path: Path) -> bool:
     text = read_text(path)
     return text.startswith("# GENERATED - DO NOT EDIT") or text.startswith("GENERATED - DO NOT EDIT")
-
-
-def generated_directory_marker_present(path: Path) -> bool:
-    if not path.exists() or not path.is_dir():
-        return False
-    marker_names = {
-        ".devmgmt-generated",
-        ".generated-by-dev-management",
-        ".devmgmt-mirror-manifest.json",
-    }
-    for marker in marker_names:
-        if (path / marker).exists():
-            return True
-    return False
 
 
 def windows_policy_paths(paths: dict[str, Path]) -> list[Path]:
@@ -135,7 +143,7 @@ def header_status(path: Path, authority: dict[str, Any], authority_path: Path, p
         checks = {
             "generated_banner": text.startswith("GENERATED - DO NOT EDIT"),
             "authority_file_line": authority_line in text,
-            "outputs_only_line": "Generated config mirrors are outputs only." in text,
+            "outputs_only_line": "Linux generated runtime files are outputs only." in text,
             "user_override_line": "Optional user override source is /home/andy4917/.codex/user-config.toml only." in text,
         }
         if not path.exists():
@@ -216,64 +224,13 @@ def config_policy_findings(path: Path, policy: dict[str, Any], classification: s
         for feature in sorted(required_true):
             if features.get(feature) is False:
                 reasons.append(f"user override attempted to disable required active feature: {feature}")
+    reasons.extend(shell_zsh_fork_dependency_reasons(payload, policy))
     return {
         "status": "BLOCKED" if reasons else "PASS",
         "blocked_reasons": reasons,
         "features": features,
         "approval_policy": str(payload.get("approval_policy", "")),
         "sandbox_mode": str(payload.get("sandbox_mode", "")),
-    }
-
-
-def windows_policy_surface_report(paths: dict[str, Path], authority: dict[str, Any] | None = None) -> dict[str, Any]:
-    findings: list[dict[str, Any]] = []
-    known_generated_cleanup_candidates: list[str] = []
-    unknown_observed: list[str] = []
-    expected_linux_hooks = render_hooks(authority or {}, windows=False) if authority else None
-    for path in windows_policy_paths(paths):
-        if not path.exists():
-            continue
-        if path.is_dir():
-            classification = "known_generated_cleanup_candidate" if generated_directory_marker_present(path) else "unknown_policy_surface"
-            reason = (
-                "known generated Windows skills surface remains present and should be removed because Dev-Management must not generate policy-bearing Windows ~/.codex content."
-                if classification == "known_generated_cleanup_candidate"
-                else "Windows skills content is present under app state without a Dev-Management generated marker; treat it as evidence-only and review manually before removal."
-            )
-            findings.append({"path": str(path), "kind": "directory", "classification": classification, "reason": reason})
-            if classification == "known_generated_cleanup_candidate":
-                known_generated_cleanup_candidates.append(str(path))
-            else:
-                unknown_observed.append(str(path))
-            continue
-        is_generated_hook = path.name == "hooks.json" and expected_linux_hooks is not None and read_text(path) == expected_linux_hooks
-        if generated_header_present(path) or is_generated_hook:
-            findings.append(
-                {
-                    "path": str(path),
-                    "kind": "file",
-                    "classification": "known_generated_cleanup_candidate",
-                    "reason": "known generated Windows policy file remains present and should be removed because Codex App can actively read Windows ~/.codex config and instructions.",
-                }
-            )
-            known_generated_cleanup_candidates.append(str(path))
-            continue
-        findings.append(
-            {
-                "path": str(path),
-                "kind": "file",
-                "classification": "unknown_policy_surface",
-                "reason": "unknown Windows policy-bearing file remains present on an app-readable active surface and requires manual review.",
-            }
-        )
-        unknown_observed.append(str(path))
-    status = "BLOCKED" if known_generated_cleanup_candidates else "WARN" if unknown_observed else "PASS"
-    return {
-        "status": status,
-        "findings": findings,
-        "known_generated_cleanup_candidates": known_generated_cleanup_candidates,
-        "unknown_observed": unknown_observed,
-        "unknown_blocking": [],
     }
 
 
@@ -311,14 +268,14 @@ def evaluate_config_provenance(repo_root: str | Path | None = None) -> dict[str,
         self_feed_reasons.append(f"optional user override source drifted away from {allowed_override}")
     generated_headers = {str(path): header_status(path, authority, repo_authority_path, policy) for path in mirrors}
     active_config_findings = {str(path): config_policy_findings(path, policy, classifications[str(path)], authority) for path in [paths["linux_config"], paths["linux_user_override"]]}
-    windows_policy_surface = windows_policy_surface_report(paths, authority)
+    windows_policy_surface = windows_policy_surface_report(paths, authority, expected_linux_hooks=render_hooks(authority, windows=False))
     blocked_reasons = list(self_feed_reasons)
     blocked_reasons.extend(reason for payload in active_config_findings.values() for reason in payload.get("blocked_reasons", []))
     blocked_reasons.extend(f"{path_text}: {reason}" for path_text, payload in generated_headers.items() if payload["status"] == "BLOCKED" for reason in payload.get("reasons", []))
     blocked_reasons.extend(
         str(item.get("reason", ""))
         for item in windows_policy_surface.get("findings", [])
-        if str(item.get("classification", "")).strip() == "known_generated_cleanup_candidate"
+        if str(item.get("disposition", "")).strip() in {"INERT_QUARANTINE", "REMOVE_NOW"}
     )
     app_state_surface = {
         "status": "PASS" if WINDOWS_CODEX_HOME.exists() else "WARN",
@@ -331,7 +288,7 @@ def evaluate_config_provenance(repo_root: str | Path | None = None) -> dict[str,
     warnings.extend(
         str(item.get("reason", ""))
         for item in windows_policy_surface.get("findings", [])
-        if str(item.get("classification", "")).strip() == "unknown_policy_surface"
+        if str(item.get("disposition", "")).strip() in {"MANUAL_REMEDIATION", "ACCEPTED_NONBLOCKING"}
     )
     status = collapse_status(["BLOCKED" if blocked_reasons else "", "WARN" if warnings else ""])
     return {

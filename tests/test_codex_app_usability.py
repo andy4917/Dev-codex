@@ -248,6 +248,98 @@ class CodexAppUsabilityTests(unittest.TestCase):
         self.assertIn("Optional user override source is /home/andy4917/.codex/user-config.toml only.", agents)
         self.assertIn("Dev-Management Control", agents)
 
+    def test_app_usability_reuses_windows_readiness_once_and_passes_report_to_audit(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp = Path(tmpdir)
+            (tmp / "reports").mkdir()
+            authority = self._authority(tmp)
+            with patch.object(self.module, "load_authority", return_value=authority), patch.object(
+                self.module,
+                "load_app_policy",
+                return_value={"settings_flow": {"settings_path": "Settings > Connections", "host_alias": "devmgmt-wsl", "remote_project": str(tmp)}},
+            ), patch.object(
+                self.module,
+                "evaluate_windows_app_ssh_readiness",
+                return_value={
+                    "status": "PASS",
+                    "probe_source": "cached_report",
+                    "cache_status": "fresh",
+                    "windows_ssh_config": str(tmp / "ssh" / "config"),
+                    "applied": False,
+                    "backups": [],
+                    "simple_user_instruction": "Open Settings > Connections.",
+                },
+            ) as ssh_readiness, patch.object(
+                self.module,
+                "evaluate_global_runtime",
+                return_value={
+                    "overall_status": "PASS",
+                    "canonical_execution_status": "PASS",
+                    "ssh_runtime_status": "PASS",
+                    "remote_codex_resolution_status": {"status": "PASS"},
+                    "remote_native_codex_status": {"status": "PASS", "selected_path": "/usr/local/bin/codex"},
+                },
+            ) as global_runtime, patch.object(
+                self.module,
+                "evaluate_config_provenance",
+                return_value={"gate_status": "PASS", "windows_policy_surface_status": "PASS", "app_state_surface": {"status": "PASS"}},
+            ), patch.object(
+                self.module,
+                "evaluate_active_config_smoke",
+                return_value={"gate_status": "PASS", "windows_app_evidence_status": "PASS"},
+            ), patch.object(
+                self.module,
+                "evaluate_toolchain_surface",
+                return_value={"status": "PASS"},
+            ), patch.object(
+                self.module,
+                "evaluate_git_surfaces",
+                return_value={"status": "PASS"},
+            ), patch.object(
+                self.module,
+                "evaluate_hook_readiness",
+                return_value={"status": "PASS", "hook_only_enforcement_claim": False},
+            ), patch.object(
+                self.module,
+                "install_linux_codex_cli",
+                return_value={"status": "PASS", "applied": False, "path": "/usr/local/bin/codex", "version": "codex-cli"},
+            ), patch.object(
+                self.module,
+                "repair_linux_launcher_shim",
+                return_value={"status": "PASS", "preview_path": str(tmp / "preview.sh"), "live_write_allowed": True, "current_target": "/usr/local/bin/codex", "expected_target": "/usr/local/bin/codex", "reasons": [], "changed": False},
+            ), patch.object(
+                self.module,
+                "repair_serena",
+                return_value={"actions_planned": [], "actions_applied": []},
+            ), patch.object(
+                self.module,
+                "evaluate_startup_workflow",
+                return_value={"status": "PASS"},
+            ), patch.object(
+                self.module,
+                "evaluate_artifact_hygiene",
+                return_value={"status": "PASS"},
+            ), patch.object(
+                self.module,
+                "evaluate_score_layer",
+                return_value={"status": "PASS"},
+            ), patch.object(
+                self.module,
+                "run_audit_cli",
+                side_effect=[{"status": "PASS"}, {"status": "PASS"}],
+            ) as run_audit:
+                report = self.module.evaluate_app_usability(tmp)
+
+        self.assertEqual(report["status"], "APP_READY")
+        self.assertEqual(report["windows_app_ssh_probe_source"], "cached_report")
+        self.assertEqual(report["windows_app_ssh_cache_status"], "fresh")
+        ssh_readiness.assert_called_once()
+        global_runtime.assert_called_once()
+        audit_paths = [call.kwargs["windows_ssh_readiness_report"] for call in run_audit.call_args_list]
+        self.assertEqual(len(audit_paths), 2)
+        self.assertEqual(audit_paths[0], audit_paths[1])
+        self.assertTrue(str(audit_paths[0]).endswith("windows-app-ssh-remote-readiness.final.json"))
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -16,7 +16,7 @@
     "settings_path": "Settings > Connections",
     "host_alias": "devmgmt-wsl",
     "remote_project": "/home/andy4917/Dev-Management",
-    "readiness_prompt": "Run Dev-Management app usability readiness check and report PASS/WARN/BLOCKED. Do not modify code unless runtime, config provenance, startup, Context7, and score gates allow it."
+    "readiness_prompt": "Run Dev-Management readiness after Windows .codex root-cause cleanup and report APP_READY / APP_READY_WITH_WARNINGS / APP_NOT_READY. Do not modify code unless runtime, config provenance, Serena/Context7, score, and audit gates allow it."
   },
   "control_thread": {
     "required": true,
@@ -72,13 +72,13 @@
       "C:/Users/anise/.ssh/config"
     ],
     "app_reads_policy_files_if_present": true,
-    "policy_bearing_forbidden_paths": [
-      "/mnt/c/Users/anise/.codex/config.toml",
-      "/mnt/c/Users/anise/.codex/AGENTS.md",
-      "/mnt/c/Users/anise/.codex/hooks.json",
-      "/mnt/c/Users/anise/.codex/skills/dev-workflow"
+    "policy_bearing_relative_paths": [
+      "config.toml",
+      "AGENTS.md",
+      "hooks.json",
+      "skills/dev-workflow"
     ],
     "app_state_role": "evidence_only",
-    "policy_surface_reason": "Codex App can actively read Windows ~/.codex config, AGENTS, hooks, and skills when present, so Dev-Management must not generate policy-bearing files there. Non-generated Windows app or user state remains evidence-only unless manually reviewed."
+    "policy_surface_reason": "Codex App can actively read Windows ~/.codex config, AGENTS, hooks, and skills when present, so Dev-Management must not generate policy-bearing files there. Linux generated outputs remain the only repo authority; Windows .codex stays app-readable evidence only unless manual review proves specific user-owned state."
   }
 }

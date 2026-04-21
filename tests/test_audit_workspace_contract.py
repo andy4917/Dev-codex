@@ -106,17 +106,20 @@ class AuditWorkspaceContractTests(unittest.TestCase):
                 "windows_policy_surface_findings": [
                     {
                         "path": str(windows_agents),
-                        "classification": "known_generated_cleanup_candidate",
+                        "classification": "generated_policy_surface",
+                        "disposition": "INERT_QUARANTINE",
                         "reason": "known generated Windows policy file remains present and should be removed because Codex App can actively read Windows ~/.codex config and instructions.",
                     },
                     {
                         "path": str(windows_config),
-                        "classification": "known_generated_cleanup_candidate",
+                        "classification": "generated_policy_surface",
+                        "disposition": "INERT_QUARANTINE",
                         "reason": "known generated Windows policy file remains present and should be removed because Codex App can actively read Windows ~/.codex config and instructions.",
                     },
                     {
                         "path": str(windows_hooks),
-                        "classification": "unknown_policy_surface",
+                        "classification": "external_app_or_user_state",
+                        "disposition": "MANUAL_REMEDIATION",
                         "reason": "unknown Windows policy-bearing file remains present on an app-readable active surface and requires manual review.",
                     },
                 ],

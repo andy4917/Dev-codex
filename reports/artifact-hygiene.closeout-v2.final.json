@@ -1,0 +1,23 @@
+{
+  "status": "PASS",
+  "stale_draft_reports": [],
+  "remediation_reports": [
+    "/home/andy4917/Dev-Management/reports/manual-system-remediation-20260421-190204.md"
+  ],
+  "stale_preview_files": [],
+  "preview_executable_files": [],
+  "transient_files": [],
+  "quarantine_executable_files": [],
+  "quarantine_importable_files": [],
+  "quarantine_cli_files": [],
+  "quarantine_manifest_files": [
+    "/home/andy4917/Dev-Management/quarantine/2026-04-16/MANIFEST.json",
+    "/home/andy4917/Dev-Management/quarantine/artifact-hygiene/20260421-102140/MANIFEST.json",
+    "/home/andy4917/Dev-Management/quarantine/windows-codex-policy-mirrors/20260421-081829/MANIFEST.json",
+    "/home/andy4917/Dev-Management/quarantine/windows-codex-policy-mirrors/20260421-111515/MANIFEST.json"
+  ],
+  "active_quarantine_reference_hits": [],
+  "findings": [],
+  "cleanup_actions": [],
+  "cleanup_allowed_only_with_explicit_apply": true
+}

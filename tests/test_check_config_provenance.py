@@ -60,6 +60,14 @@ class CheckConfigProvenanceTests(unittest.TestCase):
                     "sandbox_mode": ["danger-full-access"],
                 },
                 "linux_required_true_features": [],
+                "feature_dependency_rules": {
+                    "shell_zsh_fork": {
+                        "required_when_true": ["zsh_path"],
+                        "path_must_be_absolute": True,
+                        "path_must_not_start_with": ["/mnt/c"],
+                        "path_must_exist": True,
+                    }
+                },
             },
         )
 
@@ -177,7 +185,7 @@ class CheckConfigProvenanceTests(unittest.TestCase):
             self._write_json(authority_path, authority)
             self._write_policy(tmp / "repo")
             with patch.object(self.module, "AUTHORITY_PATH", authority_path), patch.object(self.module, "WINDOWS_CODEX_HOME", tmp / "windows-home" / ".codex"):
-                self._write_generated(tmp / "linux-config.toml", authority, 'approval_policy = "on-request"\nsandbox_mode = "workspace-write"\n[features]\nshell_zsh_fork = true')
+                self._write_generated(tmp / "linux-config.toml", authority, 'approval_policy = "on-request"\nsandbox_mode = "workspace-write"\n[features]\nchronicle = true')
                 windows_config = tmp / "windows-home" / ".codex" / "config.toml"
                 windows_config.parent.mkdir(parents=True, exist_ok=True)
                 windows_config.write_text('approval_policy = "on-request"\n', encoding="utf-8")
@@ -186,6 +194,19 @@ class CheckConfigProvenanceTests(unittest.TestCase):
         self.assertEqual(report["status"], "WARN")
         self.assertEqual(report["windows_policy_surface_status"], "WARN")
         self.assertEqual(report["unknown_windows_policy_files_observed"], [str(windows_config)])
+
+    def test_shell_zsh_fork_without_zsh_path_is_blocked(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp = Path(tmpdir)
+            authority = self._authority(tmp)
+            authority_path = tmp / "repo" / "contracts" / "workspace_authority.json"
+            self._write_json(authority_path, authority)
+            self._write_policy(tmp / "repo")
+            with patch.object(self.module, "AUTHORITY_PATH", authority_path), patch.object(self.module, "WINDOWS_CODEX_HOME", tmp / "missing-app-state"):
+                self._write_generated(tmp / "linux-config.toml", authority, 'approval_policy = "on-request"\nsandbox_mode = "workspace-write"\n[features]\nshell_zsh_fork = true')
+                report = self.module.evaluate_config_provenance(tmp / "repo")
+        self.assertEqual(report["status"], "BLOCKED")
+        self.assertIn("zsh_path", " ".join(report["blocked_reasons"]))
 
     def test_worktree_cannot_become_source_of_truth(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

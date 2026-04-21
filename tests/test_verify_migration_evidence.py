@@ -57,7 +57,7 @@ class VerifyMigrationEvidenceTests(unittest.TestCase):
             project_root_markers = [".git"]
 
             [features]
-            shell_zsh_fork = true
+            chronicle = true
 
             [projects."{repo_root}"]
             trust_level = "trusted"
@@ -206,8 +206,8 @@ class VerifyMigrationEvidenceTests(unittest.TestCase):
             report = {{
                 "authority_path": str(repo_root / "contracts" / "workspace_authority.json"),
                 "trusted_projects": [str(repo_root), str(repo_root.parent / "Dev-Workflow"), str(repo_root.parent / "Dev-Product")],
-                "agents_files": [str(linux_agents), str(project_agents)] + ([str(windows_agents)] if windows_agents.exists() else []),
-                "config_files": [str(linux_config), str(project_config)] + ([str(windows_config)] if windows_config.exists() else []),
+                "agents_files": [str(linux_agents), str(project_agents)],
+                "config_files": [str(linux_config), str(project_config)],
                 "contracts_dirs": [
                     str(repo_root / "contracts"),
                     str(Path({str(project_root / "contracts")!r})),
@@ -373,10 +373,7 @@ class VerifyMigrationEvidenceTests(unittest.TestCase):
             surviving_configs = {
                 item["path"]: item["justification"] for item in payload["migration_evidence"]["surviving_config_files"]
             }
-            self.assertIn(
-                "should be removed, not a canonical authority target",
-                surviving_configs[str(windows_codex / "config.toml")],
-            )
+            self.assertNotIn(str(windows_codex / "config.toml"), surviving_configs)
 
 
 if __name__ == "__main__":
