@@ -19,6 +19,12 @@
       "kind": "standalone_contract",
       "final_authority": false
     },
+    "path_authority_policy": {
+      "path": "/home/andy4917/Dev-Management/contracts/path_authority_policy.json",
+      "kind": "standalone_contract",
+      "final_authority": true,
+      "compatibility_mode": "dual-read"
+    },
     "execution_surfaces": {
       "path": "/home/andy4917/Dev-Management/contracts/execution_surfaces.json",
       "kind": "standalone_contract",
@@ -241,7 +247,7 @@
   "forbidden_primary_runtime_paths": [
     "/mnt/c/Users/anise/.codex/bin/wsl",
     "/mnt/c/Users/anise/.codex/tmp/arg0",
-    ".codex/bin/wsl/codex"
+    "/mnt/c/Users/anise/.codex/bin/wsl/codex"
   ],
   "canonical_execution_surface": {
     "id": "ssh-devmgmt-wsl",
@@ -687,14 +693,10 @@
         "remote_connections",
         "request_permissions_tool",
         "runtime_metrics",
-        "shell_zsh_fork",
         "skill_env_var_dependency_prompt",
-      "chronicle",
-     "tool_search",
-     "undo"
-   ],
-      "required_true_features": [
-        "shell_zsh_fork"
+        "chronicle",
+        "tool_search",
+        "undo"
       ],
       "enabled_plugins": [
         "github@openai-curated"

@@ -32,6 +32,9 @@ class ScoreLayerTests(unittest.TestCase):
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
+    def _write_path_preflight(self, reports: Path, *, status: str = "PASS") -> None:
+        self._write_json(reports / "path-preflight.final.json", {"status": status, "gate_status": status})
+
     def test_generated_mirror_self_feed_blocks(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             tmp = Path(tmpdir)
@@ -44,6 +47,7 @@ class ScoreLayerTests(unittest.TestCase):
             self._write_json(reports / "hook-readiness.unified-phase.final.json", {"hook_only_enforcement_claim": False})
             self._write_json(reports / "startup-workflow.unified-phase.final.json", {"status": "PASS"})
             self._write_json(reports / "audit.unified-phase.final.json", {"status": "PASS"})
+            self._write_path_preflight(reports)
             self._write_json(reports / "git-surface.unified-phase.final.json", {"status": "PASS"})
             report = self.module.evaluate_score_layer(tmp)
         self.assertEqual(report["status"], "BLOCKED")
@@ -60,6 +64,7 @@ class ScoreLayerTests(unittest.TestCase):
             self._write_json(reports / "hook-readiness.unified-phase.final.json", {"hook_only_enforcement_claim": False})
             self._write_json(reports / "startup-workflow.unified-phase.final.json", {"status": "PASS"})
             self._write_json(reports / "audit.unified-phase.final.json", {"status": "PASS"})
+            self._write_path_preflight(reports)
             self._write_json(reports / "git-surface.unified-phase.final.json", {"status": "PASS"})
             report = self.module.evaluate_score_layer(tmp)
         self.assertEqual(report["status"], "PASS")
@@ -76,6 +81,7 @@ class ScoreLayerTests(unittest.TestCase):
             self._write_json(reports / "hook-readiness.unified-phase.final.json", {"status": "PASS", "hook_only_enforcement_claim": False})
             self._write_json(reports / "startup-workflow.unified-phase.final.json", {"status": "PASS"})
             self._write_json(reports / "audit.unified-phase.final.json", {"status": "FAIL"})
+            self._write_path_preflight(reports)
             self._write_json(reports / "git-surface.unified-phase.final.json", {"status": "PASS"})
             report = self.module.evaluate_score_layer(tmp)
         self.assertEqual(report["status"], "BLOCKED")
@@ -100,6 +106,7 @@ class ScoreLayerTests(unittest.TestCase):
             self._write_json(reports / "hook-readiness.unified-phase.final.json", {"status": "PASS", "hook_only_enforcement_claim": False})
             self._write_json(reports / "artifact-hygiene.unified-phase.final.json", {"status": "PASS", "transient_files": []})
             self._write_json(reports / "audit.post-export.json", {"status": "PASS"})
+            self._write_path_preflight(reports)
             self._write_json(reports / "git-surface.unified-phase.final.json", {"status": "PASS"})
             report = self.module.evaluate_score_layer(tmp)
         self.assertEqual(report["status"], "PASS")
@@ -117,7 +124,9 @@ class ScoreLayerTests(unittest.TestCase):
             self._write_json(reports / "hook-readiness.final.json", {"status": "PASS", "hook_only_enforcement_claim": False})
             self._write_json(reports / "artifact-hygiene.final.json", {"status": "PASS"})
             self._write_json(reports / "audit.final.json", {"status": "WARN"})
+            self._write_path_preflight(reports, status="WARN")
             self._write_json(reports / "git-surface.final.json", {"status": "WARN"})
+            self._write_json(reports / "windows-app-ssh-remote-readiness.final.json", {"status": "WARN", "app_remote_project_status": "OPENED", "ssh_transport_status": "PASS"})
             report = self.module.evaluate_score_layer(tmp, purpose="app-usability")
         self.assertEqual(report["status"], "WARN")
         self.assertEqual(report["purpose"], "app-usability")
@@ -134,9 +143,30 @@ class ScoreLayerTests(unittest.TestCase):
             self._write_json(reports / "hook-readiness.final.json", {"status": "PASS", "hook_only_enforcement_claim": False})
             self._write_json(reports / "artifact-hygiene.final.json", {"status": "PASS"})
             self._write_json(reports / "audit.final.json", {"status": "PASS"})
+            self._write_path_preflight(reports)
             self._write_json(reports / "git-surface.final.json", {"status": "BLOCKED"})
+            self._write_json(reports / "windows-app-ssh-remote-readiness.final.json", {"status": "PASS", "app_remote_project_status": "OPENED", "ssh_transport_status": "PASS"})
             report = self.module.evaluate_score_layer(tmp, purpose="app-usability")
         self.assertEqual(report["status"], "BLOCKED")
+
+    def test_app_usability_blocks_when_project_open_proof_is_missing(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp = Path(tmpdir)
+            reports = tmp / "reports"
+            self._write_json(reports / "config-provenance.final.json", {"status": "PASS", "gate_status": "PASS"})
+            self._write_json(reports / "active-config-smoke.final.json", {"status": "PASS", "gate_status": "PASS"})
+            self._write_json(reports / "global-runtime.final.json", {"overall_status": "PASS", "canonical_execution_status": "PASS", "remote_codex_resolution_status": {"status": "PASS"}, "client_surface_status": "PASS"})
+            self._write_json(reports / "startup-workflow.final.json", {"status": "PASS"})
+            self._write_json(reports / "toolchain-surface.final.json", {"status": "PASS"})
+            self._write_json(reports / "hook-readiness.final.json", {"status": "PASS", "hook_only_enforcement_claim": False})
+            self._write_json(reports / "artifact-hygiene.final.json", {"status": "PASS"})
+            self._write_json(reports / "audit.final.json", {"status": "PASS"})
+            self._write_path_preflight(reports)
+            self._write_json(reports / "git-surface.final.json", {"status": "PASS"})
+            self._write_json(reports / "windows-app-ssh-remote-readiness.final.json", {"status": "BLOCKED", "app_remote_project_status": "NOT_OPENED", "ssh_transport_status": "PASS", "blocking_domain": "app_discovery"})
+            report = self.module.evaluate_score_layer(tmp, purpose="app-usability")
+        self.assertEqual(report["status"], "BLOCKED")
+        self.assertIn("app remote project has not been proven opened in Codex App", report["disqualifiers"])
 
     def test_code_modification_prefers_root_cause_reports_when_present(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -150,6 +180,7 @@ class ScoreLayerTests(unittest.TestCase):
             self._write_json(reports / "artifact-hygiene.root-cause-removal.final.json", {"status": "PASS"})
             self._write_json(reports / "startup-workflow.root-cause-removal.final.json", {"status": "BLOCKED"})
             self._write_json(reports / "audit.root-cause-removal.final.json", {"status": "FAIL"})
+            self._write_path_preflight(reports)
             self._write_json(reports / "git-surface.final.json", {"status": "PASS"})
             self._write_json(reports / "startup-workflow.final.json", {"status": "PASS"})
             self._write_json(reports / "audit.final.json", {"status": "PASS"})
@@ -157,6 +188,24 @@ class ScoreLayerTests(unittest.TestCase):
         self.assertEqual(report["status"], "BLOCKED")
         self.assertTrue(report["report_sources"]["startup_workflow"].endswith("startup-workflow.root-cause-removal.final.json"))
         self.assertTrue(report["report_sources"]["audit"].endswith("audit.root-cause-removal.final.json"))
+
+    def test_path_preflight_block_blocks_score_layer(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp = Path(tmpdir)
+            reports = tmp / "reports"
+            self._write_json(reports / "config-provenance.unified-phase.final.json", {"status": "PASS", "gate_status": "PASS"})
+            self._write_json(reports / "active-config-smoke.unified-phase.final.json", {"status": "PASS", "gate_status": "PASS"})
+            self._write_json(reports / "global-runtime.unified-phase.final.json", {"overall_status": "PASS", "canonical_execution_status": "PASS", "remote_codex_resolution_status": {"status": "PASS"}, "client_surface_status": "PASS"})
+            self._write_json(reports / "toolchain-surface.unified-phase.final.json", {"status": "PASS"})
+            self._write_json(reports / "artifact-hygiene.unified-phase.final.json", {"status": "PASS", "transient_files": []})
+            self._write_json(reports / "hook-readiness.unified-phase.final.json", {"status": "PASS", "hook_only_enforcement_claim": False})
+            self._write_json(reports / "startup-workflow.unified-phase.final.json", {"status": "PASS"})
+            self._write_json(reports / "audit.unified-phase.final.json", {"status": "PASS"})
+            self._write_path_preflight(reports, status="BLOCKED")
+            self._write_json(reports / "git-surface.unified-phase.final.json", {"status": "PASS"})
+            report = self.module.evaluate_score_layer(tmp)
+        self.assertEqual(report["status"], "BLOCKED")
+        self.assertIn("path authority preflight is blocked", report["disqualifiers"])
 
 
 if __name__ == "__main__":

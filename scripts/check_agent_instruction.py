@@ -4,14 +4,17 @@ from __future__ import annotations
 import argparse
 import json
 import subprocess
+import sys
 from pathlib import Path
 from typing import Any
 
 from check_global_runtime import evaluate_global_runtime
 from check_startup_workflow import evaluate_startup_workflow
-
-
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from devmgmt_runtime.path_authority import forbidden_primary_paths, load_path_policy, windows_codex_home
 POLICY_PATH = ROOT / "contracts" / "instruction_guard_policy.json"
 
 
@@ -148,6 +151,9 @@ def evaluate_instruction(
     root = repo_root or ROOT
     activation_bootstrap = bool(activation_bootstrap or bootstrap_implementation_exception)
     policy = load_json(POLICY_PATH, default={})
+    path_policy = load_path_policy()
+    forbidden_runtime_markers = [item.lower() for item in forbidden_primary_paths(path_policy)]
+    windows_codex_marker = str(windows_codex_home(path_policy)).replace("\\", "/").lower()
     runtime = evaluate_global_runtime(root, mode="auto")
     startup = evaluate_startup_workflow(root, mode="auto")
     changed_paths = git_changed_paths(root)
@@ -180,12 +186,22 @@ def evaluate_instruction(
         reminders.append(policy["required_reminders"]["hooks_trigger_only"])
     if "plugin" in normalized and "mcp" in normalized and "audit" not in normalized and code_change:
         warnings.append("Plugin-provided MCP or config drift must be audited before code modification.")
-    if "/mnt/c/users/anise/.codex/bin/wsl/codex" in normalized or ("windows launcher" in normalized and "primary" in normalized):
+    if any(marker in normalized for marker in forbidden_runtime_markers) or ("windows launcher" in normalized and "primary" in normalized):
         reasons.append("Windows-side Codex launcher cannot become the primary runtime.")
         reminders.append(policy["required_reminders"]["runtime_authority_conflict"])
-    if "/mnt/c/users/anise/.codex/bin/wsl" in normalized or (".codex/tmp/arg0" in normalized and "path" in normalized):
+    if any(marker in normalized for marker in forbidden_runtime_markers[:2]) or (".codex/tmp/arg0" in normalized and "path" in normalized):
         reasons.append("Forbidden Windows-mounted Codex paths cannot be reintroduced into PATH or wrapper targets.")
         reminders.append(policy["required_reminders"]["runtime_authority_conflict"])
+    if ".env" in normalized and any(token in normalized for token in ["source of truth", "authority", "policy authority"]):
+        reasons.append(".env and .envrc are exported runtime views only and cannot become path authority.")
+    if "direnv" in normalized and any(token in normalized for token in ["source of truth", "authority", "mandatory"]):
+        reasons.append("direnv is a bootstrap convenience only and cannot become mandatory path authority.")
+    if ("windows .codex" in normalized or windows_codex_marker in normalized) and any(
+        token in normalized for token in ["source of truth", "authority", "policy authority", "path authority"]
+    ):
+        reasons.append("Windows .codex is app runtime state only and cannot become policy or path authority.")
+    if "fallback path" in normalized or ("fallback" in normalized and "path" in normalized and "authority" not in normalized):
+        reasons.append("Fallback paths must not be added without path authority coverage and tests.")
     if any(token in normalized for token in ["manual edit", "수동 편집", "~/.local/bin/codex", "generated config", "generated shim"]):
         reasons.append("Generated config, wrapper, and mirror files must not be manually edited.")
     if any(token in normalized for token in ["git reset", "git clean", "rm -rf", "sudo ", "apt install", "npm install", "pip install", "wsl --shutdown", "systemctl restart"]):

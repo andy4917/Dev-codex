@@ -15,6 +15,7 @@ if str(ROOT) not in sys.path:
 from check_artifact_hygiene import evaluate_artifact_hygiene
 from check_windows_app_ssh_readiness import DEFAULT_CACHE_PATH as WINDOWS_SSH_CACHE_PATH
 from devmgmt_runtime.authority import load_authority
+from devmgmt_runtime.path_authority import get_devmgmt_root
 from devmgmt_runtime.paths import runtime_paths
 from devmgmt_runtime.reports import load_json, save_json, write_markdown
 from devmgmt_runtime.status import status_exit_code
@@ -578,14 +579,17 @@ def build_warn_disposition(
 
 def write_restart_note(repo_root: Path) -> None:
     reports_root = repo_root / "reports"
+    management_root = get_devmgmt_root()
     body = [
         "- Windows generated config/AGENTS/hooks were removed or quarantined earlier.",
         "- Windows `skills/dev-workflow` disposition is now resolved.",
         "- Windows SSH readiness is kept as bootstrap only.",
         "- Dev-Management no longer generates Windows `.codex` policy surfaces.",
         "- Codex App must be restarted.",
-        "- Open `Settings > Connections > devmgmt-wsl`.",
-        "- Open `/home/andy4917/Dev-Management`.",
+        "- Open `Settings > Connections`.",
+        "- If `devmgmt-wsl` is not listed, use `Connections > Add host > devmgmt-wsl`.",
+        "- Select `devmgmt-wsl`.",
+        f"- Open `{management_root}`.",
         "- Do not recreate Windows `.codex/config.toml`, `AGENTS.md`, `hooks.json`, or `skills`.",
         "- If warnings remain after restart, collect app state evidence; do not reintroduce mirrors.",
         "",

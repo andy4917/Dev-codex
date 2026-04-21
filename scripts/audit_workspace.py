@@ -22,16 +22,18 @@ from check_artifact_hygiene import evaluate_artifact_hygiene
 from check_active_config_smoke import evaluate_active_config_smoke
 from check_config_provenance import evaluate_config_provenance
 from check_hook_readiness import evaluate_hook_readiness
+from preflight_path_context import evaluate_path_context
 from check_toolchain_surface import evaluate_toolchain_surface
 from check_windows_app_ssh_readiness import evaluate_windows_app_ssh_readiness
+from devmgmt_runtime.authority import load_authority as load_shared_authority
 from devmgmt_runtime.paths import runtime_paths as managed_runtime_paths
 
 
-AUTHORITY_PATH = Path("/home/andy4917/Dev-Management/contracts/workspace_authority.json")
-REPORTS_ROOT = Path("/home/andy4917/Dev-Management/reports")
+ROOT = Path(__file__).resolve().parents[1]
+AUTHORITY_PATH = ROOT / "contracts" / "workspace_authority.json"
+REPORTS_ROOT = ROOT / "reports"
 REPORT_PATH = REPORTS_ROOT / "audit.final.json"
-WINDOWS_CODEX = Path("/mnt/c/Users/anise/.codex")
-HOME = Path("/home/andy4917")
+HOME = Path.home()
 
 BASE_SKIP_DIRS = {
     ".git",
@@ -69,7 +71,7 @@ PROTECTED_SCORE_POLICY_FILES = (
 
 
 def load_authority() -> dict:
-    return json.loads(AUTHORITY_PATH.read_text(encoding="utf-8"))
+    return load_shared_authority(ROOT, authority_path=AUTHORITY_PATH)
 
 
 def load_json(path: Path, default=None):
@@ -891,6 +893,7 @@ def main() -> int:
     toolchain_surface = evaluate_toolchain_surface(Path(roots["management"]))
     hook_readiness = evaluate_hook_readiness(Path(roots["management"]))
     artifact_hygiene = evaluate_artifact_hygiene(Path(roots["management"]))
+    path_preflight = evaluate_path_context(Path(roots["management"]))
     windows_app_ssh_readiness = evaluate_windows_app_ssh_readiness(
         Path(roots["management"]),
         refresh_windows_ssh=bool(args.refresh_windows_ssh),
@@ -910,32 +913,9 @@ def main() -> int:
         ),
     )
     quarantine_root_ok = quarantine_root_policy_ok(quarantine_root)
-
-    files_to_scan: list[Path] = []
-    for base in scan_roots:
-        if not base.exists():
-            continue
-        files_to_scan.extend(
-            find_paths(
-                base,
-                lambda p: p.is_file()
-                and not should_skip(p, authority, quarantine_root)
-                and p.suffix.lower() in {".md", ".json", ".toml", ".py", ".yml", ".yaml", ".mjs", ".sh", ".txt", ".cmd"},
-                authority,
-                quarantine_root,
-            )
-        )
-    old_path_refs = text_paths(files_to_scan, authority["hardcoding_definition"]["path_rules"]["legacy_repo_paths_to_remove"])
-    historical_allowlist = set(authority["hardcoding_definition"]["path_rules"].get("historical_evidence_allowlist", []))
-    old_path_refs = [
-        path
-        for path in old_path_refs
-        if not str(path).startswith(str(quarantine_root))
-        and path != str(AUTHORITY_PATH)
-        and Path(path).name not in historical_allowlist
-    ]
+    old_path_refs = list(path_preflight.get("legacy_repo_refs", []))
     forbidden_feature_findings = detect_forbidden_feature_flags(config_files, authority)
-    runtime_restore_seed_violations = detect_runtime_restore_seed_violations(WINDOWS_CODEX / ".codex-global-state.json", authority)
+    runtime_restore_seed_violations = detect_runtime_restore_seed_violations(runtime["observed_windows_codex_home"] / ".codex-global-state.json", authority)
     blocking_runtime_restore_seed_violations, warning_runtime_restore_seed_violations = partition_runtime_restore_seed_violations(
         runtime_restore_seed_violations
     )
@@ -971,7 +951,19 @@ def main() -> int:
     repair_readiness = global_runtime_surface.get("wrapper_apply_readiness", {})
     linux_native_codex_cli = global_runtime_surface.get("ssh_canonical_runtime", {}).get("remote_native_codex_status", {})
     legacy_feature_scan = {"status": "BLOCKED" if forbidden_feature_findings else "PASS", "findings": forbidden_feature_findings}
-    hardcoding_fallback_scan = {"status": "BLOCKED" if old_path_refs else "PASS", "findings": sorted(set(old_path_refs))}
+    hardcoding_fallback_scan = {
+        "status": str(path_preflight.get("hardcoded_path_scan", {}).get("status", "PASS")),
+        "findings": sorted(
+            {
+                *old_path_refs,
+                *[
+                    str(item.get("relative_path", item.get("path", "")))
+                    for item in path_preflight.get("hardcoded_path_scan", {}).get("findings", [])
+                    if str(item.get("relative_path", item.get("path", ""))).strip()
+                ],
+            }
+        ),
+    }
 
     blocking_conditions = [
         bool(any(violations.values())),
@@ -985,6 +977,7 @@ def main() -> int:
         toolchain_surface["status"] == "BLOCKED",
         hook_readiness["status"] == "BLOCKED",
         artifact_hygiene["status"] == "BLOCKED",
+        path_preflight["status"] == "BLOCKED",
         windows_app_ssh_readiness["status"] == "BLOCKED",
         startup_workflow_check["status"] == "BLOCKED",
         instruction_guard_policy["status"] != "PASS",
@@ -992,6 +985,8 @@ def main() -> int:
         bool(old_path_refs),
         bool(tamper_events),
     ]
+    if args.purpose == "app-usability":
+        blocking_conditions.append(str(windows_app_ssh_readiness.get("app_remote_project_status", "UNOBSERVED")) != "OPENED")
     warning_conditions = [
         global_runtime_surface.get("status") == "WARN",
         windows_policy_surface_check["status"] == "WARN",
@@ -1000,6 +995,7 @@ def main() -> int:
         windows_app_ssh_readiness["status"] == "WARN",
         hook_readiness["status"] == "WARN",
         artifact_hygiene["status"] == "WARN",
+        path_preflight["status"] == "WARN",
         bool(warning_runtime_restore_seed_violations),
         str(score_layer.get("status", "PASS")) in {"WARN", "BLOCKED"} and not bool(score_layer.get("missing", False)),
         str((release_report or {}).get("status", "PASS")) == "WARN",
@@ -1036,10 +1032,14 @@ def main() -> int:
         "hook_readiness": hook_readiness,
         "score_layer": score_layer,
         "artifact_hygiene": artifact_hygiene,
+        "path_preflight": path_preflight,
         "legacy_feature_scan": legacy_feature_scan,
         "hardcoding_fallback_scan": hardcoding_fallback_scan,
         "canonical_execution_surface": canonical_execution_surface,
         "windows_app_ssh_readiness": windows_app_ssh_readiness,
+        "app_remote_project_status": windows_app_ssh_readiness.get("app_remote_project_status", "UNOBSERVED"),
+        "app_remote_project_path": windows_app_ssh_readiness.get("app_remote_project_path", ""),
+        "windows_app_blocking_domain": windows_app_ssh_readiness.get("blocking_domain", ""),
         "linux_native_codex_cli": linux_native_codex_cli,
         "client_surface": client_surface,
         "local_shell_surface": local_shell_surface,

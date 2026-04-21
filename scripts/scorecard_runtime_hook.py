@@ -5,12 +5,19 @@ import argparse
 import hashlib
 import json
 import os
+import sys
 import time
 from pathlib import Path
 from typing import Any
 
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
-DEFAULT_AUTHORITY_PATH = Path("/home/andy4917/Dev-Management/contracts/workspace_authority.json")
+from devmgmt_runtime.path_authority import get_devmgmt_root
+
+
+DEFAULT_AUTHORITY_PATH = ROOT / "contracts" / "workspace_authority.json"
 DEFAULT_USER_PROMPT_THROTTLE_SECONDS = 300
 
 
@@ -111,7 +118,7 @@ def should_emit(state_dir: Path, workspace_root: Path, event: str, throttle: int
 
 def build_notice(authority: dict[str, Any], workspace_root: Path) -> str:
     scorecard = authority.get("generation_targets", {}).get("scorecard", {})
-    closeout = Path(scorecard.get("closeout", "/home/andy4917/Dev-Management/scripts/iaw_closeout.py"))
+    closeout = Path(scorecard.get("closeout", get_devmgmt_root() / "scripts" / "iaw_closeout.py"))
     workspace = str(workspace_root)
     return (
         f"[scorecard-hook] Binding scorecard layer for {workspace}. "

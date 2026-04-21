@@ -53,8 +53,16 @@ def evaluate_score_layer(repo_root: str | Path | None = None, *, purpose: str = 
     toolchain, toolchain_source, toolchain_missing = load_first_report(reports, report_candidates(purpose, "toolchain-surface.final.json", "toolchain-surface.unified-phase.final.json", "toolchain-surface.unified-phase.json"))
     hooks, hooks_source, hooks_missing = load_first_report(reports, report_candidates(purpose, "hook-readiness.final.json", "hook-readiness.unified-phase.final.json", "hook-readiness.unified-phase.json"))
     audit, audit_source, audit_missing = load_first_report(reports, report_candidates(purpose, "audit.final.json", "audit.unified-phase.final.json", "audit.post-export.json"))
+    path_preflight, path_preflight_source, path_preflight_missing = load_first_report(
+        reports,
+        report_candidates(purpose, "path-preflight.final.json"),
+    )
     hygiene, hygiene_source, hygiene_missing = load_first_report(reports, report_candidates(purpose, "artifact-hygiene.final.json", "artifact-hygiene.unified-phase.final.json", "artifact-hygiene.unified-phase.json"))
     git_surface, git_surface_source, git_surface_missing = load_first_report(reports, report_candidates(purpose, "git-surface.final.json", "git-surface.unified-phase.final.json", "git-surface.json"))
+    windows_readiness, windows_readiness_source, windows_readiness_missing = load_first_report(
+        reports,
+        report_candidates(purpose, "windows-app-ssh-remote-readiness.final.json"),
+    )
     score_policy = load_score_policy()
 
     disqualifiers: list[str] = []
@@ -67,9 +75,12 @@ def evaluate_score_layer(repo_root: str | Path | None = None, *, purpose: str = 
         "toolchain_surface": toolchain_missing,
         "hook_readiness": hooks_missing,
         "audit": audit_missing,
+        "path_preflight": path_preflight_missing,
         "artifact_hygiene": hygiene_missing,
         "git_surface": git_surface_missing,
     }
+    if purpose == "app-usability":
+        missing_reports["windows_app_ssh_readiness"] = windows_readiness_missing
     for label, missing in missing_reports.items():
         if missing:
             disqualifiers.append(f"missing required evidence report: {label}")
@@ -81,6 +92,7 @@ def evaluate_score_layer(repo_root: str | Path | None = None, *, purpose: str = 
     hook_status = str(hooks.get("status", "PASS"))
     hygiene_status = str(hygiene.get("status", "PASS"))
     audit_status = str(audit.get("gate_status", audit.get("status", "PASS")))
+    path_preflight_status = str(path_preflight.get("gate_status", path_preflight.get("status", "PASS")))
     startup_status = str(startup.get("status", "PASS"))
 
     if config_gate_status == "BLOCKED":
@@ -110,8 +122,16 @@ def evaluate_score_layer(repo_root: str | Path | None = None, *, purpose: str = 
         disqualifiers.append("startup gate remains blocked for the requested purpose")
     if audit_status in {"BLOCKED", "FAIL"}:
         disqualifiers.append("workspace audit final gate blocked")
+    if path_preflight_status == "BLOCKED":
+        disqualifiers.append("path authority preflight is blocked")
     if str(git_surface.get("status", "PASS")) == "BLOCKED":
         disqualifiers.append("git surface reports a branch lock conflict or blocked worktree condition")
+    if purpose == "app-usability":
+        app_remote_project_status = str(windows_readiness.get("app_remote_project_status", "UNOBSERVED"))
+        if app_remote_project_status != "OPENED":
+            disqualifiers.append("app remote project has not been proven opened in Codex App")
+        if str(windows_readiness.get("blocking_domain", "")) == "app_discovery" and str(windows_readiness.get("ssh_transport_status", "BLOCKED")) == "PASS":
+            warnings.append("Codex App host discovery is still blocked even though Windows OpenSSH transport is already PASS")
 
     if hygiene_status == "WARN":
         warnings.append("artifact hygiene still has stale drafts, duplicate remediation reports, or transient artifacts")
@@ -128,6 +148,8 @@ def evaluate_score_layer(repo_root: str | Path | None = None, *, purpose: str = 
         warnings.append("active config smoke reported warnings")
     if audit_status == "WARN":
         warnings.append("workspace audit still reports warnings")
+    if path_preflight_status == "WARN":
+        warnings.append("path authority preflight still reports warnings")
     if str(git_surface.get("status", "PASS")) == "WARN":
         warnings.append("git surface still reports stale worktrees, drift, or repo-local guard proposals")
 
@@ -155,10 +177,24 @@ def evaluate_score_layer(repo_root: str | Path | None = None, *, purpose: str = 
             "toolchain_surface": toolchain_source,
             "hook_readiness": hooks_source,
             "audit": audit_source,
+            "path_preflight": path_preflight_source,
             "artifact_hygiene": hygiene_source,
             "git_surface": git_surface_source,
+            "windows_app_ssh_readiness": windows_readiness_source,
         },
-        "evidence_files": [config_source, active_config_source, runtime_source, startup_source, toolchain_source, hooks_source, audit_source, hygiene_source, git_surface_source],
+        "evidence_files": [
+            config_source,
+            active_config_source,
+            runtime_source,
+            startup_source,
+            toolchain_source,
+            hooks_source,
+            audit_source,
+            path_preflight_source,
+            hygiene_source,
+            git_surface_source,
+            windows_readiness_source,
+        ],
         "score_policy_path": str(SCORE_POLICY_PATH),
         "worktree_policy": score_policy.get("worktree_policy", {}),
     }

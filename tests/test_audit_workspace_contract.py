@@ -493,7 +493,7 @@ trust_level = "trusted"
         self.assertIn("Codex App is the primary user control surface and remote session control surface", rendered_agents)
         self.assertIn("Linux generated runtime files are outputs only", rendered_agents)
         self.assertIn("must not generate policy-bearing Windows ~/.codex", rendered_agents)
-        self.assertIn("Optional user override source is /home/andy4917/.codex/user-config.toml only", rendered_agents)
+        self.assertIn("Optional user override source is `/home/andy4917/.codex/user-config.toml` only", rendered_agents)
         self.assertIn("Linux-native Codex CLI on the canonical remote login-shell PATH is the canonical agent binary", rendered_agents)
         self.assertIn("PATH contamination is a client-surface warning only", rendered_agents)
         self.assertIn("Windows-mounted launchers such as `/mnt/c/Users/anise/.codex/bin/wsl/codex` are external dependencies", rendered_agents)

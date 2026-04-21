@@ -16,7 +16,8 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from devmgmt_runtime.authority import authority_path_for, canonical_authority_path, canonical_repo_root, load_authority
-from devmgmt_runtime.paths import WINDOWS_CODEX_HOME, runtime_paths
+from devmgmt_runtime.path_authority import load_path_policy, windows_codex_home
+from devmgmt_runtime.paths import runtime_paths
 from devmgmt_runtime.reports import load_json, save_json
 from devmgmt_runtime.status import collapse_status, status_exit_code
 from devmgmt_runtime.windows_policy import windows_policy_surface_report
@@ -26,6 +27,7 @@ from render_codex_runtime import render_agents, render_hooks, user_override_conf
 AUTHORITY_PATH = ROOT / "contracts" / "workspace_authority.json"
 DEFAULT_OUTPUT_PATH = ROOT / "reports" / "config-provenance.unified-phase.json"
 POLICY_PATH = ROOT / "contracts" / "config_provenance_policy.json"
+WINDOWS_CODEX_HOME = windows_codex_home(load_path_policy())
 
 
 def load_policy(repo_root: str | Path | None = None) -> dict[str, Any]:
@@ -140,11 +142,12 @@ def header_status(path: Path, authority: dict[str, Any], authority_path: Path, p
     if path.name == "AGENTS.md":
         text = read_text(path)
         authority_line = f"- Authority file: {chr(96)}{authority_path}{chr(96)}"
+        override_line = f"Optional user override source is `{paths['linux_user_override']}` only."
         checks = {
             "generated_banner": text.startswith("GENERATED - DO NOT EDIT"),
             "authority_file_line": authority_line in text,
             "outputs_only_line": "Linux generated runtime files are outputs only." in text,
-            "user_override_line": "Optional user override source is /home/andy4917/.codex/user-config.toml only." in text,
+            "user_override_line": override_line in text,
         }
         if not path.exists():
             return {"status": "WARN", "exists": False, "checks": checks, "reasons": ["generated AGENTS mirror is missing"]}
@@ -326,7 +329,7 @@ def evaluate_config_provenance(repo_root: str | Path | None = None) -> dict[str,
 
 def render_markdown(report: dict[str, Any]) -> str:
     status = str(report.get("status", report.get("gate_status", "WARN")))
-    override_source = str(report.get("allowed_optional_user_override_source", "/home/andy4917/.codex/user-config.toml"))
+    override_source = str(report.get("allowed_optional_user_override_source", "")).strip() or "(unknown)"
     override_sources = report.get("override_source_paths", [])
     if not isinstance(override_sources, list):
         override_sources = []

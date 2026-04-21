@@ -273,6 +273,12 @@ def classify_codex_candidate(
         return payload
 
     candidate = Path(normalized).expanduser()
+    expected_native = managed_runtime_paths(authority).get("linux_native_codex_cli")
+    if expected_native is not None and candidate.resolve(strict=False) == Path(expected_native).resolve(strict=False):
+        payload["classification"] = "authority_codex_cli"
+        payload["status"] = "PASS"
+        payload["native_candidate"] = True
+        return payload
     exists = candidate.exists()
     payload["exists"] = exists
     text = ""
@@ -792,6 +798,7 @@ def evaluate_global_runtime(
         "config_provenance": config_provenance,
         "codex_resolution_status": codex_resolution_status,
         "path_contamination_status": path_contamination_status["status"],
+        "expected_codex_cli_bin": str(managed_runtime_paths(authority).get("linux_native_codex_cli", "")),
         "wrapper_apply_readiness": wrapper_apply_readiness,
         "canonical_ssh_probe_cache": remote.get("canonical_ssh_probe_cache", {}),
         "canonical_ssh_runtime_status": remote["canonical_ssh_runtime_status"],

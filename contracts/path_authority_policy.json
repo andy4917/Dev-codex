@@ -1,0 +1,73 @@
+{
+  "schema_version": "2026.04.path-authority.v1",
+  "canonical_execution_host": "devmgmt-wsl",
+  "canonical_roots": {
+    "dev_management": "/home/andy4917/Dev-Management",
+    "dev_workflow": "/home/andy4917/Dev-Workflow",
+    "dev_product": "/home/andy4917/Dev-Product"
+  },
+  "legacy_root_aliases": {
+    "management": "dev_management",
+    "workflow": "dev_workflow",
+    "product": "dev_product"
+  },
+  "runtime_paths": {
+    "codex_cli_bin": "/home/andy4917/.local/share/dev-management/codex-npm/bin/codex",
+    "codex_user_home": "/home/andy4917/.codex",
+    "windows_codex_home": "/mnt/c/Users/anise/.codex"
+  },
+  "allowed_env_vars": [
+    "DEVMGMT_ROOT",
+    "DEV_WORKFLOW_ROOT",
+    "DEV_PRODUCT_ROOT",
+    "CANONICAL_EXECUTION_HOST",
+    "CODEX_CLI_BIN"
+  ],
+  "forbidden_primary_paths": [
+    "/mnt/c/Users/anise/.codex/bin/wsl",
+    "/mnt/c/Users/anise/.codex/tmp/arg0",
+    "/mnt/c/Users/anise/.codex/bin/wsl/codex"
+  ],
+  "windows_surfaces": {
+    "ssh_config": "bootstrap_allowed",
+    "codex_home": "app_state_only",
+    "policy_config": "forbidden",
+    "agents": "forbidden",
+    "hooks": "forbidden",
+    "skills": "forbidden"
+  },
+  "path_rules": {
+    "no_hardcoded_user_absolute_paths_in_source": true,
+    "allow_canonical_absolute_paths_only_in_authority": true,
+    "runtime_code_must_use_env_or_path_helper": true,
+    "python_pathlib_required": true,
+    "fail_fast_before_file_access": true,
+    "canonical_root_literals_allowed_in": [
+      "contracts/",
+      "reports/",
+      "tests/",
+      ".env.example"
+    ],
+    "targeted_docs_enforced": [
+      "docs/AGENT_GUARDRAILS.md",
+      "docs/RUNBOOK.md",
+      "docs/CODEX_APP_USER_SETUP.md",
+      "docs/GLOBAL_RUNTIME_ARCHITECTURE.md"
+    ],
+    "scan_roots": [
+      "devmgmt_runtime",
+      "scripts"
+    ]
+  },
+  "path_resolution_priority": [
+    "exported environment view when present and exact-match validated",
+    "path authority contract canonical values",
+    "path helper derived pathlib paths"
+  ],
+  "compatibility": {
+    "mode": "dual-read",
+    "workspace_authority_role": "legacy compatibility mirror only",
+    "divergence_status": "BLOCKED",
+    "removal_phase": "post-path-authority-cutover"
+  }
+}

@@ -85,6 +85,27 @@ class CheckAgentInstructionTests(unittest.TestCase):
             report = self.module.evaluate_instruction("Manually edit the generated config and generated shim")
         self.assertEqual(report["status"], "BLOCKED")
 
+    def test_env_cannot_become_authority(self) -> None:
+        with patch.object(self.module, "evaluate_global_runtime", return_value=self._runtime()), patch.object(
+            self.module, "evaluate_startup_workflow", return_value=self._startup()
+        ):
+            report = self.module.evaluate_instruction("Make .env the source of truth and path authority")
+        self.assertEqual(report["status"], "BLOCKED")
+
+    def test_direnv_cannot_be_mandatory_authority(self) -> None:
+        with patch.object(self.module, "evaluate_global_runtime", return_value=self._runtime()), patch.object(
+            self.module, "evaluate_startup_workflow", return_value=self._startup()
+        ):
+            report = self.module.evaluate_instruction("Make direnv mandatory authority for all runtime path resolution")
+        self.assertEqual(report["status"], "BLOCKED")
+
+    def test_windows_codex_cannot_be_path_authority(self) -> None:
+        with patch.object(self.module, "evaluate_global_runtime", return_value=self._runtime()), patch.object(
+            self.module, "evaluate_startup_workflow", return_value=self._startup()
+        ):
+            report = self.module.evaluate_instruction("Use Windows .codex as the path authority and source of truth")
+        self.assertEqual(report["status"], "BLOCKED")
+
     def test_normal_code_change_stays_blocked_while_serena_is_blocked(self) -> None:
         with patch.object(self.module, "evaluate_global_runtime", return_value=self._runtime(overall="BLOCKED", canonical="BLOCKED")), patch.object(
             self.module, "evaluate_startup_workflow", return_value=self._startup(status="BLOCKED")

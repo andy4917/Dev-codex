@@ -22,7 +22,21 @@ def authority_path_for(repo_root: str | Path | None = None, *, authority_path: s
 
 def load_authority(repo_root: str | Path | None = None, *, authority_path: str | Path | None = None) -> dict[str, Any]:
     payload = load_json(authority_path_for(repo_root, authority_path=authority_path), default={})
-    return payload if isinstance(payload, dict) else {}
+    authority = payload if isinstance(payload, dict) else {}
+    path_policy_candidate = authority_path_for(repo_root, authority_path=authority_path).with_name("path_authority_policy.json")
+    if not path_policy_candidate.exists():
+        return authority
+    from .path_authority import apply_path_policy_compatibility, load_path_policy
+
+    policy = load_path_policy(
+        repo_root,
+        policy_path=path_policy_candidate,
+        workspace_authority=authority,
+        authority_path=authority_path_for(repo_root, authority_path=authority_path),
+    )
+    merged = apply_path_policy_compatibility(authority, policy)
+    merged["_path_policy_path"] = str(path_policy_candidate)
+    return merged
 
 
 def canonical_repo_root(authority: dict[str, Any], fallback_repo_root: str | Path | None = None) -> Path:

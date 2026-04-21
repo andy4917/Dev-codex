@@ -5,9 +5,14 @@ from pathlib import Path
 from typing import Any
 
 from .authority import canonical_repo_root as authority_canonical_repo_root
+from .path_authority import (
+    codex_user_home,
+    forbidden_primary_paths,
+    load_path_policy,
+    runtime_paths as path_runtime_paths,
+    windows_codex_home,
+)
 
-
-WINDOWS_CODEX_HOME = Path("/mnt/c/Users/anise/.codex")
 WINDOWS_POLICY_RELATIVE_PATHS = {
     "config": Path("config.toml"),
     "agents": Path("AGENTS.md"),
@@ -17,10 +22,25 @@ WINDOWS_POLICY_RELATIVE_PATHS = {
 }
 
 
+def _path_policy_for_authority(authority: dict[str, Any] | None) -> dict[str, Any]:
+    payload = authority if isinstance(authority, dict) else {}
+    policy_path = str(payload.get("_path_policy_path", "")).strip()
+    if not policy_path:
+        return {}
+    try:
+        return load_path_policy(policy_path=policy_path, workspace_authority=payload)
+    except ValueError:
+        return {}
+
+
 def windows_policy_paths(authority: dict[str, Any] | None = None) -> dict[str, Path]:
     payload = authority if isinstance(authority, dict) else {}
     windows_state = payload.get("windows_app_state", {}) if isinstance(payload.get("windows_app_state"), dict) else {}
-    codex_home = Path(str(windows_state.get("codex_home", WINDOWS_CODEX_HOME))).expanduser().resolve()
+    policy = _path_policy_for_authority(payload)
+    codex_home = windows_codex_home(policy, authority=payload)
+    configured_home = str(windows_state.get("codex_home", "")).strip()
+    if configured_home:
+        codex_home = Path(configured_home).expanduser().resolve()
     return {
         "codex_home": codex_home,
         "config": (codex_home / WINDOWS_POLICY_RELATIVE_PATHS["config"]).resolve(),
@@ -34,24 +54,23 @@ def windows_policy_paths(authority: dict[str, Any] | None = None) -> dict[str, P
 def runtime_paths(authority: dict[str, Any]) -> dict[str, Path]:
     runtime = authority.get("generation_targets", {}).get("global_runtime", {})
     linux = runtime.get("linux", {})
+    policy = _path_policy_for_authority(authority)
+    authority_runtime = path_runtime_paths(policy)
+    codex_home = codex_user_home(policy)
     windows_policy = windows_policy_paths(authority)
     return {
-        "linux_config": Path(str(linux.get("config", Path.home() / ".codex" / "config.toml"))).expanduser().resolve(),
-        "linux_agents": Path(str(linux.get("agents", Path.home() / ".codex" / "AGENTS.md"))).expanduser().resolve(),
-        "linux_hooks": Path(str(linux.get("hooks_config", Path.home() / ".codex" / "hooks.json"))).expanduser().resolve(),
-        "linux_user_override": Path(str(linux.get("user_override_config", Path.home() / ".codex" / "user-config.toml"))).expanduser().resolve(),
+        "linux_config": Path(str(linux.get("config", codex_home / "config.toml"))).expanduser().resolve(),
+        "linux_agents": Path(str(linux.get("agents", codex_home / "AGENTS.md"))).expanduser().resolve(),
+        "linux_hooks": Path(str(linux.get("hooks_config", codex_home / "hooks.json"))).expanduser().resolve(),
+        "linux_user_override": Path(str(linux.get("user_override_config", codex_home / "user-config.toml"))).expanduser().resolve(),
         "linux_launcher": Path(str(linux.get("launcher", Path.home() / ".local" / "bin" / "codex"))).expanduser().resolve(),
+        "linux_native_codex_cli": authority_runtime.get("codex_cli_bin", Path.home() / ".local" / "bin" / "codex"),
         "observed_windows_codex_home": windows_policy["codex_home"],
         "observed_windows_policy_config": windows_policy["config"],
         "observed_windows_policy_agents": windows_policy["agents"],
         "observed_windows_policy_hooks": windows_policy["hooks"],
         "observed_windows_policy_skills": windows_policy["skills"],
         "observed_windows_wsl_launcher": windows_policy["wsl_launcher"],
-        # Legacy aliases kept temporarily while callers migrate to observed_* names.
-        "windows_config": windows_policy["config"],
-        "windows_agents": windows_policy["agents"],
-        "windows_hooks": windows_policy["hooks"],
-        "windows_wsl_launcher": windows_policy["wsl_launcher"],
     }
 
 
@@ -61,7 +80,15 @@ def canonical_surface(authority: dict[str, Any]) -> dict[str, Any]:
 
 
 def forbidden_runtime_paths(authority: dict[str, Any]) -> list[str]:
-    return [str(item).strip() for item in authority.get("forbidden_primary_runtime_paths", []) if str(item).strip()]
+    if authority:
+        configured = [str(item).strip() for item in authority.get("forbidden_primary_runtime_paths", []) if str(item).strip()]
+        if configured:
+            return configured
+        try:
+            return forbidden_primary_paths(_path_policy_for_authority(authority))
+        except ValueError:
+            return configured
+    return []
 
 
 def is_forbidden_runtime_value(value: str, authority: dict[str, Any]) -> bool:

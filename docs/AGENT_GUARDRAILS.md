@@ -23,11 +23,14 @@
 
 ## Editing Rules
 
+- Path authority is defined in `contracts/path_authority_policy.json`.
+- Resolve repo paths through `devmgmt_runtime.path_authority`, not hardcoded user-specific absolute paths.
 - Do not manually edit generated Linux config, shim, hook, or AGENTS files.
-- Do not use `/home/andy4917/.codex/config.toml` as override input.
+- Do not use `$HOME/.codex/config.toml` as override input.
 - Do not generate or rely on Windows `.codex` config, AGENTS, hooks, skills, or score wrappers.
-- Use `/home/andy4917/.codex/user-config.toml` only for allowed global user overrides.
-- Do not add hardcoded fallback paths or reintroduce `/mnt/c/Users/anise/.codex/bin/wsl/codex` as a primary runtime target.
+- Use `$HOME/.codex/user-config.toml` only for allowed global user overrides.
+- Do not add hardcoded fallback paths or reintroduce the Windows-mounted Codex launcher as a primary runtime target.
+- Use `pathlib.Path` for path operations and fail fast before file access.
 - Treat app memories, projectless chat state, and restore seed as hints only.
 - Do not let a worktree, thread, or app memory become a source of truth.
 - Do not claim hook-only enforcement.
@@ -39,4 +42,4 @@
 - Before code work, inspect git status, instruction guard, global runtime, config provenance, and startup workflow.
 - When worktree mode is in use, record both `active_worktree_root` and `canonical_repo_root`.
 - During work, touch only in-scope files and record subagent, skill, plugin, hook, and workspace dependency usage when used.
-- After work, run hardcoding scans, stale feature scans, config provenance checks, artifact hygiene checks, `git diff --check`, and relevant tests before commit.
+- After work, run path preflight, hardcoding scans, stale feature scans, config provenance checks, artifact hygiene checks, `git diff --check`, and relevant tests before commit.

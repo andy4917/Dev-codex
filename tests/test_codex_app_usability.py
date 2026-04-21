@@ -105,7 +105,33 @@ class CodexAppUsabilityTests(unittest.TestCase):
             ), patch.object(
                 self.module,
                 "evaluate_windows_app_ssh_readiness",
-                return_value={"status": "PASS", "windows_ssh_config": str(tmp / "ssh" / "config"), "applied": False, "backups": [], "simple_user_instruction": "Open Settings > Connections."},
+                return_value={
+                    "status": "PASS",
+                    "windows_ssh_config": str(tmp / "ssh" / "config"),
+                    "applied": False,
+                    "backups": [],
+                    "simple_user_instruction": "Open Settings > Connections.",
+                    "ssh_transport_status": "PASS",
+                    "blocking_domain": "none",
+                    "app_remote_project_status": "OPENED",
+                    "app_remote_project_path": str(tmp),
+                },
+            ), patch.object(
+                self.module,
+                "normalize_windows_app_bootstrap",
+                return_value={
+                    "status": "PASS",
+                    "applied": False,
+                    "actions_applied": [],
+                    "actions_planned": [],
+                    "changed_files": [],
+                    "backups_created": [],
+                    "after": {"status": "PASS", "minimal_bootstrap": True, "remote_control_enabled": True, "remote_connections_enabled": True, "bootstrap_features_ready": True},
+                },
+            ), patch.object(
+                self.module,
+                "build_app_remote_access_blocker_analysis",
+                return_value={"status": "PASS"},
             ), patch.object(
                 self.module,
                 "evaluate_config_provenance",
@@ -184,7 +210,33 @@ class CodexAppUsabilityTests(unittest.TestCase):
             ), patch.object(
                 self.module,
                 "evaluate_windows_app_ssh_readiness",
-                return_value={"status": "PASS", "windows_ssh_config": str(tmp / "ssh" / "config"), "applied": False, "backups": [], "simple_user_instruction": "Open Settings > Connections."},
+                return_value={
+                    "status": "PASS",
+                    "windows_ssh_config": str(tmp / "ssh" / "config"),
+                    "applied": False,
+                    "backups": [],
+                    "simple_user_instruction": "Open Settings > Connections.",
+                    "ssh_transport_status": "PASS",
+                    "blocking_domain": "app_remote_project",
+                    "app_remote_project_status": "NOT_OPENED",
+                    "app_remote_project_path": str(tmp),
+                },
+            ), patch.object(
+                self.module,
+                "normalize_windows_app_bootstrap",
+                return_value={
+                    "status": "PASS",
+                    "applied": False,
+                    "actions_applied": [],
+                    "actions_planned": [],
+                    "changed_files": [],
+                    "backups_created": [],
+                    "after": {"status": "PASS", "minimal_bootstrap": True, "remote_control_enabled": True, "remote_connections_enabled": True, "bootstrap_features_ready": True},
+                },
+            ), patch.object(
+                self.module,
+                "build_app_remote_access_blocker_analysis",
+                return_value={"status": "BLOCKED"},
             ), patch.object(
                 self.module,
                 "evaluate_config_provenance",
@@ -244,9 +296,116 @@ class CodexAppUsabilityTests(unittest.TestCase):
         authority["control_thread_policy"] = {"name": "Dev-Management Control", "remote_host": "devmgmt-wsl"}
         authority["worktree_policy_summary"] = {"persistent_ops_worktree_allowed": False, "task_worktrees_are_ephemeral": True}
         agents = self.render.render_agents(authority, windows=False)
-        self.assertIn("User app setup path: Restart Codex App -> Settings > Connections -> select devmgmt-wsl", agents)
-        self.assertIn("Optional user override source is /home/andy4917/.codex/user-config.toml only.", agents)
+        self.assertIn("User app setup path: Restart Codex App -> Settings > Connections -> if devmgmt-wsl is not listed use Connections > Add host > devmgmt-wsl -> select devmgmt-wsl", agents)
+        self.assertIn(f"Optional user override source is `{ROOT / '.codex' / 'user-config.toml'}` only.", agents)
         self.assertIn("Dev-Management Control", agents)
+
+    def test_app_ready_with_warnings_when_windows_app_requires_manual_add_host(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp = Path(tmpdir)
+            (tmp / "reports").mkdir()
+            authority = self._authority(tmp)
+            with patch.object(self.module, "load_authority", return_value=authority), patch.object(
+                self.module,
+                "load_app_policy",
+                return_value={"settings_flow": {"settings_path": "Settings > Connections", "host_alias": "devmgmt-wsl", "remote_project": str(tmp)}},
+            ), patch.object(
+                self.module,
+                "evaluate_global_runtime",
+                return_value={
+                    "overall_status": "PASS",
+                    "canonical_execution_status": "PASS",
+                    "ssh_runtime_status": "PASS",
+                    "remote_codex_resolution_status": {"status": "PASS"},
+                    "remote_native_codex_status": {"status": "PASS", "selected_path": "/usr/local/bin/codex"},
+                },
+            ), patch.object(
+                self.module,
+                "evaluate_windows_app_ssh_readiness",
+                return_value={
+                    "status": "WARN",
+                    "warning_reasons": [
+                        "Codex App did not auto-list devmgmt-wsl, but Connections > Add host > devmgmt-wsl worked."
+                    ],
+                    "windows_ssh_config": str(tmp / "ssh" / "config"),
+                    "applied": False,
+                    "backups": [],
+                    "simple_user_instruction": "Open Codex App Settings > Connections. Do not assume devmgmt-wsl is already listed; use Connections > Add host > devmgmt-wsl, then retry the remote connection.",
+                    "ssh_transport_status": "PASS",
+                    "blocking_domain": "none",
+                    "app_remote_project_status": "OPENED",
+                    "app_remote_project_path": str(tmp),
+                },
+            ), patch.object(
+                self.module,
+                "normalize_windows_app_bootstrap",
+                return_value={
+                    "status": "PASS",
+                    "applied": False,
+                    "actions_applied": [],
+                    "actions_planned": [],
+                    "changed_files": [],
+                    "backups_created": [],
+                    "after": {"status": "PASS", "minimal_bootstrap": True, "remote_control_enabled": True, "remote_connections_enabled": True, "bootstrap_features_ready": True},
+                },
+            ), patch.object(
+                self.module,
+                "build_app_remote_access_blocker_analysis",
+                return_value={"status": "PASS"},
+            ), patch.object(
+                self.module,
+                "evaluate_config_provenance",
+                return_value={"gate_status": "PASS", "windows_policy_surface_status": "PASS", "app_state_surface": {"status": "PASS"}},
+            ), patch.object(
+                self.module,
+                "evaluate_active_config_smoke",
+                return_value={"gate_status": "PASS", "windows_app_evidence_status": "PASS"},
+            ), patch.object(
+                self.module,
+                "evaluate_toolchain_surface",
+                return_value={"status": "PASS"},
+            ), patch.object(
+                self.module,
+                "evaluate_git_surfaces",
+                return_value={"status": "PASS"},
+            ), patch.object(
+                self.module,
+                "evaluate_hook_readiness",
+                return_value={"status": "PASS", "hook_only_enforcement_claim": False},
+            ), patch.object(
+                self.module,
+                "install_linux_codex_cli",
+                return_value={"status": "PASS", "applied": False, "path": "/usr/local/bin/codex", "version": "codex-cli"},
+            ), patch.object(
+                self.module,
+                "repair_linux_launcher_shim",
+                return_value={"status": "PASS", "preview_path": str(tmp / "preview.sh"), "live_write_allowed": True, "current_target": "/usr/local/bin/codex", "expected_target": "/usr/local/bin/codex", "reasons": [], "changed": False},
+            ), patch.object(
+                self.module,
+                "repair_serena",
+                return_value={"actions_planned": [], "actions_applied": []},
+            ), patch.object(
+                self.module,
+                "evaluate_startup_workflow",
+                return_value={"status": "PASS"},
+            ), patch.object(
+                self.module,
+                "evaluate_artifact_hygiene",
+                return_value={"status": "PASS"},
+            ), patch.object(
+                self.module,
+                "evaluate_score_layer",
+                return_value={"status": "PASS"},
+            ), patch.object(
+                self.module,
+                "run_audit_cli",
+                side_effect=[{"status": "PASS"}, {"status": "PASS"}],
+            ):
+                report = self.module.evaluate_app_usability(tmp)
+
+        self.assertEqual(report["status"], "APP_READY_WITH_WARNINGS")
+        self.assertEqual(report["windows_app_ssh_status"], "WARN")
+        self.assertIn("Connections > Add host > devmgmt-wsl", report["final_user_instructions"])
 
     def test_app_usability_reuses_windows_readiness_once_and_passes_report_to_audit(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -268,8 +427,28 @@ class CodexAppUsabilityTests(unittest.TestCase):
                     "applied": False,
                     "backups": [],
                     "simple_user_instruction": "Open Settings > Connections.",
+                    "ssh_transport_status": "PASS",
+                    "blocking_domain": "none",
+                    "app_remote_project_status": "OPENED",
+                    "app_remote_project_path": str(tmp),
                 },
             ) as ssh_readiness, patch.object(
+                self.module,
+                "normalize_windows_app_bootstrap",
+                return_value={
+                    "status": "PASS",
+                    "applied": False,
+                    "actions_applied": [],
+                    "actions_planned": [],
+                    "changed_files": [],
+                    "backups_created": [],
+                    "after": {"status": "PASS", "minimal_bootstrap": True, "remote_control_enabled": True, "remote_connections_enabled": True, "bootstrap_features_ready": True},
+                },
+            ), patch.object(
+                self.module,
+                "build_app_remote_access_blocker_analysis",
+                return_value={"status": "PASS"},
+            ), patch.object(
                 self.module,
                 "evaluate_global_runtime",
                 return_value={

@@ -27,6 +27,7 @@ from _scorecard_common import codex_home as resolve_codex_home  # noqa: E402
 from render_codex_runtime import launcher_paths as runtime_launcher_paths  # noqa: E402
 from render_codex_runtime import preview_linux_launcher_path, render_linux_launcher, sync_generated_executable_text  # noqa: E402
 from check_global_runtime import evaluate_global_runtime  # noqa: E402
+from devmgmt_runtime.path_authority import forbidden_primary_paths, load_path_policy  # noqa: E402
 
 
 def load_json(path: Path, default: Any | None = None) -> Any:
@@ -585,10 +586,11 @@ def repair_linux_launcher_shim(authority: dict[str, Any], *, apply: bool = True)
     current_target = extract_launcher_target(current_text)
     changed = False
     reasons: list[str] = []
+    path_policy = load_path_policy(policy_path=MANAGEMENT_ROOT / "contracts" / "path_authority_policy.json", workspace_authority=authority)
 
     if not shim_path.exists():
         reasons.append(f"Linux Codex launcher shim is missing: {shim_path}")
-    if current_target and "/mnt/c/Users/anise/.codex/bin/wsl/codex" in current_target:
+    if current_target and any(marker in current_target for marker in forbidden_primary_paths(path_policy)):
         reasons.append("Linux Codex launcher shim still points to the forbidden Windows-mounted launcher.")
 
     gate_report = load_json(MANAGEMENT_ROOT / "reports" / "global-runtime.json", default={})
@@ -648,33 +650,216 @@ def repair_linux_launcher_shim(authority: dict[str, Any], *, apply: bool = True)
     }
 
 
-def remove_stale_environment(state: dict[str, Any]) -> bool:
+LOCALHOST_SSH_HOSTS = {"localhost", "127.0.0.1", "::1"}
+
+
+def iter_nested_strings(value: Any) -> list[str]:
+    strings: list[str] = []
+    stack = [value]
+    while stack:
+        current = stack.pop()
+        if isinstance(current, str):
+            strings.append(current)
+            continue
+        if isinstance(current, dict):
+            stack.extend(current.values())
+            continue
+        if isinstance(current, list):
+            stack.extend(current)
+    return strings
+
+
+def is_stale_environment_payload(environment: dict[str, Any], *, stale_markers: tuple[str, ...]) -> bool:
+    repo_map = environment.get("repo_map", {})
+    repo_names = [str(item.get("repository_full_name", "")) for item in repo_map.values() if isinstance(item, dict)]
+    if environment.get("workspace_dir") == "/workspace" or "andy4917/-" in repo_names:
+        return True
+    for value in iter_nested_strings(environment):
+        normalized = value.replace("\\", "/").lower()
+        if any(marker in normalized for marker in stale_markers):
+            return True
+        if normalized.startswith("//wsl$/") or "//wsl$/" in normalized:
+            return True
+    return False
+
+
+def remove_stale_environment(state: dict[str, Any], *, stale_markers: tuple[str, ...]) -> bool:
     atom_state = state.get("electron-persisted-atom-state")
     if not isinstance(atom_state, dict):
         return False
     environment = atom_state.get("environment")
     if not isinstance(environment, dict):
         return False
-    repo_map = environment.get("repo_map", {})
-    repo_names = [str(item.get("repository_full_name", "")) for item in repo_map.values() if isinstance(item, dict)]
-    if environment.get("workspace_dir") == "/workspace" or "andy4917/-" in repo_names:
+    if is_stale_environment_payload(environment, stale_markers=stale_markers):
         atom_state.pop("environment", None)
         return True
     return False
 
 
-def has_localhost_remote_connection(state: dict[str, Any]) -> bool:
+def split_ssh_host(value: Any) -> tuple[str, str]:
+    text = str(value).strip()
+    if not text:
+        return "", ""
+    if "@" in text:
+        user, host = text.rsplit("@", 1)
+    else:
+        user, host = "", text
+    host = host.strip()
+    if host.startswith("[") and host.endswith("]"):
+        host = host[1:-1]
+    return user.strip(), host.strip().lower()
+
+
+def normalize_localhost_ssh_host(value: Any, *, fallback_host: str = "localhost") -> str:
+    user, host = split_ssh_host(value)
+    normalized_host = host or fallback_host
+    if normalized_host in LOCALHOST_SSH_HOSTS:
+        normalized_host = "localhost"
+    return f"{user}@{normalized_host}" if user else normalized_host
+
+
+def localhost_remote_host_id(host_alias: str) -> str:
+    return f"remote-ssh-codex-managed:{host_alias}"
+
+
+def is_localhost_remote_connection(connection: dict[str, Any], *, host_alias: str) -> bool:
+    ssh_alias = str(connection.get("sshAlias", "")).strip().lower()
+    display_name = str(connection.get("displayName", "")).strip().lower()
+    host_id = str(connection.get("hostId", "")).strip().lower()
+    _user, host = split_ssh_host(connection.get("sshHost", ""))
+    alias = host_alias.strip().lower()
+    if host in LOCALHOST_SSH_HOSTS:
+        return True
+    return any(
+        (
+            ssh_alias == alias,
+            display_name == alias,
+            host_id.endswith(f":{alias}"),
+            ssh_alias in LOCALHOST_SSH_HOSTS,
+            display_name in LOCALHOST_SSH_HOSTS,
+            host_id.endswith(":localhost"),
+        )
+    )
+
+
+def normalize_localhost_remote_connection(connection: dict[str, Any], *, host_alias: str) -> dict[str, Any]:
+    normalized = dict(connection)
+    normalized["hostId"] = localhost_remote_host_id(host_alias)
+    normalized["displayName"] = host_alias
+    normalized["source"] = "codex-managed"
+    normalized["autoConnect"] = False
+    normalized["sshAlias"] = host_alias
+    normalized["sshHost"] = normalize_localhost_ssh_host(connection.get("sshHost", "localhost"))
+    ssh_port = connection.get("sshPort", 22)
+    try:
+        normalized["sshPort"] = int(str(ssh_port).strip()) if str(ssh_port).strip() else 22
+    except ValueError:
+        normalized["sshPort"] = 22
+    return normalized
+
+
+def remote_connection_rank(connection: dict[str, Any]) -> int:
+    score = 0
+    for key in ("identity", "sshHost", "sshAlias", "displayName", "hostId"):
+        if str(connection.get(key, "")).strip():
+            score += 1
+    if str(connection.get("source", "")).strip().lower() == "codex-managed":
+        score += 2
+    if connection.get("sshPort") not in (None, ""):
+        score += 1
+    return score
+
+
+def normalize_codex_managed_remote_connections(
+    state: dict[str, Any],
+    authority: dict[str, Any],
+) -> tuple[bool, set[str], set[str]]:
+    connections = state.get("codex-managed-remote-connections", [])
+    if not isinstance(connections, list):
+        if "codex-managed-remote-connections" not in state:
+            return False, set(), set()
+        state["codex-managed-remote-connections"] = []
+        return True, set(), set()
+
+    canonical_surface = authority.get("canonical_execution_surface", {})
+    canonical_alias = str(canonical_surface.get("host_alias", "devmgmt-wsl")).strip() or "devmgmt-wsl"
+    changed = False
+    ordered_host_ids: list[str] = []
+    connections_by_host_id: dict[str, dict[str, Any]] = {}
+    passthrough_connections: list[dict[str, Any]] = []
+    localhost_host_ids: set[str] = set()
+
+    for connection in connections:
+        if not isinstance(connection, dict):
+            changed = True
+            continue
+        normalized_connection = dict(connection)
+        if is_localhost_remote_connection(connection, host_alias=canonical_alias):
+            normalized_connection = normalize_localhost_remote_connection(connection, host_alias=canonical_alias)
+            localhost_host_ids.add(str(normalized_connection.get("hostId", "")).strip())
+        host_id = str(normalized_connection.get("hostId", "")).strip()
+        if not host_id:
+            passthrough_connections.append(normalized_connection)
+            if normalized_connection != connection:
+                changed = True
+            continue
+        if host_id not in connections_by_host_id:
+            ordered_host_ids.append(host_id)
+            connections_by_host_id[host_id] = normalized_connection
+        elif remote_connection_rank(normalized_connection) >= remote_connection_rank(connections_by_host_id[host_id]):
+            connections_by_host_id[host_id] = normalized_connection
+        if normalized_connection != connection:
+            changed = True
+
+    normalized_connections = [connections_by_host_id[host_id] for host_id in ordered_host_ids]
+    normalized_connections.extend(passthrough_connections)
+    if normalized_connections != connections:
+        state["codex-managed-remote-connections"] = normalized_connections
+        changed = True
+    return changed, set(ordered_host_ids), localhost_host_ids
+
+
+def clear_stale_remote_selection_noise(
+    state: dict[str, Any],
+    *,
+    known_host_ids: set[str],
+    localhost_host_ids: set[str],
+) -> bool:
+    changed = False
+    selected_host = str(state.get("selected-remote-host-id", "")).strip()
+    if "selected-remote-host-id" in state and (not selected_host or selected_host in localhost_host_ids or selected_host not in known_host_ids):
+        state.pop("selected-remote-host-id", None)
+        changed = True
+
+    auto_connect = state.get("remote-connection-auto-connect-by-host-id")
+    if isinstance(auto_connect, dict):
+        filtered = {
+            str(host_id).strip(): value
+            for host_id, value in auto_connect.items()
+            if str(host_id).strip() and str(host_id).strip() in known_host_ids and str(host_id).strip() not in localhost_host_ids
+        }
+        if filtered:
+            if filtered != auto_connect:
+                state["remote-connection-auto-connect-by-host-id"] = filtered
+                changed = True
+        else:
+            state.pop("remote-connection-auto-connect-by-host-id", None)
+            changed = True
+    elif "remote-connection-auto-connect-by-host-id" in state:
+        state.pop("remote-connection-auto-connect-by-host-id", None)
+        changed = True
+
+    return changed
+
+
+def has_localhost_remote_connection(state: dict[str, Any], authority: dict[str, Any]) -> bool:
+    canonical_surface = authority.get("canonical_execution_surface", {})
+    canonical_alias = str(canonical_surface.get("host_alias", "devmgmt-wsl")).strip() or "devmgmt-wsl"
     connections = state.get("codex-managed-remote-connections", [])
     if not isinstance(connections, list):
         return False
     for connection in connections:
-        if not isinstance(connection, dict):
-            continue
-        ssh_host = str(connection.get("sshHost", "")).strip().lower()
-        if not ssh_host:
-            continue
-        host = ssh_host.rsplit("@", 1)[-1]
-        if host in {"localhost", "127.0.0.1", "::1"}:
+        if isinstance(connection, dict) and is_localhost_remote_connection(connection, host_alias=canonical_alias):
             return True
     return False
 
@@ -696,12 +881,28 @@ def repair_global_state(
     stale_markers = stale_path_markers(policy, authority)
     default_root_name = str(restore.get("default_active_workspace_root", "management"))
     default_active_root = root_map.get(default_root_name, next(iter(root_map.values())))
+    normalized_preferred_active_root = canonicalize_root_value(
+        preferred_active_root or "",
+        linux_roots=roots,
+        root_map=root_map,
+        allowed_unc_hosts=allowed_unc_hosts,
+        stale_markers=stale_markers,
+    )
 
     previous_projectless = list(state.get("projectless-thread-ids", []))
     previous_hints = dict(state.get("thread-workspace-root-hints", {}))
     changed = False
 
-    if remove_stale_environment(state):
+    if remove_stale_environment(state, stale_markers=stale_markers):
+        changed = True
+    remote_connections_changed, remote_host_ids, localhost_host_ids = normalize_codex_managed_remote_connections(state, authority)
+    if remote_connections_changed:
+        changed = True
+    if clear_stale_remote_selection_noise(
+        state,
+        known_host_ids=remote_host_ids,
+        localhost_host_ids=localhost_host_ids,
+    ):
         changed = True
 
     active_roots = [
@@ -717,9 +918,9 @@ def repair_global_state(
     active_roots = [root for root in active_roots if root]
     active_roots = list(dict.fromkeys(active_roots))
     if not active_roots:
-        active_roots = [preferred_active_root or default_active_root]
-    elif preferred_active_root and (previous_projectless or previous_hints):
-        active_roots = list(dict.fromkeys([preferred_active_root, *active_roots]))
+        active_roots = [normalized_preferred_active_root or default_active_root]
+    elif normalized_preferred_active_root and (previous_projectless or previous_hints):
+        active_roots = list(dict.fromkeys([normalized_preferred_active_root, *active_roots]))
     if active_roots != state.get("active-workspace-roots", []):
         state["active-workspace-roots"] = active_roots
         changed = True
@@ -737,8 +938,8 @@ def repair_global_state(
     saved_roots = [root for root in saved_roots if root]
     if not saved_roots:
         saved_roots = list(dict.fromkeys([*active_roots, *root_map.values()]))
-    elif preferred_active_root and (previous_projectless or previous_hints):
-        saved_roots = list(dict.fromkeys([preferred_active_root, *saved_roots]))
+    elif normalized_preferred_active_root and (previous_projectless or previous_hints):
+        saved_roots = list(dict.fromkeys([normalized_preferred_active_root, *saved_roots]))
     saved_roots = list(dict.fromkeys(saved_roots))
     if saved_roots != state.get("electron-saved-workspace-roots", []):
         state["electron-saved-workspace-roots"] = saved_roots
@@ -755,8 +956,8 @@ def repair_global_state(
         for root in state.get("project-order", [])
     ]
     project_order = [root for root in project_order if root]
-    if preferred_active_root and (previous_projectless or previous_hints):
-        project_order = list(dict.fromkeys([preferred_active_root, *project_order, *root_map.values()]))
+    if normalized_preferred_active_root and (previous_projectless or previous_hints):
+        project_order = list(dict.fromkeys([normalized_preferred_active_root, *project_order, *root_map.values()]))
     else:
         project_order = list(dict.fromkeys([*project_order, *root_map.values()]))
     if project_order != state.get("project-order", []):
@@ -771,7 +972,7 @@ def repair_global_state(
         open_target["perPath"] = {}
         changed = True
 
-    should_run_in_wsl = not has_localhost_remote_connection(state)
+    should_run_in_wsl = not has_localhost_remote_connection(state, authority)
     if state.get("runCodexInWindowsSubsystemForLinux") is not should_run_in_wsl:
         state["runCodexInWindowsSubsystemForLinux"] = should_run_in_wsl
         changed = True

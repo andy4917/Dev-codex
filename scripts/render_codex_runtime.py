@@ -6,13 +6,17 @@ import copy
 import hashlib
 import json
 import shutil
+import sys
 import tomllib
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
-AUTHORITY_PATH = Path("/home/andy4917/Dev-Management/contracts/workspace_authority.json")
+AUTHORITY_PATH = ROOT / "contracts" / "workspace_authority.json"
 MANAGEMENT_ROOT = AUTHORITY_PATH.parents[1]
 DEFAULT_MCP_SERVERS = ("context7", "serena")
 DEFAULT_MCP_TRANSPORTS = {
@@ -73,6 +77,13 @@ def write_text(path: Path, text: str) -> None:
 def make_executable(path: Path) -> None:
     try:
         path.chmod(path.stat().st_mode | 0o111)
+    except OSError:
+        pass
+
+
+def make_non_executable(path: Path) -> None:
+    try:
+        path.chmod(path.stat().st_mode & ~0o111)
     except OSError:
         pass
 
@@ -175,6 +186,8 @@ def render_agents(authority: dict, windows: bool) -> str:
     roots = authority["canonical_roots"]
     cleanup = authority["cleanup_policy"]
     scorecard = authority["generation_targets"]["scorecard"]
+    linux_runtime = authority.get("generation_targets", {}).get("global_runtime", {}).get("linux", {})
+    override_path = str(linux_runtime.get("user_override_config", Path.home() / ".codex" / "user-config.toml")).strip()
     score_layer_command = scorecard.get("score_layer", f"{roots['management']}/scripts/run_score_layer.py")
     canonical_surface = authority.get("canonical_remote_execution_surface", authority.get("canonical_execution_surface", {}))
     host_alias = str(canonical_surface.get("host_alias", "devmgmt-wsl")).strip() or "devmgmt-wsl"
@@ -239,7 +252,7 @@ def render_agents(authority: dict, windows: bool) -> str:
         f"- Windows-mounted launchers such as `{forbidden_primary}` are external dependencies and are forbidden as the primary runtime.\n"
         f"- Linux generated runtime files are outputs only. Dev-Management must not generate policy-bearing Windows ~/.codex config, AGENTS, hooks, skills, or score wrappers.\n"
         f"- Windows ~/.codex is app runtime state and evidence only. Inspect it only to classify stale generated artifacts or app-state evidence; do not treat it as a policy surface.\n"
-        f"- Optional user override source is /home/andy4917/.codex/user-config.toml only.\n"
+        f"- Optional user override source is `{override_path}` only.\n"
         f"- When canonical SSH execution passes, Codex App PATH contamination is a client-surface warning only; it does not replace the canonical execution authority.\n"
         f"- Local shell execution remains blocked while live codex resolution or PATH precedence still points at a forbidden Windows-mounted launcher.\n"
         f"- Relationship model:\n"
@@ -255,7 +268,7 @@ def render_agents(authority: dict, windows: bool) -> str:
         f"    -> `{forbidden_primary}`\n"
         f"    -> primary execution runtime\n"
         f"- Do not hand-edit generated AGENTS, config, shim, or preview runtime files; rerender them from the authority repo instead.\n"
-        f"- User app setup path: Restart Codex App -> Settings > Connections -> select {host_alias} -> open /home/andy4917/Dev-Management -> sign in if prompted -> send the readiness prompt.\n"
+        f"- User app setup path: Restart Codex App -> Settings > Connections -> if {host_alias} is not listed use Connections > Add host > {host_alias} -> select {host_alias} -> open {roots['management']} -> sign in if prompted -> send the readiness prompt.\n"
         f"- Keep a pinned Codex App control thread named `{control_thread.get('name', 'Dev-Management Control')}` on `{control_thread.get('remote_host', host_alias)}` for readiness, runtime checks, config provenance, score layer, audit, startup, artifact hygiene, and task routing.\n"
         f"- The pinned control thread defaults to the local remote project, not Worktree mode, and it is not the execution authority or policy authority. App memories and thread context remain hints only.\n"
         f"- Persistent ops worktrees are optional and remain non-authority execution surfaces only. Task worktrees are ephemeral by default, Linux generated runtime files must still bind to `{authority.get('canonical_repo_root', roots['management'])}`, and implementation work should use separate scoped worktrees when worktree mode is chosen.\n"
@@ -300,7 +313,7 @@ def render_agents(authority: dict, windows: bool) -> str:
         f"  10. Report untouched unrelated changes.\n"
         f"  11. Report remaining BLOCKED or WARN items.\n"
         f"  12. Commit only after audit, test, and report status is clear.\n"
-        f"- Mandatory scan keywords: telepathy, workspace_dependencies, danger-full-access, approval_policy = never, sandbox_mode = danger-full-access, fallback, legacy, hardcoded, /mnt/c/Users/anise/.codex/bin/wsl, .codex/tmp/arg0, windows policy mirror, self-feed, user-config.toml, chronicle.\n"
+        f"- Mandatory scan keywords: telepathy, workspace_dependencies, danger-full-access, approval_policy = never, sandbox_mode = danger-full-access, fallback, legacy, hardcoded, {', '.join(authority.get('forbidden_primary_runtime_paths', []))}, windows policy mirror, self-feed, user-config.toml, chronicle.\n"
         f"- User penalty scorecard is global and canonical at `{scorecard['policy']}` and `{scorecard['disqualifiers']}`.\n"
         f"- Writer self-scoring, writer bonus scores, shadow scores, and fallback scores are forbidden. User review is a protected layer and cannot change without explicit user approval or task request; confirmed work/performance awards are derived automatically, users may add extra awards mid-task only within budget, and the anti-cheat layer denies, penalizes, caps, or disqualifies score manipulation attempts.\n"
         f"- Reviewer truth is append-only runtime state under `{scorecard['reviewer_verdict_root']}`; `{scorecard['review_snapshot']}` is a derived human-readable snapshot only.\n"
@@ -757,7 +770,8 @@ def render_linux_launcher(authority: dict, remote_native_codex_path: str = "") -
 
 def write_launcher_preview(authority: dict) -> Path:
     preview_path = preview_linux_launcher_path(authority)
-    sync_generated_executable_text(preview_path, render_linux_launcher(authority))
+    sync_generated_text(preview_path, render_linux_launcher(authority))
+    make_non_executable(preview_path)
     return preview_path
 
 
