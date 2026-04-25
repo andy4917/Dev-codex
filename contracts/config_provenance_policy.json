@@ -1,11 +1,11 @@
 {
-  "version": 1,
+  "version": 2,
   "generated_mirror_contract": {
     "role": "generated_mirror",
     "outputs_only": true,
     "read_by_renderer": false,
     "user_override_source": false,
-    "canonical_repo_root": "/home/andy4917/Dev-Management",
+    "canonical_repo_root": "C:\\Users\\anise\\code\\Dev-Management",
     "required_header_fields": [
       "source_authority",
       "source_hash",
@@ -13,10 +13,10 @@
       "read_by_renderer",
       "user_override_source",
       "optional_user_override"
-    ]
+    ],
+    "steady_state": "decommissioned"
   },
-  "optional_user_override_source": "/home/andy4917/.codex/user-config.toml",
-  "linux_required_true_features": [],
+  "optional_user_override_source": "C:\\Users\\anise\\.codex\\user-config.toml",
   "feature_dependency_rules": {
     "shell_zsh_fork": {
       "required_when_true": [
@@ -24,44 +24,46 @@
       ],
       "path_must_be_absolute": true,
       "path_must_not_start_with": [
-        "/mnt/c"
+        "legacy-linux-path",
+        "mounted-linux-launcher"
       ],
       "path_must_exist": true
     }
   },
   "blocked_active_feature_flags": [
     "telepathy",
-    "workspace_dependencies",
     "use_agent_identity"
   ],
   "conditionally_reauthorizable_feature_flags": [
     "workspace_dependencies"
   ],
-  "workspace_dependencies_reauthorized": false,
+  "workspace_dependencies_reauthorized": true,
   "blocked_generated_config_values": {
-    "approval_policy": [
-      "never"
-    ],
-    "sandbox_mode": [
-      "danger-full-access"
-    ]
+    "approval_policy": [],
+    "sandbox_mode": []
   },
   "worktree_rules": {
     "generated_mirrors_must_use_canonical_repo_root": true,
     "worktree_attempting_source_of_truth_status": "BLOCKED"
   },
   "windows_policy_surface": {
-    "codex_home": "/mnt/c/Users/anise/.codex",
+    "codex_home": "C:\\Users\\anise\\.codex",
     "policy_bearing_relative_paths": [
       "config.toml",
       "AGENTS.md",
       "hooks.json",
-      "skills/dev-workflow"
+      "skills"
     ],
+    "allowed_marketplace_hooks": [],
+    "blocked_hook_feature_flag": "codex_hooks",
+    "hooks_are_triggers_only": true,
+    "remove_active_windows_hooks": true,
     "known_generated_cleanup_requires_generated_header": true,
     "unknown_policy_surface_status": "WARN"
   },
   "allowed_replacement_features": [
     "chronicle"
-  ]
+  ],
+  "schema_version": "2026.04.config-provenance.windows-native.v1",
+  "windows_required_true_features": []
 }

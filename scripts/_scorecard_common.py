@@ -4,7 +4,6 @@ import hashlib
 import hmac
 import json
 import os
-import platform
 import secrets
 import subprocess
 from datetime import datetime, timezone
@@ -38,11 +37,7 @@ def utc_timestamp() -> str:
 def codex_home() -> Path:
     override = os.environ.get("CODEX_HOME", "").strip()
     if override:
-        candidate = Path(override).expanduser()
-        in_wsl = "microsoft" in platform.release().lower() or Path("/proc/sys/fs/binfmt_misc/WSLInterop").exists()
-        candidate_text = str(candidate).replace("\\", "/").lower()
-        if not (in_wsl and candidate_text.startswith("/mnt/") and candidate.name == ".codex"):
-            return candidate.resolve()
+        return Path(override).expanduser().resolve()
     authority: dict[str, Any] = {}
     if DEFAULT_AUTHORITY_FILE.exists():
         try:
@@ -53,9 +48,9 @@ def codex_home() -> Path:
         except (OSError, json.JSONDecodeError):
             authority = {}
     runtime = authority.get("generation_targets", {}).get("global_runtime", {}) if isinstance(authority, dict) else {}
-    linux_agents = str(runtime.get("linux", {}).get("agents", "")).strip()
-    if linux_agents:
-        return Path(linux_agents).expanduser().resolve().parent
+    windows_config = str(runtime.get("windows", {}).get("config", "")).strip()
+    if windows_config:
+        return Path(windows_config).expanduser().resolve().parent
     scorecard = authority.get("generation_targets", {}).get("scorecard", {}) if isinstance(authority, dict) else {}
     lease_root = str(scorecard.get("workspace_authority_root", "")).strip()
     if lease_root:

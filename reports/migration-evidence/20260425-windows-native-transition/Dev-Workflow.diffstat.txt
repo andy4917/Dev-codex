@@ -1,0 +1,42 @@
+ .agents/plugins/marketplace.json                   |   0
+ .github/guardrails/eslint.config.mjs               |   0
+ .github/workflows/guardrails.yml                   |   0
+ config/guardrails/banned-patterns.json             |   0
+ config/guardrails/semgrep.yml                      |   0
+ .../codex-vibe-execution/.codex-plugin/plugin.json |   0
+ scripts/_common.py                                 |  10 +-
+ scripts/audit_execution_surfaces.py                |   0
+ scripts/check_context7.py                          |   0
+ scripts/check_dip.py                               |  33 ++--
+ scripts/check_hook_logs.py                         |   0
+ scripts/check_local_environments.py                |   0
+ scripts/check_runaway.py                           |   0
+ scripts/check_sync_conflicts.py                    |   0
+ scripts/check_syncthing.py                         |   0
+ scripts/check_toolchain.py                         |   0
+ scripts/check_traceability.py                      |   0
+ scripts/check_unknowns.py                          |   0
+ scripts/check_wsl_status.py                        |   0
+ scripts/delivery_gate.py                           | 193 +++++++++++++++++++--
+ scripts/guardrails/check_banned_patterns.py        |   0
+ scripts/guardrails/check_contract_surfaces.py      |   0
+ scripts/install_hooks.py                           |   0
+ scripts/install_or_repair_toolchain.py             |   0
+ scripts/session_router.py                          |   2 +-
+ scripts/update_wsl_and_ubuntu.py                   |   0
+ scripts/workspace_alignment/repair.py              |   0
+ skills/acceptance-writer/SKILL.md                  |   0
+ skills/anti-cheat-auditor/SKILL.md                 |   0
+ skills/architecture-pack/SKILL.md                  |   0
+ skills/benchmark-packet/SKILL.md                   |   0
+ skills/delivery-gate-reviewer/SKILL.md             |   0
+ skills/design-pack/SKILL.md                        |   0
+ skills/env-audit/SKILL.md                          |   0
+ skills/hook-log-review/SKILL.md                    |   0
+ skills/ops-packet/SKILL.md                         |   0
+ skills/proof-runner/SKILL.md                       |   0
+ skills/refactor-guard/SKILL.md                     |   0
+ skills/review-packet/SKILL.md                      |   0
+ skills/scope-lock/SKILL.md                         |   0
+ skills/session-router/SKILL.md                     |   0
+ 41 files changed, 211 insertions(+), 27 deletions(-)

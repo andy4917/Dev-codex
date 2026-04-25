@@ -17,8 +17,7 @@ WINDOWS_POLICY_RELATIVE_PATHS = {
     "config": Path("config.toml"),
     "agents": Path("AGENTS.md"),
     "hooks": Path("hooks.json"),
-    "skills": Path("skills") / "dev-workflow",
-    "wsl_launcher": Path("bin") / "wsl" / "codex",
+    "skills": Path("skills"),
 }
 
 
@@ -47,35 +46,54 @@ def windows_policy_paths(authority: dict[str, Any] | None = None) -> dict[str, P
         "agents": (codex_home / WINDOWS_POLICY_RELATIVE_PATHS["agents"]).resolve(),
         "hooks": (codex_home / WINDOWS_POLICY_RELATIVE_PATHS["hooks"]).resolve(),
         "skills": (codex_home / WINDOWS_POLICY_RELATIVE_PATHS["skills"]).resolve(),
-        "wsl_launcher": (codex_home / WINDOWS_POLICY_RELATIVE_PATHS["wsl_launcher"]).resolve(),
     }
 
 
 def runtime_paths(authority: dict[str, Any]) -> dict[str, Path]:
     runtime = authority.get("generation_targets", {}).get("global_runtime", {})
-    linux = runtime.get("linux", {})
+    windows = runtime.get("windows", {}) if isinstance(runtime.get("windows"), dict) else {}
+    linux = runtime.get("linux", {}) if isinstance(runtime.get("linux"), dict) else {}
     policy = _path_policy_for_authority(authority)
     authority_runtime = path_runtime_paths(policy)
     codex_home = codex_user_home(policy)
     windows_policy = windows_policy_paths(authority)
+    codex_cli = authority_runtime.get("codex_cli_bin", Path(str(windows.get("launcher", "codex"))))
+    config_path = Path(str(windows.get("config", codex_home / "config.toml"))).expanduser().resolve()
+    agents_path = Path(str(windows.get("agents", codex_home / "AGENTS.md"))).expanduser().resolve()
+    hooks_path = Path(str(windows.get("hooks_config", codex_home / "hooks.json"))).expanduser().resolve()
+    user_override_path = Path(
+        str(windows.get("user_override_config", codex_home / "user-config.toml"))
+    ).expanduser().resolve()
+    linux_config = Path(str(linux.get("config", codex_home / "decommissioned-linux-config.toml"))).expanduser().resolve()
+    linux_agents = Path(str(linux.get("agents", codex_home / "decommissioned-linux-AGENTS.md"))).expanduser().resolve()
+    linux_hooks = Path(str(linux.get("hooks_config", codex_home / "decommissioned-linux-hooks.json"))).expanduser().resolve()
+    linux_user_override = Path(
+        str(linux.get("user_override_config", codex_home / "decommissioned-linux-user-config.toml"))
+    ).expanduser().resolve()
     return {
-        "linux_config": Path(str(linux.get("config", codex_home / "config.toml"))).expanduser().resolve(),
-        "linux_agents": Path(str(linux.get("agents", codex_home / "AGENTS.md"))).expanduser().resolve(),
-        "linux_hooks": Path(str(linux.get("hooks_config", codex_home / "hooks.json"))).expanduser().resolve(),
-        "linux_user_override": Path(str(linux.get("user_override_config", codex_home / "user-config.toml"))).expanduser().resolve(),
-        "linux_launcher": Path(str(linux.get("launcher", Path.home() / ".local" / "bin" / "codex"))).expanduser().resolve(),
-        "linux_native_codex_cli": authority_runtime.get("codex_cli_bin", Path.home() / ".local" / "bin" / "codex"),
+        "windows_config": config_path,
+        "windows_agents": agents_path,
+        "windows_hooks": hooks_path,
+        "windows_user_override": user_override_path,
+        "windows_launcher": codex_cli,
+        "codex_cli_bin": codex_cli,
+        "linux_launcher": codex_cli,
+        "linux_config": linux_config,
+        "linux_agents": linux_agents,
+        "linux_hooks": linux_hooks,
+        "linux_user_override": linux_user_override,
+        "legacy_linux_config": linux_config,
+        "legacy_linux_agents": linux_agents,
         "observed_windows_codex_home": windows_policy["codex_home"],
         "observed_windows_policy_config": windows_policy["config"],
         "observed_windows_policy_agents": windows_policy["agents"],
         "observed_windows_policy_hooks": windows_policy["hooks"],
         "observed_windows_policy_skills": windows_policy["skills"],
-        "observed_windows_wsl_launcher": windows_policy["wsl_launcher"],
     }
 
 
 def canonical_surface(authority: dict[str, Any]) -> dict[str, Any]:
-    payload = authority.get("canonical_remote_execution_surface", authority.get("canonical_execution_surface", {}))
+    payload = authority.get("canonical_execution_surface", {})
     return payload if isinstance(payload, dict) else {}
 
 
@@ -97,7 +115,7 @@ def is_forbidden_runtime_value(value: str, authority: dict[str, Any]) -> bool:
         return False
     for raw in forbidden_runtime_paths(authority):
         marker = raw.replace("\\", "/").strip().lower()
-        if marker == ".codex/bin/wsl/codex" and normalized.endswith(marker):
+        if marker == "mounted-linux-launcher" and marker in normalized:
             return True
         if marker and marker in normalized:
             return True

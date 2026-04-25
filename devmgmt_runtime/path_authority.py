@@ -25,7 +25,7 @@ WINDOWS_POLICY_RELATIVE_PATHS = {
     "policy_config": Path("config.toml"),
     "agents": Path("AGENTS.md"),
     "hooks": Path("hooks.json"),
-    "skills": Path("skills") / "dev-workflow",
+    "skills": Path("skills"),
 }
 
 
@@ -120,6 +120,44 @@ def codex_user_home(policy: dict[str, Any] | None = None) -> Path:
     return (Path.home() / ".codex").resolve(strict=False)
 
 
+def linux_user_home(policy: dict[str, Any] | None = None) -> Path:
+    return codex_user_home(policy).parent.resolve(strict=False)
+
+
+def windows_user_home(policy: dict[str, Any] | None = None, authority: dict[str, Any] | None = None) -> Path:
+    return windows_codex_home(policy, authority=authority).parent.resolve(strict=False)
+
+
+def linux_home_prefix(policy: dict[str, Any] | None = None) -> Path:
+    payload = policy or load_path_policy()
+    roots = canonical_roots(payload)
+    devmgmt_root = roots.get("dev_management")
+    if devmgmt_root is not None:
+        return devmgmt_root.parent.resolve(strict=False)
+    return linux_user_home(payload)
+
+
+def workflow_doc_path(policy: dict[str, Any] | None = None) -> Path:
+    payload = policy or load_path_policy()
+    roots = canonical_roots(payload)
+    devmgmt_root = roots.get("dev_management")
+    if devmgmt_root is None:
+        devmgmt_root = get_devmgmt_root(payload)
+    return (devmgmt_root / "docs" / "GLOBAL_AGENT_WORKFLOW.md").resolve(strict=False)
+
+
+def windows_ssh_config_path(policy: dict[str, Any] | None = None, authority: dict[str, Any] | None = None) -> Path:
+    raise RuntimeError(r"C:\Users\anise\.ssh is decommissioned in the Windows-native runtime model")
+
+
+def linux_ssh_config_path(policy: dict[str, Any] | None = None) -> Path:
+    raise RuntimeError("Linux SSH config paths are decommissioned in the Windows-native runtime model")
+
+
+def linux_ssh_managed_config_path(policy: dict[str, Any] | None = None) -> Path:
+    raise RuntimeError("Linux managed SSH config paths are decommissioned in the Windows-native runtime model")
+
+
 def get_codex_cli_bin(policy: dict[str, Any] | None = None, env: dict[str, str] | None = None) -> Path:
     payload = policy or load_path_policy()
     runtime = runtime_paths(payload)
@@ -145,6 +183,7 @@ def env_export_view(policy: dict[str, Any] | None = None) -> dict[str, str]:
         "DEV_PRODUCT_ROOT": str(roots.get("dev_product", "")),
         "CANONICAL_EXECUTION_HOST": str(payload.get("canonical_execution_host", "")),
         "CODEX_CLI_BIN": str(runtime.get("codex_cli_bin", "")),
+        "CODEX_HOME": str(runtime.get("windows_codex_home", runtime.get("codex_user_home", ""))),
     }
 
 

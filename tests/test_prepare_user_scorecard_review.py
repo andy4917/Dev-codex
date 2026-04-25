@@ -344,8 +344,10 @@ class PrepareUserScorecardReviewTests(unittest.TestCase):
             self.assertEqual(prepare.returncode, 0, msg=prepare.stderr)
             snapshot = json.loads(snapshot_output.read_text(encoding="utf-8"))
             self.assertEqual(snapshot["run_id"], requested_run)
-            self.assertTrue(snapshot["evidence_inputs"]["evidence_manifest_path"].endswith(f"/{requested_run}/EVIDENCE_MANIFEST.json"))
-            self.assertTrue(snapshot["evidence_inputs"]["workorder_path"].endswith(f"/{requested_run}/WORKORDER.json"))
+            evidence_path = snapshot["evidence_inputs"]["evidence_manifest_path"].replace("\\", "/")
+            workorder_path = snapshot["evidence_inputs"]["workorder_path"].replace("\\", "/")
+            self.assertTrue(evidence_path.endswith(f"/{requested_run}/EVIDENCE_MANIFEST.json"))
+            self.assertTrue(workorder_path.endswith(f"/{requested_run}/WORKORDER.json"))
 
             compute = subprocess.run(
                 [

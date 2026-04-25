@@ -1,0 +1,356 @@
+## work/ui-workbench-recovery
+ D .codex_tmp/ota_dom_fallback_handoff.json
+ D .codex_tmp/ota_dom_fallback_memory.json
+ D .codex_tmp/ota_dom_fallback_regression.json
+ D .codex_tmp/ota_fetch_instrumentation_handoff.json
+ D .codex_tmp/ota_fetch_instrumentation_memory.json
+ D .codex_tmp/ota_fetch_instrumentation_regression.json
+ M .gitignore
+ M AGENTS.md
+ M README.md
+ D app_v2/main/appMode.ts
+ D app_v2/main/authRequirements.ts
+ D app_v2/main/bgeModelInstaller.ts
+ D app_v2/main/branchRuntimeConfig.ts
+ D app_v2/main/embeddingRuntime.ts
+ D app_v2/main/hybridCandidateEngine.ts
+ D app_v2/main/ipc.ts
+ D app_v2/main/liveReadActions.ts
+ D app_v2/main/main.ts
+ D app_v2/main/mainRuntimeStartup.ts
+ D app_v2/main/opsSheetApplyRunner.ts
+ D app_v2/main/preflight.ts
+ D app_v2/main/preload.ts
+ D app_v2/main/providerOperatingAdapter.ts
+ D app_v2/main/providerWorkspaceManager.ts
+ D app_v2/main/reservationActionRunner.ts
+ D app_v2/main/runtimeReadiness.ts
+ D app_v2/main/runtimeVerificationProcess.ts
+ D app_v2/main/settingsStore.ts
+ D app_v2/main/sheetReadiness.ts
+ D app_v2/main/smokeHarness.ts
+ D app_v2/main/window.ts
+ D app_v2/main/wingsSessionContract.ts
+ D app_v2/main/wingsSharedCredentials.ts
+ D app_v2/package.json
+ D app_v2/renderer/App.tsx
+ D app_v2/renderer/assets/uh-suite-logo.svg
+ D app_v2/renderer/env.d.ts
+ D app_v2/renderer/index.html
+ D app_v2/renderer/main.tsx
+ D app_v2/renderer/shellState.ts
+ D app_v2/renderer/styles/app.css
+ D app_v2/renderer/svg.d.ts
+ D app_v2/vite.config.ts
+ D core/allocation_engine.cpp
+ D core/allocation_engine.hpp
+ D core/bindings.cpp
+ D core/drift_engine.cpp
+ D core/drift_engine.hpp
+ D core/reconciliation_engine.cpp
+ D core/reconciliation_engine.hpp
+ D core/scan_engine.cpp
+ D core/scan_engine.hpp
+ M docs/architecture/APP_SINGLE_SOURCE_BLUEPRINT.md
+ M docs/architecture/TRUTH_SET_PROGRAM.md
+ M docs/integrations/INVENTORY_PLANNER.md
+ M docs/integrations/WINGS_PMS_INTEGRATION.md
+ D docs/runtime/ACTIVE_MEMORY.md
+ D docs/runtime/HANDOFF.md
+ D docs/runtime/PLAN.md
+ D docs/runtime/STAGE_V1_CHECKLIST.md
+ D docs/runtime/TASK_STATE.md
+ D docs/runtime/WORKSPACE_ALIGNMENT.md
+ M docs/sheets/SHEET_READ_SCAN_LOGIC.md
+ M docs/superpowers/plans/2026-03-20-bge-m3-readonly-expansion.md
+ M docs/superpowers/plans/2026-03-20-reservation-management-engineization.md
+ M docs/superpowers/plans/2026-04-03-hybrid-search-ai-assist-implementation.md
+ M docs/superpowers/specs/2026-04-03-hybrid-search-ai-assist-design.md
+ D extension/README.md
+ D extension/manifest.json
+ D extension/src/background.js
+ D extension/src/bridge/authBridge.js
+ D extension/src/bridge/infoBridge.js
+ D extension/src/bridge/providerAuthCapture.js
+ D extension/src/contracts/extension-contracts.d.ts
+ D extension/src/extensionBridge.entry.js
+ D extension/src/shared/entryPolicy.js
+ D extension/src/shared/syncPolicy.js
+ D manifest.json
+ M package.json
+ M pyproject.toml
+ D reservation_sheet_audit.py
+ D reservation_sheet_sync.py
+ D room_registry_baseline.json
+ M run-app.ps1
+ M scripts/analyze_wings_har_endpoints.py
+ M scripts/app_v2_artifact_check.mjs
+ M scripts/app_v2_electron_smoke.mjs
+ M scripts/app_v2_ota_apply_bridge.py
+ M scripts/app_v2_runtime_verify.mjs
+ M scripts/benchmark_har_paths.py
+ M scripts/build_truth_capture_bundle.py
+ M scripts/build_truth_room_alias_graph.py
+ M scripts/build_wings_capability_matrix.py
+ M scripts/check_contract_hygiene.py
+ D scripts/lib/atomicWriteJsonFile.mjs
+ D scripts/lib/workspace_alignment.py
+ M scripts/run-app-windows.cmd
+ M scripts/validate_truth_dataset.py
+ D scripts/workspace_alignment/check.py
+ D scripts/workspace_alignment/repair.py
+ M scripts/write-dist-app-package-json.mjs
+ M setup.py
+ D src/channel_executors/__init__.py
+ D src/channel_executors/naver_executor.py
+ D src/channel_executors/station_executor.py
+ D src/constants.js
+ D src/core_bridge/__init__.py
+ D src/core_bridge/allocation_bridge.py
+ D src/core_bridge/drift_bridge.py
+ D src/core_bridge/reconciliation_bridge.py
+ D src/core_bridge/runtime.py
+ D src/core_bridge/sheet_scan_bridge.py
+ D src/desktop/app-v2-contracts.ts
+ D src/desktop/app-v2-runtime-policy.ts
+ D src/domain.types.js
+ D src/domain/audit_engine.py
+ D src/domain/inventory_planner.py
+ D src/domain/ops_sheet_policy.py
+ D src/domain/report_policy.py
+ D src/domain/reservationPolicy.js
+ D src/domain/sheet_domain.py
+ D src/domain/sync_policy.py
+ D src/engine/noteKey.js
+ D src/engine/rules.js
+ D src/engine/scanEngine.js
+ D src/io/har_cache.py
+ D src/io/pms.fetch.js
+ D src/io/sheet_loader.py
+ D src/io/sheets.fetch.js
+ D src/io/sheets_api.py
+ D src/ota/__init__.py
+ D src/ota/adapters/__init__.py
+ D src/ota/adapters/agoda_adapter.py
+ D src/ota/adapters/airbnb_adapter.py
+ D src/ota/adapters/booking_adapter.py
+ D src/ota/adapters/http_json_adapter.py
+ D src/ota/adapters/naver_partner_adapter.py
+ D src/ota/adapters/trip_adapter.py
+ D src/ota/adapters/wings_har_adapter.py
+ D src/ota/base.py
+ D src/ota/models.py
+ D src/ota/registry.py
+ D src/pms/wings.adapter.js
+ D src/reconcile/sheet_reconcile.py
+ D src/report/opsWorkflowBridge.js
+ D src/report/ops_artifact_report.py
+ D src/report/ops_sheet_export.py
+ D src/report/ops_workflow.py
+ D src/report/report.format.js
+ D src/report/reservationVerification.js
+ D src/report/sheet_report.py
+ D src/report/validator.js
+ D src/scan/aggregator.js
+ D src/scan/blockBuilder.js
+ D src/scan/normalize.js
+ D src/scan/sheet_scan.py
+ D src/ui/tokens.json
+ D tasks/build_extension_unpacked.sh
+ D tasks/design-handoff/README.md
+ D tasks/design-handoff/handoff-input.md
+ D tasks/dryrun_coex_readonly.sh
+ D tasks/dryrun_gangnam_readonly.sh
+ D tasks/handoffs/NEXT_SESSION.md
+ M tests/regression_app_v2_arrival_single_board_contract.mjs
+ M tests/regression_app_v2_bge_install_contract.mjs
+ M tests/regression_app_v2_bge_readonly_expansion.mjs
+ M tests/regression_app_v2_cleanup_contract.mjs
+ M tests/regression_app_v2_end_user_shell_contract.mjs
+ M tests/regression_app_v2_error_management_contract.mjs
+ M tests/regression_app_v2_hybrid_candidate_engine.mjs
+ M tests/regression_app_v2_inventory_management_contract.mjs
+ M tests/regression_app_v2_live_bridge_contract.mjs
+ M tests/regression_app_v2_live_read_contract.mjs
+ M tests/regression_app_v2_live_read_proof_contract.mjs
+ M tests/regression_app_v2_management_engine_contract.mjs
+ M tests/regression_app_v2_no_legacy_refs.mjs
+ M tests/regression_app_v2_operating_boundary.mjs
+ M tests/regression_app_v2_operational_hardcoding_guard.mjs
+ M tests/regression_app_v2_ops_sheet_apply_contract.mjs
+ M tests/regression_app_v2_ops_workspace_contract.mjs
+ M tests/regression_app_v2_phase2_contract.mjs
+ M tests/regression_app_v2_preflight_settle_contract.mjs
+ M tests/regression_app_v2_provider_session_bootstrap.mjs
+ M tests/regression_app_v2_settings_reference_contract.mjs
+ M tests/regression_app_v2_sheet_room_detail_contract.mjs
+ M tests/regression_app_v2_shell_contract.mjs
+ M tests/regression_app_v2_sidebar_branding_contract.mjs
+ M tests/regression_app_v2_wings_login_contract.mjs
+ M tests/regression_extension_auth_info_modules.mjs
+ M tests/regression_extension_bridge_candidate_tags.mjs
+ M tests/regression_long_tail_source_enrichment_py.py
+ M tests/regression_product_flow_acceptance.mjs
+ M tests/regression_provider_room_mapping_guardrail.mjs
+ M tests/regression_reservation_verification_branch_guard.mjs
+ M tests/regression_sync_dryrun_action_counts_py.py
+ M tests/regression_sync_policy_shared_defaults.mjs
+ M tests/regression_truth_capture_builder_py.py
+ M tests/regression_truth_dataset_validator_py.py
+ M tests/regression_wings_capability_matrix_py.py
+ M tests/regression_wings_har_endpoint_analyzer_py.py
+ M tests/regression_wings_live_contracts.mjs
+ M tests/regression_workspace_alignment_py.py
+ D truth_dataset/CAPTURE_SPEC_v1.md
+ D truth_dataset/README.md
+ D truth_dataset/branch_provider_mapping_v1.json
+ D truth_dataset/canonical_data_contract_v1.schema.json
+ D truth_dataset/provider_channel_taxonomy_v1.json
+ D truth_dataset/reports/current_contract_gap_report.md
+ D truth_dataset/reports/wings_har_endpoint_catalog.json
+ D truth_dataset/reports/wings_har_endpoint_catalog.md
+ D truth_dataset/reports/wings_har_refresh_audit.md
+ D truth_dataset/reservation_identity_graph_v1.json
+ D truth_dataset/room_alias_graph_v1.json
+ D truth_dataset/wings_capability_matrix_v1.json
+ D truth_dataset/wings_live_contract_v2.json
+ M tsconfig.extension-contracts.json
+ M tsconfig.json
+ D ui-workbench/.gitignore
+ D ui-workbench/.storybook/main.js
+ D ui-workbench/.storybook/preview.js
+ D ui-workbench/README.md
+ D ui-workbench/package-lock.json
+ D ui-workbench/package.json
+ D ui-workbench/public/desktop-program-ui/arrival/Arrivallist.png
+ D ui-workbench/public/desktop-program-ui/arrival/arrivallist.md.md
+ D ui-workbench/public/desktop-program-ui/arrival/code.html
+ D ui-workbench/public/desktop-program-ui/cost/casher.md.md
+ D ui-workbench/public/desktop-program-ui/cost/cashermenu.png
+ D ui-workbench/public/desktop-program-ui/cost/code.html
+ D ui-workbench/public/desktop-program-ui/orderlist/code.html
+ D ui-workbench/public/desktop-program-ui/orderlist/orderlist.md.md
+ D ui-workbench/public/desktop-program-ui/orderlist/orderlist.png
+ D "ui-workbench/public/desktop-program-ui/reserv ota/code.html"
+ D "ui-workbench/public/desktop-program-ui/reserv ota/reservation ota menu.md.md"
+ D "ui-workbench/public/desktop-program-ui/reserv ota/reservation ota menu.png"
+ D ui-workbench/public/desktop-program-ui/roomavailable/code.html
+ D "ui-workbench/public/desktop-program-ui/roomavailable/roomavailable list.md.md"
+ D "ui-workbench/public/desktop-program-ui/roomavailable/roomavailable list.png"
+ D ui-workbench/public/desktop-program-ui/settings/DESIGN.md
+ D ui-workbench/public/desktop-program-ui/settings/code.html
+ D ui-workbench/public/desktop-program-ui/settings/screen.png
+ D "ui-workbench/public/desktop-program-ui/sitch_uh_sheet naver_station/code.html"
+ D "ui-workbench/public/desktop-program-ui/sitch_uh_sheet naver_station/coex\354\230\210\354\225\275\354\213\234\355\212\270.png"
+ D "ui-workbench/public/desktop-program-ui/sitch_uh_sheet naver_station/gangnam\354\230\210\354\225\275\354\213\234\355\212\270.png"
+ D "ui-workbench/public/desktop-program-ui/sitch_uh_sheet naver_station/sheet naver_station mark.md"
+ D "ui-workbench/public/desktop-program-ui/sitch_uh_sheet naver_station/sheet naver_station.png"
+ D "ui-workbench/public/desktop-program-ui/sitch_uh_sheet naver_station/\353\204\244\354\235\264\353\262\204_\354\212\244\355\205\214\354\235\264\354\205\230 \354\213\234\355\212\270\354\236\254\352\263\240\355\221\234.png"
+ D "ui-workbench/public/desktop-program-ui/sitch_uh_sheet naver_station/\354\204\240\353\246\211 \354\230\210\354\225\275\354\213\234\355\212\270.png"
+ D ui-workbench/public/desktop-program-ui/stitch_uh_Arrival_manager/Arrival_manager.md
+ D ui-workbench/public/desktop-program-ui/stitch_uh_Arrival_manager/code.html
+ D ui-workbench/public/desktop-program-ui/stitch_uh_Arrival_manager/stitch_uh_Arrival_manager.png
+ D "ui-workbench/public/desktop-program-ui/stitch_uh_Arrival_manager/\354\226\264\353\235\274\354\235\264\353\262\214 \354\213\234\355\212\270.png"
+ D "ui-workbench/public/desktop-program-ui/stitch_uh_Arrival_manager/\354\226\264\353\235\274\354\235\264\353\262\21412lco.png"
+ D ui-workbench/public/desktop-program-ui/stitch_uh_Cashing_manager/Cashing_manager.md
+ D ui-workbench/public/desktop-program-ui/stitch_uh_Cashing_manager/code.html
+ D ui-workbench/public/desktop-program-ui/stitch_uh_Cashing_manager/stitch_uh_Cashing_manager.png
+ D ui-workbench/public/desktop-program-ui/stitch_uh_orderlist_manager/code.html
+ D ui-workbench/public/desktop-program-ui/stitch_uh_orderlist_manager/orderlist_manager.md
+ D ui-workbench/public/desktop-program-ui/stitch_uh_orderlist_manager/stitch_uh_orderlist_manager.png
+ D "ui-workbench/public/desktop-program-ui/stitch_uh_orderlist_manager/\354\230\244\353\215\224\353\246\254\354\212\244\355\212\270.png"
+ D "ui-workbench/public/desktop-program-ui/stitch_uh_roomavailable_manager/RA\354\236\220\354\204\270\355\236\210\353\263\264\352\270\260.png"
+ D ui-workbench/public/desktop-program-ui/stitch_uh_roomavailable_manager/code.html
+ D ui-workbench/public/desktop-program-ui/stitch_uh_roomavailable_manager/roomavailable_manager.md
+ D ui-workbench/public/desktop-program-ui/stitch_uh_roomavailable_manager/roomavailablewings.png
+ D ui-workbench/public/desktop-program-ui/stitch_uh_roomavailable_manager/stitch_uh_roomavailable_manager.png
+ D ui-workbench/public/desktop-program-ui/stitch_uh_settings_manager/code.html
+ D ui-workbench/public/desktop-program-ui/stitch_uh_settings_manager/settings_manager.md
+ D ui-workbench/public/desktop-program-ui/stitch_uh_settings_manager/stitch_uh_settings_manager.png
+ D "ui-workbench/public/desktop-program-ui/\354\204\240\353\246\211_\352\260\225\353\202\250 \354\226\264\353\235\274\354\235\264\353\262\214.png"
+ D ui-workbench/public/stitch-recovery/manifest.json
+ D ui-workbench/public/stitch-recovery/stitch_/DESIGN.md
+ D ui-workbench/public/stitch-recovery/stitch_/code.html
+ D ui-workbench/public/stitch-recovery/stitch_/screen.png
+ D ui-workbench/public/stitch-recovery/stitch_uh_task_manager/DESIGN.md
+ D ui-workbench/public/stitch-recovery/stitch_uh_task_manager/code.html
+ D ui-workbench/public/stitch-recovery/stitch_uh_task_manager/screen.png
+ D ui-workbench/public/stitch-recovery/stitch_uh_task_manager_(1)/DESIGN.md
+ D ui-workbench/public/stitch-recovery/stitch_uh_task_manager_(1)/code.html
+ D ui-workbench/public/stitch-recovery/stitch_uh_task_manager_(1)/screen.png
+ D ui-workbench/public/stitch-recovery/stitch_uh_task_manager_(2)/DESIGN.md
+ D ui-workbench/public/stitch-recovery/stitch_uh_task_manager_(2)/code.html
+ D ui-workbench/public/stitch-recovery/stitch_uh_task_manager_(2)/screen.png
+ D ui-workbench/public/stitch-recovery/stitch_uh_task_manager_(3)/DESIGN.md
+ D ui-workbench/public/stitch-recovery/stitch_uh_task_manager_(3)/code.html
+ D ui-workbench/public/stitch-recovery/stitch_uh_task_manager_(3)/screen.png
+ D ui-workbench/public/stitch-recovery/stitch_uh_task_manager_(4)/DESIGN.md
+ D ui-workbench/public/stitch-recovery/stitch_uh_task_manager_(4)/code.html
+ D ui-workbench/public/stitch-recovery/stitch_uh_task_manager_(4)/screen.png
+ D ui-workbench/public/stitch-recovery/stitch_uh_task_manager_(5)/DESIGN.md
+ D ui-workbench/public/stitch-recovery/stitch_uh_task_manager_(5)/code.html
+ D ui-workbench/public/stitch-recovery/stitch_uh_task_manager_(5)/screen.png
+ D ui-workbench/stories/desktopProgramUi.stories.js
+ D ui-workbench/stories/stitchRecovery.stories.js
+ D ui-workbench/stories/workbenchHelpers.js
+ M uv.lock
+ M "\354\225\261 \354\213\244\355\226\211.cmd"
+?? .agents/
+?? .editorconfig
+?? .env.example
+?? .envrc
+?? .gitattributes
+?? .github/
+?? Makefile
+?? apps/
+?? contracts/
+?? docs/ARCHITECTURE.md
+?? docs/BENCHMARK_PROTOCOL.md
+?? docs/DESIGN.md
+?? docs/OBSIDIAN.md
+?? docs/PRODUCT_REQUIREMENTS.md
+?? docs/examples/
+?? ops/
+?? packages/
+?? scripts/_common.py
+?? scripts/audit_execution_surfaces.py
+?? scripts/benchmark_prepare.py
+?? scripts/bootstrap_real_env.py
+?? scripts/build_inventory_cpp_core.py
+?? scripts/check_bundle_sync.py
+?? scripts/check_context7.py
+?? scripts/check_dip.py
+?? scripts/check_file_organization.py
+?? scripts/check_hook_logs.py
+?? scripts/check_local_environments.py
+?? scripts/check_path_visibility.py
+?? scripts/check_runaway.py
+?? scripts/check_serena.py
+?? scripts/check_sync_conflicts.py
+?? scripts/check_syncthing.py
+?? scripts/check_toolchain.py
+?? scripts/check_traceability.py
+?? scripts/check_unknowns.py
+?? scripts/check_wsl_status.py
+?? scripts/configure_syncthing.py
+?? scripts/delivery_gate.py
+?? scripts/export_obsidian_notes.py
+?? scripts/human_bottleneck_patch.py
+?? scripts/install_hooks.py
+?? scripts/install_or_repair_toolchain.py
+?? scripts/issue_workspace_authority.py
+?? scripts/lib
+?? scripts/memory_checkpoint.py
+?? scripts/memory_resume.py
+?? scripts/preflight_product.py
+?? scripts/project_setup.py
+?? scripts/run_acceptance.py
+?? scripts/session_router.py
+?? scripts/sitecustomize.py
+?? scripts/summarize_benchmark_results.py
+?? scripts/update_wsl_and_ubuntu.py
+?? scripts/workspace_alignment
+?? support/
+?? tests/regression_global_scorecard_bridge_py.py
+?? tests/sitecustomize.py
+?? tsconfig.base.json

@@ -1,0 +1,320 @@
+## codex/sshfirst
+ T .patch-links/regression_app_v2_no_legacy_refs.mjs
+ M contracts/app_surface_policy.json
+ M contracts/config_provenance_policy.json
+ M contracts/context7_policy.json
+ M contracts/environment_sync_policy.json
+ M contracts/execution_surfaces.json
+ M contracts/experiment_policy.json
+ M contracts/human_bottleneck_rules.json
+ M contracts/memory_policy.json
+ M contracts/path_authority_policy.json
+ M contracts/spawn_policy.json
+ M contracts/syncthing_policy.json
+ M contracts/toolchain_policy.json
+ M contracts/workspace_authority.json
+ M devmgmt_runtime/path_authority.py
+ M devmgmt_runtime/paths.py
+ M devmgmt_runtime/subprocess_safe.py
+ M devmgmt_runtime/windows_policy.py
+ M docs/AGENT_GUARDRAILS.md
+ D docs/CLOSE_OUT.md
+ M docs/CODEX_APP_USER_SETUP.md
+ M docs/CONTEXT7_USAGE.md
+ D docs/DEPENDENCY_INVERSION.md
+ M docs/GLOBAL_RUNTIME_ARCHITECTURE.md
+ D docs/HOOKS_WSL.md
+ D docs/LOCAL_ENVIRONMENTS.md
+ M docs/PROMPT_BLOCKS.md
+ D docs/RELEASE_PLAN.md
+ D docs/ROLLBACK.md
+ M docs/RUNBOOK.md
+ D docs/SESSION_THREAD_CONTAMINATION_AUDIT.md
+ D docs/SYNCTHING.md
+ D docs/TOOLCHAIN.md
+ D docs/USER_READINESS.md
+ M docs/USER_SCORECARD.md
+ D "mermaid-diagram (4).png"
+ D "mermaid-diagram (5).png"
+ D migration_manifest.json
+ D quarantine/artifact-hygiene/20260420-212308/reports/manual-system-remediation-20260421-041812.md
+ D quarantine/artifact-hygiene/20260420-212308/reports/manual-system-remediation-20260421-044434.md
+ D quarantine/artifact-hygiene/20260420-212308/reports/manual-system-remediation-20260421-050309.md
+ D quarantine/artifact-hygiene/20260420-212308/reports/manual-system-remediation-20260421-050414.md
+ D quarantine/artifact-hygiene/20260420-212308/reports/manual-system-remediation-20260421-054128.md
+ D quarantine/artifact-hygiene/20260420-212308/reports/manual-system-remediation-20260421-054219.md
+ D quarantine/artifact-hygiene/20260420-212308/reports/manual-system-remediation-20260421-054742.md
+ D quarantine/artifact-hygiene/20260420-212308/reports/manual-system-remediation-20260421-055136.md
+ D quarantine/artifact-hygiene/20260420-213517/reports/manual-system-remediation-20260421-062256.md
+ D quarantine/artifact-hygiene/20260420-213517/reports/manual-system-remediation-20260421-063150.md
+ D quarantine/artifact-hygiene/20260421-082651/reports/manual-system-remediation-20260421-063444.md
+ D quarantine/artifact-hygiene/20260421-082651/reports/manual-system-remediation-20260421-112829.md
+ D quarantine/artifact-hygiene/20260421-082651/reports/manual-system-remediation-20260421-120815.md
+ D quarantine/artifact-hygiene/20260421-082651/reports/manual-system-remediation-20260421-125212.md
+ D quarantine/artifact-hygiene/20260421-082651/reports/manual-system-remediation-20260421-160853.md
+ D quarantine/artifact-hygiene/20260421-082651/reports/manual-system-remediation-20260421-160921.md
+ D quarantine/artifact-hygiene/20260421-082651/reports/manual-system-remediation-20260421-161815.md
+ D quarantine/artifact-hygiene/20260421-082651/reports/manual-system-remediation-20260421-171910.md
+ D quarantine/artifact-hygiene/20260421-083152/reports/manual-system-remediation-20260421-172001.md
+ M reports/active-config-smoke.final.json
+ M reports/active-config-smoke.final.md
+ D reports/app-restart-after-root-cause-closeout-v2.md
+ D reports/app-restart-after-windows-mirror-removal.md
+ D reports/app-usability.closeout-v2.final-dry-run.json
+ D reports/app-usability.closeout-v2.final-dry-run.md
+ M reports/app-usability.final-dry-run.json
+ M reports/app-usability.final-dry-run.md
+ D reports/app-usability.root-cause-removal.final-dry-run.json
+ D reports/app-usability.root-cause-removal.final-dry-run.md
+ D reports/artifact-hygiene.closeout-v2.final.json
+ D reports/artifact-hygiene.closeout-v2.final.md
+ D reports/artifact-hygiene.closeout-v2.pre.json
+ D reports/artifact-hygiene.closeout-v2.pre.md
+ M reports/artifact-hygiene.final.json
+ M reports/artifact-hygiene.final.md
+ D reports/artifact-hygiene.root-cause-removal.final.json
+ D reports/artifact-hygiene.root-cause-removal.final.md
+ D reports/artifact-hygiene.root-removal.final.json
+ D reports/artifact-hygiene.root-removal.final.md
+ D reports/artifact-hygiene.unified-phase.final.json
+ D reports/artifact-hygiene.unified-phase.final.md
+ D reports/artifact-hygiene.unified-phase.json
+ D reports/artifact-hygiene.unified-phase.md
+ D reports/audit.closeout-v2.final.json
+ D reports/audit.closeout-v2.pre.json
+ M reports/audit.final.json
+ D reports/audit.pre-gate.json
+ D reports/audit.pre-modular-app-finalization.json
+ D reports/audit.pre-root-cause-removal.json
+ D reports/audit.root-cause-removal.final.json
+ D reports/audit.root-removal.final.json
+ D reports/audit.unified-phase.final.json
+ D reports/canonical-runtime-activation.dry-run.json
+ D reports/canonical-runtime-activation.json
+ D reports/cleanup_report.json
+ D reports/closeout-v2-inventory.json
+ D reports/closeout-v2-inventory.md
+ D reports/codex-app-installed-release-impact.unified-phase.json
+ D reports/codex-app-installed-release-impact.unified-phase.md
+ M reports/codex-app-usability-final.json
+ M reports/codex-app-usability-final.md
+ M reports/codex-runtime-repair.json
+ D reports/codex-runtime-repair.unified-phase.pre-apply.json
+ D reports/config-provenance.closeout-v2.final.json
+ D reports/config-provenance.closeout-v2.final.md
+ D reports/config-provenance.closeout-v2.pre.json
+ D reports/config-provenance.closeout-v2.pre.md
+ M reports/config-provenance.final.json
+ M reports/config-provenance.final.md
+ D reports/config-provenance.pre-modular-app-finalization.json
+ D reports/config-provenance.pre-modular-app-finalization.md
+ D reports/config-provenance.pre-root-cause-removal.json
+ D reports/config-provenance.pre-root-cause-removal.md
+ D reports/config-provenance.root-cause-removal.final.json
+ D reports/config-provenance.root-cause-removal.final.md
+ D reports/config-provenance.root-removal.final.json
+ D reports/config-provenance.root-removal.final.md
+ D reports/config-provenance.unified-phase.final.json
+ D reports/config-provenance.unified-phase.final.md
+ D reports/config-provenance.unified-phase.json
+ D reports/config-provenance.unified-phase.md
+ D reports/execution-surfaces.now.json
+ M reports/generated-runtime-preview/codex-ssh-wrapper.sh
+ M reports/git-surface.final.json
+ M reports/git-surface.final.md
+ D reports/git-surface.json
+ D reports/git-surface.pre-modular-app-finalization.json
+ D reports/git-surface.pre-unified-phase.json
+ D reports/git-surface.unified-phase.final.json
+ D reports/global-runtime.after-activation.json
+ D reports/global-runtime.closeout-v2.final.json
+ D reports/global-runtime.closeout-v2.pre.json
+ M reports/global-runtime.final.json
+ M reports/global-runtime.json
+ D reports/global-runtime.pre-modular-app-finalization.json
+ D reports/global-runtime.pre-unified-phase.json
+ D reports/global-runtime.root-cause-removal.final.json
+ D reports/global-runtime.root-removal.final.json
+ D reports/global-runtime.unified-phase.final.json
+ D reports/global-runtime.unified-phase.json
+ D reports/hook-readiness.closeout-v2.final.json
+ D reports/hook-readiness.closeout-v2.final.md
+ D reports/hook-readiness.closeout-v2.pre.json
+ D reports/hook-readiness.closeout-v2.pre.md
+ M reports/hook-readiness.final.json
+ D reports/hook-readiness.root-cause-removal.final.json
+ D reports/hook-readiness.root-cause-removal.final.md
+ D reports/hook-readiness.unified-phase.final.json
+ D reports/hook-readiness.unified-phase.final.md
+ D reports/hook-readiness.unified-phase.json
+ D reports/hook-readiness.unified-phase.md
+ D reports/instruction-guard.pre-modular-app-finalization.json
+ D reports/instruction-guard.pre-unified-phase.json
+ D reports/instruction-guard.unified-phase.final.json
+ D reports/inventory.after.json
+ D reports/inventory.before.json
+ D reports/inventory.summary.json
+ D reports/inventory.windows.json
+ D reports/inventory.wsl.json
+ D reports/legacy-root-removal-inventory.json
+ D reports/legacy-root-removal-inventory.md
+ M reports/linux-native-codex-cli-activation.final.json
+ M reports/linux-native-codex-cli-activation.final.md
+ D reports/linux-native-codex-cli-activation.unified-phase.json
+ D reports/linux-native-codex-cli-activation.unified-phase.md
+ D reports/manual-system-remediation-20260421-172656.md
+ D reports/migration-evidence.unified-phase.final.json
+ D reports/migration-verification.json
+ D reports/modularization-compatibility-review.json
+ D reports/modularization-compatibility-review.md
+ D reports/path-preflight.root-removal.final.json
+ D reports/path-preflight.root-removal.final.md
+ D reports/path-visibility.json
+ D reports/quarantine-and-dead-surface.closeout-v2.json
+ D reports/quarantine-and-dead-surface.closeout-v2.md
+ D reports/quarantine-inertness.root-removal.json
+ D reports/quarantine-inertness.root-removal.md
+ D reports/score-layer.closeout-v2.final.json
+ D reports/score-layer.closeout-v2.final.md
+ D reports/score-layer.closeout-v2.pre.json
+ D reports/score-layer.closeout-v2.pre.md
+ M reports/score-layer.final.json
+ M reports/score-layer.final.md
+ D reports/score-layer.pre-root-cause-removal.json
+ D reports/score-layer.pre-root-cause-removal.md
+ D reports/score-layer.root-cause-removal.final.json
+ D reports/score-layer.root-cause-removal.final.md
+ D reports/score-layer.root-removal.final.json
+ D reports/score-layer.unified-phase.final.json
+ D reports/score-layer.unified-phase.final.md
+ D reports/serena-startup-repair.apply.json
+ D reports/serena-startup-repair.json
+ M reports/serena-startup.final-dry-run.json
+ D reports/serena-startup.unified-phase.dry-run.json
+ D reports/startup-workflow.after-activation.json
+ D reports/startup-workflow.closeout-v2.final.json
+ M reports/startup-workflow.final.json
+ M reports/startup-workflow.json
+ D reports/startup-workflow.pre-modular-app-finalization.json
+ D reports/startup-workflow.pre-unified-phase.json
+ D reports/startup-workflow.root-cause-removal.final.json
+ D reports/startup-workflow.unified-phase.final.json
+ D reports/toolchain-surface.closeout-v2.final.json
+ D reports/toolchain-surface.closeout-v2.final.md
+ D reports/toolchain-surface.closeout-v2.pre.json
+ D reports/toolchain-surface.closeout-v2.pre.md
+ M reports/toolchain-surface.final.json
+ M reports/toolchain-surface.final.md
+ D reports/toolchain-surface.pre-modular-app-finalization.json
+ D reports/toolchain-surface.pre-modular-app-finalization.md
+ D reports/toolchain-surface.pre-root-cause-removal.json
+ D reports/toolchain-surface.pre-root-cause-removal.md
+ D reports/toolchain-surface.root-cause-removal.final.json
+ D reports/toolchain-surface.root-cause-removal.final.md
+ D reports/toolchain-surface.root-removal.final.json
+ D reports/toolchain-surface.root-removal.final.md
+ D reports/toolchain-surface.unified-phase.final.json
+ D reports/toolchain-surface.unified-phase.final.md
+ D reports/toolchain-surface.unified-phase.json
+ D reports/toolchain-surface.unified-phase.md
+ D reports/toolchain.parity.json
+ D reports/toolchain.windows.json
+ D reports/toolchain.windows.preview.json
+ D reports/toolchain.wsl.json
+ D reports/toolchain.wsl.preview.json
+ D reports/warn-disposition.closeout-v2.json
+ D reports/warn-disposition.closeout-v2.md
+ D reports/warn-disposition.root-removal.json
+ D reports/warn-disposition.root-removal.md
+ D reports/windows-app-ssh-remote-readiness.closeout-v2.refresh.json
+ D reports/windows-app-ssh-remote-readiness.closeout-v2.refresh.md
+ M reports/windows-app-ssh-remote-readiness.final.json
+ M reports/windows-app-ssh-remote-readiness.final.md
+ D reports/windows-app-ssh-remote-readiness.unified-phase.json
+ D reports/windows-app-ssh-remote-readiness.unified-phase.md
+ D reports/windows-codex-policy-mirror-removal.apply.json
+ D reports/windows-codex-policy-mirror-removal.closeout-v2.dry-run.json
+ D reports/windows-codex-policy-mirror-removal.dry-run.json
+ D reports/windows-codex-policy-mirror-removal.final-dry-run.json
+ D reports/windows-codex-policy-surface.root-removal.apply.json
+ D reports/windows-codex-policy-surface.root-removal.json
+ D reports/windows-codex-policy-surface.root-removal.md
+ D reports/windows-skill-dev-workflow-disposition.json
+ D reports/windows-skill-dev-workflow-disposition.md
+ D reports/windows-ssh-probe-dedup.closeout-v2.json
+ D reports/windows-ssh-probe-dedup.closeout-v2.md
+ M scripts/activate_codex_app_usability.py
+ M scripts/audit_workspace.py
+ M scripts/check_active_config_smoke.py
+ M scripts/check_artifact_hygiene.py
+ M scripts/check_config_provenance.py
+ M scripts/check_git_surface.py
+ M scripts/check_hook_readiness.py
+ M scripts/check_toolchain_surface.py
+ M scripts/check_windows_app_ssh_readiness.py
+ D scripts/generate_closeout_v2_reports.py
+ M scripts/iaw_closeout.py
+ M scripts/preflight_path_context.py
+ D scripts/remove_windows_codex_policy_mirrors.py
+ M scripts/render_codex_runtime.py
+ M scripts/repair_codex_desktop_runtime.py
+ M scripts/run_score_layer.py
+ D scripts/verify_migration_evidence.py
+ M tests/test_audit_workspace_contract.py
+ M tests/test_check_config_provenance.py
+ D tests/test_closeout_v2_reports.py
+ M tests/test_codex_app_usability.py
+ D tests/test_hostile_boundary_meta.py
+ D tests/test_quarantine_hostile_audit.py
+ M tests/test_repair_codex_desktop_runtime.py
+ M tests/test_score_layer.py
+ M tests/test_subprocess_safe.py
+ D tests/test_verify_migration_evidence.py
+ M tests/test_windows_app_ssh_readiness.py
+ D tests/test_windows_codex_policy_mirror_removal.py
+?? contracts/global_agent_workflow_policy.json
+?? contracts/user_dev_environment_policy.json
+?? contracts/workspace_structure_policy.json
+?? devmgmt_runtime/reference_graph.py
+?? devmgmt_runtime/retention.py
+?? docs/GLOBAL_AGENT_WORKFLOW.md
+?? docs/USER_DEV_ENVIRONMENT_BASELINE.md
+?? reports/app-remote-access-blocker-analysis.final.json
+?? reports/app-remote-access-blocker-analysis.final.md
+?? reports/app-remote-access-blocker-analysis.json
+?? reports/app-remote-access-blocker-analysis.md
+?? reports/codex-runtime-repair.after-app-close.json
+?? reports/codex-runtime-repair.after-app-close.log
+?? reports/codex-runtime-repair.blocked-live-app.json
+?? reports/codex-runtime-repair.live-dry-run.json
+?? reports/global-agent-workflow.final.json
+?? reports/global-agent-workflow.final.md
+?? reports/path-preflight.final.json
+?? reports/path-preflight.final.md
+?? reports/reference-graph.final.json
+?? reports/reference-graph.final.md
+?? reports/retention-manifest.final.json
+?? reports/retention-manifest.final.md
+?? reports/user-dev-environment-baseline.final.json
+?? reports/user-dev-environment-baseline.final.md
+?? reports/warn-disposition.windows-codex-control-plane.json
+?? reports/windows-codex-control-plane.reset-attempt.json
+?? reports/windows-codex-control-plane.reset-attempt.md
+?? reports/windows-codex-control-plane.validation.json
+?? reports/windows-codex-control-plane.validation.md
+?? reports/workspace-structure.final.json
+?? reports/workspace-structure.final.md
+?? scripts/check_global_agent_workflow.py
+?? scripts/check_user_dev_environment.py
+?? scripts/check_workspace_structure.py
+?? scripts/generate_reference_graph.py
+?? scripts/generate_retention_manifest.py
+?? scripts/repair_windows_app_bootstrap.py
+?? tests/test_check_user_dev_environment.py
+?? tests/test_global_agent_workflow.py
+?? tests/test_path_preflight.py
+?? tests/test_reference_graph.py
+?? tests/test_repair_windows_app_bootstrap.py
+?? tests/test_retention_manifest.py
+?? tests/test_user_dev_environment_policy.py
+?? tests/test_workspace_structure.py

@@ -12,7 +12,7 @@
         "forbidden Windows launcher primary runtime",
         "active stale config flag",
         "Dev-Management generated Windows policy-bearing file present",
-        "Windows app SSH unreachable"
+        "Codex App local project not ready"
       ]
     }
   },
@@ -24,7 +24,7 @@
     "thread_context_is_hint_only": true
   },
   "worktree_policy": {
-    "canonical_repo_root": "/home/andy4917/Dev-Management",
+    "canonical_repo_root": "C:\\Users\\anise\\code\\Dev-Management",
     "persistent_ops_worktree_allowed_only_when_explicitly_enabled": true,
     "persistent_ops_worktree_is_authority": false,
     "task_worktrees_are_ephemeral": true,
@@ -34,7 +34,7 @@
     "worktree_source_of_truth_escalation_status": "BLOCKED"
   },
   "references": {
-    "user_score_policy": "/home/andy4917/Dev-Management/contracts/user_score_policy.json",
-    "disqualifier_policy": "/home/andy4917/Dev-Management/contracts/disqualifier_policy.json"
+    "user_score_policy": "C:\\Users\\anise\\code\\Dev-Management/contracts/user_score_policy.json",
+    "disqualifier_policy": "C:\\Users\\anise\\code\\Dev-Management/contracts/disqualifier_policy.json"
   }
 }

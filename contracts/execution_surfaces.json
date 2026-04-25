@@ -1,30 +1,15 @@
 {
-  "version": 2,
-  "canonical_execution_surface_id": "ssh-devmgmt-wsl",
-  "canonical_remote_execution_surface_id": "ssh-devmgmt-wsl",
+  "version": 4,
+  "canonical_execution_surface_id": "local-windows-agent",
+  "canonical_remote_execution_surface_id": "decommissioned",
   "surfaces": [
     {
-      "id": "windows-native",
+      "id": "local-windows-agent",
       "roles": [
-        "primary_user_control_surface",
-        "remote_session_control_surface",
+        "canonical_execution_surface",
         "app_host",
-        "ssh_client_surface"
-      ],
-      "authority": false
-    },
-    {
-      "id": "wsl-ubuntu",
-      "roles": [
-        "local_execution_surface",
-        "diagnostic_surface"
-      ],
-      "authority": false
-    },
-    {
-      "id": "ssh-devmgmt-wsl",
-      "roles": [
-        "canonical_remote_execution_surface"
+        "primary_user_control_surface",
+        "local_git_surface"
       ],
       "authority": true
     }
@@ -33,24 +18,25 @@
     "git",
     "python",
     "node",
-    "npm"
+    "npm",
+    "pwsh"
   ],
   "optional_tool_families": [
-    "uv"
+    "uv",
+    "docker",
+    "dotnet",
+    "gh"
   ],
   "missing_reason_taxonomy": [
     "not_installed",
     "not_on_path",
     "surface_mismatch",
     "policy_intentional",
-    "unconfirmed",
-    "canonical_runtime_unavailable"
+    "unconfirmed"
   ],
   "surface_gate_rules": {
     "required_missing_status": "BLOCKED",
     "optional_missing_status": "HOLD",
-    "wsl_distro_missing_status": "BLOCKED",
-    "canonical_ssh_unavailable_status": "BLOCKED",
     "exclude_environment_blocked_runs_from_variant_scoring": true
   },
   "local_vs_remote_mismatch_rules": {
@@ -66,39 +52,34 @@
   },
   "forbidden_path_contamination_rules": {
     "blocked_prefixes": [
-      "/mnt/c/Users/anise/.codex/bin/wsl",
-      "/mnt/c/Users/anise/.codex/tmp/arg0"
+      "legacy-linux-path",
+      "mounted-linux-launcher"
     ],
-    "blocked_suffixes": [
-      ".codex/bin/wsl/codex"
-    ],
+    "blocked_suffixes": [],
     "front_loaded_arg0_status": "BLOCKED"
   },
   "codex_resolution_precedence_rules": {
-    "preferred_primary_resolution": "linux-native Codex CLI on canonical SSH runtime login-shell PATH",
-    "allowed_fallback_resolution": "repo-generated local SSH wrapper",
-    "forbidden_primary_resolution": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
+    "preferred_primary_resolution": "Windows-native Codex app agent with PowerShell 7",
+    "forbidden_primary_resolution": "legacy Linux/remote route or mounted launcher",
     "status_on_forbidden_resolution": "BLOCKED"
   },
   "generated_mirror_rules": {
-    "linux_mirror": "/home/andy4917/.codex/config.toml",
-    "optional_user_override_source": "/home/andy4917/.codex/user-config.toml",
+    "windows_control_plane": "C:\\Users\\anise\\.codex\\config.toml",
     "mirrors_are_outputs_only": true,
     "generated_mirror_self_feed_status": "BLOCKED"
   },
   "windows_policy_surface_rules": {
-    "codex_home": "/mnt/c/Users/anise/.codex",
+    "codex_home": "C:\\Users\\anise\\.codex",
     "policy_bearing_relative_paths": [
       "config.toml",
       "AGENTS.md",
       "hooks.json",
-      "skills/dev-workflow"
+      "skills"
     ],
-    "known_generated_cleanup_requires_generated_header": true,
     "unknown_policy_surface_status": "WARN"
   },
   "worktree_policy": {
-    "canonical_repo_root": "/home/andy4917/Dev-Management",
+    "canonical_repo_root": "C:\\Users\\anise\\code\\Dev-Management",
     "persistent_ops_worktree_allowed": false,
     "persistent_ops_worktree_enablement": "explicit_only",
     "persistent_ops_worktree_root": "",
@@ -124,20 +105,20 @@
     "cleanup_and_handoff_required": true
   },
   "git_surface_drift_rules": {
-    "mixed_windows_and_wsl_execution_status": "BLOCKED",
-    "windows_git_observation_only": true,
+    "windows_git_observation_only": false,
     "local_dirty_state_status": "WARN",
     "lfs_missing_status": "WARN",
     "stale_safe_directory_status": "WARN",
     "stale_persistent_worktree_status": "WARN",
     "branch_checked_out_in_multiple_locations_status": "BLOCKED",
-    "worktree_authority_escalation_status": "BLOCKED"
+    "worktree_authority_escalation_status": "BLOCKED",
+    "mixed_windows_and_legacy_linux_execution_status": "BLOCKED"
   },
   "app_surface_rules": {
     "codex_app_role": "primary_user_control_surface",
-    "codex_app_remote_session_role": "remote_session_control_surface",
+    "codex_app_remote_session_role": "decommissioned",
     "windows_codex_state_role": "app_state_evidence_only",
-    "windows_codex_launcher_role": "external_dependency_forbidden_primary_runtime"
+    "windows_codex_launcher_role": "external_dependency"
   },
   "release_driven_audit_surfaces": {
     "codex_app_installed_release": true,
@@ -160,8 +141,8 @@
     "package.json",
     "pyproject.toml",
     "contracts/project_policy.json",
-    "management:docs/LOCAL_ENVIRONMENTS.md",
     "management:docs/RUNBOOK.md",
-    "management:docs/CLOSE_OUT.md"
+    "management:docs/USER_DEV_ENVIRONMENT_BASELINE.md",
+    "management:docs/GLOBAL_RUNTIME_ARCHITECTURE.md"
   ]
 }

@@ -296,8 +296,10 @@ class ComputeUserScorecardV12Tests(unittest.TestCase):
             support = self.module._load_support_artifacts({"run_id": requested_run, "evidence_inputs": {}}, workspace)
 
         self.assertEqual(support["evidence_manifest"]["run_id"], requested_run)
-        self.assertTrue(str(support["evidence_manifest_path"]).endswith(f"/{requested_run}/EVIDENCE_MANIFEST.json"))
-        self.assertTrue(str(support["workorder_path"]).endswith(f"/{requested_run}/WORKORDER.json"))
+        evidence_path = str(support["evidence_manifest_path"]).replace("\\", "/")
+        workorder_path = str(support["workorder_path"]).replace("\\", "/")
+        self.assertTrue(evidence_path.endswith(f"/{requested_run}/EVIDENCE_MANIFEST.json"))
+        self.assertTrue(workorder_path.endswith(f"/{requested_run}/WORKORDER.json"))
         self.assertEqual(support["workorder"]["objective"], "requested run")
 
 

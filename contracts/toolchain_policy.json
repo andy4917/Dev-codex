@@ -4,24 +4,24 @@
     "required_tools": [
       "git",
       "pwsh",
-      "wt",
-      "wsl",
-      "ubuntu",
       "python",
-      "pipx",
-      "uv",
-      "7zip"
+      "node",
+      "npm"
     ],
     "optional_tools": [
-      "node",
-      "npm",
       "corepack",
       "pnpm",
       "syncthing",
       "winget",
       "choco",
       "scoop",
-      "vs_build_tools"
+      "vs_build_tools",
+      "7zip",
+      "docker",
+      "dotnet",
+      "gh",
+      "uv",
+      "pipx"
     ],
     "repairable_path_tools": [
       "git",
@@ -119,96 +119,15 @@
       }
     }
   },
-  "wsl": {
-    "required_tools": [
-      "git",
-      "curl",
-      "wget",
-      "zip",
-      "unzip",
-      "jq",
-      "rsync",
-      "file",
-      "tree",
-      "ca_certificates",
-      "openssh_client",
-      "bubblewrap",
-      "build_essential",
-      "make",
-      "gcc",
-      "gxx",
-      "cmake",
-      "pkg_config",
-      "python3",
-      "python3_pip",
-      "python3_venv",
-      "pipx",
-      "uv",
-      "nvm",
-      "node",
-      "npm",
-      "corepack",
-      "pnpm",
-      "dos2unix",
-      "sqlite3",
-      "electron_runtime"
-    ],
-    "optional_tools": [
-      "yarn",
-      "syncthing"
-    ],
-    "apt_packages": {
-      "git": "git",
-      "curl": "curl",
-      "wget": "wget",
-      "zip": "zip",
-      "unzip": "unzip",
-      "jq": "jq",
-      "rsync": "rsync",
-      "file": "file",
-      "tree": "tree",
-      "ca_certificates": "ca-certificates",
-      "openssh_client": "openssh-client",
-      "bubblewrap": "bubblewrap",
-      "build_essential": "build-essential",
-      "make": "make",
-      "gcc": "gcc",
-      "gxx": "g++",
-      "cmake": "cmake",
-      "pkg_config": "pkg-config",
-      "python3": "python3",
-      "python3_pip": "python3-pip",
-      "python3_venv": "python3-venv",
-      "pipx": "pipx",
-      "dos2unix": "dos2unix",
-      "sqlite3": "sqlite3",
-      "electron_runtime": [
-        "libnss3",
-        "libasound2t64",
-        "libxss1",
-        "libgtk-3-0t64",
-        "libatk-bridge2.0-0t64",
-        "libcups2t64"
-      ],
-      "syncthing": "syncthing"
-    },
-    "script_installers": {
-      "uv": "curl -LsSf https://astral.sh/uv/install.sh | sh",
-      "nvm": "curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash",
-      "node_bundle": "export NVM_DIR=\"$HOME/.nvm\" && . \"$NVM_DIR/nvm.sh\" && nvm install --lts && nvm alias default 'lts/*' && corepack enable && corepack prepare pnpm@latest --activate && (command -v yarn >/dev/null 2>&1 || npm install -g yarn)"
-    }
-  },
   "blocked_conditions": [
     "administrator_privilege_required",
     "reboot_required",
     "gui_or_license_approval_required",
-    "wsl_first_boot_pending",
     "network_or_repository_failure",
     "destructive_overwrite_required"
   ],
   "app_surface_features": [
     "remote_connections",
-    "windows_wsl_agent_selection",
     "integrated_terminal",
     "multiple_terminals",
     "plugins",
@@ -216,7 +135,6 @@
     "subagents",
     "plugin_mcp_surface",
     "workspace_dependencies",
-    "hooks",
     "chronicle",
     "projectless_chats",
     "automations",
@@ -225,10 +143,38 @@
     "settings_sync",
     "computer_use",
     "in_app_browser",
-    "linux_native_codex_cli",
     "serena",
     "context7"
   ],
+  "ai_python_packages": {
+    "langchain": {
+      "distribution": "langchain",
+      "role": "RAG and external integration library when a repo contract calls for it"
+    },
+    "langgraph": {
+      "distribution": "langgraph",
+      "role": "workflow graph and agent orchestration library when a repo contract calls for it"
+    },
+    "openai-agents": {
+      "distribution": "openai-agents",
+      "role": "OpenAI Agents Python SDK"
+    },
+    "mcp": {
+      "distribution": "mcp",
+      "role": "Python MCP client/server integration support"
+    }
+  },
+  "marketplace_artifacts": {
+    "skills": [
+      {
+        "package": "Leonxlnx/taste-skill/skills/minimalist-skill",
+        "installed_path": "C:\\Users\\anise\\.agents\\skills\\minimalist-skill",
+        "role": "optional UI workflow style module",
+        "authority": "workflow_only"
+      }
+    ],
+    "hooks": []
+  },
   "usage_provenance": {
     "report_path": "reports/toolchain-usage.session.json",
     "required_keys": [
@@ -238,18 +184,12 @@
     "projectless_chat_block_when_repo_root_missing": true,
     "multiple_terminal_path_mismatch_status": "WARN",
     "selected_execution_terminal_contaminated_status": "BLOCKED",
+    "windows_hooks_disabled": true,
     "hooks_are_trigger_only": true
   },
   "workspace_dependency_policy": {
     "disabled_and_unused": "PASS",
     "disabled_but_required": "WARN",
     "enabled_but_unaudited": "WARN"
-  },
-  "linux_native_codex_cli_policy": {
-    "user_level_prefix": "/home/andy4917/.local/share/dev-management/codex-npm",
-    "forbidden_primary_runtime_paths": [
-      "/mnt/c/Users/anise/.codex/bin/wsl/codex",
-      ".codex/tmp/arg0"
-    ]
   }
 }

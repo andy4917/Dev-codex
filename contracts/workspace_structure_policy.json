@@ -1,0 +1,134 @@
+{
+  "schema_version": "2026.04.workspace-structure.windows-native.v1",
+  "workspace_root": "C:\\Users\\anise\\code",
+  "taxonomy": [
+    "CLI_SHELL",
+    "CORE_RUNTIME",
+    "CONTRACT_AUTHORITY",
+    "DOCS",
+    "SDK",
+    "SCRIPTS",
+    "TOOLS",
+    "PATCHES",
+    "THIRD_PARTY",
+    "CONFIG_ENV",
+    "GENERATED_EVIDENCE",
+    "TESTS",
+    "SKILLS",
+    "PRODUCT_SOURCE",
+    "USER_CONTROL_PLANE",
+    "APP_STATE",
+    "EXTERNAL_DEPENDENCY",
+    "DECOMMISSIONED",
+    "STALE_OR_MISPLACED"
+  ],
+  "root_roles": {
+    "Dev-Management": {
+      "path": "C:\\Users\\anise\\code\\Dev-Management",
+      "role": "CONTRACT_AUTHORITY",
+      "required": true
+    },
+    "Dev-Workflow": {
+      "path": "C:\\Users\\anise\\code\\Dev-Workflow",
+      "role": "SDK",
+      "required": true
+    },
+    "Dev-Product": {
+      "path": "C:\\Users\\anise\\code\\Dev-Product",
+      "role": "PRODUCT_SOURCE",
+      "required": true
+    },
+    ".codex": {
+      "path": "C:\\Users\\anise\\.codex",
+      "role": "USER_CONTROL_PLANE",
+      "app_state": true,
+      "repo_authority": false,
+      "required": true
+    },
+    ".ssh": {
+      "path": "C:\\Users\\anise\\.ssh",
+      "role": "DECOMMISSIONED",
+      "required": false,
+      "expected_absent": true
+    },
+    "Documents/PowerShell": {
+      "path": "C:\\Users\\anise\\Documents\\PowerShell",
+      "role": "CONFIG_ENV",
+      "required": true
+    }
+  },
+  "windows_codex_surface": {
+    "path": "C:\\Users\\anise\\.codex",
+    "role": "USER_CONTROL_PLANE",
+    "app_state": true,
+    "repo_authority": false,
+    "authoritative": true,
+    "workspace_structure_authority": false
+  },
+  "dev_management_roles": {
+    "contracts": {
+      "role": "CONTRACT_AUTHORITY",
+      "required": true
+    },
+    "devmgmt_runtime": {
+      "role": "CORE_RUNTIME",
+      "required": true
+    },
+    "docs": {
+      "role": "DOCS",
+      "required": true
+    },
+    "scripts": {
+      "role": "SCRIPTS",
+      "required": true
+    },
+    "tests": {
+      "role": "TESTS",
+      "required": true
+    },
+    "reports": {
+      "role": "GENERATED_EVIDENCE",
+      "required": true
+    },
+    "tools": {
+      "role": "TOOLS",
+      "required": false
+    },
+    "patches": {
+      "role": "PATCHES",
+      "required": false
+    },
+    "third_party": {
+      "role": "THIRD_PARTY",
+      "required": false
+    },
+    ".agents/skills": {
+      "role": "SKILLS",
+      "required": false
+    }
+  },
+  "documentation_requirements": {
+    "tools": [
+      "README.md",
+      "manifest.json",
+      "MANIFEST.json"
+    ],
+    "patches": [
+      "README.md",
+      "manifest.json",
+      "MANIFEST.json"
+    ],
+    "third_party": [
+      "README.md",
+      "manifest.json",
+      "MANIFEST.json"
+    ]
+  },
+  "invariants": {
+    "reports_are_evidence_only": true,
+    "windows_codex_not_workspace_authority": true,
+    "no_file_moves_in_this_phase": false,
+    "product_repos_out_of_scope": false,
+    "windows_codex_is_app_control_plane": true
+  }
+}

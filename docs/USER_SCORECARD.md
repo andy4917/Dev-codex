@@ -2,9 +2,9 @@
 
 ## Scope
 
-- canonical policy root: `/home/andy4917/Dev-Management`
-- runtime mirror: `/home/andy4917/.codex/AGENTS.md`
-- generated runtime hooks: `/home/andy4917/.codex/hooks.json`
+- canonical policy root: `$DEVMGMT_ROOT`
+- runtime mirror: `$CODEX_HOME/AGENTS.md`
+- generated runtime hooks: `$CODEX_HOME/hooks.json`
 - scorecard policy: `contracts/user_score_policy.json`
 - disqualifier policy: `contracts/disqualifier_policy.json`
 - authoritative reviewer verdict root: `$CODEX_HOME/state/reviewer-verdicts/<codex_project_id>/<trace_id>/`
@@ -90,8 +90,8 @@ Unsigned, wrong-signature, or wrong-provenance verdicts are ignored and recorded
 ## Commands
 
 ```bash
-python /home/andy4917/Dev-Management/scripts/iaw_closeout.py --workspace-root /home/andy4917/Dev-Product/<project> --run-id <run_id> --profile <L1|L2|L3|L4> --mode verify
-python /home/andy4917/Dev-Management/scripts/record_reviewer_verdict.py --workspace-root /home/andy4917/Dev-Product/<project> --trace-id <trace_id> --role skeptic_reviewer --status APPROVED --green true --input-report <context.json>
+python "$DEVMGMT_ROOT/scripts/iaw_closeout.py" --workspace-root "$DEV_PRODUCT_ROOT/<project>" --run-id <run_id> --profile <L1|L2|L3|L4> --mode verify
+python "$DEVMGMT_ROOT/scripts/record_reviewer_verdict.py" --workspace-root "$DEV_PRODUCT_ROOT/<project>" --trace-id <trace_id> --role skeptic_reviewer --status APPROVED --green true --input-report <context.json>
 ```
 
 `iaw_closeout.py` is the only accepted verify or release close-out entrypoint. It canonicalizes the workspace root, verifies the authority lease and evidence manifest, runs the global `prepare -> audit(pre-gate) -> delivery_gate -> audit(pre-export) -> export -> audit(post-export) -> score-layer` sequence, then issues the signed gate receipt.

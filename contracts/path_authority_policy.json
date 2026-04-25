@@ -1,10 +1,10 @@
 {
-  "schema_version": "2026.04.path-authority.v1",
-  "canonical_execution_host": "devmgmt-wsl",
+  "schema_version": "2026.04.path-authority.windows-native.v1",
+  "canonical_execution_host": "local-windows",
   "canonical_roots": {
-    "dev_management": "/home/andy4917/Dev-Management",
-    "dev_workflow": "/home/andy4917/Dev-Workflow",
-    "dev_product": "/home/andy4917/Dev-Product"
+    "dev_management": "C:\\Users\\anise\\code\\Dev-Management",
+    "dev_workflow": "C:\\Users\\anise\\code\\Dev-Workflow",
+    "dev_product": "C:\\Users\\anise\\code\\Dev-Product"
   },
   "legacy_root_aliases": {
     "management": "dev_management",
@@ -12,29 +12,34 @@
     "product": "dev_product"
   },
   "runtime_paths": {
-    "codex_cli_bin": "/home/andy4917/.local/share/dev-management/codex-npm/bin/codex",
-    "codex_user_home": "/home/andy4917/.codex",
-    "windows_codex_home": "/mnt/c/Users/anise/.codex"
+    "codex_cli_bin": "C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.422.2437.0_x64__2p2nqsd0c76g0\\app\\resources\\codex.exe",
+    "codex_user_home": "C:\\Users\\anise\\.codex",
+    "windows_codex_home": "C:\\Users\\anise\\.codex",
+    "dev_management_scratch": "C:\\Users\\anise\\code\\.scratch\\Dev-Management",
+    "migration_evidence": "C:\\Users\\anise\\code\\Dev-Management\\reports\\migration-evidence\\20260425-windows-native-transition",
+    "powershell_profile": "C:\\Users\\anise\\Documents\\PowerShell\\Microsoft.PowerShell_profile.ps1",
+    "powershell_utf8_policy": "C:\\Users\\anise\\Documents\\PowerShell\\policies\\utf8.ps1",
+    "powershell_native_args_policy": "C:\\Users\\anise\\Documents\\PowerShell\\policies\\native-args.ps1"
   },
   "allowed_env_vars": [
     "DEVMGMT_ROOT",
     "DEV_WORKFLOW_ROOT",
     "DEV_PRODUCT_ROOT",
     "CANONICAL_EXECUTION_HOST",
-    "CODEX_CLI_BIN"
+    "CODEX_CLI_BIN",
+    "CODEX_HOME"
   ],
   "forbidden_primary_paths": [
-    "/mnt/c/Users/anise/.codex/bin/wsl",
-    "/mnt/c/Users/anise/.codex/tmp/arg0",
-    "/mnt/c/Users/anise/.codex/bin/wsl/codex"
+    "legacy-linux-path",
+    "mounted-linux-launcher",
+    "legacy-remote-route"
   ],
   "windows_surfaces": {
-    "ssh_config": "bootstrap_allowed",
-    "codex_home": "app_state_only",
-    "policy_config": "forbidden",
-    "agents": "forbidden",
-    "hooks": "forbidden",
-    "skills": "forbidden"
+    "codex_home": "app_control_plane",
+    "policy_config": "app_control_plane_allowed",
+    "agents": "global_custom_instructions_allowed",
+    "hooks": "user_approved_marketplace_allowed_with_explicit_policy",
+    "skills": "app_owned_or_user_approved_allowed"
   },
   "path_rules": {
     "no_hardcoded_user_absolute_paths_in_source": true,
@@ -46,10 +51,14 @@
       "contracts/",
       "reports/",
       "tests/",
-      ".env.example"
+      ".env.example",
+      "docs/AI_TOOLCHAIN_USAGE.md",
+      "docs/CODEX_APP_USER_SETUP.md",
+      "docs/GLOBAL_RUNTIME_ARCHITECTURE.md"
     ],
     "targeted_docs_enforced": [
       "docs/AGENT_GUARDRAILS.md",
+      "docs/AI_TOOLCHAIN_USAGE.md",
       "docs/RUNBOOK.md",
       "docs/CODEX_APP_USER_SETUP.md",
       "docs/GLOBAL_RUNTIME_ARCHITECTURE.md"
@@ -57,17 +66,22 @@
     "scan_roots": [
       "devmgmt_runtime",
       "scripts"
+    ],
+    "legacy_linux_literals_forbidden_in_active_source": [
+      "legacy-linux-path",
+      "mounted-linux-launcher",
+      "legacy-remote-route"
     ]
   },
   "path_resolution_priority": [
     "exported environment view when present and exact-match validated",
-    "path authority contract canonical values",
+    "path authority contract canonical Windows values",
     "path helper derived pathlib paths"
   ],
   "compatibility": {
-    "mode": "dual-read",
-    "workspace_authority_role": "legacy compatibility mirror only",
+    "mode": "windows-native-only",
+    "workspace_authority_role": "compatibility mirror only until workspace_authority is fully compacted",
     "divergence_status": "BLOCKED",
-    "removal_phase": "post-path-authority-cutover"
+    "removal_phase": "post-windows-native-cutover"
   }
 }

@@ -1,0 +1,197 @@
+{
+  "version": 6,
+  "windows_surface": {
+    "codex_app_ui": "OpenAI Codex App on Windows is the primary user interface and session control surface.",
+    "windows_native_agent": "Canonical local execution surface. The agent runs commands in PowerShell on Windows.",
+    "windows_codex_control_plane": "Windows .codex is USER_CONTROL_PLANE + APP_STATE, not repo authority.",
+    "repo_workspace": "C:\\Users\\anise\\code"
+  },
+  "linux_decommission": {
+    "steady_state_role": "none",
+    "preserve_until_verified": false,
+    "delete_allowed_only_after": [
+      "windows_native_checks_pass",
+      "migration_evidence_captured",
+      "repo_remotes_and_heads_verified"
+    ],
+    "source_roots_role": "migration_evidence_already_captured",
+    "decommission_status": "completed_by_user_authorized_cleanup"
+  },
+  "forbidden": {
+    "mnt_c_active_repo_roots": true,
+    "generated_mirror_self_feed": true,
+    "legacy_remote_as_app_route": true,
+    "legacy_linux_as_execution_authority": true,
+    "unverified_delete_of_migration_evidence": true
+  },
+  "scratch_surface": {
+    "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management",
+    "role": "git_untracked_external_scratch",
+    "repo_root_codex_scripts_forbidden": true
+  },
+  "ssh_decommission": {
+    "path": "C:\\Users\\anise\\.ssh",
+    "status": "deleted_by_user_authorized_cleanup",
+    "active_development_surface": false,
+    "secret_values_reported": false
+  },
+  "powershell_policy_surface": {
+    "root": "C:\\Users\\anise\\Documents\\PowerShell",
+    "profile": "C:\\Users\\anise\\Documents\\PowerShell\\Microsoft.PowerShell_profile.ps1",
+    "profile_d": "C:\\Users\\anise\\Documents\\PowerShell\\profile.d",
+    "modules": "C:\\Users\\anise\\Documents\\PowerShell\\Modules",
+    "policies": {
+      "utf8": "C:\\Users\\anise\\Documents\\PowerShell\\policies\\utf8.ps1",
+      "native_args": "C:\\Users\\anise\\Documents\\PowerShell\\policies\\native-args.ps1"
+    }
+  },
+  "allowed_user_settings": {
+    "memories": true,
+    "model": true,
+    "model_reasoning_effort": true,
+    "web_search": true,
+    "ux": true,
+    "workspace_preference": true,
+    "sign_in": true,
+    "ui_preference": true,
+    "approval_policy": true,
+    "sandbox_mode": true,
+    "custom_instructions": true,
+    "projects_trust_state": true,
+    "windows_preferences": true,
+    "hooks": "disabled_remove_active_hook_surfaces",
+    "mcp_servers": [
+      "context7",
+      "serena"
+    ],
+    "skills": true
+  },
+  "app_control_plane": {
+    "role": "windows_native_app_control_plane",
+    "default_mode": "validate_report_only",
+    "source_of_user_intent": true,
+    "devmgmt_overwrite_by_default": false,
+    "allowed_mcp_servers": [
+      "context7",
+      "serena"
+    ]
+  },
+  "windows_codex_boundary": {
+    "role": "WINDOWS_NATIVE_CONTROL_PLANE_VALIDATED",
+    "final_closeout_requires_exact_minimal_bootstrap": false,
+    "allow_full_access_for_trusted_windows_roots": true,
+    "default_mode": "validate_report_only",
+    "safe_top_level_keys": [
+      "approval_policy",
+      "features",
+      "mcp_servers",
+      "memories",
+      "model",
+      "model_reasoning_effort",
+      "projects",
+      "sandbox_mode",
+      "shell_zsh_fork",
+      "ux",
+      "web_search",
+      "windows",
+      "workspace_preference",
+      "zsh_path",
+      "marketplaces",
+      "plugins"
+    ],
+    "safe_feature_keys": [
+      "memories",
+      "remote_connections",
+      "remote_control",
+      "workspace_dependencies"
+    ],
+    "warn_only_unknown_top_level_keys": true,
+    "warn_only_unknown_feature_keys": true,
+    "target_approval_policy": "never",
+    "target_sandbox_mode": "danger-full-access",
+    "target_windows_sandbox": "elevated",
+    "user_selected_runtime_preferences": [
+      "model_reasoning_effort"
+    ],
+    "required_local_project_roots": [
+      "C:\\Users\\anise\\code\\Dev-Management",
+      "C:\\Users\\anise\\code\\Dev-Workflow",
+      "C:\\Users\\anise\\code\\Dev-Product"
+    ],
+    "allowed_mcp_servers": [
+      "context7",
+      "serena"
+    ],
+    "blocked_top_level_keys": [
+      "hooks",
+      "telepathy"
+    ],
+    "blocked_feature_keys": [
+      "telepathy"
+    ],
+    "blocked_runtime_markers": [
+      "linux_home_path",
+      "mounted_linux_path",
+      "linux_unc_mount",
+      "legacy_remote_host"
+    ],
+    "blocked_authority_markers": [],
+    "blocked_value_rules": {
+      "approval_policy": [],
+      "sandbox_mode": [],
+      "shell_zsh_fork_requires_valid_windows_or_tool_path": true
+    },
+    "agents": {
+      "allow_zero_byte_placeholder": true,
+      "allow_pointer_only_placeholder": true,
+      "allow_user_managed_short_global_instructions": true,
+      "block_secret_material": true,
+      "pointer_text": "Before work, read and follow:\nC:\\Users\\anise\\code\\Dev-Management\\docs\\GLOBAL_AGENT_WORKFLOW.md\n\nCodex App is my UI and Windows-native execution control plane. Repo-specific stack and commands come from that repo's AGENTS.md and package scripts.\n\nUse Serena for codebase exploration, Context7 for external docs, and tests/reports for final claims.\n"
+    },
+    "skills": {
+      "allow_empty_directory": true,
+      "allow_app_owned_or_user_approved_markdown_only": true,
+      "allow_app_owned_system_bundle": true,
+      "block_generated_mirror": true,
+      "block_unapproved_executable_payloads": true,
+      "block_authority_claims": true
+    },
+    "hooks": {
+      "allow_user_approved_marketplace_hooks": false,
+      "allowed_packages": [],
+      "blocked_feature_flag": "codex_hooks",
+      "hooks_are_triggers_only": true,
+      "remove_active_windows_hooks": true,
+      "block_authority_claims": true
+    },
+    "mcp": {
+      "allowed_servers": [
+        "context7",
+        "serena"
+      ],
+      "block_unknown_local_executables": true,
+      "block_authority_claims": true,
+      "block_secret_like_fields_from_reports": true
+    },
+    "repair_behavior": {
+      "default_mode": "validate_report_only",
+      "do_not_delete_user_app_settings_by_default": true,
+      "do_not_create_backups_in_windows_codex": true,
+      "do_not_modify_product_repos": true
+    }
+  },
+  "manual_remediation": {
+    "powershell_profile": "Keep Documents\\PowerShell\\Microsoft.PowerShell_profile.ps1 dot-sourcing policies\\utf8.ps1 and policies\\native-args.ps1.",
+    "windows_git_global": "Set core.autocrlf=false and core.safecrlf=true.",
+    "docker_desktop": "Docker is optional and used for build, verification, packaging, and integration checks, not canonical local execution.",
+    "legacy_runtime_cleanup": "Legacy Linux runtime has been removed; keep migration evidence until explicitly cleaned."
+  },
+  "target_app_config": {
+    "path": "C:\\Users\\anise\\.codex\\config.toml",
+    "approval_policy": "never",
+    "sandbox_mode": "danger-full-access",
+    "windows_sandbox": "elevated"
+  },
+  "canonical_execution_host": "local-windows",
+  "expected_repo_root_prefix": "C:\\Users\\anise\\code"
+}

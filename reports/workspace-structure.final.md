@@ -1,0 +1,692 @@
+# Workspace Structure
+
+- Status: PASS
+- Workspace root: C:\Users\anise\code
+- Management root: C:\Users\anise\code\Dev-Management
+
+## Checks
+- [PASS] policy
+- [PASS] workspace_roots
+  - Dev-Management => CONTRACT_AUTHORITY: ok
+  - Dev-Workflow => SDK: ok
+  - Dev-Product => PRODUCT_SOURCE: ok
+  - .codex => USER_CONTROL_PLANE: ok
+  - .ssh => DECOMMISSIONED: ok
+  - Documents/PowerShell => CONFIG_ENV: ok
+- [PASS] windows_codex_surface
+- [PASS] dev_management_layout
+  - contracts => CONTRACT_AUTHORITY: ok
+  - devmgmt_runtime => CORE_RUNTIME: ok
+  - docs => DOCS: ok
+  - scripts => SCRIPTS: ok
+  - tests => TESTS: ok
+  - reports => GENERATED_EVIDENCE: ok
+  - tools => TOOLS: optional path is absent
+  - patches => PATCHES: optional path is absent
+  - third_party => THIRD_PARTY: optional path is absent
+  - .agents/skills => SKILLS: optional path is absent
+
+## Folder Tree
+- Max depth: 3
+- Excluded dirs: .git, .mypy_cache, .pytest_cache, .ruff_cache, .venv, __pycache__, node_modules
+
+### Dev-Management (CONTRACT_AUTHORITY, detailed)
+- Path: C:\Users\anise\code\Dev-Management
+- Dev-Management/
+  - .patch-links/
+    - regression_app_v2_no_legacy_refs.mjs
+  - .serena/
+    - cache/
+      - al/
+      - python/
+    - memories/
+      - children: 0 dirs, 0 files, 0 skipped
+    - .gitignore
+    - project.local.yml
+    - project.yml
+  - contracts/
+    - app_surface_policy.json
+    - config_provenance_policy.json
+    - context7_policy.json
+    - disqualifier_policy.json
+    - execution_surfaces.json
+    - experiment_policy.json
+    - global_agent_workflow_policy.json
+    - human_bottleneck_rules.json
+    - instruction_guard_policy.json
+    - memory_policy.json
+    - path_authority_policy.json
+    - score_policy.json
+    - serena_policy.json
+    - spawn_policy.json
+    - toolchain_policy.json
+    - user_dev_environment_policy.json
+    - user_score_policy.json
+    - workspace_authority.json
+    - workspace_structure_policy.json
+  - devmgmt_runtime/
+    - __init__.py
+    - authority.py
+    - path_authority.py
+    - paths.py
+    - redaction.py
+    - reference_graph.py
+    - reports.py
+    - retention.py
+    - status.py
+    - subprocess_safe.py
+    - windows_policy.py
+  - docs/
+    - AGENT_GUARDRAILS.md
+    - AI_TOOLCHAIN_USAGE.md
+    - CODEX_APP_USER_SETUP.md
+    - CONTEXT7_USAGE.md
+    - GLOBAL_AGENT_WORKFLOW.md
+    - GLOBAL_RUNTIME_ARCHITECTURE.md
+    - PREREQUISITES.md
+    - PROMPT_BLOCKS.md
+    - RUNBOOK.md
+    - SERENA_USAGE.md
+    - USER_DEV_ENVIRONMENT_BASELINE.md
+    - USER_SCORECARD.md
+  - quarantine/
+    - 2026-04-16/
+      - preexisting-dev-management-agent/
+      - reservation-system-runtime/
+    - artifact-hygiene/
+      - 20260420-212308/
+      - 20260420-213517/
+      - 20260421-082651/
+      - 20260421-083152/
+      - 20260421-102140/
+    - windows-codex-policy-mirrors/
+      - 20260421-081829/
+      - 20260421-111515/
+  - reports/
+    - generated-runtime-preview/
+      - children: 0 dirs, 0 files, 0 skipped
+    - migration-evidence/
+      - 20260425-windows-native-transition/
+    - artifact-hygiene.final.md
+    - config-provenance.final.json
+    - config-provenance.final.md
+    - global-agent-workflow.final.json
+    - global-agent-workflow.final.md
+    - hook-readiness.final.md
+    - score-layer.final.md
+    - toolchain-surface.final.md
+    - user-dev-environment-baseline.final.json
+    - user-dev-environment-baseline.final.md
+    - windows-app-local-readiness.final.json
+    - workspace-dependency-surface.json
+    - workspace-structure.final.json
+    - workspace-structure.final.md
+  - scripts/
+    - _scorecard_common.py
+    - check_config_provenance.py
+    - check_disqualifiers.py
+    - check_global_agent_workflow.py
+    - check_user_dev_environment.py
+    - check_windows_app_local_readiness.py
+    - check_workspace_structure.py
+    - compute_user_scorecard.py
+    - delivery_gate.py
+    - export_user_score_summary.py
+    - generate_reference_graph.py
+    - generate_retention_manifest.py
+    - iaw_closeout.py
+    - merge_reviewer_penalties.py
+    - prepare_user_scorecard_review.py
+    - record_reviewer_verdict.py
+    - scorecard_runtime_hook.py
+  - tests/
+    - test_check_config_provenance.py
+    - test_check_user_dev_environment.py
+    - test_compute_user_scorecard_v12.py
+    - test_delivery_gate.py
+    - test_devmgmt_runtime_helpers.py
+    - test_export_user_score_summary.py
+    - test_global_agent_workflow.py
+    - test_iaw_closeout.py
+    - test_merge_reviewer_penalties.py
+    - test_path_authority.py
+    - test_prepare_user_scorecard_review.py
+    - test_reference_graph.py
+    - test_retention_manifest.py
+    - test_scorecard_runtime_hook.py
+    - test_subprocess_safe.py
+    - test_user_dev_environment_policy.py
+    - test_windows_app_local_readiness.py
+    - test_workspace_structure.py
+  - .env.example
+  - .envrc
+  - .gitattributes
+  - .gitignore
+
+### Dev-Workflow (SDK, detailed)
+- Path: C:\Users\anise\code\Dev-Workflow
+- Dev-Workflow/
+  - .agent-runs/
+    - 2026-04-19-induced-agentic-workframe/
+      - CHANGESET_MAP.json
+      - COMMAND_LOG.jsonl
+      - EVIDENCE_MANIFEST.json
+      - PLAN.json
+      - PLAN.md
+      - REPLAY.md
+      - WAIVERS.json
+      - WORKORDER.json
+      - WORKORDER.md
+    - 2026-04-20-v13-closeout-workflow/
+      - tasks/
+      - CLAIM_LEDGER.json
+      - COMMAND_LOG.jsonl
+      - CONVENTION_LOCK.json
+      - CROSS_VERIFICATION.json
+      - EVIDENCE_MANIFEST.json
+      - gate_receipt.json
+      - PLAN.json
+      - REPEATED_VERIFY.json
+      - REPLAY.md
+      - SUMMARY_COVERAGE.json
+      - TASK_TREE.json
+      - WAIVERS.json
+      - WORKORDER.json
+    - 2026-04-20-vibe-physics-iaw/
+      - tasks/
+      - CHANGESET_MAP.json
+      - CLAIM_LEDGER.json
+      - COMMAND_LOG.jsonl
+      - CONVENTION_LOCK.json
+      - CROSS_VERIFICATION.json
+      - EVIDENCE_MANIFEST.json
+      - PLAN.json
+      - REPEATED_VERIFY.json
+      - REPLAY.md
+      - SUMMARY_COVERAGE.json
+      - TASK_TREE.json
+      - WAIVERS.json
+      - WORKORDER.json
+  - .agents/
+    - plugins/
+      - marketplace.json
+  - .github/
+    - guardrails/
+      - eslint.config.mjs
+    - workflows/
+      - guardrails.yml
+  - .serena/
+    - cache/
+      - python/
+    - memories/
+      - children: 0 dirs, 0 files, 0 skipped
+    - .gitignore
+    - project.local.yml
+    - project.yml
+  - config/
+    - guardrails/
+      - banned-patterns.json
+      - semgrep.yml
+  - docs/
+    - adr/
+      - ADR-0001-induced-agentic-workframe.md
+      - ADR-0002-iaw-option-c.md
+  - plugins/
+    - codex-vibe-execution/
+      - .codex-plugin/
+      - skills/
+  - reports/
+    - authority/
+      - fresh-evidence.json
+    - context7-usage.json
+    - delivery-gate.json
+    - execution-surfaces.json
+    - inventory.summary.json
+    - inventory.windows.json
+    - local-environments-report.json
+    - path-visibility.json
+    - serena-status.json
+    - session-router.json
+    - toolchain.windows.json
+    - user-readiness.json
+  - scripts/
+    - guardrails/
+      - check_banned_patterns.py
+      - check_contract_surfaces.py
+    - lib/
+      - atomicWriteJsonFile.mjs
+      - windowsShellLauncher.mjs
+      - workspace_alignment.py
+    - workspace_alignment/
+      - check.py
+      - repair.py
+    - _common.py
+    - audit_execution_surfaces.py
+    - check_context7.py
+    - check_dip.py
+    - check_hook_logs.py
+    - check_local_environments.py
+    - check_path_visibility.py
+    - check_runaway.py
+    - check_serena.py
+    - check_sync_conflicts.py
+    - check_syncthing.py
+    - check_toolchain.py
+    - check_traceability.py
+    - check_unknowns.py
+    - delivery_gate.py
+    - install_hooks.py
+    - install_or_repair_toolchain.py
+    - issue_workspace_authority.py
+    - session_router.py
+  - skills/
+    - acceptance-writer/
+      - SKILL.md
+    - anti-cheat-auditor/
+      - SKILL.md
+    - architecture-pack/
+      - SKILL.md
+    - benchmark-packet/
+      - SKILL.md
+    - delivery-gate-reviewer/
+      - SKILL.md
+    - design-pack/
+      - SKILL.md
+    - env-audit/
+      - SKILL.md
+    - hook-log-review/
+      - SKILL.md
+    - iaw-clean-room-verify/
+      - SKILL.md
+    - iaw-contract/
+      - SKILL.md
+    - iaw-dq-review/
+      - SKILL.md
+    - iaw-evidence-harvest/
+      - SKILL.md
+    - iaw-release-summary/
+      - SKILL.md
+    - iaw-scorecard-audit/
+      - SKILL.md
+    - ops-packet/
+      - SKILL.md
+    - proof-runner/
+      - SKILL.md
+    - refactor-guard/
+      - SKILL.md
+    - review-packet/
+      - SKILL.md
+    - scope-lock/
+      - SKILL.md
+    - session-router/
+      - SKILL.md
+  - templates/
+    - agent-runs/
+      - tasks/
+      - CHANGESET_MAP.json
+      - CLAIM_LEDGER.json
+      - CLAIM_LEDGER.schema.json
+      - COMMAND_LOG.jsonl
+      - CONVENTION_LOCK.json
+      - CONVENTION_LOCK.schema.json
+      - CROSS_VERIFICATION.json
+      - CROSS_VERIFICATION.schema.json
+      - EVIDENCE_MANIFEST.schema.json
+      - HONESTY_CONTRACT.md
+      - PLAN.json
+      - REPEATED_VERIFY.json
+      - REPEATED_VERIFY.schema.json
+      - REPLAY.md
+      - SUMMARY_COVERAGE.json
+      - SUMMARY_COVERAGE.schema.json
+      - TASK_TREE.json
+      - TASK_TREE.schema.json
+      - TASTE_GATE.json
+      - TASTE_GATE.schema.json
+      - WAIVERS.json
+      - WORKORDER.schema.json
+  - tests/
+    - test_audit_execution_surfaces.py
+    - test_authoritative_controls.py
+    - test_context7_usage.py
+    - test_delivery_gate_scorecard_slice.py
+    - test_runtime_surface_hardening.py
+    - test_serena_advisory.py
+    - test_workflow_root_policy_fallbacks.py
+    - test_workspace_alignment_preferences.py
+  - workflows/
+    - CODEX_RUNTIME_REPAIR_SAFETY.md
+    - CODEX_RUNTIME_UNIFICATION.md
+    - IAW_CLOSEOUT_AUTHORITY.md
+    - IAW_GLOBAL_HOOKS.md
+    - IAW_VERIFY_CHAIN_HARDENING.md
+    - INDUCED_AGENTIC_WORKFRAME.md
+    - VIBE_PHYSICS_TO_IAW.md
+  - .gitattributes
+  - .gitignore
+  - DESIGN_REVIEW.md
+  - REPO_ATLAS.md
+  - SUMMARY.md
+
+### Dev-Product (PRODUCT_SOURCE, detailed)
+- Path: C:\Users\anise\code\Dev-Product
+- Dev-Product/
+  - reservation-system/
+    - .agents/
+      - skills/
+    - .codex/
+      - config.toml
+    - .github/
+      - CODEOWNERS
+    - .serena/
+      - cache/
+      - memories/
+      - .gitignore
+      - project.local.yml
+      - project.yml
+    - apps/
+      - desktop/
+      - extension/
+      - ui-workbench/
+    - build/
+      - lib.win-amd64-cpython-314/
+      - temp.win-amd64-cpython-314/
+    - contracts/
+      - acceptance.json
+      - benchmark_tasks.json
+      - dip_policy.json
+      - project_policy.json
+      - risk_register.json
+      - traceability.json
+      - unknowns.json
+    - dist-app/
+      - app_v2/
+      - apps/
+      - packages/
+      - src/
+      - support/
+      - package.json
+    - docs/
+      - architecture/
+      - examples/
+      - integrations/
+      - sheets/
+      - superpowers/
+      - ARCHITECTURE.md
+      - BENCHMARK_PROTOCOL.md
+      - DESIGN.md
+      - OBSIDIAN.md
+      - PRODUCT_REQUIREMENTS.md
+    - icons/
+      - icon128.png
+      - icon16.png
+      - icon48.png
+    - ops/
+      - knowledge/
+      - memory/
+      - reports/
+      - tasks/
+    - packages/
+      - contracts/
+      - shared/
+    - reports/
+      - cpp-core-build.json
+    - scripts/
+      - lib/
+      - analyze_wings_har_endpoints.py
+      - app_v2_apply_ops_sheet.py
+      - app_v2_artifact_check.mjs
+      - app_v2_electron_smoke.mjs
+      - app_v2_live_sheet_bridge.py
+      - app_v2_ops_preview.py
+      - app_v2_ota_apply_bridge.py
+      - app_v2_read_live.mjs
+      - app_v2_reservation_management_bridge.py
+      - app_v2_runtime_verify.mjs
+      - app_v2_runtime_verify_support.mjs
+      - benchmark_har_paths.py
+      - benchmark_prepare.py
+      - bootstrap_real_env.py
+      - build_inventory_cpp_core.py
+      - build_truth_capture_bundle.py
+      - build_truth_room_alias_graph.py
+      - build_wings_capability_matrix.py
+      - check_bundle_sync.py
+      - check_contract_hygiene.py
+      - check_file_organization.py
+      - check_serena.py
+      - export_obsidian_notes.py
+      - human_bottleneck_patch.py
+      - issue_workspace_authority.py
+      - memory_checkpoint.py
+      - memory_resume.py
+      - preflight_product.py
+      - project_setup.py
+      - render_gpt_handoff.mjs
+      - run-app-windows.cmd
+      - run_acceptance.py
+      - run_electron_with_bridge_secret.mjs
+      - sitecustomize.py
+      - summarize_benchmark_results.py
+      - ui_workbench_dev.cmd
+      - ui_workbench_storybook.cmd
+      - ui_workbench_storybook_build.cmd
+      - validate_truth_dataset.py
+      - write-dist-app-package-json.mjs
+    - support/
+      - cpp-core/
+      - datasets/
+      - python-runtime/
+    - tests/ (truncated)
+      - fixtures/
+      - regression_app_v2_arrival_single_board_contract.mjs
+      - regression_app_v2_bge_install_contract.mjs
+      - regression_app_v2_bge_readonly_expansion.mjs
+      - regression_app_v2_branch_contract.mjs
+      - regression_app_v2_cleanup_contract.mjs
+      - regression_app_v2_electron_smoke.mjs
+      - regression_app_v2_end_user_shell_contract.mjs
+      - regression_app_v2_error_management_contract.mjs
+      - regression_app_v2_hybrid_candidate_engine.mjs
+      - regression_app_v2_hybrid_candidate_engine_py.py
+      - regression_app_v2_inventory_management_contract.mjs
+      - regression_app_v2_live_bridge_contract.mjs
+      - regression_app_v2_live_read_contract.mjs
+      - regression_app_v2_live_read_proof_contract.mjs
+      - regression_app_v2_management_bridge_py.py
+      - regression_app_v2_management_engine_contract.mjs
+      - regression_app_v2_no_legacy_refs.mjs
+      - regression_app_v2_operating_boundary.mjs
+      - regression_app_v2_operational_hardcoding_guard.mjs
+      - regression_app_v2_ops_preview.mjs
+      - regression_app_v2_ops_sheet_apply_contract.mjs
+      - regression_app_v2_ops_workspace_contract.mjs
+      - regression_app_v2_ota_apply_bridge_py.py
+      - regression_app_v2_phase2_contract.mjs
+      - regression_app_v2_preflight_settle_contract.mjs
+      - regression_app_v2_provider_readiness.mjs
+      - regression_app_v2_provider_session_bootstrap.mjs
+      - regression_app_v2_read_live_command.mjs
+      - regression_app_v2_runtime_readiness_contract.mjs
+      - regression_app_v2_runtime_verify.mjs
+      - regression_app_v2_runtime_verify_token_file.mjs
+      - regression_app_v2_settings_reference_contract.mjs
+      - regression_app_v2_sheet_room_detail_contract.mjs
+      - regression_app_v2_shell_contract.mjs
+      - regression_app_v2_sidebar_branding_contract.mjs
+      - regression_app_v2_wings_login_contract.mjs
+      - regression_app_v2_wings_shared_credentials_import.mjs
+      - regression_auth_bundle_py.py
+      - regression_contract_hygiene_guard_py.py
+      - regression_cpp_allocation_parity_py.py
+      - regression_cpp_core_required_py.py
+      - regression_cpp_drift_parity_py.py
+      - regression_cpp_reconciliation_parity_py.py
+      - regression_cpp_sheet_scan_parity_py.py
+      - regression_cpp_wrapper_modes_py.py
+      - regression_cross_validation_window_py.py
+      - regression_dist_app_package_json_atomic_write.mjs
+      - regression_extension_auth_info_modules.mjs
+      - regression_extension_bridge_candidate_tags.mjs
+      - regression_global_scorecard_bridge_py.py
+      - regression_gpt_handoff_module.mjs
+      - regression_inventory_planner_py.py
+      - regression_inventory_rows_and_color_map.mjs
+      - regression_long_tail_source_enrichment_py.py
+      - regression_manual_ota_sheet_only_py.py
+      - regression_note_reservation_id_extraction_py.py
+      - regression_ops_artifacts_py.py
+      - regression_ops_sheet_export_py.py
+      - regression_ops_sheet_policy_links_py.py
+      - regression_ops_workflow_bridge.mjs
+      - regression_ops_workflow_py.py
+      - regression_ota_adapter_layer_py.py
+      - regression_ota_wings_har_adapters_py.py
+      - regression_pkg_rows.mjs
+      - regression_pms_audit_engine_py.py
+      - regression_pms_fetch_wings_post.mjs
+      - regression_pms_reconcile_py.py
+      - regression_policy_contract_alignment_py.py
+      - regression_price_commission_match_py.py
+      - regression_product_flow_acceptance.mjs
+      - regression_provider_maximums.mjs
+      - regression_provider_room_mapping_guardrail.mjs
+      - regression_reconcile_alias_tokens_py.py
+      - regression_reservation_identity.mjs
+      - regression_reservation_verification_branch_guard.mjs
+      - regression_room_registry_guardrails_py.py
+      - regression_secret_hygiene_py.py
+      - regression_sheet_branch_scope_filter_py.py
+      - regression_sheet_scan_py.py
+    - .editorconfig
+    - .env.example
+    - .envrc
+    - .gitattributes
+    - .gitignore
+    - AGENTS.md
+    - clean_pycache.ps1
+    - code_review.md
+    - inventory_cpp_core.cp314-win_amd64.pyd
+    - Makefile
+    - package-lock.json
+    - package.json
+    - pyproject.toml
+    - README.md
+    - run-app.ps1
+    - setup.py
+    - tsconfig.base.json
+    - tsconfig.extension-contracts.json
+    - tsconfig.json
+    - uv.lock
+    - 앱 실행.cmd
+
+### .codex (USER_CONTROL_PLANE, control_plane)
+- Path: C:\Users\anise\.codex
+- .codex/
+  - .sandbox/
+    - children: 0 dirs, 3 files, 0 skipped
+  - .sandbox-bin/
+    - children: 0 dirs, 3 files, 0 skipped
+  - .sandbox-secrets/
+    - children: 0 dirs, 1 files, 0 skipped
+  - .tmp/
+    - bundled-marketplaces/
+      - openai-bundled/
+    - marketplaces/
+      - children: 0 dirs, 0 files, 0 skipped
+    - plugins/
+      - .agents/
+      - plugins/
+  - ambient-suggestions/
+    - 116dfebc3147f1b0ac90c5691bb9bb078d321c5c/
+      - children: 0 dirs, 1 files, 0 skipped
+    - 34fa0807c002f83ae71cf8a4d432d97eab639dfb/
+      - children: 0 dirs, 1 files, 0 skipped
+    - 435005d653dcfe1c012e5ac25111784f9933db38/
+      - children: 0 dirs, 1 files, 0 skipped
+    - 4d40bf7fb587b4b285cff2584cde51bddcd9be67/
+      - children: 0 dirs, 1 files, 0 skipped
+    - 788735442fa72440257d128d8fcca99f0803a8e0/
+      - children: 0 dirs, 1 files, 0 skipped
+    - 79ea914c687bc0ac2acf073f9691453089807f51/
+      - children: 0 dirs, 1 files, 0 skipped
+    - 890bc1b675cd96012a9cdb8ca9a81cd68379f0d9/
+      - children: 0 dirs, 1 files, 0 skipped
+    - a5da0ca0ad0db383df09148f767510b4ad2467a6/
+      - children: 0 dirs, 1 files, 0 skipped
+    - e233f4283db360c131dc861395f498cd0a8562e3/
+      - children: 0 dirs, 1 files, 0 skipped
+  - archived_sessions/
+    - children: 0 dirs, 2 files, 0 skipped
+  - bin/
+    - wsl/
+      - children: 0 dirs, 2 files, 0 skipped
+  - browser/
+    - children: 0 dirs, 1 files, 0 skipped
+  - cache/
+    - codex_apps_tools/
+      - children: 0 dirs, 1 files, 0 skipped
+  - generated_images/
+    - 019db62d-7347-7ab3-b6e0-f50c493f97de/
+      - children: 0 dirs, 3 files, 0 skipped
+    - 019dc41e-d95b-7532-a288-a6c9c9290fb7/
+      - children: 0 dirs, 1 files, 0 skipped
+  - hooks/
+    - children: 0 dirs, 0 files, 0 skipped
+  - local-environments/
+    - children: 0 dirs, 1 files, 0 skipped
+  - memories/
+    - rollout_summaries/
+      - children: 0 dirs, 42 files, 0 skipped
+    - skills/
+      - dev-management-app-readiness/
+      - dev-management-user-environment-closeout/
+  - plugins/
+    - cache/
+      - openai-bundled/
+      - openai-curated/
+      - openai-primary-runtime/
+  - sessions/
+    - 2026/
+      - 04/
+  - shell_snapshots/
+    - children: 0 dirs, 7 files, 0 skipped
+  - skills/
+    - .system/
+      - imagegen/
+      - openai-docs/
+      - plugin-creator/
+      - skill-creator/
+      - skill-installer/
+  - sqlite/
+    - children: 0 dirs, 1 files, 0 skipped
+  - state/
+    - iaw/
+      - gate-receipts/
+    - scorecard-context/
+      - Dev-Management/
+      - Dev-Workflow/
+      - reservation-system/
+    - workspace-authority/
+      - children: 0 dirs, 0 files, 0 skipped
+  - tmp/
+    - arg0/
+      - codex-arg0Ai4VgU/
+  - vendor_imports/
+    - skills/
+      - skills/
+
+### .ssh (DECOMMISSIONED, decommissioned)
+- Path: C:\Users\anise\.ssh
+- Status: missing
+
+### Documents/PowerShell (CONFIG_ENV, redacted)
+- Path: C:\Users\anise\Documents\PowerShell
+- PowerShell/
+  - Modules/
+    - Microsoft.PowerToys.Configure/
+      - 0.98.1.0/
+  - policies/
+    - children: 0 dirs, 2 files, 0 skipped
+  - profile.d/
+    - children: 0 dirs, 0 files, 0 skipped

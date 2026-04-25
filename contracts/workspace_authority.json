@@ -1,50 +1,50 @@
 {
   "version": 1,
-  "schema_version": "2026-04-21.control-thread-worktree-policy",
-  "authority_root": "/home/andy4917/Dev-Management",
-  "canonical_repo_root": "/home/andy4917/Dev-Management",
+  "schema_version": "2026-04-25.windows-only-control-plane-policy",
+  "authority_root": "C:\\Users\\anise\\code\\Dev-Management",
+  "canonical_repo_root": "C:\\Users\\anise\\code\\Dev-Management",
   "canonical_roots": {
-    "management": "/home/andy4917/Dev-Management",
-    "workflow": "/home/andy4917/Dev-Workflow",
-    "product": "/home/andy4917/Dev-Product"
+    "management": "C:\\Users\\anise\\code\\Dev-Management",
+    "workflow": "C:\\Users\\anise\\code\\Dev-Workflow",
+    "product": "C:\\Users\\anise\\code\\Dev-Product"
   },
   "module_registry": {
     "app_surface_policy": {
-      "path": "/home/andy4917/Dev-Management/contracts/app_surface_policy.json",
+      "path": "C:\\Users\\anise\\code\\Dev-Management/contracts/app_surface_policy.json",
       "kind": "standalone_contract",
       "final_authority": false
     },
     "config_provenance_policy": {
-      "path": "/home/andy4917/Dev-Management/contracts/config_provenance_policy.json",
+      "path": "C:\\Users\\anise\\code\\Dev-Management/contracts/config_provenance_policy.json",
       "kind": "standalone_contract",
       "final_authority": false
     },
     "path_authority_policy": {
-      "path": "/home/andy4917/Dev-Management/contracts/path_authority_policy.json",
+      "path": "C:\\Users\\anise\\code\\Dev-Management/contracts/path_authority_policy.json",
       "kind": "standalone_contract",
       "final_authority": true,
       "compatibility_mode": "dual-read"
     },
     "execution_surfaces": {
-      "path": "/home/andy4917/Dev-Management/contracts/execution_surfaces.json",
+      "path": "C:\\Users\\anise\\code\\Dev-Management/contracts/execution_surfaces.json",
       "kind": "standalone_contract",
       "final_authority": false
     },
     "instruction_guard": {
-      "path": "/home/andy4917/Dev-Management/contracts/instruction_guard_policy.json",
+      "path": "C:\\Users\\anise\\code\\Dev-Management/contracts/instruction_guard_policy.json",
       "kind": "standalone_contract",
       "final_authority": false
     },
     "toolchain_surface_policy": {
-      "path": "/home/andy4917/Dev-Management/contracts/toolchain_policy.json",
+      "path": "C:\\Users\\anise\\code\\Dev-Management/contracts/toolchain_policy.json",
       "kind": "standalone_contract",
       "final_authority": false
     },
     "startup_gates": {
       "kind": "composite_contract",
       "paths": [
-        "/home/andy4917/Dev-Management/contracts/serena_policy.json",
-        "/home/andy4917/Dev-Management/contracts/context7_policy.json"
+        "C:\\Users\\anise\\code\\Dev-Management/contracts/serena_policy.json",
+        "C:\\Users\\anise\\code\\Dev-Management/contracts/context7_policy.json"
       ],
       "final_authority": false
     },
@@ -54,30 +54,21 @@
       "final_authority": false
     },
     "score_policy": {
-      "path": "/home/andy4917/Dev-Management/contracts/score_policy.json",
+      "path": "C:\\Users\\anise\\code\\Dev-Management/contracts/score_policy.json",
       "kind": "standalone_contract",
       "references": [
-        "/home/andy4917/Dev-Management/contracts/user_score_policy.json",
-        "/home/andy4917/Dev-Management/contracts/disqualifier_policy.json"
+        "C:\\Users\\anise\\code\\Dev-Management/contracts/user_score_policy.json",
+        "C:\\Users\\anise\\code\\Dev-Management/contracts/disqualifier_policy.json"
       ],
       "final_authority": false
     }
   },
   "global_invariants": [
     "Codex App is the primary user control surface.",
-    "Codex App is not execution authority.",
-    "Codex App is not policy authority.",
-    "Dev-Management is policy/runtime authority.",
-    "devmgmt-wsl is canonical remote execution surface.",
-    "Linux-native Codex CLI is canonical agent binary.",
-    "Dev-Management Control is the pinned Codex App control thread for readiness and maintenance routing.",
-    "Permanent Git worktrees are optional execution conveniences and never policy authority.",
-    "Task worktrees are ephemeral and generated Linux runtime files always bind to the canonical repo root.",
-    "Generated Linux mirrors are outputs only.",
-    "Optional user override source is /home/andy4917/.codex/user-config.toml only.",
-    "Windows .codex policy-bearing files are app-readable active settings or instruction surfaces, so they are violations, not Linux runtime outputs.",
-    "Windows app state is evidence only; Windows bootstrap remains SSH config plus Codex App usability, but Windows ~/.codex config or AGENTS must never be repo-generated because Codex App can actively read them.",
-    "Windows-mounted Codex launcher is external dependency and forbidden primary runtime.",
+    "Windows-native Codex App agent is the canonical execution surface.",
+    "Dev-Management is policy/runtime verification authority.",
+    "Repo AGENTS.md and package scripts are repo-local stack/workflow authority.",
+    "Legacy Linux/remote execution authority is decommissioned after migration evidence and Windows checks pass.",
     "Hooks are triggers only; audit, tests, and score are the final gates."
   ],
   "generated_mirror_contract": {
@@ -85,23 +76,24 @@
     "outputs_only": true,
     "render_input_allowed": false,
     "authority_input_allowed": false,
-    "optional_user_override_source": "/home/andy4917/.codex/user-config.toml",
-    "canonical_repo_root": "/home/andy4917/Dev-Management"
+    "optional_user_override_source": "C:\\Users\\anise\\.codex/user-config.toml",
+    "canonical_repo_root": "C:\\Users\\anise\\code\\Dev-Management"
   },
   "windows_app_state": {
-    "codex_home": "/mnt/c/Users/anise/.codex",
+    "codex_home": "C:\\Users\\anise\\.codex",
+    "classification": "USER_CONTROL_PLANE + APP_STATE",
+    "repo_authority": false,
     "bootstrap_surfaces": [
-      "user_level_windows_ssh_config",
-      "codex_app_connection_readiness"
+      "codex_app_local_project_readiness"
     ],
     "policy_bearing_relative_paths": [
       "config.toml",
       "AGENTS.md",
       "hooks.json",
-      "skills/dev-workflow"
+      "skills"
     ],
-    "authoritative": false,
-    "evidence_only": true,
+    "authoritative": true,
+    "evidence_only": false,
     "app_reads_policy_files_if_present": true,
     "repo_generation_allowed": false,
     "known_generated_cleanup_requires_generated_header": true,
@@ -109,26 +101,21 @@
   },
   "repair_boundary_summary": {
     "repairable_surfaces": [
-      "generated_config_files",
-      "generated_wrapper_files",
-      "generated_report_files",
-      "user_level_windows_ssh_config",
-      "user_level_linux_codex_cli_prefix"
+      "generated_report_files"
     ],
     "report_only_surfaces": [
       "windows_codex_app_binaries",
       "windows_codex_launcher_binaries",
       "windows_global_or_system_git_config",
-      "windows_path",
-      "wsl_system_config"
+      "windows_path"
     ],
-    "final_gate_owner": "audit_workspace.py + run_score_layer.py"
+    "final_gate_owner": "check_user_dev_environment.py + check_global_agent_workflow.py"
   },
   "score_policy": {
-    "contract_path": "/home/andy4917/Dev-Management/contracts/score_policy.json",
+    "contract_path": "C:\\Users\\anise\\code\\Dev-Management/contracts/score_policy.json",
     "final_gate": [
-      "/home/andy4917/Dev-Management/scripts/audit_workspace.py",
-      "/home/andy4917/Dev-Management/scripts/run_score_layer.py"
+      "C:\\Users\\anise\\code\\Dev-Management/scripts/check_user_dev_environment.py",
+      "C:\\Users\\anise\\code\\Dev-Management/scripts/check_global_agent_workflow.py"
     ],
     "purpose_profiles": {
       "code-modification": {
@@ -138,23 +125,21 @@
       "app-usability": {
         "serena_startup_blocked": "WARN",
         "non_downgradable_blockers": [
-          "generated mirror self-feed",
-          "forbidden Windows launcher primary runtime",
           "active stale config flag",
-          "Windows app SSH unreachable"
+          "Codex App local project not ready"
         ]
       }
     },
     "references": {
-      "user_score_policy": "/home/andy4917/Dev-Management/contracts/user_score_policy.json",
-      "disqualifier_policy": "/home/andy4917/Dev-Management/contracts/disqualifier_policy.json"
+      "user_score_policy": "C:\\Users\\anise\\code\\Dev-Management/contracts/user_score_policy.json",
+      "disqualifier_policy": "C:\\Users\\anise\\code\\Dev-Management/contracts/disqualifier_policy.json"
     }
   },
   "control_thread_policy": {
     "name": "Dev-Management Control",
-    "remote_host": "devmgmt-wsl",
-    "project_path": "/home/andy4917/Dev-Management",
-    "default_mode": "local_remote_project",
+    "remote_host": "local-windows",
+    "project_path": "C:\\Users\\anise\\code\\Dev-Management",
+    "default_mode": "local_windows_project",
     "default_worktree_mode": false,
     "purpose": [
       "readiness",
@@ -177,32 +162,21 @@
   "surface_roles": {
     "codex_app": [
       "primary_user_control_surface",
-      "remote_session_control_surface"
+      "windows_native_execution_control_plane"
     ],
     "windows_host": [
       "app_host",
-      "ssh_client_surface"
-    ],
-    "windows_codex_state": [
-      "live_runtime_surface",
-      "not_authority"
-    ],
-    "windows_codex_launcher": [
-      "external_dependency",
-      "forbidden_primary_runtime"
-    ],
-    "wsl_linux_shell": [
       "local_execution_surface"
     ],
-    "ssh_devmgmt_wsl": [
-      "canonical_remote_execution_surface"
+    "windows_codex_state": [
+      "app_control_plane_state"
     ],
-    "linux_native_codex_cli": [
-      "canonical_agent_binary"
+    "windows_codex_launcher": [
+      "external_dependency"
     ],
     "dev_management": [
       "policy_authority",
-      "runtime_authority",
+      "runtime_verification_authority",
       "source_of_truth"
     ],
     "dev_workflow": [
@@ -219,64 +193,42 @@
     ],
     "git_windows": [
       "git_surface"
-    ],
-    "git_wsl": [
-      "git_surface"
     ]
   },
   "repair_boundaries": {
     "repo_may_repair": [
-      "generated_config_files",
-      "generated_wrapper_files",
       "generated_report_files"
     ],
-    "repo_may_repair_local_generated_wrappers_only_when_canonical_runtime_passes": true,
+    "repo_may_repair_local_generated_wrappers_only_when_canonical_runtime_passes": false,
     "repo_must_not_repair": [
       "windows_codex_app_binaries",
       "windows_codex_launcher_binaries",
       "windows_global_or_system_git_config",
-      "windows_path",
-      "wsl_system_config",
-      "ssh_private_key_permissions"
+      "windows_path"
     ],
-    "repo_must_not_treat_as_repo_owned": [
-      "/mnt/c/Users/anise/.codex/bin/wsl/codex"
-    ],
-    "repo_must_not_overwrite_external_app_state_except_repo_owned_linux_runtime_outputs": true
+    "repo_must_not_treat_as_repo_owned": [],
+    "repo_must_not_overwrite_external_app_state_except_repo_owned_linux_runtime_outputs": false
   },
   "forbidden_primary_runtime_paths": [
-    "/mnt/c/Users/anise/.codex/bin/wsl",
-    "/mnt/c/Users/anise/.codex/tmp/arg0",
-    "/mnt/c/Users/anise/.codex/bin/wsl/codex"
+    "legacy-linux-path",
+    "mounted-linux-launcher",
+    "legacy-remote-route"
   ],
   "canonical_execution_surface": {
-    "id": "ssh-devmgmt-wsl",
-    "host_alias": "devmgmt-wsl",
-    "repo_root": "/home/andy4917/Dev-Management",
-    "expected_os": "linux",
-    "expected_primary_resolution": "linux-native codex CLI on the canonical SSH runtime login-shell PATH",
-    "allowed_primary_resolution_fallback": "repo-generated local SSH wrapper",
-    "forbidden_primary_resolution": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
-    "client_surface_contamination_status_when_canonical_passes": "WARN",
-    "local_shell_requested_execution_status_when_forbidden": "BLOCKED"
+    "id": "local-windows-agent",
+    "host_alias": "local-windows",
+    "repo_root": "C:\\Users\\anise\\code\\Dev-Management",
+    "expected_os": "windows",
+    "expected_primary_resolution": "Windows-native Codex app agent running PowerShell 7",
+    "forbidden_primary_resolution": "legacy Linux/remote route or mounted launcher"
   },
   "canonical_remote_execution_surface": {
-    "id": "ssh-devmgmt-wsl",
-    "host_alias": "devmgmt-wsl",
-    "repo_root": "/home/andy4917/Dev-Management",
-    "expected_os": "linux",
-    "expected_primary_resolution": "linux-native codex CLI on the canonical SSH runtime login-shell PATH",
-    "allowed_primary_resolution_fallback": "repo-generated local SSH wrapper",
-    "forbidden_primary_resolution": "/mnt/c/Users/anise/.codex/bin/wsl/codex",
-    "client_surface_contamination_status_when_canonical_passes": "WARN",
-    "local_shell_requested_execution_status_when_forbidden": "BLOCKED"
-  },
-  "observed_remote_evidence": {
-    "codex_app_remote_record": {
-      "value": "andy4917@localhost:22",
-      "authoritative": false,
-      "role": "observed_fallback_candidate"
-    }
+    "id": "decommissioned",
+    "host_alias": "",
+    "repo_root": "",
+    "expected_os": "none",
+    "expected_primary_resolution": "remote execution disabled for steady-state Windows-native model",
+    "forbidden_primary_resolution": "legacy Linux/remote route"
   },
   "classification_rules": {
     "management": {
@@ -290,44 +242,35 @@
         "quarantine",
         "runtime_generation_scripts"
       ],
-        "promoted_contracts": [
-          "app_surface_policy.json",
-          "config_provenance_policy.json",
-          "context7_policy.json",
-          "disqualifier_policy.json",
-          "environment_sync_policy.json",
-          "execution_surfaces.json",
-          "experiment_policy.json",
-          "human_bottleneck_rules.json",
-          "instruction_guard_policy.json",
-          "memory_policy.json",
-          "score_policy.json",
-          "serena_policy.json",
-          "spawn_policy.json",
-          "syncthing_policy.json",
-          "toolchain_policy.json",
-          "user_score_policy.json"
-        ],
+      "promoted_contracts": [
+        "app_surface_policy.json",
+        "config_provenance_policy.json",
+        "context7_policy.json",
+        "disqualifier_policy.json",
+        "execution_surfaces.json",
+        "experiment_policy.json",
+        "human_bottleneck_rules.json",
+        "instruction_guard_policy.json",
+        "memory_policy.json",
+        "score_policy.json",
+        "serena_policy.json",
+        "spawn_policy.json",
+        "toolchain_policy.json",
+        "user_score_policy.json"
+      ],
       "promoted_docs": [
+        "AGENT_GUARDRAILS.md",
+        "AI_TOOLCHAIN_USAGE.md",
         "CODEX_APP_USER_SETUP.md",
-        "CLOSE_OUT.md",
         "CONTEXT7_USAGE.md",
-        "DEPENDENCY_INVERSION.md",
+        "GLOBAL_AGENT_WORKFLOW.md",
         "GLOBAL_RUNTIME_ARCHITECTURE.md",
-        "HOOKS_WSL.md",
-        "LOCAL_ENVIRONMENTS.md",
         "PREREQUISITES.md",
         "PROMPT_BLOCKS.md",
-        "RELEASE_PLAN.md",
-        "ROLLBACK.md",
         "RUNBOOK.md",
-        "AGENT_GUARDRAILS.md",
-        "SESSION_THREAD_CONTAMINATION_AUDIT.md",
-        "SYNCTHING.md",
-        "TOOLCHAIN.md",
-        "USER_READINESS.md",
-        "USER_SCORECARD.md",
-        "WINDOWS_WSL_RUNTIME_MODEL.md"
+        "SERENA_USAGE.md",
+        "USER_DEV_ENVIRONMENT_BASELINE.md",
+        "USER_SCORECARD.md"
       ]
     },
     "workflow": {
@@ -342,7 +285,6 @@
       ],
       "shared_scripts": [
         "audit_execution_surfaces.py",
-        "check_context7.py",
         "check_dip.py",
         "check_hook_logs.py",
         "check_local_environments.py",
@@ -353,12 +295,10 @@
         "check_toolchain.py",
         "check_traceability.py",
         "check_unknowns.py",
-        "check_wsl_status.py",
         "delivery_gate.py",
         "install_hooks.py",
         "install_or_repair_toolchain.py",
         "session_router.py",
-        "update_wsl_and_ubuntu.py",
         "_common.py"
       ],
       "shared_script_dirs": [
@@ -407,7 +347,7 @@
       {
         "id": "L0",
         "name": "canonical_authority",
-        "role": "Canonical WSL contracts, topology, trust and safety invariants.",
+        "role": "Windows-native contracts, topology, trust and safety invariants.",
         "mutability": "authoritative"
       },
       {
@@ -419,7 +359,7 @@
       {
         "id": "L2",
         "name": "generated_mirror",
-        "role": "Generated Linux .codex runtime files rendered from authority plus optional user overrides. Linux runtime outputs are outputs only and must never be treated as render inputs, user override inputs, or authority sources.",
+        "role": "Generated runtime mirrors are decommissioned; Windows app control-plane files are validated in place.",
         "mutability": "generated_only"
       },
       {
@@ -438,7 +378,7 @@
     "user_override_policy": {
       "precedence": "partial_user_override",
       "optional_user_override_sources": [
-        "/home/andy4917/.codex/user-config.toml"
+        "C:\\Users\\anise\\.codex/user-config.toml"
       ],
       "allowed_fields": [
         "model",
@@ -456,8 +396,8 @@
         "trusted_projects_within_canonical_roots"
       ],
       "generated_mirror_paths_forbidden_as_override_sources": [
-        "/home/andy4917/.codex/config.toml",
-        "/mnt/c/Users/anise/.codex/config.toml"
+        "C:\\Users\\anise\\.codex/config.toml",
+        "C:\\Users\\anise\\.codex/config.toml"
       ],
       "blocked_feature_overrides": [
         "js_repl_tools_only",
@@ -520,13 +460,6 @@
       "preserve_named_threads": true,
       "drop_projectless_restore_refs": true,
       "drop_stale_remote_environment": true,
-      "preferred_windows_access_host": "wsl.localhost",
-      "allowed_windows_access_hosts": [
-        "wsl.localhost",
-        "wsl$"
-      ],
-      "open_target_global": "wsl",
-      "integrated_terminal_shell": "wsl",
       "follow_up_queue_mode": "steer",
       "conversation_detail_mode": "steps",
       "terminal_restore_policy": "background",
@@ -549,25 +482,20 @@
         "generated_runtime_files"
       ],
       "historical_evidence_allowlist": [
-        "migration_manifest.json"
+        "C:\\Users\\anise\\code\\Dev-Management\\reports\\migration-evidence"
       ],
       "historical_batch_paths_not_allowed_in_active_policy": [
         "cleanup_policy.quarantine_root"
       ],
-      "legacy_repo_paths_to_remove": [
-        "/home/andy4917/code/reservation-system",
-        "~/code/reservation-system",
-        "\\\\wsl$\\Ubuntu\\home\\andy4917\\code\\reservation-system",
-        "\\\\wsl.localhost\\Ubuntu\\home\\andy4917\\code\\reservation-system"
-      ]
+      "legacy_repo_paths_to_remove": []
     },
-   "feature_rules": {
-     "forbidden_feature_flags": [
+    "feature_rules": {
+      "forbidden_feature_flags": [
         "telepathy",
         "workspace_dependencies",
         "use_agent_identity"
-     ]
-   }
+      ]
+    }
   },
   "runtime_state_exclusions": [
     "auth",
@@ -588,7 +516,7 @@
     "knowledge"
   ],
   "cleanup_policy": {
-    "quarantine_root": "/home/andy4917/Dev-Management/quarantine",
+    "quarantine_root": "C:\\Users\\anise\\code\\Dev-Management/quarantine",
     "ambiguous_items": "remove_or_inert_archive_only_when_forensic_context_requires_retention",
     "exact_duplicates": "delete_only_after_checksum_match_or_generated_match",
     "legacy_backups": "remove_now",
@@ -599,32 +527,28 @@
     "final_rescan_required": true
   },
   "generation_targets": {
-   "global_runtime": {
-   "linux": {
-     "agents": "/home/andy4917/.codex/AGENTS.md",
-     "config": "/home/andy4917/.codex/config.toml",
-      "user_override_config": "/home/andy4917/.codex/user-config.toml",
-     "hooks_config": "/home/andy4917/.codex/hooks.json",
-     "generated_config_role": "generated_mirror",
-     "generated_config_outputs_only": true,
-     "launcher": "/home/andy4917/.local/bin/codex"
-   }
+    "global_runtime": {
+      "windows": {
+        "agents": "C:\\Users\\anise\\.codex\\AGENTS.md",
+        "config": "C:\\Users\\anise\\.codex\\config.toml",
+        "launcher": "C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.422.2437.0_x64__2p2nqsd0c76g0\\app\\resources\\codex.exe"
+      }
     },
     "scorecard": {
-      "policy": "/home/andy4917/Dev-Management/contracts/user_score_policy.json",
-      "disqualifiers": "/home/andy4917/Dev-Management/contracts/disqualifier_policy.json",
-      "review_snapshot": "/home/andy4917/Dev-Management/reports/user-scorecard.review.json",
-      "reviewer_verdict_root": "/home/andy4917/.codex/state/reviewer-verdicts",
-      "context_root": "/home/andy4917/.codex/state/scorecard-context",
-      "workspace_authority_root": "/home/andy4917/.codex/state/workspace-authority",
-      "receipt_state_root": "/home/andy4917/.codex/state/iaw",
-      "gate_receipt_root": "/home/andy4917/.codex/state/gate-receipts",
-      "report": "/home/andy4917/Dev-Management/reports/user-scorecard.json",
-      "score_layer_report": "/home/andy4917/Dev-Management/reports/score-layer.unified-phase.json",
-      "closeout": "/home/andy4917/Dev-Management/scripts/iaw_closeout.py",
-      "delivery_gate": "/home/andy4917/Dev-Management/scripts/delivery_gate.py",
-      "summary_export": "/home/andy4917/Dev-Management/scripts/export_user_score_summary.py",
-      "score_layer": "/home/andy4917/Dev-Management/scripts/run_score_layer.py",
+      "policy": "C:\\Users\\anise\\code\\Dev-Management/contracts/user_score_policy.json",
+      "disqualifiers": "C:\\Users\\anise\\code\\Dev-Management/contracts/disqualifier_policy.json",
+      "review_snapshot": "C:\\Users\\anise\\code\\Dev-Management/reports/user-scorecard.review.json",
+      "reviewer_verdict_root": "C:\\Users\\anise\\.codex/state/reviewer-verdicts",
+      "context_root": "C:\\Users\\anise\\.codex/state/scorecard-context",
+      "workspace_authority_root": "C:\\Users\\anise\\.codex/state/workspace-authority",
+      "receipt_state_root": "C:\\Users\\anise\\.codex/state/iaw",
+      "gate_receipt_root": "C:\\Users\\anise\\.codex/state/gate-receipts",
+      "report": "C:\\Users\\anise\\code\\Dev-Management/reports/user-scorecard.json",
+      "score_layer_report": "C:\\Users\\anise\\code\\Dev-Management/reports/score-layer.final.json",
+      "closeout": "C:\\Users\\anise\\code\\Dev-Management/scripts/iaw_closeout.py",
+      "delivery_gate": "C:\\Users\\anise\\code\\Dev-Management/scripts/delivery_gate.py",
+      "summary_export": "C:\\Users\\anise\\code\\Dev-Management/scripts/export_user_score_summary.py",
+      "score_layer": "C:\\Users\\anise\\code\\Dev-Management/scripts/iaw_closeout.py",
       "accepted_profiles": [
         "L1",
         "L2",
@@ -632,34 +556,33 @@
         "L4"
       ],
       "required_policy_hash_targets": [
-        "/home/andy4917/Dev-Management/contracts/workspace_authority.json",
-        "/home/andy4917/Dev-Management/contracts/score_policy.json",
-        "/home/andy4917/Dev-Management/contracts/user_score_policy.json",
-        "/home/andy4917/Dev-Management/contracts/disqualifier_policy.json"
+        "C:\\Users\\anise\\code\\Dev-Management/contracts/workspace_authority.json",
+        "C:\\Users\\anise\\code\\Dev-Management/contracts/score_policy.json",
+        "C:\\Users\\anise\\code\\Dev-Management/contracts/user_score_policy.json",
+        "C:\\Users\\anise\\code\\Dev-Management/contracts/disqualifier_policy.json"
       ],
       "required_script_hash_targets": [
-        "/home/andy4917/Dev-Management/scripts/prepare_user_scorecard_review.py",
-        "/home/andy4917/Dev-Management/scripts/delivery_gate.py",
-        "/home/andy4917/Dev-Management/scripts/export_user_score_summary.py",
-        "/home/andy4917/Dev-Management/scripts/run_score_layer.py",
-        "/home/andy4917/Dev-Management/scripts/audit_workspace.py"
+        "C:\\Users\\anise\\code\\Dev-Management/scripts/prepare_user_scorecard_review.py",
+        "C:\\Users\\anise\\code\\Dev-Management/scripts/delivery_gate.py",
+        "C:\\Users\\anise\\code\\Dev-Management/scripts/export_user_score_summary.py",
+        "C:\\Users\\anise\\code\\Dev-Management/scripts/check_user_dev_environment.py",
+        "C:\\Users\\anise\\code\\Dev-Management/scripts/check_global_agent_workflow.py"
       ],
       "runtime_hook": {
         "role": "trigger_only",
-        "script": "/home/andy4917/Dev-Management/scripts/scorecard_runtime_hook.py",
-        "linux_command_prefix": "python3",
-        "state_root": "/home/andy4917/.codex/state/scorecard-hook",
+        "script": "C:\\Users\\anise\\code\\Dev-Management/scripts/scorecard_runtime_hook.py",
+        "state_root": "C:\\Users\\anise\\.codex/state/scorecard-hook",
         "user_prompt_throttle_seconds": 300,
         "events": {
           "UserPromptSubmit": {
             "matcher": ".*"
           }
-        }
+        },
+        "windows_command_prefix": "python"
       }
     },
     "global_config": {
       "model": "gpt-5.4",
-      "model_reasoning_effort": "medium",
       "approval_policy": "on-request",
       "sandbox_mode": "workspace-write",
       "web_search": "cached",
@@ -668,9 +591,9 @@
       ],
       "network_access": true,
       "trusted_projects": [
-        "/home/andy4917/Dev-Management",
-        "/home/andy4917/Dev-Workflow",
-        "/home/andy4917/Dev-Product"
+        "C:\\Users\\anise\\code\\Dev-Management",
+        "C:\\Users\\anise\\code\\Dev-Workflow",
+        "C:\\Users\\anise\\code\\Dev-Product"
       ],
       "enabled_features": [
         "apply_patch_freeform",
@@ -703,10 +626,9 @@
       ]
     },
     "skill_exposure": {
-      "wsl_symlink": {
-        "target": "/home/andy4917/Dev-Workflow/skills",
-        "link": "/home/andy4917/.codex/skills/dev-workflow"
-      }
+      "canonical_skill_root": "C:\\Users\\anise\\code\\Dev-Workflow\\skills",
+      "app_skill_bundle_root": "C:\\Users\\anise\\.codex\\skills"
     }
-  }
+  },
+  "canonical_execution_host": "local-windows"
 }

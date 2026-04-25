@@ -12,7 +12,7 @@
 
 ## Surface Inventory Contract
 
-1. 현재 실행면: `windows-native` 또는 `wsl-ubuntu`
+1. 현재 실행면: `windows-native`
 2. 필수 런타임: `git`, `python/python3`, `node`, `npm`
 3. 선택 런타임: `uv`
 4. 미설치 원인 분류: `not_installed | not_on_path | surface_mismatch | policy_intentional | unconfirmed`

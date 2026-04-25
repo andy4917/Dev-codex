@@ -1,0 +1,194 @@
+{
+  "schema_version": "2026.04.global-agent-workflow.windows-native.v1",
+  "runtime_model": {
+    "user_ui": "Codex App",
+    "canonical_execution": "local-windows",
+    "agent_binary": "windows-native-codex-app-agent",
+    "windows_native_for_governed_repos": "required"
+  },
+  "authority_layers": {
+    "app_settings": "bootstrap_pointer_only",
+    "dev_management": "environment_policy_authority",
+    "repo_agents": "stack_workflow_authority",
+    "package_scripts": "command_authority",
+    "skills": "workflow_modules_not_truth",
+    "context7": "external_docs_evidence",
+    "serena": "codebase_semantic_evidence",
+    "domain_rag": "business_domain_evidence"
+  },
+  "toolchain_roles": {
+    "codex_app_cli": "external_product_use_as_is",
+    "dev_management_dev_workflow": "python_first",
+    "product_repo": "repo_stack_owned",
+    "app_integrated_tool_or_plugin": "typescript_first_when_authored_locally",
+    "openai_agents_python": "sdk",
+    "langchain": "rag_or_integration_library_when_repo_contract_requires_it",
+    "langgraph": "workflow_graph_or_agent_orchestration_library_when_repo_contract_requires_it",
+    "mcp": "app_managed_external_tool_context_surface",
+    "marketplace_skills": "workflow_modules_not_truth",
+    "marketplace_hooks": "trigger_only_not_final_gate"
+  },
+  "task_classification": [
+    "environment",
+    "frontend",
+    "backend",
+    "full-stack",
+    "infra/Docker",
+    "data/RAG",
+    "domain/business",
+    "refactor",
+    "test/quality",
+    "documentation"
+  ],
+  "required_evidence_matrix": {
+    "external_library_api_change": [
+      "context7"
+    ],
+    "framework_config_change": [
+      "context7"
+    ],
+    "code_refactor": [
+      "serena"
+    ],
+    "backend_auth_payment_db_migration": [
+      "serena",
+      "context7",
+      "domain_rag"
+    ],
+    "frontend_component_library": [
+      "context7"
+    ],
+    "domain_business_rule": [
+      "domain_rag",
+      "serena"
+    ],
+    "file_organization": [
+      "skill_or_repo_rule"
+    ],
+    "environment_docker": [
+      "user_dev_environment_policy"
+    ],
+    "security_or_privacy_sensitive_change": [
+      "context7",
+      "domain_rag",
+      "explicit_tests"
+    ]
+  },
+  "vibe_coding_standard": {
+    "exploration_required": true,
+    "artifact_required": true,
+    "clean_context_execution_required": true,
+    "three_test_gate_required": true,
+    "trunk_branch_leaf_required": true,
+    "artifact_fields": [
+      "Essence",
+      "Impact Map",
+      "Constraints",
+      "Evidence used",
+      "Tests",
+      "Rollback/cleanup plan",
+      "WARN/BLOCKED disposition"
+    ],
+    "verification_gates": [
+      "Happy Path",
+      "Error Case A",
+      "Error Case B",
+      "Touched code path executed with all touched functions exercised directly when practical",
+      "C:\\Users\\anise\\code\\.scratch\\Dev-Management scratch harness may copy relevant production code/config/data to observe actual production behavior",
+      "repo lint/test/typecheck/build/preflight when available"
+    ]
+  },
+  "touched_code_runtime_verification": {
+    "required": true,
+    "exact_code_path_required": true,
+    "exercise_all_touched_functions_when_practical": true,
+    "copy_relevant_production_context_to_scratch_when_needed": true,
+    "scratch_dir": "C:\\Users\\anise\\code\\.scratch\\Dev-Management",
+    "scratch_dir_gitignored": false,
+    "scratch_dir_outside_repo": true,
+    "claim_rule": "Do not claim behavior from inspection alone when the touched code can be executed."
+  },
+  "trunk_branch_leaf_governance": {
+    "trunk": {
+      "areas": [
+        "auth",
+        "payment",
+        "DB schema",
+        "migration",
+        "runtime policy",
+        "security",
+        "architecture"
+      ],
+      "requirements": [
+        "human review",
+        "strong evidence"
+      ]
+    },
+    "branch": {
+      "areas": [
+        "service flows",
+        "shared modules",
+        "API boundaries"
+      ],
+      "requirements": [
+        "Serena impact map",
+        "tests"
+      ]
+    },
+    "leaf": {
+      "areas": [
+        "isolated UI",
+        "terminal feature"
+      ],
+      "requirements": [
+        "verification gates"
+      ]
+    }
+  },
+  "fallback_rules": {
+    "missing_context7": "block_external_library_framework_change_without_explicit_fallback_approval",
+    "missing_serena": "block_trunk_or_branch_modification_without_low_risk_leaf_fallback_approval",
+    "missing_domain_rag": "block_business_rule_implementation",
+    "skills_cannot_replace_evidence": true,
+    "fabricated_evidence_forbidden": true,
+    "unknown_domain_requirement": "blocked_until_domain_evidence_exists"
+  },
+  "quality_workflow": {
+    "sqa": "process_assurance",
+    "qc": "product_defect_detection",
+    "vv": "verification_and_validation",
+    "valid_quality_gates": [
+      "static analysis",
+      "dynamic testing",
+      "technical review",
+      "audit",
+      "test documentation"
+    ]
+  },
+  "app_settings_pointer": {
+    "path": "C:\\Users\\anise\\code\\Dev-Management\\docs\\GLOBAL_AGENT_WORKFLOW.md",
+    "exact_text": "Before work, read and follow:\nC:\\Users\\anise\\code\\Dev-Management\\docs\\GLOBAL_AGENT_WORKFLOW.md\n\nCodex App is my UI and Windows-native execution control plane. Repo-specific stack and commands come from that repo's AGENTS.md and package scripts.\n\nUse Serena for codebase exploration, Context7 for external docs, and tests/reports for final claims. If required evidence is missing, report the gap and do not fabricate it.\n\nAlways run the exact code path touched before claiming behavior; exercise all touched functions directly when practical, and use C:\\Users\\anise\\code\\.scratch\\Dev-Management scratch harnesses to copy relevant production context and observe actual behavior.\n"
+  },
+  "blocked_assertions": {
+    "skills_as_authority": true,
+    "context7_as_product_domain_source": true,
+    "serena_as_external_docs_source": true,
+    "domain_logic_without_domain_evidence": true,
+    "backend_auth_payment_db_migration_without_all_required_evidence": true,
+    "windows_codex_as_ssot": true,
+    "windows_native_execution_for_devmgmt_or_product_code_changes": true,
+    "long_policy_in_app_settings": true
+  },
+  "forbidden": [
+    "windows_codex_policy_surface",
+    "windows_launcher_primary_runtime",
+    "fake_mcp_evidence",
+    "fake_serena_evidence",
+    "backup_fallback_removed_surface",
+    "executable_quarantine",
+    "legacy_linux_execution_authority",
+    "legacy_remote_runtime_route",
+    "fake_mcp_evidence",
+    "fake_serena_evidence"
+  ]
+}

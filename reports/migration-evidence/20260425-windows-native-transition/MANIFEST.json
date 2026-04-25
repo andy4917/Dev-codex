@@ -1,0 +1,133 @@
+{
+  "schema_version": "2026-04-25.windows-native-migration-evidence.v1",
+  "captured_at": "2026-04-25T02:19:55.8254947+09:00",
+  "evidence_root": "C:\\Users\\anise\\code\\migration-evidence\\20260425-windows-native-transition",
+  "source_model": "WSL repos preserved, Windows canonical workspace copied",
+  "windows_roots": [
+    "C:\\Users\\anise\\code\\Dev-Management",
+    "C:\\Users\\anise\\code\\Dev-Workflow",
+    "C:\\Users\\anise\\code\\Dev-Product\\reservation-system"
+  ],
+  "wsl_sources_preserved": [
+    "/home/andy4917/Dev-Management",
+    "/home/andy4917/Dev-Workflow",
+    "/home/andy4917/Dev-Product/reservation-system"
+  ],
+  "files": [
+    {
+      "name": "captured_at.txt",
+      "length": 35,
+      "sha256": "290b14121e30dd12c60cd0049bd167033064990f1fe8c52b71b49bd3a2b26190"
+    },
+    {
+      "name": "Dev-Management.branch.txt",
+      "length": 16,
+      "sha256": "5bc7b151754e4ad8de97fbb3a57fb9eac0869618ee6fd02345dee0717a524feb"
+    },
+    {
+      "name": "Dev-Management.diffstat.txt",
+      "length": 17324,
+      "sha256": "8d3da1f8116b58f9aeeac82587fde8b6925590b0c6729501156b5dfddc5feb11"
+    },
+    {
+      "name": "Dev-Management.head.txt",
+      "length": 42,
+      "sha256": "45b10ffaa3c8d493f4c8c7508646a3cc8f178588986a3942b93e9caaf1db8040"
+    },
+    {
+      "name": "Dev-Management.remotes.txt",
+      "length": 115,
+      "sha256": "bcf83f5ca85e0e4b2ae8065238a30a082bc1474bfc2d29d5b1e976dc444c46e5"
+    },
+    {
+      "name": "Dev-Management.status.txt",
+      "length": 15729,
+      "sha256": "29823912f2d2f66f012f96dcb5192315a1fa58f896eb41f1a99440da8a807017"
+    },
+    {
+      "name": "Dev-Management.untracked.txt",
+      "length": 1949,
+      "sha256": "b3f7de1a0b16718cc7c81b62c010bdf073fd73c5697556a0b2b296cc2ad82cd0"
+    },
+    {
+      "name": "Dev-Workflow.branch.txt",
+      "length": 41,
+      "sha256": "97a4cc7a9e402b246024ba2b1fdc5bd8181c27c914ada032a4a05a09e24d3c86"
+    },
+    {
+      "name": "Dev-Workflow.diffstat.txt",
+      "length": 2507,
+      "sha256": "1b467fcf2c0d909d40fd32c5a8af8195d5b3a6db5d93b1c7ce1858fd5510f879"
+    },
+    {
+      "name": "Dev-Workflow.head.txt",
+      "length": 42,
+      "sha256": "af01bc60c5d37499757720a0779f0fa55cb508b2f317f8c0d8ecee1158e17e4d"
+    },
+    {
+      "name": "Dev-Workflow.remotes.txt",
+      "length": 121,
+      "sha256": "c9a129e6ebb17fb590f87330eb7b44f1b3ef63c81bccf447e74513b9207f56d3"
+    },
+    {
+      "name": "Dev-Workflow.status.txt",
+      "length": 1644,
+      "sha256": "cdb589dee280081597098517a9989b208b61c8cd73a189b51863fc7b67906333"
+    },
+    {
+      "name": "Dev-Workflow.untracked.txt",
+      "length": 45,
+      "sha256": "66a7ace3f9ade66740a506001222269edbab39ef33e4e38fa70aa03d35282942"
+    },
+    {
+      "name": "reservation-system.branch.txt",
+      "length": 28,
+      "sha256": "bd3ecb632b3cb69ad04cd5606ba9ec521d7b2ade0a18765132cccd6c2e002430"
+    },
+    {
+      "name": "reservation-system.diffstat.txt",
+      "length": 19163,
+      "sha256": "d7e96a2ab39256fdaf6cb163231e64fa13ea906bbe69dfed913563d134e988db"
+    },
+    {
+      "name": "reservation-system.head.txt",
+      "length": 42,
+      "sha256": "c95b0e492f8540d5005c26f1722a4d53da01ecd2adceb5945ad96cb5cfc9a742"
+    },
+    {
+      "name": "reservation-system.remotes.txt",
+      "length": 133,
+      "sha256": "2dbf87a5e9d83755499c685f2afbd64e9b842104a7b82ea578e7775a181734a7"
+    },
+    {
+      "name": "reservation-system.status.txt",
+      "length": 16592,
+      "sha256": "878c850b8d1cff3dd55300e52d859ff9024d60f5d4bf9153b66aef952189fbfb"
+    },
+    {
+      "name": "reservation-system.untracked.txt",
+      "length": 16925,
+      "sha256": "64a0a111a35a81b7547adb8e1597c9200952e4c559aaac8cfbe0165013f5602d"
+    },
+    {
+      "name": "robocopy.Dev-Management.log",
+      "length": 1247,
+      "sha256": "0c556dd6e84e7d3b48d35956a0285af95b35311ccfa6697846667049215468f8"
+    },
+    {
+      "name": "robocopy.Dev-Workflow.log",
+      "length": 1241,
+      "sha256": "6749c34fa4fd659484afdb5b8685de4d909022520e6edb07b03c53258be93826"
+    },
+    {
+      "name": "robocopy.reservation-system.log",
+      "length": 1279,
+      "sha256": "bace7f680de8da901f7cb0f5af8cccc332a2dd5c41010a1219852665ffd2c9fa"
+    },
+    {
+      "name": "robocopy.results.json",
+      "length": 730,
+      "sha256": "91a22c4a522a55de25f7e577f519d3e9ff841ab9d620b72974da3d64ef11bbb0"
+    }
+  ]
+}

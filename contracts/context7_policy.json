@@ -33,7 +33,7 @@
     ]
   },
   "agent_targets": [
-    "/home/andy4917/.codex/AGENTS.md"
+    "C:\\Users\\anise\\.codex/AGENTS.md"
   ],
   "protected_change_globs": [
     "package.json",
@@ -45,8 +45,6 @@
     ".codex/*.toml",
     "config/**",
     "scripts/install_or_repair_toolchain.py",
-    "scripts/update_wsl_and_ubuntu.py",
-    "scripts/check_context7.py",
     "scripts/bootstrap_real_env.py"
   ],
   "source_candidate_globs": [

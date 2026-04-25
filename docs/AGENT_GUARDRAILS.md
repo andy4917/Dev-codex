@@ -2,46 +2,35 @@
 
 ## Default Stance
 
-- Treat Codex App as the primary user control surface.
-- Treat Windows host as the app host and SSH client surface.
-- Treat `devmgmt-wsl` as the canonical remote execution surface.
-- Treat Linux-native Codex CLI as the canonical agent binary.
-- Treat Dev-Management as the policy authority and runtime authority.
-- Treat Linux generated runtime files as outputs only.
-- Treat Windows `.codex` as app runtime state and evidence only.
-- Treat the pinned `Dev-Management Control` thread as a routing and maintenance surface only.
-- Treat persistent ops worktrees as optional execution conveniences only.
+- Follow [GLOBAL_AGENT_WORKFLOW.md](./GLOBAL_AGENT_WORKFLOW.md).
+- Treat Codex App as the UI and Windows-native execution control plane.
+- Treat `local-windows` as the canonical execution surface.
+- Treat the Windows-native Codex App agent as the canonical agent binary.
+- Treat Dev-Management docs/contracts/checkers as runtime and workflow authority.
+- Treat `C:\Users\anise\.codex` as the validated Codex App user control plane.
 
-## Standard Reminders
+## Evidence Rules
 
-- runtime authority conflict: Codex App is the primary user control surface, but execution authority belongs to `devmgmt-wsl` and Linux-native Codex CLI
-- Serena-first unmet: activation, onboarding, or latest activation evidence is incomplete
-- Context7 evidence missing: protected dependency, API, config, or migration change requires real evidence
-- generated runtime blocked: Linux generated runtime files cannot be used as authority or override inputs
-- hooks trigger only: hooks may trigger checks, but audit, tests, and score layer are the final gates
-- unrelated dirty changes present: report them and leave them untouched
+- Use Serena for codebase semantic evidence.
+- Use Context7 for external documentation evidence.
+- Use product docs or Domain RAG for business/domain evidence.
+- Treat Skills as workflow modules, not factual authority.
+- Do not fabricate evidence.
 
 ## Editing Rules
 
-- Path authority is defined in `contracts/path_authority_policy.json`.
-- Resolve repo paths through `devmgmt_runtime.path_authority`, not hardcoded user-specific absolute paths.
-- Do not manually edit generated Linux config, shim, hook, or AGENTS files.
-- Do not use `$HOME/.codex/config.toml` as override input.
-- Do not generate or rely on Windows `.codex` config, AGENTS, hooks, skills, or score wrappers.
-- Use `$HOME/.codex/user-config.toml` only for allowed global user overrides.
-- Do not add hardcoded fallback paths or reintroduce the Windows-mounted Codex launcher as a primary runtime target.
-- Use `pathlib.Path` for path operations and fail fast before file access.
-- Tracked source rollback uses Git history, and generated output rollback uses regeneration rather than backup files.
-- Treat app memories, projectless chat state, and restore seed as hints only.
-- Do not let a worktree, thread, or app memory become a source of truth.
-- Do not claim hook-only enforcement.
-- For app usability work, keep user actions limited to app restart, Settings > Connections, devmgmt-wsl selection, remote project open, sign-in, and normal task input whenever safe automation exists.
-- Use the `Dev-Management Control` thread for readiness and maintenance routing, and use separate Worktree mode only for scoped implementation tasks.
+- Read repo `AGENTS.md` before modifying code.
+- Use package scripts as the command authority for that repo.
+- Do not move repo stack or product policy into Windows `.codex`.
+- Validate Windows `.codex` and report blocked authority-breaking settings, but do not overwrite it by default.
+- Do not generate or restore Windows `.codex` policy mirrors.
+- Do not use legacy Linux, SSH remote routes, or mounted launchers as governed runtime.
+- Do not use mounted Linux paths as governed repo roots.
+- Treat Docker as build/verification/packaging support only; `direnv` and dotfile managers are optional bootstrap surfaces.
 
-## Work Pattern
+## Verification Rules
 
-- Before code work, inspect git status, instruction guard, global runtime, config provenance, and startup workflow.
-- When worktree mode is in use, record both `active_worktree_root` and `canonical_repo_root`.
-- During work, touch only in-scope files and record subagent, skill, plugin, hook, and workspace dependency usage when used.
-- After work, run path preflight, hardcoding scans, stale feature scans, config provenance checks, artifact hygiene checks, `git diff --check`, and relevant tests before commit.
-- Leave quarantine as inert evidence only; never preserve executable, importable, or fallback-ready backups there.
+- Exploration, artifact, clean execution, and verification are mandatory.
+- Verification requires Happy Path, Error Case A, and Error Case B, plus repo lint/test/typecheck/build/preflight when available.
+- Static analysis, dynamic testing, technical review, audit, and test documentation are valid quality gates.
+- Report remaining WARN/BLOCKED dispositions explicitly.

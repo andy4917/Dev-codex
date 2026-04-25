@@ -24,10 +24,10 @@ class DevMgmtRuntimeHelpersTests(unittest.TestCase):
             authority.write_text("{}\\n", encoding="utf-8")
             self.assertEqual(authority_path_for(tmp), authority.resolve())
 
-    def test_forbidden_runtime_detection_matches_windows_launcher(self) -> None:
-        authority = {"forbidden_primary_runtime_paths": ["/mnt/c/Users/anise/.codex/bin/wsl", ".codex/bin/wsl/codex"]}
-        self.assertTrue(is_forbidden_runtime_value("/mnt/c/Users/anise/.codex/bin/wsl/codex", authority))
-        self.assertFalse(is_forbidden_runtime_value("/home/andy4917/.local/share/dev-management/codex-npm/bin/codex", authority))
+    def test_forbidden_runtime_detection_matches_legacy_marker(self) -> None:
+        authority = {"forbidden_primary_runtime_paths": ["mounted-linux-launcher", "legacy-remote-route"]}
+        self.assertTrue(is_forbidden_runtime_value("mounted-linux-launcher/codex", authority))
+        self.assertFalse(is_forbidden_runtime_value("C:/Users/anise/code/Dev-Management", authority))
 
 
 if __name__ == "__main__":

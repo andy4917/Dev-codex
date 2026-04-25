@@ -32,8 +32,8 @@
       "description": "Tool search only."
     },
     {
-      "id": "v5-wsl-hooks",
-      "description": "WSL-only hooks enforcement only."
+      "id": "v5-windows-local-gates",
+      "description": "Windows-local verification gates only."
     }
   ],
   "soft_budget": {

@@ -1,106 +1,45 @@
 {
-  "status": "WARN",
+  "status": "PASS",
   "gate_status": "PASS",
-  "checked_at": "2026-04-21T08:28:07.923095+00:00",
-  "authority_path": "/home/andy4917/Dev-Management/contracts/workspace_authority.json",
-  "raw_authority_probe_path": "/home/andy4917/Dev-Management/contracts/workspace_authority.json",
-  "authority_hash": "a8d3a23e349c8ce20aa9f90ab8080255ccce7143f8d5e1531b212da71e11e38e",
-  "canonical_repo_root": "/home/andy4917/Dev-Management",
-  "active_worktree_root": "/home/andy4917/Dev-Management",
-  "policy_path": "/home/andy4917/Dev-Management/contracts/config_provenance_policy.json",
-  "allowed_optional_user_override_source": "/home/andy4917/.codex/user-config.toml",
+  "checked_at": "2026-04-25T11:23:30.871487+00:00",
+  "authority_path": "C:\\Users\\anise\\code\\Dev-Management\\contracts\\workspace_authority.json",
+  "raw_authority_probe_path": "C:\\Users\\anise\\code\\Dev-Management\\contracts\\workspace_authority.json",
+  "authority_hash": "e5dd304a773e290b3db336f6912550d30d5c0554111f3f511bead5863beee493",
+  "canonical_repo_root": "C:\\Users\\anise\\code\\Dev-Management",
+  "active_worktree_root": "C:\\Users\\anise\\code\\Dev-Management",
+  "policy_path": "C:\\Users\\anise\\code\\Dev-Management\\contracts\\config_provenance_policy.json",
+  "allowed_optional_user_override_source": "C:\\Users\\anise\\.codex\\user-config.toml",
   "override_source_paths": [],
   "generated_mirror_contract": {
     "status": "PASS",
     "self_feed_reasons": [],
     "mirrors_are_outputs_only": true,
-    "canonical_repo_root": "/home/andy4917/Dev-Management",
-    "active_worktree_root": "/home/andy4917/Dev-Management"
+    "canonical_repo_root": "C:\\Users\\anise\\code\\Dev-Management",
+    "active_worktree_root": "C:\\Users\\anise\\code\\Dev-Management"
   },
   "classifications": {
-    "/home/andy4917/.codex/config.toml": "generated_mirror",
-    "/home/andy4917/.codex/AGENTS.md": "generated_mirror",
-    "/home/andy4917/.codex/hooks.json": "generated_mirror",
-    "/home/andy4917/.codex/user-config.toml": "optional_user_override_source",
-    "/home/andy4917/Dev-Management/contracts/workspace_authority.json": "source_of_truth",
-    "/mnt/c/Users/anise/.codex/config.toml": "windows_policy_surface",
-    "/mnt/c/Users/anise/.codex/AGENTS.md": "windows_policy_surface",
-    "/mnt/c/Users/anise/.codex/hooks.json": "windows_policy_surface",
-    "/mnt/c/Users/anise/.codex/skills/dev-workflow": "windows_policy_surface"
+    "C:\\Users\\anise\\.codex\\decommissioned-linux-user-config.toml": "optional_user_override_source",
+    "C:\\Users\\anise\\code\\Dev-Management\\contracts\\workspace_authority.json": "source_of_truth",
+    "C:\\Users\\anise\\.codex\\config.toml": "windows_policy_surface",
+    "C:\\Users\\anise\\.codex\\AGENTS.md": "windows_policy_surface",
+    "C:\\Users\\anise\\.codex\\hooks.json": "windows_policy_surface",
+    "C:\\Users\\anise\\.codex\\skills": "windows_policy_surface"
   },
-  "generated_headers": {
-    "/home/andy4917/.codex/config.toml": {
-      "status": "PASS",
-      "exists": true,
-      "checks": {
-        "marker": true,
-        "source_authority": true,
-        "source_hash": true,
-        "role": true,
-        "read_by_renderer": true,
-        "user_override_source": true,
-        "optional_user_override": true
-      },
-      "reasons": []
-    },
-    "/home/andy4917/.codex/AGENTS.md": {
-      "status": "WARN",
-      "exists": true,
-      "checks": {
-        "generated_banner": true,
-        "authority_file_line": true,
-        "outputs_only_line": false,
-        "user_override_line": true
-      },
-      "reasons": [
-        "missing AGENTS provenance field: outputs_only_line"
-      ]
-    },
-    "/home/andy4917/.codex/hooks.json": {
-      "status": "PASS",
-      "exists": true,
-      "checks": {
-        "expected_generation": true,
-        "matches_render": true
-      },
-      "reasons": []
-    }
-  },
+  "generated_headers": {},
   "active_config_findings": {
-    "/home/andy4917/.codex/config.toml": {
+    "C:\\Users\\anise\\.codex\\config.toml": {
       "status": "PASS",
       "blocked_reasons": [],
       "features": {
-        "apply_patch_freeform": true,
-        "artifact": true,
-        "child_agents_md": true,
-        "code_mode": true,
-        "code_mode_only": true,
-        "codex_git_commit": true,
-        "codex_hooks": true,
-        "default_mode_request_user_input": true,
-        "enable_fanout": true,
-        "exec_permission_approvals": true,
-        "guardian_approval": true,
-        "image_generation": true,
-        "js_repl": true,
-        "memories": true,
-        "multi_agent_v2": true,
-        "prevent_idle_sleep": true,
-        "realtime_conversation": true,
+        "remote_control": true,
         "remote_connections": true,
-        "request_permissions_tool": true,
-        "runtime_metrics": true,
-        "shell_zsh_fork": true,
-        "skill_env_var_dependency_prompt": true,
-        "chronicle": true,
-        "tool_search": true,
-        "undo": true
+        "memories": true,
+        "workspace_dependencies": true
       },
-      "approval_policy": "on-request",
-      "sandbox_mode": "workspace-write"
+      "approval_policy": "never",
+      "sandbox_mode": "danger-full-access"
     },
-    "/home/andy4917/.codex/user-config.toml": {
+    "C:\\Users\\anise\\.codex\\user-config.toml": {
       "status": "PASS",
       "blocked_reasons": [],
       "features": {},
@@ -108,29 +47,259 @@
       "sandbox_mode": ""
     }
   },
-  "windows_policy_surface_status": "WARN",
+  "windows_policy_surface_status": "PASS",
   "windows_policy_surface_findings": [
     {
-      "path": "/mnt/c/Users/anise/.codex/skills/dev-workflow",
+      "path": "C:\\Users\\anise\\.codex\\config.toml",
+      "present": true,
+      "kind": "file",
+      "classification": "validated_app_control_plane_config",
+      "disposition": "RETAIN_SAFE",
+      "operation": "retain",
+      "status": "PASS",
+      "generated_marker_found": false,
+      "repo_owned": false,
+      "reason": "Windows .codex/config.toml is a user-managed app control plane config within validated safety boundaries.",
+      "details": {
+        "bootstrap_features_required": [
+          "remote_control",
+          "remote_connections"
+        ],
+        "feature_keys": [
+          "memories",
+          "remote_connections",
+          "remote_control",
+          "workspace_dependencies"
+        ],
+        "top_level_keys": [
+          "approval_policy",
+          "features",
+          "marketplaces",
+          "mcp_servers",
+          "model",
+          "model_reasoning_effort",
+          "plugins",
+          "projects",
+          "sandbox_mode",
+          "windows"
+        ],
+        "remote_control_enabled": true,
+        "remote_connections_enabled": true,
+        "remote_usability_ready": true,
+        "safe_user_preferences_only": true,
+        "mcp_servers": [
+          "context7",
+          "serena"
+        ],
+        "warning_codes": [],
+        "reason_codes": []
+      }
+    },
+    {
+      "path": "C:\\Users\\anise\\.codex\\AGENTS.md",
+      "present": true,
+      "kind": "file",
+      "classification": "user_managed_custom_instructions",
+      "disposition": "RETAIN_SAFE",
+      "operation": "retain",
+      "status": "PASS",
+      "generated_marker_found": false,
+      "repo_owned": false,
+      "reason": "Windows AGENTS.md contains user-managed global custom instructions within validated boundaries.",
+      "details": {
+        "byte_length": 677,
+        "nonempty_lines": [
+          "Before work, read and follow:",
+          "C:\\Users\\anise\\code\\Dev-Management\\docs\\GLOBAL_AGENT_WORKFLOW.md",
+          "Codex App is my UI and Windows-native execution control plane. Repo-specific stack and commands come from that repo's AGENTS.md and package scripts.",
+          "Use Serena for codebase exploration, Context7 for external docs, and tests/reports for final claims. If required evidence is missing, report the gap and do not fabricate it.",
+          "Always run the exact code path touched before claiming behavior; exercise all touched functions directly when practical, and use C:\\Users\\anise\\code\\.scratch\\Dev-Management scratch harnesses to copy relevant production context and observe actual behavior."
+        ],
+        "pointer_only": false
+      }
+    },
+    {
+      "path": "C:\\Users\\anise\\.codex\\skills",
+      "present": true,
       "kind": "directory",
-      "classification": "unknown_policy_surface",
-      "reason": "Windows skills content is present under app state without a Dev-Management generated marker; treat it as evidence-only and review manually before removal."
+      "classification": "app_owned_system_skill_bundle",
+      "disposition": "RETAIN_SAFE",
+      "operation": "retain",
+      "status": "PASS",
+      "generated_marker_found": false,
+      "repo_owned": false,
+      "reason": "Windows skills surface contains the app-owned system skill bundle only.",
+      "details": {
+        "entries": [
+          ".system"
+        ],
+        "skill_tree": {
+          "exists": true,
+          "is_dir": true,
+          "files": [
+            ".system\\.codex-system-skills.marker",
+            ".system\\imagegen\\LICENSE.txt",
+            ".system\\imagegen\\SKILL.md",
+            ".system\\imagegen\\agents\\openai.yaml",
+            ".system\\imagegen\\assets\\imagegen-small.svg",
+            ".system\\imagegen\\assets\\imagegen.png",
+            ".system\\imagegen\\references\\cli.md",
+            ".system\\imagegen\\references\\codex-network.md",
+            ".system\\imagegen\\references\\image-api.md",
+            ".system\\imagegen\\references\\prompting.md",
+            ".system\\imagegen\\references\\sample-prompts.md",
+            ".system\\imagegen\\scripts\\image_gen.py",
+            ".system\\imagegen\\scripts\\remove_chroma_key.py",
+            ".system\\openai-docs\\LICENSE.txt",
+            ".system\\openai-docs\\SKILL.md",
+            ".system\\openai-docs\\agents\\openai.yaml",
+            ".system\\openai-docs\\assets\\openai-small.svg",
+            ".system\\openai-docs\\assets\\openai.png",
+            ".system\\openai-docs\\references\\latest-model.md",
+            ".system\\openai-docs\\references\\prompting-guide.md",
+            ".system\\openai-docs\\references\\upgrade-guide.md",
+            ".system\\openai-docs\\scripts\\resolve-latest-model-info.js",
+            ".system\\plugin-creator\\SKILL.md",
+            ".system\\plugin-creator\\agents\\openai.yaml",
+            ".system\\plugin-creator\\assets\\plugin-creator-small.svg",
+            ".system\\plugin-creator\\assets\\plugin-creator.png",
+            ".system\\plugin-creator\\references\\plugin-json-spec.md",
+            ".system\\plugin-creator\\scripts\\create_basic_plugin.py",
+            ".system\\skill-creator\\SKILL.md",
+            ".system\\skill-creator\\license.txt",
+            ".system\\skill-creator\\agents\\openai.yaml",
+            ".system\\skill-creator\\assets\\skill-creator-small.svg",
+            ".system\\skill-creator\\assets\\skill-creator.png",
+            ".system\\skill-creator\\references\\openai_yaml.md",
+            ".system\\skill-creator\\scripts\\generate_openai_yaml.py",
+            ".system\\skill-creator\\scripts\\init_skill.py",
+            ".system\\skill-creator\\scripts\\quick_validate.py",
+            ".system\\skill-installer\\LICENSE.txt",
+            ".system\\skill-installer\\SKILL.md",
+            ".system\\skill-installer\\agents\\openai.yaml",
+            ".system\\skill-installer\\assets\\skill-installer-small.svg",
+            ".system\\skill-installer\\assets\\skill-installer.png",
+            ".system\\skill-installer\\scripts\\github_utils.py",
+            ".system\\skill-installer\\scripts\\install-skill-from-github.py",
+            ".system\\skill-installer\\scripts\\list-skills.py"
+          ],
+          "hashes": {
+            ".system\\.codex-system-skills.marker": "0609a80392395de8066c61977e5b7bbfbfb13d3330c96eed88506e155bbeaf0e",
+            ".system\\imagegen\\LICENSE.txt": "44e03f7e263eb3ad256440c1eeab5e49168baff5a78ecef9a5447261cf3a91bc",
+            ".system\\imagegen\\SKILL.md": "613f892ba9259cbfcb44ee74e81587cc7ce288de86ae2f1eab5eacb190e34f58",
+            ".system\\imagegen\\agents\\openai.yaml": "1797be4076717806df54aa9331c07ac8eebe32c69f32132d5858712b05406146",
+            ".system\\imagegen\\assets\\imagegen-small.svg": "087c1632a3b8a2ed4d6218952e7ba7ae2221a979f84233667ed2c587998784da",
+            ".system\\imagegen\\assets\\imagegen.png": "95952f644064eb9e890f98d8db07216347186526e4c41ad66d3420629eb86e20",
+            ".system\\imagegen\\references\\cli.md": "200709f50fd772d9a54424274290253ef9d4c1e2834ebb0455e607a93c1293f3",
+            ".system\\imagegen\\references\\codex-network.md": "cba3b4d24d30f38adf8021b6e9b49ec5261a9e45e7df31047ec451c916c99b0a",
+            ".system\\imagegen\\references\\image-api.md": "6e682e499f48e4249b2ddffa91f2f76a82cbb1ba9d913ec9f63f82756e4eeb26",
+            ".system\\imagegen\\references\\prompting.md": "60ba06b558547479325ad51ef2fcfcd573b926ca6ab8b664c5d372ea199f2a8f",
+            ".system\\imagegen\\references\\sample-prompts.md": "6c873500a381f85703745df0a4d7074772a626f96c2e73cb984a47ab18caec0a",
+            ".system\\imagegen\\scripts\\image_gen.py": "c2cdb05244ad9a3dcb8731988790ea6a06a59ab3c062c0f872b35f4ad7d20b05",
+            ".system\\imagegen\\scripts\\remove_chroma_key.py": "7e51236919203b61d07ddffdc6e0b5f501a28661003f5851f26ffbb64bdec1ea",
+            ".system\\openai-docs\\LICENSE.txt": "44e03f7e263eb3ad256440c1eeab5e49168baff5a78ecef9a5447261cf3a91bc",
+            ".system\\openai-docs\\SKILL.md": "406c09aa0a6424ffe48fdd93f1901d8a792acfafaab1a77993da88ccae96309f",
+            ".system\\openai-docs\\agents\\openai.yaml": "24a68fdd3b6c59c712dfae36991a652ccad7e796c86f601aeb00a44b0bd10dbd",
+            ".system\\openai-docs\\assets\\openai-small.svg": "85ef0a2cde497872edec1525f1d538ccc42b33ff47acdbb88499a1631a4bdb21",
+            ".system\\openai-docs\\assets\\openai.png": "156cc84d7332bfe95b310350bd470b690d22aa33d65340cc6c2e06022946194c",
+            ".system\\openai-docs\\references\\latest-model.md": "e654194d187197f21f8821d0127175772a4d02e37858245064c6a99ccc84a903",
+            ".system\\openai-docs\\references\\prompting-guide.md": "e305b40e031224ca8bc02c6c7064960cf39088205d86147ec65dd4ec1890be3d",
+            ".system\\openai-docs\\references\\upgrade-guide.md": "e518b150d65cbc2dc2bd055b6ee37cbc8789e87ad1a43b7e6b4d5e9f1fb679ca",
+            ".system\\openai-docs\\scripts\\resolve-latest-model-info.js": "00ed380ea7427877814aff12328bed41848612db77331181360a57a493481161",
+            ".system\\plugin-creator\\SKILL.md": "d7c5a754c137d2e5e6924f998e35c0c88c4a051a38024e92fae90003caf58e82",
+            ".system\\plugin-creator\\agents\\openai.yaml": "8b734948e71277f03e157cf7a6e5b3dc7861a4f0d730f75fc5d5e9b906672b7d",
+            ".system\\plugin-creator\\assets\\plugin-creator-small.svg": "edb19a0c59f9a1b5253b9af6d2f9f03cac27b2fe6a0275ebccbbdbff07891a1a",
+            ".system\\plugin-creator\\assets\\plugin-creator.png": "a4024b0306ddb05847e1012879d37aaf1e658205199da596f5145ed7a88d9162",
+            ".system\\plugin-creator\\references\\plugin-json-spec.md": "cb0d34c9f5591a4e9862482ab62426e3d0af88b9baccc06ff2b4f77b0e71a63f",
+            ".system\\plugin-creator\\scripts\\create_basic_plugin.py": "cf3cb61f3dc94d8e6df3f3afea031ff285ead8238143441659c0f95546370125",
+            ".system\\skill-creator\\SKILL.md": "2940e08d49e5197453e58a4387d14cb07101b97911c992ef75c8289e0a1734c0",
+            ".system\\skill-creator\\license.txt": "3ddf9be5c28fe27dad143a5dc76eea25222ad1dd68934a047064e56ed2fa40c5",
+            ".system\\skill-creator\\agents\\openai.yaml": "b750627cdd588fdbb5b46e854d3384d1a504fad3b8ed73ca5d7ead3804df78b6",
+            ".system\\skill-creator\\assets\\skill-creator-small.svg": "edb19a0c59f9a1b5253b9af6d2f9f03cac27b2fe6a0275ebccbbdbff07891a1a",
+            ".system\\skill-creator\\assets\\skill-creator.png": "a4024b0306ddb05847e1012879d37aaf1e658205199da596f5145ed7a88d9162",
+            ".system\\skill-creator\\references\\openai_yaml.md": "7039d465b05342cbacf861f08d20192ab1eeee112bc5d8ff0fb66234756887a9",
+            ".system\\skill-creator\\scripts\\generate_openai_yaml.py": "9ea002c57657e169b1bddcae227e55a5d87c43735da6d87cf682b3e216abb84b",
+            ".system\\skill-creator\\scripts\\init_skill.py": "50281d4b53c73f6ffa1e98adf1ee9fcd55d4854970f24513e33da65f073f74be",
+            ".system\\skill-creator\\scripts\\quick_validate.py": "5347a0a09cfb546bba1c0d1a30dae0a233d9a05f57bd4e7877155c588bcdabf7",
+            ".system\\skill-installer\\LICENSE.txt": "3ddf9be5c28fe27dad143a5dc76eea25222ad1dd68934a047064e56ed2fa40c5",
+            ".system\\skill-installer\\SKILL.md": "2d3be2289274cbffb9eb632b25a1038aa7f369df6aaa0964077c77648547e01d",
+            ".system\\skill-installer\\agents\\openai.yaml": "bd64b4d6893138706b3e3540f266ab809ccdcd08375652ae9f9d1e029fe50d02",
+            ".system\\skill-installer\\assets\\skill-installer-small.svg": "099e5a4b5e5f0f918a8de0d2059f0a86211da623dbb75f86f13dc9f7c08c778d",
+            ".system\\skill-installer\\assets\\skill-installer.png": "d0a230b1a79b71b858b7c215a0fbb0768d6459c14ea4ef80c61592629bf0e605",
+            ".system\\skill-installer\\scripts\\github_utils.py": "2f9702afb9f0da740181fa4a3214f663e460f80cd5cea2e7dcaab00ad269082e",
+            ".system\\skill-installer\\scripts\\install-skill-from-github.py": "80196d9f149a0191d338f37d56003f32ffc8590e833d658539903f5d794ef146",
+            ".system\\skill-installer\\scripts\\list-skills.py": "4baa87cad465607d45c7a2859df89fdb354334b35861f5f4d123a7e9d0f658aa"
+          },
+          "symlinks": [],
+          "unexpected_files": [
+            ".system\\imagegen\\agents\\openai.yaml",
+            ".system\\imagegen\\assets\\imagegen-small.svg",
+            ".system\\imagegen\\assets\\imagegen.png",
+            ".system\\imagegen\\scripts\\image_gen.py",
+            ".system\\imagegen\\scripts\\remove_chroma_key.py",
+            ".system\\openai-docs\\agents\\openai.yaml",
+            ".system\\openai-docs\\assets\\openai-small.svg",
+            ".system\\openai-docs\\assets\\openai.png",
+            ".system\\openai-docs\\scripts\\resolve-latest-model-info.js",
+            ".system\\plugin-creator\\agents\\openai.yaml",
+            ".system\\plugin-creator\\assets\\plugin-creator-small.svg",
+            ".system\\plugin-creator\\assets\\plugin-creator.png",
+            ".system\\plugin-creator\\scripts\\create_basic_plugin.py",
+            ".system\\skill-creator\\agents\\openai.yaml",
+            ".system\\skill-creator\\assets\\skill-creator-small.svg",
+            ".system\\skill-creator\\assets\\skill-creator.png",
+            ".system\\skill-creator\\scripts\\generate_openai_yaml.py",
+            ".system\\skill-creator\\scripts\\init_skill.py",
+            ".system\\skill-creator\\scripts\\quick_validate.py",
+            ".system\\skill-installer\\agents\\openai.yaml",
+            ".system\\skill-installer\\assets\\skill-installer-small.svg",
+            ".system\\skill-installer\\assets\\skill-installer.png",
+            ".system\\skill-installer\\scripts\\github_utils.py",
+            ".system\\skill-installer\\scripts\\install-skill-from-github.py",
+            ".system\\skill-installer\\scripts\\list-skills.py"
+          ],
+          "active_entries": [
+            ".system\\imagegen\\scripts\\image_gen.py",
+            ".system\\imagegen\\scripts\\remove_chroma_key.py",
+            ".system\\plugin-creator\\scripts\\create_basic_plugin.py",
+            ".system\\skill-creator\\scripts\\generate_openai_yaml.py",
+            ".system\\skill-creator\\scripts\\init_skill.py",
+            ".system\\skill-creator\\scripts\\quick_validate.py",
+            ".system\\skill-installer\\scripts\\github_utils.py",
+            ".system\\skill-installer\\scripts\\install-skill-from-github.py",
+            ".system\\skill-installer\\scripts\\list-skills.py"
+          ],
+          "executable_markdown": []
+        },
+        "mirror": {
+          "canonical_skill_root": "C:\\Users\\anise\\code\\Dev-Workflow\\skills",
+          "windows_tree": {
+            "exists": false,
+            "is_dir": false,
+            "files": [],
+            "hashes": {},
+            "symlinks": [],
+            "unexpected_files": [],
+            "active_entries": [],
+            "executable_markdown": []
+          },
+          "canonical_tree": {},
+          "is_structural_mirror": false,
+          "reason": "Windows skill surface does not contain a dev-workflow mirror."
+        }
+      }
     }
   ],
   "known_generated_windows_policy_files_deleted": [],
   "unknown_windows_policy_files_blocking": [],
-  "unknown_windows_policy_files_observed": [
-    "/mnt/c/Users/anise/.codex/skills/dev-workflow"
-  ],
+  "unknown_windows_policy_files_observed": [],
   "app_state_surface": {
     "status": "PASS",
-    "path": "/mnt/c/Users/anise/.codex",
+    "path": "C:\\Users\\anise\\.codex",
     "classification": "app_state_evidence_only",
     "exists": true,
     "reason": ""
   },
   "blocked_reasons": [],
-  "warnings": [
-    "Windows skills content is present under app state without a Dev-Management generated marker; treat it as evidence-only and review manually before removal."
-  ]
+  "warnings": []
 }

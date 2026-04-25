@@ -1,95 +1,43 @@
 # Global Runtime Architecture
 
-## Goal
+## Verdict
 
-Align Codex App main control, SSH remote execution, Linux-native Codex CLI, and Dev-Management authority under one model.
+The canonical runtime model is Windows-native only.
 
-- Codex App is the primary user control surface.
-- Codex App is the remote session control surface.
-- Codex App is not the execution authority.
-- Codex App is not the policy authority.
-- Windows host is the app host and SSH client surface.
-- `devmgmt-wsl` is the canonical remote execution surface.
-- Linux-native Codex CLI on the remote login-shell PATH is the canonical agent binary.
-- Dev-Management is the policy authority and runtime authority.
-- Path authority is defined in `contracts/path_authority_policy.json`.
-- Linux generated runtime files are outputs only.
-- Windows `.codex` is app runtime state and evidence only.
-- Dev-Management must not generate policy-bearing Windows `.codex` files.
-- Windows-mounted Codex launcher paths remain forbidden as the primary runtime.
-- Tracked source rollback uses Git history, and generated output rollback uses regeneration rather than backup copies.
-- Dev-Management Control is the pinned Codex App control thread for readiness and maintenance routing.
-- Permanent Git worktrees are optional execution conveniences and never policy authority.
+- App control plane: `C:\Users\anise\.codex` (`USER_CONTROL_PLANE + APP_STATE`, not repo authority)
+- Canonical workspace: `C:\Users\anise\code`
+- Policy and verification authority: `C:\Users\anise\code\Dev-Management`
+- Workflow assets: `C:\Users\anise\code\Dev-Workflow`
+- Product repos: `C:\Users\anise\code\Dev-Product`
 
-## Current vs Desired
+Linux/remote execution is decommissioned for steady state. Migration evidence remains only under `C:\Users\anise\code\Dev-Management\reports\migration-evidence` until the user explicitly removes those records.
 
-```text
-Codex App on Windows
-  -> SSH remote connection
-  -> devmgmt-wsl
-  -> Linux-native Codex CLI
-  -> Dev-Management guard/audit/repair
-  -> repo changes/tests/reports
+## Authority Split
+
+- Dev-Management owns environment policy, path authority, checks, gates, and final reports.
+- Each repo owns its own stack/workflow rules through `AGENTS.md`, package scripts, and repo-local contracts.
+- Codex App owns user intent, app settings, local sessions, plugins, skills, and live UI state.
+- Docker is optional build, verification, packaging, and integration support, not the canonical development runtime.
+
+## Required Baseline
+
+- Codex App agent: Windows native
+- Integrated terminal: PowerShell 7
+- PowerShell policy surface: `Documents\PowerShell\policies\utf8.ps1`, `Documents\PowerShell\policies\native-args.ps1`, and a profile that dot-sources them.
+- Codex config: `sandbox_mode = "danger-full-access"`, `approval_policy = "never"`, `[windows] sandbox = "elevated"`
+- Git global EOL: `core.autocrlf=false`, `core.safecrlf=true`
+- Repo EOL: `.gitattributes` controls LF/CRLF per repo
+
+## Final Gate
+
+Run from `C:\Users\anise\code\Dev-Management`:
+
+```powershell
+python scripts\check_windows_app_local_readiness.py --json
+python scripts\check_user_dev_environment.py --json
 ```
 
-Forbidden relation:
+Expected verdicts:
 
-```text
-Codex App on Windows
-  -> Windows-mounted launcher
-  -> Windows-mounted Codex launcher
-  -> primary execution runtime
-```
-
-## Surface Roles
-
-- `codex_app`: `primary_user_control_surface`, `remote_session_control_surface`
-- `windows_host`: `app_host`, `ssh_client_surface`, `user_surface`
-- `windows_codex_state`: app state and restore evidence only
-- `windows_codex_launcher`: external dependency and forbidden primary runtime
-- `wsl_linux_shell`: local diagnostic surface only
-- `ssh_devmgmt_wsl`: `canonical_remote_execution_surface`
-- `linux_native_codex_cli`: `canonical_agent_binary`
-- `dev_management`: `policy_authority`, `runtime_authority`, `source_of_truth`
-
-## Control Thread And Worktrees
-
-- Keep a pinned Codex App control thread named `Dev-Management Control` on `devmgmt-wsl`, project `${DEVMGMT_ROOT}`.
-- That control thread is allowed and recommended, but it is not execution authority and not policy authority.
-- App memory, thread memory, and restore state are hints only.
-- Default the control thread to the local remote project, not Worktree mode.
-- Persistent ops worktrees are optional and non-authoritative. Use them only for recurring audits, report generation, readiness checks, app usability checks, and non-destructive diagnostics.
-- Implementation work should default to task-scoped ephemeral worktrees.
-- Reports from worktrees must declare `active_worktree_root` and `canonical_repo_root`.
-- Linux generated runtime files always bind to the canonical repo root, never a task worktree root.
-
-## Generated Runtime Files
-
-- `$HOME/.codex/config.toml` is a generated Linux runtime file.
-- Windows `.codex/config.toml`, `AGENTS.md`, `hooks.json`, and `skills/dev-workflow` must not be generated by Dev-Management.
-- Linux generated runtime files must never be used as render input, authority input, or user override input.
-- `$HOME/.codex/user-config.toml` is the only optional user override source.
-- Source and scripts should resolve paths through `devmgmt_runtime.path_authority`.
-
-## Status Semantics
-
-- Canonical remote PASS plus client PATH contamination means `overall_status = WARN` and `canonical_execution_status = PASS`.
-- Canonical remote FAIL means `overall_status = BLOCKED`.
-- Local shell direct execution plus forbidden launcher remains `BLOCKED`.
-- Remote execution through `devmgmt-wsl` and Linux-native Codex CLI is the success path.
-- Generated Linux runtime self-feed is always `BLOCKED`.
-- Hook-only enforcement claims are always `BLOCKED`.
-
-## Guard And Audit Rules
-
-- App state, projectless chats, memories, restore refs, and plugin state can be evidence, never authority.
-- Plugin-provided MCP drift is audit-relevant before code modification.
-- Hooks may trigger checks, but audit, tests, and score layer remain the final gates.
-- `telepathy`, `workspace_dependencies` without re-authorization, `approval_policy = "never"`, and `sandbox_mode = "danger-full-access"` are stale active config blockers.
-
-## App Usability Scope
-
-- Default verification purpose remains code-modification.
-- App-usability is a narrower readiness scope for app restart, Settings > Connections, remote project open, sign-in, and task submission.
-- Serena onboarding or activation may keep code-modification blocked while app-usability is only WARN.
-- Remote SSH failure, forbidden Windows launcher primary runtime, generated Linux runtime self-feed, and stale active config flags remain BLOCKED even for app-usability.
+- App readiness: `APP_READY`
+- User environment baseline: `PASS`

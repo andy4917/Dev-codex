@@ -1,44 +1,37 @@
 {
-  "version": 1,
+  "version": 2,
+  "schema_version": "2026.04.app-surface.windows-native.v1",
   "roles": {
     "codex_app": [
       "primary_user_control_surface",
-      "remote_session_control_surface"
+      "windows_native_execution_control_plane"
     ],
     "windows_host": [
       "app_host",
-      "ssh_client_surface"
+      "local_execution_surface"
     ],
-    "canonical_remote_execution_surface": "devmgmt-wsl",
-    "canonical_agent_binary": "Linux-native Codex CLI"
+    "canonical_execution_surface": "local-windows-agent",
+    "canonical_agent_binary": "Windows-native Codex App agent"
   },
   "settings_flow": {
-    "settings_path": "Settings > Connections",
-    "host_alias": "devmgmt-wsl",
-    "manual_add_host_path": "Connections > Add host > devmgmt-wsl",
-    "auto_discovery_not_guaranteed": true,
-    "required_windows_bootstrap_features": [
+    "settings_path": "Local / Windows project open",
+    "agent_environment": "Windows native",
+    "integrated_terminal": "PowerShell 7 (pwsh)",
+    "required_windows_features": [
       "remote_control",
-      "remote_connections"
+      "remote_connections",
+      "workspace_dependencies"
     ],
-    "windows_ssh_config_path": "C:/Users/anise/.ssh/config",
-    "require_direct_top_level_host_alias": true,
-    "remote_project": "/home/andy4917/Dev-Management",
-    "require_remote_project_open_proof": true,
-    "user_result_values": [
-      "listed + project opened",
-      "manual add worked + project opened",
-      "manual add failed",
-      "project open failed",
-      "sign-in blocker"
-    ],
-    "readiness_prompt": "Run Dev-Management readiness after Windows .codex root-cause cleanup and report APP_READY / APP_READY_WITH_WARNINGS / APP_NOT_READY. Do not modify code unless runtime, config provenance, Serena/Context7, score, and audit gates allow it."
+    "local_project": "C:\\Users\\anise\\code\\Dev-Management",
+    "require_local_project_open_proof": true,
+    "remote_project_proof_required": false,
+    "readiness_prompt": "Run Windows-native local readiness and report APP_READY / APP_READY_WITH_WARNINGS / APP_NOT_READY."
   },
   "control_thread": {
     "required": true,
     "name": "Dev-Management Control",
-    "remote_host": "devmgmt-wsl",
-    "project_path": "/home/andy4917/Dev-Management",
+    "host": "local-windows",
+    "project_path": "C:\\Users\\anise\\code\\Dev-Management",
     "purpose": [
       "readiness",
       "runtime_checks",
@@ -49,53 +42,48 @@
       "artifact_hygiene",
       "task_routing"
     ],
-    "default_mode": "local_remote_project",
-    "default_worktree_mode": false,
+    "default_mode": "local_windows_project",
     "thread_context_role": "hint_only",
     "thread_is_execution_authority": false,
     "thread_is_policy_authority": false,
     "must_not": [
       "bypass_instruction_guard",
       "bypass_serena_or_context7",
-      "treat_app_memory_as_authority",
-      "treat_generated_mirrors_as_render_input",
-      "use_windows_mounted_launcher_as_primary_runtime",
+      "treat_app_memory_as_policy_authority",
       "modify_unrelated_dirty_changes"
     ]
   },
-  "worktree_guidance": {
-    "default_for_control_thread": "local_remote_project",
-    "implementation_tasks_should_use_scoped_worktree_mode": true,
-    "persistent_ops_worktree_is_optional": true,
-    "persistent_ops_worktree_is_authority": false
-  },
   "blocked_relation": {
-    "description": "Codex App on Windows must not use the Windows-mounted Codex launcher as the primary execution runtime.",
-    "forbidden_primary_runtime": "/mnt/c/Users/anise/.codex/bin/wsl/codex"
+    "description": "Legacy Linux, remote routes, and mounted launchers must not be used as primary execution runtime.",
+    "blocked_runtime_markers": [
+      "linux_home_path",
+      "mounted_linux_path",
+      "linux_unc_mount",
+      "legacy_remote_host"
+    ]
   },
   "auth_surface": {
     "sign_in_is_user_action": true,
     "auth_payloads_are_runtime_state": true,
+    "app_memory_is_policy_authority": false,
+    "thread_memory_is_policy_authority": false,
     "app_memory_is_authority": false,
     "thread_memory_is_authority": false
   },
-  "windows_bootstrap_boundary": {
-    "repo_managed_surfaces": [
-      "user_level_windows_ssh_config",
-      "codex_app_connection_readiness_evidence"
-    ],
-    "allowed_windows_bootstrap_repairs": [
-      "C:/Users/anise/.ssh/config"
-    ],
-    "codex_app_discovery_requires_direct_top_level_host_alias": true,
-    "app_reads_policy_files_if_present": true,
-    "policy_bearing_relative_paths": [
+  "windows_control_plane_boundary": {
+    "codex_home": "C:\\Users\\anise\\.codex",
+    "validated_relative_paths": [
       "config.toml",
       "AGENTS.md",
       "hooks.json",
-      "skills/dev-workflow"
+      "skills"
     ],
-    "app_state_role": "evidence_only",
-    "policy_surface_reason": "Codex App can actively read Windows ~/.codex config, AGENTS, hooks, and skills when present, so Dev-Management must not generate policy-bearing files there. Linux generated outputs remain the only repo authority; Windows .codex stays app-readable evidence only unless manual review proves specific user-owned state."
+    "blocked_relative_paths": [
+    ],
+    "approved_marketplace_hook_packages": [],
+    "active_windows_hooks_status": "remove",
+    "hooks_are_triggers_only": true,
+    "app_state_role": "validated_user_control_plane",
+    "policy_surface_reason": "Codex App actively reads Windows .codex config, AGENTS, hooks, and skills. Dev-Management validates this user-owned control plane and reports authority-breaking content."
   }
 }

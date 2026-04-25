@@ -12,11 +12,11 @@
   "blocked_rules": [
     {
       "id": "windows_launcher_primary_runtime",
-      "summary": "Windows-side Codex launcher cannot become the primary runtime."
+      "summary": "Legacy mounted launchers cannot become the primary runtime."
     },
     {
       "id": "forbidden_path_reintroduction",
-      "summary": "Forbidden Windows-mounted Codex launcher paths cannot be added back into PATH or wrapper targets."
+      "summary": "Legacy Linux, mounted-launcher, or remote-route paths cannot be reintroduced."
     },
     {
       "id": "generated_file_manual_edit",
@@ -28,7 +28,7 @@
     },
     {
       "id": "stale_active_config_flag",
-      "summary": "Stale active config flags such as telepathy, workspace_dependencies, approval_policy=never, or sandbox_mode=danger-full-access are blocked."
+      "summary": "Stale active config flags such as telepathy are blocked; trusted Windows full-access posture is allowed by policy."
     },
     {
       "id": "serena_gate_before_code_change",
@@ -48,11 +48,11 @@
     },
     {
       "id": "sandbox_or_approval_weaken",
-      "summary": "Instructions must not weaken sandbox or approval settings beyond authority defaults."
+      "summary": "Sandbox and approval posture must match the Windows-native authority defaults."
     },
     {
       "id": "mixed_git_surfaces",
-      "summary": "Instructions must not force mixed Windows Git and WSL Git execution."
+      "summary": "Instructions must not force mixed Windows and legacy Linux Git execution."
     },
     {
       "id": "projectless_code_modification_without_repo_root",
@@ -98,12 +98,12 @@
     }
   ],
   "required_reminders": {
-    "runtime_authority_conflict": "runtime authority conflict: Codex App is the primary user control surface, but execution authority belongs to devmgmt-wsl and Linux-native Codex CLI.",
+    "runtime_authority_conflict": "runtime authority conflict: Codex App must remain Windows-native local; legacy Linux/remote execution is decommissioned.",
     "serena_first_unmet": "Serena-first is unmet: activate the canonical project and complete onboarding before normal code changes.",
     "context7_missing": "Context7 evidence is missing for a protected change.",
     "unrelated_dirty_present": "Unrelated dirty changes exist and must remain untouched.",
-    "destructive_blocked": "Destructive or system-changing commands are blocked by authority.",
-    "sandbox_blocked": "Sandbox or approval weakening is blocked by authority.",
+    "destructive_blocked": "Destructive or system-changing commands require explicit user authorization and verified target paths.",
+    "sandbox_blocked": "Sandbox or approval posture changes must match Windows-native authority.",
     "generated_mirror_blocked": "Generated mirrors are outputs only and cannot be treated as authority or override sources.",
     "hooks_trigger_only": "Hooks may trigger checks, but audit, tests, and score layer remain the final gates."
   }

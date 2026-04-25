@@ -14,10 +14,10 @@ class SubprocessSafeTests(unittest.TestCase):
             subprocess_safe.run_powershell('& "$env:WINDIR\\System32\\OpenSSH\\ssh.exe" -V', set_userprofile=False)
 
         args = mock_run.call_args.args[0]
+        self.assertTrue(args[0].lower().endswith("pwsh.exe") or args[0] == "pwsh")
         self.assertEqual(
-            args[:8],
+            args[1:8],
             [
-                "powershell.exe",
                 "-NoLogo",
                 "-NoProfile",
                 "-NonInteractive",

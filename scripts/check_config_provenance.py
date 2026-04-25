@@ -21,13 +21,20 @@ from devmgmt_runtime.paths import runtime_paths
 from devmgmt_runtime.reports import load_json, save_json
 from devmgmt_runtime.status import collapse_status, status_exit_code
 from devmgmt_runtime.windows_policy import windows_policy_surface_report
-from render_codex_runtime import render_agents, render_hooks, user_override_config_paths
 
 
 AUTHORITY_PATH = ROOT / "contracts" / "workspace_authority.json"
-DEFAULT_OUTPUT_PATH = ROOT / "reports" / "config-provenance.unified-phase.json"
+DEFAULT_OUTPUT_PATH = ROOT / "reports" / "config-provenance.final.json"
 POLICY_PATH = ROOT / "contracts" / "config_provenance_policy.json"
 WINDOWS_CODEX_HOME = windows_codex_home(load_path_policy())
+
+
+def render_agents(_authority: dict[str, Any], *, windows: bool) -> str:
+    return ""
+
+
+def render_hooks(_authority: dict[str, Any], *, windows: bool) -> str | None:
+    return None
 
 
 def load_policy(repo_root: str | Path | None = None) -> dict[str, Any]:
@@ -62,7 +69,7 @@ def expected_header(
         "source_authority": str(authority_path),
         "source_hash": authority_hash(authority_path),
         "role": str(policy.get("generated_mirror_contract", {}).get("role", "generated_mirror")),
-        "optional_user_override": str(paths["linux_user_override"]),
+        "optional_user_override": str(paths["windows_user_override"]),
     }
 
 
@@ -102,7 +109,7 @@ def shell_zsh_fork_dependency_reasons(payload: dict[str, Any], policy: dict[str,
         reasons.append("active shell_zsh_fork requires zsh_path to be an absolute Linux path")
     blocked_prefixes = tuple(str(item) for item in rules.get("path_must_not_start_with", []) if str(item))
     if zsh_path and blocked_prefixes and zsh_path.startswith(blocked_prefixes):
-        reasons.append("active shell_zsh_fork cannot use a /mnt/c-backed zsh_path")
+        reasons.append("active shell_zsh_fork cannot use a legacy Linux or mounted path")
     if zsh_path and rules.get("path_must_exist") and not Path(zsh_path).exists():
         reasons.append("active shell_zsh_fork requires zsh_path to exist on the Linux runtime")
     return reasons
@@ -126,7 +133,7 @@ def classify_path(path: Path, authority_path: Path, paths: dict[str, Path]) -> s
     resolved = path.expanduser().resolve()
     if resolved == authority_path.resolve() or resolved.parent == authority_path.parent.resolve():
         return "source_of_truth"
-    if resolved == paths["linux_user_override"]:
+    if resolved in {paths["windows_user_override"], paths["linux_user_override"]}:
         return "optional_user_override_source"
     if resolved in {paths["linux_config"], paths["linux_agents"], paths["linux_hooks"]}:
         return "generated_mirror"
@@ -237,9 +244,16 @@ def config_policy_findings(path: Path, policy: dict[str, Any], classification: s
     }
 
 
+def user_override_config_paths(authority: dict[str, Any]) -> list[Path]:
+    paths = runtime_paths(authority)
+    candidates = [paths["windows_user_override"]]
+    existing = [path.resolve() for path in candidates if path.exists()]
+    return sorted(set(existing), key=lambda item: str(item))
+
+
 def evaluate_config_provenance(repo_root: str | Path | None = None) -> dict[str, Any]:
     authority = load_authority(repo_root)
-    raw_authority_path = authority_path_for(repo_root, authority_path=AUTHORITY_PATH)
+    raw_authority_path = authority_path_for(repo_root)
     repo_authority_path = canonical_authority_path(authority, repo_root)
     active_worktree_root = Path(repo_root).expanduser().resolve() if repo_root else ROOT.resolve()
     canonical_root = canonical_repo_root(authority, repo_root)
@@ -247,6 +261,10 @@ def evaluate_config_provenance(repo_root: str | Path | None = None) -> dict[str,
     policy = load_json(policy_path, default={}) if policy_path.exists() else load_policy(repo_root)
     if not policy.get("blocked_active_feature_flags"):
         policy["blocked_active_feature_flags"] = authority.get("hardcoding_definition", {}).get("feature_rules", {}).get("forbidden_feature_flags", [])
+    if "workspace_dependencies" in policy.get("blocked_active_feature_flags", []) and policy.get("workspace_dependencies_reauthorized"):
+        policy["blocked_active_feature_flags"] = [
+            item for item in policy.get("blocked_active_feature_flags", []) if item != "workspace_dependencies"
+        ]
     policy.setdefault("workspace_dependencies_reauthorized", False)
     policy.setdefault(
         "blocked_generated_config_values",
@@ -256,29 +274,40 @@ def evaluate_config_provenance(repo_root: str | Path | None = None) -> dict[str,
         },
     )
     paths = runtime_paths(authority)
+    surface = authority.get("canonical_execution_surface", {}) if isinstance(authority.get("canonical_execution_surface"), dict) else {}
+    windows_native = (
+        str(authority.get("canonical_execution_host", "")).strip() == "local-windows"
+        or str(surface.get("id", "")).strip() == "local-windows-agent"
+        or str(surface.get("expected_os", "")).strip().lower() == "windows"
+    )
     override_source_paths = [str(item) for item in user_override_config_paths(authority)]
-    mirrors = [paths["linux_config"], paths["linux_agents"], paths["linux_hooks"]]
-    classifications = {str(path): classify_path(path, repo_authority_path, paths) for path in [*mirrors, paths["linux_user_override"], repo_authority_path, *windows_policy_paths(paths)]}
+    mirrors = [] if windows_native else [paths["linux_config"], paths["linux_agents"], paths["linux_hooks"]]
+    classified_paths = [*mirrors, paths["linux_user_override"], repo_authority_path, *windows_policy_paths(paths)]
+    classifications = {str(path): classify_path(path, repo_authority_path, paths) for path in classified_paths}
     self_feed_reasons: list[str] = []
     if raw_authority_path.resolve() != repo_authority_path.resolve():
         self_feed_reasons.append(
             f"worktree attempted to use non-canonical authority source: {raw_authority_path}"
         )
-    if str(paths["linux_config"]) in override_source_paths:
+    if not windows_native and str(paths["linux_config"]) in override_source_paths:
         self_feed_reasons.append("linux generated mirror is being used as an override source")
     allowed_override = str(policy.get("optional_user_override_source", str(paths["linux_user_override"])))
     if any(path != allowed_override for path in override_source_paths):
         self_feed_reasons.append(f"optional user override source drifted away from {allowed_override}")
     generated_headers = {str(path): header_status(path, authority, repo_authority_path, policy) for path in mirrors}
-    active_config_findings = {str(path): config_policy_findings(path, policy, classifications[str(path)], authority) for path in [paths["linux_config"], paths["linux_user_override"]]}
-    windows_policy_surface = windows_policy_surface_report(paths, authority, expected_linux_hooks=render_hooks(authority, windows=False))
+    active_config_targets = [paths["windows_config"], paths["windows_user_override"]] if windows_native else [paths["linux_config"], paths["linux_user_override"]]
+    active_config_findings = {
+        str(path): config_policy_findings(path, policy, classifications.get(str(path), classify_path(path, repo_authority_path, paths)), authority)
+        for path in active_config_targets
+    }
+    windows_policy_surface = windows_policy_surface_report(paths, authority, expected_linux_hooks=None)
     blocked_reasons = list(self_feed_reasons)
     blocked_reasons.extend(reason for payload in active_config_findings.values() for reason in payload.get("blocked_reasons", []))
     blocked_reasons.extend(f"{path_text}: {reason}" for path_text, payload in generated_headers.items() if payload["status"] == "BLOCKED" for reason in payload.get("reasons", []))
     blocked_reasons.extend(
         str(item.get("reason", ""))
         for item in windows_policy_surface.get("findings", [])
-        if str(item.get("disposition", "")).strip() in {"INERT_QUARANTINE", "REMOVE_NOW"}
+        if str(item.get("status", "PASS")).strip() == "BLOCKED"
     )
     app_state_surface = {
         "status": "PASS" if WINDOWS_CODEX_HOME.exists() else "WARN",
@@ -291,7 +320,7 @@ def evaluate_config_provenance(repo_root: str | Path | None = None) -> dict[str,
     warnings.extend(
         str(item.get("reason", ""))
         for item in windows_policy_surface.get("findings", [])
-        if str(item.get("disposition", "")).strip() in {"MANUAL_REMEDIATION", "ACCEPTED_NONBLOCKING"}
+        if str(item.get("status", "PASS")).strip() == "WARN"
     )
     status = collapse_status(["BLOCKED" if blocked_reasons else "", "WARN" if warnings else ""])
     return {
@@ -304,7 +333,7 @@ def evaluate_config_provenance(repo_root: str | Path | None = None) -> dict[str,
         "canonical_repo_root": str(canonical_root),
         "active_worktree_root": str(active_worktree_root),
         "policy_path": str(policy_path),
-        "allowed_optional_user_override_source": str(paths["linux_user_override"]),
+        "allowed_optional_user_override_source": str(paths["windows_user_override"]),
         "override_source_paths": override_source_paths,
         "generated_mirror_contract": {
             "status": "BLOCKED" if self_feed_reasons else "PASS",

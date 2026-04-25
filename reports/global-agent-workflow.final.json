@@ -1,0 +1,23 @@
+{
+  "status": "PASS",
+  "checked_at": "2026-04-25T11:23:30.711486+00:00",
+  "doc_path": "C:\\Users\\anise\\code\\Dev-Management\\docs\\GLOBAL_AGENT_WORKFLOW.md",
+  "setup_doc_path": "C:\\Users\\anise\\code\\Dev-Management\\docs\\CODEX_APP_USER_SETUP.md",
+  "policy_path": "C:\\Users\\anise\\code\\Dev-Management\\contracts\\global_agent_workflow_policy.json",
+  "checks": {
+    "policy": {
+      "status": "PASS",
+      "reasons": []
+    },
+    "workflow_doc": {
+      "status": "PASS",
+      "reasons": []
+    },
+    "app_settings_pointer": {
+      "status": "PASS",
+      "reasons": []
+    }
+  },
+  "blockers": [],
+  "warnings": []
+}

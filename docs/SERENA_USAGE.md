@@ -3,14 +3,14 @@
 ## Default Rule
 
 - Serena remains a startup gate for general code modification in the authority repo.
-- Run Serena on the canonical remote execution surface, not from contaminated local runtime assumptions.
+- Run Serena from the local Windows project root, not from projectless or stale runtime assumptions.
 - Treat project activation, onboarding, and latest activation evidence as deterministic checks, not prompt memory.
 
 ## Runtime Pairing
 
-- Codex App drives the session, but Serena activation belongs to `devmgmt-wsl` and the canonical Linux execution surface.
-- Linux-native Codex CLI and Serena MCP must agree on the current repo root for authority work.
-- Windows-side Serena state and Windows `.codex` app state are not authoritative for the Linux repo.
+- Codex App drives the session with the Windows-native agent.
+- Serena MCP must agree on the current local Windows repo root for authority work.
+- Windows `.codex` app state is user control-plane state; Dev-Management contracts and repo files remain policy authority.
 
 ## Readiness Semantics
 

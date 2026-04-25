@@ -14,7 +14,7 @@ Use Context7 before changing:
 
 ## Config Targets
 
-- global config: canonical Linux `~/.codex/config.toml`
+- app control-plane config: `C:\Users\anise\.codex\config.toml`
 - repo config: `.codex/config.toml`
 - repo-local agent copies are not canonical and are not required.
 
@@ -35,7 +35,7 @@ env_http_headers = { "CONTEXT7_API_KEY" = "CONTEXT7_API_KEY" }
 - `CONTEXT7_API_KEY` may come from the current shell env or the Windows user/machine environment
 - `bearer_token_env_var` is not a valid Context7 transport field in this workspace and must be stripped from generated Codex configs
 
-The generated runtime keeps:
+The app control-plane config keeps:
 
 - `enabled = true`
 - `required = false`
@@ -43,9 +43,9 @@ The generated runtime keeps:
 
 ## Runtime Source
 
-- global config: `~/.codex/config.toml` is the runtime source of truth
-- repo config: `.codex/config.toml` is a Linux trusted-project support surface
-- Windows `.codex` is app runtime state and evidence only; Dev-Management must not generate Context7-related policy mirrors there
+- `C:\Users\anise\.codex\config.toml` is the user/app control-plane config.
+- repo config: `.codex/config.toml` is repo-local only when a product repo explicitly owns it.
+- Dev-Management validates Context7 posture but does not mirror generated policy into product repos.
 
 ## Evidence
 
@@ -57,4 +57,4 @@ Protected dependency/config changes must leave `reports/context7-usage.json` wit
 - `version_evidence`
 - `decision_summary`
 
-If the change only configures Context7 itself, `check_context7.py` may auto-generate a self-configuration evidence entry. All other protected changes require an explicit evidence entry.
+If the change only configures Context7 itself, record the self-configuration evidence directly in `reports/context7-usage.json`. All other protected changes require an explicit evidence entry.

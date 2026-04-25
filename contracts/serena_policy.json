@@ -41,7 +41,7 @@
     ]
   },
   "agent_targets": [
-    "/home/andy4917/.codex/AGENTS.md"
+    "C:\\Users\\anise\\.codex/AGENTS.md"
   ],
   "required_actions": [
     "uv tool install -p 3.13 serena-agent@latest --prerelease=allow",

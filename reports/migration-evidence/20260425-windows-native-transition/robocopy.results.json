@@ -1,0 +1,23 @@
+[
+  {
+    "repo": "Dev-Management",
+    "source": "\\\\wsl.localhost\\Ubuntu\\home\\andy4917\\Dev-Management",
+    "destination": "C:\\Users\\anise\\code\\Dev-Management",
+    "robocopy_exit_code": 1,
+    "success": true
+  },
+  {
+    "repo": "Dev-Workflow",
+    "source": "\\\\wsl.localhost\\Ubuntu\\home\\andy4917\\Dev-Workflow",
+    "destination": "C:\\Users\\anise\\code\\Dev-Workflow",
+    "robocopy_exit_code": 1,
+    "success": true
+  },
+  {
+    "repo": "reservation-system",
+    "source": "\\\\wsl.localhost\\Ubuntu\\home\\andy4917\\Dev-Product\\reservation-system",
+    "destination": "C:\\Users\\anise\\code\\Dev-Product\\reservation-system",
+    "robocopy_exit_code": 1,
+    "success": true
+  }
+]

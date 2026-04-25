@@ -1,11 +1,20 @@
 from __future__ import annotations
 
 import subprocess
+import shutil
 from pathlib import Path
 from typing import Sequence
 
+from .path_authority import load_path_policy, windows_user_home
 
-WINDOWS_LOCAL_CWD = Path("/mnt/c/Users/anise")
+WINDOWS_PWSH_FALLBACKS = (
+    Path(r"C:\Program Files\PowerShell\7\pwsh.exe"),
+    Path(r"C:\Users\anise\AppData\Local\Microsoft\WindowsApps\pwsh.exe"),
+)
+
+
+def _windows_local_cwd() -> Path:
+    return windows_user_home(load_path_policy())
 
 
 def _coerce_cwd(cwd: str | Path | None) -> str | None:
@@ -49,17 +58,36 @@ def run_command(args: Sequence[str], *, cwd: str | Path | None = None) -> dict[s
 
 
 def run_ssh(host: str, command: str, *, cwd: str | Path | None = None) -> dict[str, object]:
+    if "legacy" in str(host).lower():
+        return {
+            "ok": False,
+            "exit_code": None,
+            "stdout": "",
+            "stderr": "legacy Linux SSH execution is decommissioned in the Windows-native runtime model",
+            "command": ["ssh", host, command],
+        }
     return run_command(["ssh", "-o", "BatchMode=yes", "-o", "ConnectTimeout=5", host, command], cwd=cwd)
+
+
+def powershell_executable() -> str:
+    resolved = shutil.which("pwsh")
+    if resolved:
+        return resolved
+    for candidate in WINDOWS_PWSH_FALLBACKS:
+        if candidate.exists():
+            return str(candidate)
+    return "pwsh"
 
 
 def run_powershell(command: str, *, cwd: str | Path | None = None, set_userprofile: bool = True) -> dict[str, object]:
     wrapped = command
     if set_userprofile:
         wrapped = f'Set-Location $env:USERPROFILE; {command}'
-    safe_cwd = cwd or (WINDOWS_LOCAL_CWD if WINDOWS_LOCAL_CWD.exists() else None)
+    windows_local_cwd = _windows_local_cwd()
+    safe_cwd = cwd or (windows_local_cwd if windows_local_cwd.exists() else None)
     return run_command(
         [
-            "powershell.exe",
+            powershell_executable(),
             "-NoLogo",
             "-NoProfile",
             "-NonInteractive",

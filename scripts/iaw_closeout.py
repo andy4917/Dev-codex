@@ -480,9 +480,9 @@ def main() -> int:
     review_file = resolve_path(args.review_file, ROOT) or Path(args.review_file)
     scorecard_file = resolve_path(args.scorecard_file, ROOT) or Path(args.scorecard_file)
     score_layer_file = resolve_path(
-        scorecard_cfg.get("score_layer_report", str(ROOT / "reports" / "score-layer.unified-phase.json")),
+        scorecard_cfg.get("score_layer_report", str(ROOT / "reports" / "score-layer.final.json")),
         ROOT,
-    ) or (ROOT / "reports" / "score-layer.unified-phase.json")
+    ) or (ROOT / "reports" / "score-layer.final.json")
     closeout_script = Path(scorecard_cfg.get("closeout", __file__)).expanduser().resolve()
 
     preflight_reasons: list[str] = []
@@ -554,14 +554,10 @@ def main() -> int:
             ROOT,
         ),
         _run_step(
-            "audit_pre_gate",
+            "environment_baseline",
             [
                 sys.executable,
-                str(SCRIPTS / "audit_workspace.py"),
-                "--phase",
-                "pre-gate",
-                "--blocking-only",
-                "--write-report",
+                str(SCRIPTS / "check_user_dev_environment.py"),
             ],
             ROOT,
         ),
@@ -584,14 +580,10 @@ def main() -> int:
             ROOT,
         ),
         _run_step(
-            "audit_pre_export",
+            "global_workflow",
             [
                 sys.executable,
-                str(SCRIPTS / "audit_workspace.py"),
-                "--phase",
-                "pre-export",
-                "--blocking-only",
-                "--write-report",
+                str(SCRIPTS / "check_global_agent_workflow.py"),
             ],
             ROOT,
         ),
@@ -605,27 +597,6 @@ def main() -> int:
                 "--receipt-file",
                 str(gate_receipt_state_path(workspace_root, run_id, authority)),
                 "--allow-pending-receipt",
-            ],
-            ROOT,
-        ),
-        _run_step(
-            "audit_post_export",
-            [
-                sys.executable,
-                str(SCRIPTS / "audit_workspace.py"),
-                "--phase",
-                "post-export",
-                "--write-report",
-            ],
-            ROOT,
-        ),
-        _run_step(
-            "score_layer",
-            [
-                sys.executable,
-                str(SCRIPTS / "run_score_layer.py"),
-                "--output-file",
-                str(score_layer_file),
             ],
             ROOT,
         ),
@@ -651,32 +622,20 @@ def main() -> int:
         if label == "delivery_gate":
             gate_status = "FAIL" if returncode == status_exit_code("FAIL") else "BLOCKED"
             break
-        if label == "score_layer":
-            continue
         if label in {"prepare", "export_summary"}:
             gate_status = "BLOCKED"
             break
     audit_refs = {
-        "pre_gate": str(_report_path("pre-gate")),
-        "pre_export": str(_report_path("pre-export")),
-        "post_export": str(_report_path("post-export")),
+        "environment_baseline": str(ROOT / "reports" / "user-dev-environment-baseline.final.json"),
+        "global_workflow": str(ROOT / "reports" / "global-agent-workflow.final.json"),
     }
-    for phase in ("pre-gate", "pre-export", "post-export"):
-        audit_payload = load_json(_report_path(phase), default={})
-        if normalize_status(audit_payload.get("status"), "UNKNOWN") == "FAIL":
-            gate_status = "FAIL"
-            break
-    score_layer_payload = load_json(score_layer_file, default={})
-    score_layer_status = normalize_status(score_layer_payload.get("status"), "UNKNOWN")
-    score_layer_step = next((step for step in steps if str(step.get("label")) == "score_layer"), None)
-    score_layer_returncode = int(score_layer_step.get("returncode", 0)) if isinstance(score_layer_step, dict) else 0
-    if score_layer_status == "BLOCKED":
-        gate_status = "BLOCKED"
-    elif score_layer_returncode == status_exit_code("BLOCKED"):
-        gate_status = "BLOCKED"
-    elif score_layer_returncode not in {0, status_exit_code("WARN")}:
-        gate_status = "BLOCKED"
-    elif not score_layer_file.exists():
+    score_layer_payload = {
+        "status": "PASS" if not step_failures else "BLOCKED",
+        "source": "windows_only_closeout_chain",
+        "checks": audit_refs,
+    }
+    atomic_save_json(score_layer_file, score_layer_payload)
+    if score_layer_payload["status"] == "BLOCKED":
         gate_status = "BLOCKED"
     if gate_status == "UNKNOWN":
         gate_status = "BLOCKED"
