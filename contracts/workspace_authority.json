@@ -563,6 +563,8 @@
       ],
       "required_script_hash_targets": [
         "C:\\Users\\anise\\code\\Dev-Management/scripts/prepare_user_scorecard_review.py",
+        "C:\\Users\\anise\\code\\Dev-Management/scripts/iaw_closeout.py",
+        "C:\\Users\\anise\\code\\Dev-Management/scripts/check_ai_slop.py",
         "C:\\Users\\anise\\code\\Dev-Management/scripts/delivery_gate.py",
         "C:\\Users\\anise\\code\\Dev-Management/scripts/export_user_score_summary.py",
         "C:\\Users\\anise\\code\\Dev-Management/scripts/check_user_dev_environment.py",

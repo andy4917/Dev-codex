@@ -123,6 +123,7 @@
     - workspace-structure.final.md
   - scripts/
     - _scorecard_common.py
+    - check_ai_slop.py
     - check_config_provenance.py
     - check_disqualifiers.py
     - check_global_agent_workflow.py
@@ -140,6 +141,7 @@
     - record_reviewer_verdict.py
     - scorecard_runtime_hook.py
   - tests/
+    - test_check_ai_slop.py
     - test_check_config_provenance.py
     - test_check_user_dev_environment.py
     - test_compute_user_scorecard_v12.py
@@ -279,6 +281,7 @@
     - install_or_repair_toolchain.py
     - issue_workspace_authority.py
     - session_router.py
+    - vibe_director.py
   - skills/
     - acceptance-writer/
       - SKILL.md
@@ -320,9 +323,15 @@
       - SKILL.md
     - session-router/
       - SKILL.md
+    - subagent-director/
+      - SKILL.md
+    - vibe-director/
+      - SKILL.md
   - templates/
     - agent-runs/
       - tasks/
+      - AGENT_DECISION_LOG.json
+      - AGENT_DECISION_LOG.schema.json
       - CHANGESET_MAP.json
       - CLAIM_LEDGER.json
       - CLAIM_LEDGER.schema.json
@@ -331,12 +340,28 @@
       - CONVENTION_LOCK.schema.json
       - CROSS_VERIFICATION.json
       - CROSS_VERIFICATION.schema.json
+      - DELEGATION_LEDGER.json
+      - DELEGATION_LEDGER.schema.json
+      - DELEGATION_PLAN.json
+      - DELEGATION_PLAN.schema.json
       - EVIDENCE_MANIFEST.schema.json
       - HONESTY_CONTRACT.md
+      - IDEA_BRIEF.json
+      - IDEA_BRIEF.schema.json
+      - INTEGRATION_DECISION_LOG.json
+      - INTEGRATION_DECISION_LOG.schema.json
       - PLAN.json
+      - QUESTION_QUEUE.json
+      - QUESTION_QUEUE.schema.json
       - REPEATED_VERIFY.json
       - REPEATED_VERIFY.schema.json
       - REPLAY.md
+      - SLOP_LEDGER.json
+      - SLOP_LEDGER.schema.json
+      - SUBAGENT_RESULTS.json
+      - SUBAGENT_RESULTS.schema.json
+      - SUBAGENT_TASKS.json
+      - SUBAGENT_TASKS.schema.json
       - SUMMARY_COVERAGE.json
       - SUMMARY_COVERAGE.schema.json
       - TASK_TREE.json
@@ -352,6 +377,7 @@
     - test_delivery_gate_scorecard_slice.py
     - test_runtime_surface_hardening.py
     - test_serena_advisory.py
+    - test_vibe_director.py
     - test_workflow_root_policy_fallbacks.py
     - test_workspace_alignment_preferences.py
   - workflows/
@@ -361,6 +387,8 @@
     - IAW_GLOBAL_HOOKS.md
     - IAW_VERIFY_CHAIN_HARDENING.md
     - INDUCED_AGENTIC_WORKFRAME.md
+    - SUBAGENT_DELEGATION_WORKFRAME.md
+    - VIBE_DIRECTOR_WORKFRAME.md
     - VIBE_PHYSICS_TO_IAW.md
   - .gitattributes
   - .gitignore

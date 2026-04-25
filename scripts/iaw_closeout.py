@@ -39,6 +39,7 @@ from _scorecard_common import (
     workspace_git_root,
     worktree_id,
 )
+from check_ai_slop import evaluate_ai_slop
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPTS = ROOT / "scripts"
@@ -62,6 +63,7 @@ PROFILE_REQUIREMENTS = {
         "REPEATED_VERIFY.json",
         "CLAIM_LEDGER.json",
         "SUMMARY_COVERAGE.json",
+        "SLOP_LEDGER.json",
         "REPLAY.md",
     ),
     "L3": (
@@ -76,6 +78,7 @@ PROFILE_REQUIREMENTS = {
         "CROSS_VERIFICATION.json",
         "CLAIM_LEDGER.json",
         "SUMMARY_COVERAGE.json",
+        "SLOP_LEDGER.json",
         "REPLAY.md",
     ),
     "L4": (
@@ -90,6 +93,7 @@ PROFILE_REQUIREMENTS = {
         "CROSS_VERIFICATION.json",
         "CLAIM_LEDGER.json",
         "SUMMARY_COVERAGE.json",
+        "SLOP_LEDGER.json",
         "REPLAY.md",
     ),
 }
@@ -124,6 +128,7 @@ def _artifact_paths(workspace_root: Path, run_id: str) -> dict[str, Path]:
         "cross_verification": run_root / "CROSS_VERIFICATION.json",
         "claim_ledger": run_root / "CLAIM_LEDGER.json",
         "summary_coverage": run_root / "SUMMARY_COVERAGE.json",
+        "slop_ledger": run_root / "SLOP_LEDGER.json",
         "replay": run_root / "REPLAY.md",
         "receipt_mirror": gate_receipt_mirror_path(workspace_root, run_id),
         "summary": workspace_root / SUMMARY_PATH_NAME,
@@ -323,6 +328,13 @@ def _validate_waivers(paths: dict[str, Path]) -> list[str]:
     return reasons
 
 
+def _extend_unique(target: list[str], incoming: list[str]) -> None:
+    for item in incoming:
+        text = str(item).strip()
+        if text and text not in target:
+            target.append(text)
+
+
 def _run_step(label: str, argv: list[str], cwd: Path) -> dict[str, Any]:
     result = subprocess.run(
         argv,
@@ -493,16 +505,17 @@ def main() -> int:
     if profile == "L4" and mode != "release":
         preflight_reasons.append("L4 close-out profile requires release mode")
     lease_verdict = validate_workspace_authority_lease(workspace_root, required=True, authority=authority)
-    preflight_reasons.extend(lease_verdict["reasons"])
-    preflight_reasons.extend(_validate_profile_artifacts(paths, profile))
+    _extend_unique(preflight_reasons, lease_verdict["reasons"])
+    _extend_unique(preflight_reasons, _validate_profile_artifacts(paths, profile))
+    _extend_unique(preflight_reasons, evaluate_ai_slop(workspace_root, run_id, profile)["blockers"])
     manifest_reasons, manifest, manifest_meta = _validate_manifest(
         authority=authority,
         workspace_root=workspace_root,
         run_id=run_id,
         paths=paths,
     )
-    preflight_reasons.extend(manifest_reasons)
-    preflight_reasons.extend(_validate_waivers(paths))
+    _extend_unique(preflight_reasons, manifest_reasons)
+    _extend_unique(preflight_reasons, _validate_waivers(paths))
 
     if preflight_reasons:
         try:

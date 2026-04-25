@@ -116,6 +116,7 @@ class IAWCloseoutTests(unittest.TestCase):
                 "REPEATED_VERIFY.json",
                 "CLAIM_LEDGER.json",
                 "SUMMARY_COVERAGE.json",
+                "SLOP_LEDGER.json",
                 "REPLAY.md",
             ):
                 (run_root / name).write_text("{}\n", encoding="utf-8")
@@ -197,6 +198,7 @@ class IAWCloseoutTests(unittest.TestCase):
                 "REPEATED_VERIFY.json": {"rounds": []},
                 "CLAIM_LEDGER.json": {"claims": []},
                 "SUMMARY_COVERAGE.json": {"summary_claims": [], "negative_findings_present": True, "zombie_sections": []},
+                "SLOP_LEDGER.json": {"schema_version": 1, "run_id": run_id, "status": "PASS", "entries": [], "status_summary": {"blockers": 0, "warnings": 0, "fixed": 0}},
             }.items():
                 _write_json(run_root / name, payload)
             _write_text(run_root / "COMMAND_LOG.jsonl", "")
@@ -342,6 +344,7 @@ class IAWCloseoutTests(unittest.TestCase):
                 "REPEATED_VERIFY.json": {"rounds": []},
                 "CLAIM_LEDGER.json": {"claims": []},
                 "SUMMARY_COVERAGE.json": {"summary_claims": [], "negative_findings_present": True, "zombie_sections": []},
+                "SLOP_LEDGER.json": {"schema_version": 1, "run_id": run_id, "status": "PASS", "entries": [], "status_summary": {"blockers": 0, "warnings": 0, "fixed": 0}},
             }.items():
                 _write_json(run_root / name, payload)
             _write_text(run_root / "COMMAND_LOG.jsonl", "")

@@ -1,6 +1,6 @@
 {
   "status": "PASS",
-  "checked_at": "2026-04-25T11:23:30.789183+00:00",
+  "checked_at": "2026-04-25T12:14:34.417250+00:00",
   "policy_path": "C:\\Users\\anise\\code\\Dev-Management\\contracts\\workspace_structure_policy.json",
   "workspace_root": "C:\\Users\\anise\\code",
   "management_root": "C:\\Users\\anise\\code\\Dev-Management",
@@ -1076,6 +1076,15 @@
                     "error": ""
                   },
                   {
+                    "name": "check_ai_slop.py",
+                    "path": "C:\\Users\\anise\\code\\Dev-Management\\scripts\\check_ai_slop.py",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
                     "name": "check_config_provenance.py",
                     "path": "C:\\Users\\anise\\code\\Dev-Management\\scripts\\check_config_provenance.py",
                     "type": "file",
@@ -1224,7 +1233,7 @@
                 "error": "",
                 "child_summary": {
                   "directories": 0,
-                  "files": 17,
+                  "files": 18,
                   "skipped_or_truncated": 1
                 }
               },
@@ -1234,6 +1243,15 @@
                 "type": "directory",
                 "exists": true,
                 "children": [
+                  {
+                    "name": "test_check_ai_slop.py",
+                    "path": "C:\\Users\\anise\\code\\Dev-Management\\tests\\test_check_ai_slop.py",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
                   {
                     "name": "test_check_config_provenance.py",
                     "path": "C:\\Users\\anise\\code\\Dev-Management\\tests\\test_check_config_provenance.py",
@@ -1401,7 +1419,7 @@
                 "error": "",
                 "child_summary": {
                   "directories": 0,
-                  "files": 18,
+                  "files": 19,
                   "skipped_or_truncated": 1
                 }
               },
@@ -2604,13 +2622,22 @@
                     "children": [],
                     "truncated": false,
                     "error": ""
+                  },
+                  {
+                    "name": "vibe_director.py",
+                    "path": "C:\\Users\\anise\\code\\Dev-Workflow\\scripts\\vibe_director.py",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
                   }
                 ],
                 "truncated": false,
                 "error": "",
                 "child_summary": {
                   "directories": 3,
-                  "files": 19,
+                  "files": 20,
                   "skipped_or_truncated": 1
                 }
               },
@@ -3099,12 +3126,60 @@
                       "files": 1,
                       "skipped_or_truncated": 0
                     }
+                  },
+                  {
+                    "name": "subagent-director",
+                    "path": "C:\\Users\\anise\\code\\Dev-Workflow\\skills\\subagent-director",
+                    "type": "directory",
+                    "exists": true,
+                    "children": [
+                      {
+                        "name": "SKILL.md",
+                        "path": "C:\\Users\\anise\\code\\Dev-Workflow\\skills\\subagent-director\\SKILL.md",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      }
+                    ],
+                    "truncated": false,
+                    "error": "",
+                    "child_summary": {
+                      "directories": 0,
+                      "files": 1,
+                      "skipped_or_truncated": 0
+                    }
+                  },
+                  {
+                    "name": "vibe-director",
+                    "path": "C:\\Users\\anise\\code\\Dev-Workflow\\skills\\vibe-director",
+                    "type": "directory",
+                    "exists": true,
+                    "children": [
+                      {
+                        "name": "SKILL.md",
+                        "path": "C:\\Users\\anise\\code\\Dev-Workflow\\skills\\vibe-director\\SKILL.md",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      }
+                    ],
+                    "truncated": false,
+                    "error": "",
+                    "child_summary": {
+                      "directories": 0,
+                      "files": 1,
+                      "skipped_or_truncated": 0
+                    }
                   }
                 ],
                 "truncated": false,
                 "error": "",
                 "child_summary": {
-                  "directories": 20,
+                  "directories": 22,
                   "files": 0,
                   "skipped_or_truncated": 0
                 }
@@ -3125,6 +3200,24 @@
                         "name": "tasks",
                         "path": "C:\\Users\\anise\\code\\Dev-Workflow\\templates\\agent-runs\\tasks",
                         "type": "directory",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "AGENT_DECISION_LOG.json",
+                        "path": "C:\\Users\\anise\\code\\Dev-Workflow\\templates\\agent-runs\\AGENT_DECISION_LOG.json",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "AGENT_DECISION_LOG.schema.json",
+                        "path": "C:\\Users\\anise\\code\\Dev-Workflow\\templates\\agent-runs\\AGENT_DECISION_LOG.schema.json",
+                        "type": "file",
                         "exists": true,
                         "children": [],
                         "truncated": false,
@@ -3203,6 +3296,42 @@
                         "error": ""
                       },
                       {
+                        "name": "DELEGATION_LEDGER.json",
+                        "path": "C:\\Users\\anise\\code\\Dev-Workflow\\templates\\agent-runs\\DELEGATION_LEDGER.json",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "DELEGATION_LEDGER.schema.json",
+                        "path": "C:\\Users\\anise\\code\\Dev-Workflow\\templates\\agent-runs\\DELEGATION_LEDGER.schema.json",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "DELEGATION_PLAN.json",
+                        "path": "C:\\Users\\anise\\code\\Dev-Workflow\\templates\\agent-runs\\DELEGATION_PLAN.json",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "DELEGATION_PLAN.schema.json",
+                        "path": "C:\\Users\\anise\\code\\Dev-Workflow\\templates\\agent-runs\\DELEGATION_PLAN.schema.json",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
                         "name": "EVIDENCE_MANIFEST.schema.json",
                         "path": "C:\\Users\\anise\\code\\Dev-Workflow\\templates\\agent-runs\\EVIDENCE_MANIFEST.schema.json",
                         "type": "file",
@@ -3221,8 +3350,62 @@
                         "error": ""
                       },
                       {
+                        "name": "IDEA_BRIEF.json",
+                        "path": "C:\\Users\\anise\\code\\Dev-Workflow\\templates\\agent-runs\\IDEA_BRIEF.json",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "IDEA_BRIEF.schema.json",
+                        "path": "C:\\Users\\anise\\code\\Dev-Workflow\\templates\\agent-runs\\IDEA_BRIEF.schema.json",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "INTEGRATION_DECISION_LOG.json",
+                        "path": "C:\\Users\\anise\\code\\Dev-Workflow\\templates\\agent-runs\\INTEGRATION_DECISION_LOG.json",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "INTEGRATION_DECISION_LOG.schema.json",
+                        "path": "C:\\Users\\anise\\code\\Dev-Workflow\\templates\\agent-runs\\INTEGRATION_DECISION_LOG.schema.json",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
                         "name": "PLAN.json",
                         "path": "C:\\Users\\anise\\code\\Dev-Workflow\\templates\\agent-runs\\PLAN.json",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "QUESTION_QUEUE.json",
+                        "path": "C:\\Users\\anise\\code\\Dev-Workflow\\templates\\agent-runs\\QUESTION_QUEUE.json",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "QUESTION_QUEUE.schema.json",
+                        "path": "C:\\Users\\anise\\code\\Dev-Workflow\\templates\\agent-runs\\QUESTION_QUEUE.schema.json",
                         "type": "file",
                         "exists": true,
                         "children": [],
@@ -3250,6 +3433,60 @@
                       {
                         "name": "REPLAY.md",
                         "path": "C:\\Users\\anise\\code\\Dev-Workflow\\templates\\agent-runs\\REPLAY.md",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "SLOP_LEDGER.json",
+                        "path": "C:\\Users\\anise\\code\\Dev-Workflow\\templates\\agent-runs\\SLOP_LEDGER.json",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "SLOP_LEDGER.schema.json",
+                        "path": "C:\\Users\\anise\\code\\Dev-Workflow\\templates\\agent-runs\\SLOP_LEDGER.schema.json",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "SUBAGENT_RESULTS.json",
+                        "path": "C:\\Users\\anise\\code\\Dev-Workflow\\templates\\agent-runs\\SUBAGENT_RESULTS.json",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "SUBAGENT_RESULTS.schema.json",
+                        "path": "C:\\Users\\anise\\code\\Dev-Workflow\\templates\\agent-runs\\SUBAGENT_RESULTS.schema.json",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "SUBAGENT_TASKS.json",
+                        "path": "C:\\Users\\anise\\code\\Dev-Workflow\\templates\\agent-runs\\SUBAGENT_TASKS.json",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "SUBAGENT_TASKS.schema.json",
+                        "path": "C:\\Users\\anise\\code\\Dev-Workflow\\templates\\agent-runs\\SUBAGENT_TASKS.schema.json",
                         "type": "file",
                         "exists": true,
                         "children": [],
@@ -3333,7 +3570,7 @@
                     "error": "",
                     "child_summary": {
                       "directories": 1,
-                      "files": 22,
+                      "files": 40,
                       "skipped_or_truncated": 0
                     }
                   }
@@ -3407,6 +3644,15 @@
                     "error": ""
                   },
                   {
+                    "name": "test_vibe_director.py",
+                    "path": "C:\\Users\\anise\\code\\Dev-Workflow\\tests\\test_vibe_director.py",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
                     "name": "test_workflow_root_policy_fallbacks.py",
                     "path": "C:\\Users\\anise\\code\\Dev-Workflow\\tests\\test_workflow_root_policy_fallbacks.py",
                     "type": "file",
@@ -3429,7 +3675,7 @@
                 "error": "",
                 "child_summary": {
                   "directories": 0,
-                  "files": 8,
+                  "files": 9,
                   "skipped_or_truncated": 1
                 }
               },
@@ -3494,6 +3740,24 @@
                     "error": ""
                   },
                   {
+                    "name": "SUBAGENT_DELEGATION_WORKFRAME.md",
+                    "path": "C:\\Users\\anise\\code\\Dev-Workflow\\workflows\\SUBAGENT_DELEGATION_WORKFRAME.md",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "VIBE_DIRECTOR_WORKFRAME.md",
+                    "path": "C:\\Users\\anise\\code\\Dev-Workflow\\workflows\\VIBE_DIRECTOR_WORKFRAME.md",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
                     "name": "VIBE_PHYSICS_TO_IAW.md",
                     "path": "C:\\Users\\anise\\code\\Dev-Workflow\\workflows\\VIBE_PHYSICS_TO_IAW.md",
                     "type": "file",
@@ -3507,7 +3771,7 @@
                 "error": "",
                 "child_summary": {
                   "directories": 0,
-                  "files": 7,
+                  "files": 9,
                   "skipped_or_truncated": 0
                 }
               },
