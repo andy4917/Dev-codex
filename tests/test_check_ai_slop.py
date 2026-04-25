@@ -191,6 +191,32 @@ class CheckAiSlopTests(unittest.TestCase):
         self.assertEqual(report["status"], "PASS")
         self.assertEqual(report["blockers"], [])
 
+    def test_nonassertive_pass_language_does_not_block(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            workspace = Path(tmpdir)
+            run_id = "run-nonassertive"
+            run_root = workspace / ".agent-runs" / run_id
+            _write_slop_pass(run_root, run_id)
+            (workspace / "SUMMARY.md").write_text("No PASS claim yet. Evidence is pending.\n", encoding="utf-8")
+
+            report = self.module.evaluate_ai_slop(workspace, run_id, "L2")
+
+        self.assertEqual(report["status"], "PASS")
+        self.assertEqual(report["blockers"], [])
+
+    def test_assertive_pass_language_without_evidence_blocks(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            workspace = Path(tmpdir)
+            run_id = "run-assertive"
+            run_root = workspace / ".agent-runs" / run_id
+            _write_slop_pass(run_root, run_id)
+            (workspace / "SUMMARY.md").write_text("Verification complete. PASS.\n", encoding="utf-8")
+
+            report = self.module.evaluate_ai_slop(workspace, run_id, "L2")
+
+        self.assertEqual(report["status"], "BLOCKED")
+        self.assertIn("SUMMARY.md uses verification/PASS language without evidence mapping", report["blockers"])
+
     def test_open_blocking_entries_and_discoverable_questions_block(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             workspace = Path(tmpdir)

@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import re
 from pathlib import Path
 from typing import Any
 
@@ -29,15 +30,30 @@ DISCOVERABLE_QUESTION_PATTERNS = (
     "테스트 명령",
     "프레임워크가 뭐",
 )
-VERIFICATION_CLAIM_PATTERNS = (
-    "verified",
-    "verification complete",
-    "pass",
-    "passed",
-    "clean-room passed",
-    "검증 완료",
-    "통과",
+NONASSERTIVE_VERIFICATION_CUES = (
+    "no ",
+    "not ",
+    "without ",
+    "pending",
+    "blocked",
+    "unsupported",
+    "unverified",
+    "unknown",
+    "missing",
+    "lacks",
+    "lack ",
+    "absence",
+    "not yet",
+    "아님",
+    "아직",
+    "않",
+    "없",
+    "미검증",
+    "차단",
+    "보류",
+    "누락",
 )
+VERIFICATION_CLAIM_RE = re.compile(r"\b(?:verified|verification complete|clean-room passed|passed|pass)\b|검증 완료|통과", re.IGNORECASE)
 USER_DELEGATION_PATTERNS = (
     "check it yourself",
     "verify yourself",
@@ -103,6 +119,19 @@ def _supported_claims_have_evidence(claim_ledger: dict[str, Any]) -> bool:
 def _summary_has_evidence_marker(summary_text: str) -> bool:
     lowered = summary_text.casefold()
     return "evidence_ref" in lowered or "evidence ref" in lowered or "claim_ledger" in lowered or "summary_coverage" in lowered
+
+
+def _summary_uses_verification_claim_language(summary_text: str) -> bool:
+    chunks = re.split(r"(?<=[.!?。])\s+|\n+", summary_text)
+    for chunk in chunks:
+        text = chunk.strip()
+        if not text or not VERIFICATION_CLAIM_RE.search(text):
+            continue
+        lowered = text.casefold()
+        if any(cue in lowered for cue in NONASSERTIVE_VERIFICATION_CUES):
+            continue
+        return True
+    return False
 
 
 def _evidence_refs(payload: dict[str, Any]) -> list[str]:
@@ -277,7 +306,7 @@ def evaluate_ai_slop(workspace_root: Path, run_id: str, profile: str = "L2") -> 
     checks["summary_present"] = bool(summary_text)
     if any(pattern in lowered_summary for pattern in USER_DELEGATION_PATTERNS):
         _append_issue(issues, normalized_profile, "SUMMARY.md delegates verification back to the user", blocking=True)
-    if any(pattern in lowered_summary for pattern in VERIFICATION_CLAIM_PATTERNS):
+    if _summary_uses_verification_claim_language(summary_text):
         if not _summary_has_evidence_marker(summary_text) and not _supported_claims_have_evidence(claim_ledger):
             _append_issue(issues, normalized_profile, "SUMMARY.md uses verification/PASS language without evidence mapping", blocking=True)
 

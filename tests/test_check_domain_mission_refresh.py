@@ -157,6 +157,23 @@ class DomainMissionRefreshTests(unittest.TestCase):
         self.assertEqual(result["status"], "BLOCKED")
         self.assertTrue(any("SUMMARY.md uses verification/PASS language" in reason for reason in result["blockers"]))
 
+    def test_nonassertive_pass_language_does_not_require_summary_mapping(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            workspace = Path(tmpdir)
+            run_id = "run-nonassertive-summary"
+            run_root = workspace / ".agent-runs" / run_id
+            (workspace / "SUMMARY.md").write_text("No PASS claim yet. Evidence is pending.\n", encoding="utf-8")
+            closeout = _closeout(run_id, "PASS")
+            closeout["authoritative_evidence"] = []
+            _write_json(run_root / "MISSION_FRAME.json", _mission_frame(run_id))
+            _write_json(run_root / "ARTIFACT_REFRESH_MANIFEST.json", _manifest(run_id, "refreshed"))
+            _write_json(run_root / "MISSION_CLOSEOUT.json", closeout)
+
+            result = self.module.evaluate_domain_mission_refresh(workspace, run_id, "L2")
+
+        self.assertEqual(result["status"], "PASS")
+        self.assertEqual(result["blockers"], [])
+
     def test_l1_missing_artifacts_warns_without_blocking_lightweight_work(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             workspace = Path(tmpdir)

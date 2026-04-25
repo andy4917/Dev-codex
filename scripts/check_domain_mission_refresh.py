@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import re
 import subprocess
 from pathlib import Path
 from typing import Any
@@ -15,15 +16,30 @@ L2_PLUS = {"L2", "L3", "L4"}
 AUTHORITY_REF_HINTS = ("test", "report", "receipt", "checker")
 OPEN_REFRESH_STATUSES = {"pending_refresh", "blocked", "stale", "open"}
 ALLOWED_REFRESH_STATUSES = OPEN_REFRESH_STATUSES | {"refreshed", "waived", "not_impacted"}
-VERIFICATION_CLAIM_PATTERNS = (
-    "verified",
-    "verification complete",
-    "pass",
-    "passed",
-    "clean-room passed",
-    "검증 완료",
-    "통과",
+NONASSERTIVE_VERIFICATION_CUES = (
+    "no ",
+    "not ",
+    "without ",
+    "pending",
+    "blocked",
+    "unsupported",
+    "unverified",
+    "unknown",
+    "missing",
+    "lacks",
+    "lack ",
+    "absence",
+    "not yet",
+    "아님",
+    "아직",
+    "않",
+    "없",
+    "미검증",
+    "차단",
+    "보류",
+    "누락",
 )
+VERIFICATION_CLAIM_RE = re.compile(r"\b(?:verified|verification complete|clean-room passed|passed|pass)\b|검증 완료|통과", re.IGNORECASE)
 
 
 def _run_root(workspace_root: Path, run_id: str) -> Path:
@@ -157,6 +173,19 @@ def _mission_closeout_maps_summary(mission_closeout: dict[str, Any]) -> bool:
     return bool(evidence)
 
 
+def _summary_uses_verification_claim_language(summary_text: str) -> bool:
+    chunks = re.split(r"(?<=[.!?。])\s+|\n+", summary_text)
+    for chunk in chunks:
+        text = chunk.strip()
+        if not text or not VERIFICATION_CLAIM_RE.search(text):
+            continue
+        lowered = text.casefold()
+        if any(cue in lowered for cue in NONASSERTIVE_VERIFICATION_CUES):
+            continue
+        return True
+    return False
+
+
 def _validate_closeout(
     issues: dict[str, list[str]],
     profile: str,
@@ -172,8 +201,7 @@ def _validate_closeout(
     elif str(mission_closeout.get("status", "")).strip().upper() == "BLOCKED":
         _append_issue(issues, profile, "MISSION_CLOSEOUT.json status is BLOCKED", blocking=True)
 
-    lowered_summary = summary_text.casefold()
-    if any(pattern in lowered_summary for pattern in VERIFICATION_CLAIM_PATTERNS):
+    if _summary_uses_verification_claim_language(summary_text):
         mapped = (
             _mission_closeout_maps_summary(mission_closeout)
             or _claim_ledger_maps_summary(claim_ledger)
