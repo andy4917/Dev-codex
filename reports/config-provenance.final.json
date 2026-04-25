@@ -1,10 +1,10 @@
 {
   "status": "PASS",
   "gate_status": "PASS",
-  "checked_at": "2026-04-25T12:14:34.496948+00:00",
+  "checked_at": "2026-04-25T13:14:26.862018+00:00",
   "authority_path": "C:\\Users\\anise\\code\\Dev-Management\\contracts\\workspace_authority.json",
   "raw_authority_probe_path": "C:\\Users\\anise\\code\\Dev-Management\\contracts\\workspace_authority.json",
-  "authority_hash": "c9faccff1f40ec71d8baadd71439a3facbee51f3caaa2a6f411c58f7eb7e49c8",
+  "authority_hash": "2f378c830213a8782cbdab9cb5540e5416b694ec21999f2b82cce2a5962f5ba1",
   "canonical_repo_root": "C:\\Users\\anise\\code\\Dev-Management",
   "active_worktree_root": "C:\\Users\\anise\\code\\Dev-Management",
   "policy_path": "C:\\Users\\anise\\code\\Dev-Management\\contracts\\config_provenance_policy.json",

@@ -1,6 +1,6 @@
 {
   "status": "PASS",
-  "checked_at": "2026-04-25T12:14:34.417250+00:00",
+  "checked_at": "2026-04-25T13:14:26.334656+00:00",
   "policy_path": "C:\\Users\\anise\\code\\Dev-Management\\contracts\\workspace_structure_policy.json",
   "workspace_root": "C:\\Users\\anise\\code",
   "management_root": "C:\\Users\\anise\\code\\Dev-Management",
@@ -1103,6 +1103,15 @@
                     "error": ""
                   },
                   {
+                    "name": "check_domain_mission_refresh.py",
+                    "path": "C:\\Users\\anise\\code\\Dev-Management\\scripts\\check_domain_mission_refresh.py",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
                     "name": "check_global_agent_workflow.py",
                     "path": "C:\\Users\\anise\\code\\Dev-Management\\scripts\\check_global_agent_workflow.py",
                     "type": "file",
@@ -1233,7 +1242,7 @@
                 "error": "",
                 "child_summary": {
                   "directories": 0,
-                  "files": 18,
+                  "files": 19,
                   "skipped_or_truncated": 1
                 }
               },
@@ -1255,6 +1264,15 @@
                   {
                     "name": "test_check_config_provenance.py",
                     "path": "C:\\Users\\anise\\code\\Dev-Management\\tests\\test_check_config_provenance.py",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "test_check_domain_mission_refresh.py",
+                    "path": "C:\\Users\\anise\\code\\Dev-Management\\tests\\test_check_domain_mission_refresh.py",
                     "type": "file",
                     "exists": true,
                     "children": [],
@@ -1419,7 +1437,7 @@
                 "error": "",
                 "child_summary": {
                   "directories": 0,
-                  "files": 19,
+                  "files": 20,
                   "skipped_or_truncated": 1
                 }
               },
@@ -2615,6 +2633,15 @@
                     "error": ""
                   },
                   {
+                    "name": "mission_refresh.py",
+                    "path": "C:\\Users\\anise\\code\\Dev-Workflow\\scripts\\mission_refresh.py",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
                     "name": "session_router.py",
                     "path": "C:\\Users\\anise\\code\\Dev-Workflow\\scripts\\session_router.py",
                     "type": "file",
@@ -2637,7 +2664,7 @@
                 "error": "",
                 "child_summary": {
                   "directories": 3,
-                  "files": 20,
+                  "files": 21,
                   "skipped_or_truncated": 1
                 }
               },
@@ -2984,6 +3011,30 @@
                     }
                   },
                   {
+                    "name": "mission-refresh",
+                    "path": "C:\\Users\\anise\\code\\Dev-Workflow\\skills\\mission-refresh",
+                    "type": "directory",
+                    "exists": true,
+                    "children": [
+                      {
+                        "name": "SKILL.md",
+                        "path": "C:\\Users\\anise\\code\\Dev-Workflow\\skills\\mission-refresh\\SKILL.md",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      }
+                    ],
+                    "truncated": false,
+                    "error": "",
+                    "child_summary": {
+                      "directories": 0,
+                      "files": 1,
+                      "skipped_or_truncated": 0
+                    }
+                  },
+                  {
                     "name": "ops-packet",
                     "path": "C:\\Users\\anise\\code\\Dev-Workflow\\skills\\ops-packet",
                     "type": "directory",
@@ -3179,7 +3230,7 @@
                 "truncated": false,
                 "error": "",
                 "child_summary": {
-                  "directories": 22,
+                  "directories": 23,
                   "files": 0,
                   "skipped_or_truncated": 0
                 }
@@ -3217,6 +3268,24 @@
                       {
                         "name": "AGENT_DECISION_LOG.schema.json",
                         "path": "C:\\Users\\anise\\code\\Dev-Workflow\\templates\\agent-runs\\AGENT_DECISION_LOG.schema.json",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "ARTIFACT_REFRESH_MANIFEST.json",
+                        "path": "C:\\Users\\anise\\code\\Dev-Workflow\\templates\\agent-runs\\ARTIFACT_REFRESH_MANIFEST.json",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "ARTIFACT_REFRESH_MANIFEST.schema.json",
+                        "path": "C:\\Users\\anise\\code\\Dev-Workflow\\templates\\agent-runs\\ARTIFACT_REFRESH_MANIFEST.schema.json",
                         "type": "file",
                         "exists": true,
                         "children": [],
@@ -3379,6 +3448,42 @@
                       {
                         "name": "INTEGRATION_DECISION_LOG.schema.json",
                         "path": "C:\\Users\\anise\\code\\Dev-Workflow\\templates\\agent-runs\\INTEGRATION_DECISION_LOG.schema.json",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "MISSION_CLOSEOUT.json",
+                        "path": "C:\\Users\\anise\\code\\Dev-Workflow\\templates\\agent-runs\\MISSION_CLOSEOUT.json",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "MISSION_CLOSEOUT.schema.json",
+                        "path": "C:\\Users\\anise\\code\\Dev-Workflow\\templates\\agent-runs\\MISSION_CLOSEOUT.schema.json",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "MISSION_FRAME.json",
+                        "path": "C:\\Users\\anise\\code\\Dev-Workflow\\templates\\agent-runs\\MISSION_FRAME.json",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "MISSION_FRAME.schema.json",
+                        "path": "C:\\Users\\anise\\code\\Dev-Workflow\\templates\\agent-runs\\MISSION_FRAME.schema.json",
                         "type": "file",
                         "exists": true,
                         "children": [],
@@ -3570,7 +3675,7 @@
                     "error": "",
                     "child_summary": {
                       "directories": 1,
-                      "files": 40,
+                      "files": 46,
                       "skipped_or_truncated": 0
                     }
                   }
@@ -3619,6 +3724,15 @@
                   {
                     "name": "test_delivery_gate_scorecard_slice.py",
                     "path": "C:\\Users\\anise\\code\\Dev-Workflow\\tests\\test_delivery_gate_scorecard_slice.py",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "test_mission_refresh.py",
+                    "path": "C:\\Users\\anise\\code\\Dev-Workflow\\tests\\test_mission_refresh.py",
                     "type": "file",
                     "exists": true,
                     "children": [],
@@ -3675,7 +3789,7 @@
                 "error": "",
                 "child_summary": {
                   "directories": 0,
-                  "files": 9,
+                  "files": 10,
                   "skipped_or_truncated": 1
                 }
               },
@@ -3697,6 +3811,15 @@
                   {
                     "name": "CODEX_RUNTIME_UNIFICATION.md",
                     "path": "C:\\Users\\anise\\code\\Dev-Workflow\\workflows\\CODEX_RUNTIME_UNIFICATION.md",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "DOMAIN_AWARE_MISSION_REFRESH.md",
+                    "path": "C:\\Users\\anise\\code\\Dev-Workflow\\workflows\\DOMAIN_AWARE_MISSION_REFRESH.md",
                     "type": "file",
                     "exists": true,
                     "children": [],
@@ -3771,7 +3894,7 @@
                 "error": "",
                 "child_summary": {
                   "directories": 0,
-                  "files": 9,
+                  "files": 10,
                   "skipped_or_truncated": 0
                 }
               },

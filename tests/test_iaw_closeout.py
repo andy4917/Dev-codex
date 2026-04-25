@@ -46,6 +46,51 @@ def _git_output(repo_root: Path, *args: str) -> str:
     return result.stdout.strip()
 
 
+def _write_passing_mission_artifacts(run_root: Path, run_id: str) -> None:
+    _write_json(
+        run_root / "MISSION_FRAME.json",
+        {
+            "schema_version": 1,
+            "run_id": run_id,
+            "parent_domain": "governance_closeout",
+            "workstream": "policy_and_evidence_enforcement",
+            "parent_objective": "Keep closeout aligned with repo-owned authority.",
+            "why_this_task_exists": "test fixture",
+            "this_turn_goal": "test fixture",
+            "target_state": "PASS or BLOCKED with evidence.",
+            "done_when_evidence": ["checker evidence exists"],
+            "closeout_authority": {
+                "authority_kind": "tests_reports_receipt_checker",
+                "evidence_refs": ["tests/test_iaw_closeout.py", ".agent-runs/" + run_id + "/EVIDENCE_MANIFEST.json"],
+            },
+            "refresh_policy": "Refresh only impacted authoritative artifacts.",
+        },
+    )
+    _write_json(
+        run_root / "ARTIFACT_REFRESH_MANIFEST.json",
+        {
+            "schema_version": 1,
+            "run_id": run_id,
+            "refresh_policy": "impacted_authoritative_artifacts_only",
+            "impacted_artifacts": [],
+        },
+    )
+    _write_json(
+        run_root / "MISSION_CLOSEOUT.json",
+        {
+            "schema_version": 1,
+            "run_id": run_id,
+            "status": "PASS",
+            "parent_objective_alignment": "Aligned",
+            "updated_artifacts": [],
+            "waived_items": [],
+            "blocked_items": [],
+            "residual_risk": [],
+            "authoritative_evidence": ["tests/test_iaw_closeout.py"],
+        },
+    )
+
+
 class IAWCloseoutTests(unittest.TestCase):
     def setUp(self) -> None:
         self.module = _load_module()
@@ -201,6 +246,7 @@ class IAWCloseoutTests(unittest.TestCase):
                 "SLOP_LEDGER.json": {"schema_version": 1, "run_id": run_id, "status": "PASS", "entries": [], "status_summary": {"blockers": 0, "warnings": 0, "fixed": 0}},
             }.items():
                 _write_json(run_root / name, payload)
+            _write_passing_mission_artifacts(run_root, run_id)
             _write_text(run_root / "COMMAND_LOG.jsonl", "")
             _write_text(run_root / "REPLAY.md", "# Replay\n")
 
@@ -347,6 +393,7 @@ class IAWCloseoutTests(unittest.TestCase):
                 "SLOP_LEDGER.json": {"schema_version": 1, "run_id": run_id, "status": "PASS", "entries": [], "status_summary": {"blockers": 0, "warnings": 0, "fixed": 0}},
             }.items():
                 _write_json(run_root / name, payload)
+            _write_passing_mission_artifacts(run_root, run_id)
             _write_text(run_root / "COMMAND_LOG.jsonl", "")
             _write_text(run_root / "REPLAY.md", "# Replay\n")
 

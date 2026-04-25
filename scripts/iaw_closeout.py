@@ -40,6 +40,7 @@ from _scorecard_common import (
     worktree_id,
 )
 from check_ai_slop import evaluate_ai_slop
+from check_domain_mission_refresh import evaluate_domain_mission_refresh
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPTS = ROOT / "scripts"
@@ -129,6 +130,9 @@ def _artifact_paths(workspace_root: Path, run_id: str) -> dict[str, Path]:
         "claim_ledger": run_root / "CLAIM_LEDGER.json",
         "summary_coverage": run_root / "SUMMARY_COVERAGE.json",
         "slop_ledger": run_root / "SLOP_LEDGER.json",
+        "mission_frame": run_root / "MISSION_FRAME.json",
+        "artifact_refresh_manifest": run_root / "ARTIFACT_REFRESH_MANIFEST.json",
+        "mission_closeout": run_root / "MISSION_CLOSEOUT.json",
         "replay": run_root / "REPLAY.md",
         "receipt_mirror": gate_receipt_mirror_path(workspace_root, run_id),
         "summary": workspace_root / SUMMARY_PATH_NAME,
@@ -508,6 +512,7 @@ def main() -> int:
     _extend_unique(preflight_reasons, lease_verdict["reasons"])
     _extend_unique(preflight_reasons, _validate_profile_artifacts(paths, profile))
     _extend_unique(preflight_reasons, evaluate_ai_slop(workspace_root, run_id, profile)["blockers"])
+    _extend_unique(preflight_reasons, evaluate_domain_mission_refresh(workspace_root, run_id, profile)["blockers"])
     manifest_reasons, manifest, manifest_meta = _validate_manifest(
         authority=authority,
         workspace_root=workspace_root,

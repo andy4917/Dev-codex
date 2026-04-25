@@ -126,6 +126,7 @@
     - check_ai_slop.py
     - check_config_provenance.py
     - check_disqualifiers.py
+    - check_domain_mission_refresh.py
     - check_global_agent_workflow.py
     - check_user_dev_environment.py
     - check_windows_app_local_readiness.py
@@ -143,6 +144,7 @@
   - tests/
     - test_check_ai_slop.py
     - test_check_config_provenance.py
+    - test_check_domain_mission_refresh.py
     - test_check_user_dev_environment.py
     - test_compute_user_scorecard_v12.py
     - test_delivery_gate.py
@@ -280,6 +282,7 @@
     - install_hooks.py
     - install_or_repair_toolchain.py
     - issue_workspace_authority.py
+    - mission_refresh.py
     - session_router.py
     - vibe_director.py
   - skills/
@@ -311,6 +314,8 @@
       - SKILL.md
     - iaw-scorecard-audit/
       - SKILL.md
+    - mission-refresh/
+      - SKILL.md
     - ops-packet/
       - SKILL.md
     - proof-runner/
@@ -332,6 +337,8 @@
       - tasks/
       - AGENT_DECISION_LOG.json
       - AGENT_DECISION_LOG.schema.json
+      - ARTIFACT_REFRESH_MANIFEST.json
+      - ARTIFACT_REFRESH_MANIFEST.schema.json
       - CHANGESET_MAP.json
       - CLAIM_LEDGER.json
       - CLAIM_LEDGER.schema.json
@@ -350,6 +357,10 @@
       - IDEA_BRIEF.schema.json
       - INTEGRATION_DECISION_LOG.json
       - INTEGRATION_DECISION_LOG.schema.json
+      - MISSION_CLOSEOUT.json
+      - MISSION_CLOSEOUT.schema.json
+      - MISSION_FRAME.json
+      - MISSION_FRAME.schema.json
       - PLAN.json
       - QUESTION_QUEUE.json
       - QUESTION_QUEUE.schema.json
@@ -375,6 +386,7 @@
     - test_authoritative_controls.py
     - test_context7_usage.py
     - test_delivery_gate_scorecard_slice.py
+    - test_mission_refresh.py
     - test_runtime_surface_hardening.py
     - test_serena_advisory.py
     - test_vibe_director.py
@@ -383,6 +395,7 @@
   - workflows/
     - CODEX_RUNTIME_REPAIR_SAFETY.md
     - CODEX_RUNTIME_UNIFICATION.md
+    - DOMAIN_AWARE_MISSION_REFRESH.md
     - IAW_CLOSEOUT_AUTHORITY.md
     - IAW_GLOBAL_HOOKS.md
     - IAW_VERIFY_CHAIN_HARDENING.md

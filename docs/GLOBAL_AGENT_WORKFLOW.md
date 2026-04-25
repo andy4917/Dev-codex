@@ -30,10 +30,12 @@ Before modification:
 - read repo `AGENTS.md`
 - inspect package scripts
 - gather required Serena/Context7/RAG evidence
+- frame material work as parent domain, parent objective, this-turn goal, done-when evidence, and closeout authority
 
 After modification:
 
 - run the exact code path that was touched, exercising all touched functions directly when practical
+- refresh impacted authoritative artifacts or record WAIVED/BLOCKED before closeout
 - use `C:\Users\anise\code\.scratch\Dev-Management\` for local scratch harnesses that copy relevant production code/config/data needed to observe actual production behavior
 - run relevant lint/test/typecheck/build
 - run `git diff --check`
@@ -49,6 +51,14 @@ Production-grade work should include:
 - touched-code runtime verification against actual behavior, not inferred behavior
 - repo lint/test/typecheck/build/preflight when available
 - a clear final verdict that distinguishes proof from assumption
+
+## Mission Refresh
+
+- Material turns must preserve the parent objective instead of treating the latest prompt as the whole job.
+- Dev-Workflow publishes mission frame and refresh artifacts under `.agent-runs/<run_id>/`.
+- Dev-Management enforces L2+ closeout through tests, reports, checkers, receipts, and impacted artifact refresh.
+- Windows hooks remain triggers only, not final gates.
+- The standard is impacted authoritative artifact refresh, not blanket updates to every historical document.
 
 ## Forbidden
 
