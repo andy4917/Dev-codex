@@ -1,6 +1,6 @@
 {
   "status": "PASS",
-  "checked_at": "2026-04-26T08:57:00.399405+00:00",
+  "checked_at": "2026-04-26T19:12:14.931489+00:00",
   "policy_path": "C:\\Users\\anise\\code\\Dev-Management\\contracts\\workspace_structure_policy.json",
   "workspace_root": "C:\\Users\\anise\\code",
   "management_root": "C:\\Users\\anise\\code\\Dev-Management",
@@ -224,6 +224,312 @@
             "exists": true,
             "children": [
               {
+                "name": ".agent-runs",
+                "path": "C:\\Users\\anise\\code\\Dev-Management\\.agent-runs",
+                "type": "directory",
+                "exists": true,
+                "children": [
+                  {
+                    "name": "20260427-codex-app-global-cleanup-delegation",
+                    "path": "C:\\Users\\anise\\code\\Dev-Management\\.agent-runs\\20260427-codex-app-global-cleanup-delegation",
+                    "type": "directory",
+                    "exists": true,
+                    "children": [
+                      {
+                        "name": "ARTIFACT_REFRESH_MANIFEST.json",
+                        "path": "C:\\Users\\anise\\code\\Dev-Management\\.agent-runs\\20260427-codex-app-global-cleanup-delegation\\ARTIFACT_REFRESH_MANIFEST.json",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "CLAIM_LEDGER.json",
+                        "path": "C:\\Users\\anise\\code\\Dev-Management\\.agent-runs\\20260427-codex-app-global-cleanup-delegation\\CLAIM_LEDGER.json",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "COMMAND_LOG.jsonl",
+                        "path": "C:\\Users\\anise\\code\\Dev-Management\\.agent-runs\\20260427-codex-app-global-cleanup-delegation\\COMMAND_LOG.jsonl",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "CONVENTION_LOCK.json",
+                        "path": "C:\\Users\\anise\\code\\Dev-Management\\.agent-runs\\20260427-codex-app-global-cleanup-delegation\\CONVENTION_LOCK.json",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "CROSS_VERIFICATION.json",
+                        "path": "C:\\Users\\anise\\code\\Dev-Management\\.agent-runs\\20260427-codex-app-global-cleanup-delegation\\CROSS_VERIFICATION.json",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "DELEGATION_DECISION.json",
+                        "path": "C:\\Users\\anise\\code\\Dev-Management\\.agent-runs\\20260427-codex-app-global-cleanup-delegation\\DELEGATION_DECISION.json",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "DELEGATION_LEDGER.json",
+                        "path": "C:\\Users\\anise\\code\\Dev-Management\\.agent-runs\\20260427-codex-app-global-cleanup-delegation\\DELEGATION_LEDGER.json",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "DELEGATION_PLAN.json",
+                        "path": "C:\\Users\\anise\\code\\Dev-Management\\.agent-runs\\20260427-codex-app-global-cleanup-delegation\\DELEGATION_PLAN.json",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "EVIDENCE_MANIFEST.json",
+                        "path": "C:\\Users\\anise\\code\\Dev-Management\\.agent-runs\\20260427-codex-app-global-cleanup-delegation\\EVIDENCE_MANIFEST.json",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "EXTERNAL_RESEARCH.json",
+                        "path": "C:\\Users\\anise\\code\\Dev-Management\\.agent-runs\\20260427-codex-app-global-cleanup-delegation\\EXTERNAL_RESEARCH.json",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "gate_receipt.json",
+                        "path": "C:\\Users\\anise\\code\\Dev-Management\\.agent-runs\\20260427-codex-app-global-cleanup-delegation\\gate_receipt.json",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "INTEGRATION_DECISION_LOG.json",
+                        "path": "C:\\Users\\anise\\code\\Dev-Management\\.agent-runs\\20260427-codex-app-global-cleanup-delegation\\INTEGRATION_DECISION_LOG.json",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "MISSION_CLOSEOUT.json",
+                        "path": "C:\\Users\\anise\\code\\Dev-Management\\.agent-runs\\20260427-codex-app-global-cleanup-delegation\\MISSION_CLOSEOUT.json",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "MISSION_FRAME.json",
+                        "path": "C:\\Users\\anise\\code\\Dev-Management\\.agent-runs\\20260427-codex-app-global-cleanup-delegation\\MISSION_FRAME.json",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "PLAN.json",
+                        "path": "C:\\Users\\anise\\code\\Dev-Management\\.agent-runs\\20260427-codex-app-global-cleanup-delegation\\PLAN.json",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "REPEATED_VERIFY.json",
+                        "path": "C:\\Users\\anise\\code\\Dev-Management\\.agent-runs\\20260427-codex-app-global-cleanup-delegation\\REPEATED_VERIFY.json",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "REPLAY.md",
+                        "path": "C:\\Users\\anise\\code\\Dev-Management\\.agent-runs\\20260427-codex-app-global-cleanup-delegation\\REPLAY.md",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "SLOP_LEDGER.json",
+                        "path": "C:\\Users\\anise\\code\\Dev-Management\\.agent-runs\\20260427-codex-app-global-cleanup-delegation\\SLOP_LEDGER.json",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "SUBAGENT_RESULTS.json",
+                        "path": "C:\\Users\\anise\\code\\Dev-Management\\.agent-runs\\20260427-codex-app-global-cleanup-delegation\\SUBAGENT_RESULTS.json",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "SUBAGENT_TASKS.json",
+                        "path": "C:\\Users\\anise\\code\\Dev-Management\\.agent-runs\\20260427-codex-app-global-cleanup-delegation\\SUBAGENT_TASKS.json",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "SUMMARY_COVERAGE.json",
+                        "path": "C:\\Users\\anise\\code\\Dev-Management\\.agent-runs\\20260427-codex-app-global-cleanup-delegation\\SUMMARY_COVERAGE.json",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "TASK_TREE.json",
+                        "path": "C:\\Users\\anise\\code\\Dev-Management\\.agent-runs\\20260427-codex-app-global-cleanup-delegation\\TASK_TREE.json",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "TASTE_GATE.json",
+                        "path": "C:\\Users\\anise\\code\\Dev-Management\\.agent-runs\\20260427-codex-app-global-cleanup-delegation\\TASTE_GATE.json",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "WAIVERS.json",
+                        "path": "C:\\Users\\anise\\code\\Dev-Management\\.agent-runs\\20260427-codex-app-global-cleanup-delegation\\WAIVERS.json",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "WORKORDER.json",
+                        "path": "C:\\Users\\anise\\code\\Dev-Management\\.agent-runs\\20260427-codex-app-global-cleanup-delegation\\WORKORDER.json",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      }
+                    ],
+                    "truncated": false,
+                    "error": "",
+                    "child_summary": {
+                      "directories": 0,
+                      "files": 25,
+                      "skipped_or_truncated": 0
+                    }
+                  },
+                  {
+                    "name": "20260427-report-output-cleanup-hardening",
+                    "path": "C:\\Users\\anise\\code\\Dev-Management\\.agent-runs\\20260427-report-output-cleanup-hardening",
+                    "type": "directory",
+                    "exists": true,
+                    "children": [
+                      {
+                        "name": "DELEGATION_DECISION.json",
+                        "path": "C:\\Users\\anise\\code\\Dev-Management\\.agent-runs\\20260427-report-output-cleanup-hardening\\DELEGATION_DECISION.json",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "EVIDENCE_MANIFEST.json",
+                        "path": "C:\\Users\\anise\\code\\Dev-Management\\.agent-runs\\20260427-report-output-cleanup-hardening\\EVIDENCE_MANIFEST.json",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "SLOP_LEDGER.json",
+                        "path": "C:\\Users\\anise\\code\\Dev-Management\\.agent-runs\\20260427-report-output-cleanup-hardening\\SLOP_LEDGER.json",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "WORKORDER.json",
+                        "path": "C:\\Users\\anise\\code\\Dev-Management\\.agent-runs\\20260427-report-output-cleanup-hardening\\WORKORDER.json",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      }
+                    ],
+                    "truncated": false,
+                    "error": "",
+                    "child_summary": {
+                      "directories": 0,
+                      "files": 4,
+                      "skipped_or_truncated": 0
+                    }
+                  }
+                ],
+                "truncated": false,
+                "error": "",
+                "child_summary": {
+                  "directories": 2,
+                  "files": 0,
+                  "skipped_or_truncated": 0
+                }
+              },
+              {
                 "name": ".patch-links",
                 "path": "C:\\Users\\anise\\code\\Dev-Management\\.patch-links",
                 "type": "directory",
@@ -260,15 +566,6 @@
                     "exists": true,
                     "children": [
                       {
-                        "name": "al",
-                        "path": "C:\\Users\\anise\\code\\Dev-Management\\.serena\\cache\\al",
-                        "type": "directory",
-                        "exists": true,
-                        "children": [],
-                        "truncated": false,
-                        "error": ""
-                      },
-                      {
                         "name": "python",
                         "path": "C:\\Users\\anise\\code\\Dev-Management\\.serena\\cache\\python",
                         "type": "directory",
@@ -281,7 +578,31 @@
                     "truncated": false,
                     "error": "",
                     "child_summary": {
-                      "directories": 2,
+                      "directories": 1,
+                      "files": 0,
+                      "skipped_or_truncated": 0
+                    }
+                  },
+                  {
+                    "name": "logs",
+                    "path": "C:\\Users\\anise\\code\\Dev-Management\\.serena\\logs",
+                    "type": "directory",
+                    "exists": true,
+                    "children": [
+                      {
+                        "name": "health-checks",
+                        "path": "C:\\Users\\anise\\code\\Dev-Management\\.serena\\logs\\health-checks",
+                        "type": "directory",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      }
+                    ],
+                    "truncated": false,
+                    "error": "",
+                    "child_summary": {
+                      "directories": 1,
                       "files": 0,
                       "skipped_or_truncated": 0
                     }
@@ -291,12 +612,49 @@
                     "path": "C:\\Users\\anise\\code\\Dev-Management\\.serena\\memories",
                     "type": "directory",
                     "exists": true,
-                    "children": [],
+                    "children": [
+                      {
+                        "name": "project_overview.md",
+                        "path": "C:\\Users\\anise\\code\\Dev-Management\\.serena\\memories\\project_overview.md",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "style_and_conventions.md",
+                        "path": "C:\\Users\\anise\\code\\Dev-Management\\.serena\\memories\\style_and_conventions.md",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "suggested_commands.md",
+                        "path": "C:\\Users\\anise\\code\\Dev-Management\\.serena\\memories\\suggested_commands.md",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "task_closeout.md",
+                        "path": "C:\\Users\\anise\\code\\Dev-Management\\.serena\\memories\\task_closeout.md",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      }
+                    ],
                     "truncated": false,
                     "error": "",
                     "child_summary": {
                       "directories": 0,
-                      "files": 0,
+                      "files": 4,
                       "skipped_or_truncated": 0
                     }
                   },
@@ -331,7 +689,7 @@
                 "truncated": false,
                 "error": "",
                 "child_summary": {
-                  "directories": 2,
+                  "directories": 3,
                   "files": 3,
                   "skipped_or_truncated": 0
                 }
@@ -547,6 +905,15 @@
                     "error": ""
                   },
                   {
+                    "name": "codex_app_maintenance.py",
+                    "path": "C:\\Users\\anise\\code\\Dev-Management\\devmgmt_runtime\\codex_app_maintenance.py",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
                     "name": "path_authority.py",
                     "path": "C:\\Users\\anise\\code\\Dev-Management\\devmgmt_runtime\\path_authority.py",
                     "type": "file",
@@ -601,6 +968,15 @@
                     "error": ""
                   },
                   {
+                    "name": "scorecard_hook.py",
+                    "path": "C:\\Users\\anise\\code\\Dev-Management\\devmgmt_runtime\\scorecard_hook.py",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
                     "name": "status.py",
                     "path": "C:\\Users\\anise\\code\\Dev-Management\\devmgmt_runtime\\status.py",
                     "type": "file",
@@ -612,6 +988,15 @@
                   {
                     "name": "subprocess_safe.py",
                     "path": "C:\\Users\\anise\\code\\Dev-Management\\devmgmt_runtime\\subprocess_safe.py",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "trash.py",
+                    "path": "C:\\Users\\anise\\code\\Dev-Management\\devmgmt_runtime\\trash.py",
                     "type": "file",
                     "exists": true,
                     "children": [],
@@ -632,7 +1017,7 @@
                 "error": "",
                 "child_summary": {
                   "directories": 0,
-                  "files": 11,
+                  "files": 14,
                   "skipped_or_truncated": 1
                 }
               },
@@ -654,6 +1039,15 @@
                   {
                     "name": "AI_TOOLCHAIN_USAGE.md",
                     "path": "C:\\Users\\anise\\code\\Dev-Management\\docs\\AI_TOOLCHAIN_USAGE.md",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "CODEX_APP_MAINTENANCE.md",
+                    "path": "C:\\Users\\anise\\code\\Dev-Management\\docs\\CODEX_APP_MAINTENANCE.md",
                     "type": "file",
                     "exists": true,
                     "children": [],
@@ -749,13 +1143,31 @@
                     "children": [],
                     "truncated": false,
                     "error": ""
+                  },
+                  {
+                    "name": "WINDOWS_NATIVE_DOMAIN_KNOWLEDGE.md",
+                    "path": "C:\\Users\\anise\\code\\Dev-Management\\docs\\WINDOWS_NATIVE_DOMAIN_KNOWLEDGE.md",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "WINDOWS_NATIVE_TOOLCHAIN.md",
+                    "path": "C:\\Users\\anise\\code\\Dev-Management\\docs\\WINDOWS_NATIVE_TOOLCHAIN.md",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
                   }
                 ],
                 "truncated": false,
                 "error": "",
                 "child_summary": {
                   "directories": 0,
-                  "files": 12,
+                  "files": 15,
                   "skipped_or_truncated": 0
                 }
               },
@@ -945,8 +1357,44 @@
                     }
                   },
                   {
+                    "name": "acceptance-report.json",
+                    "path": "C:\\Users\\anise\\code\\Dev-Management\\reports\\acceptance-report.json",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "ai-slop.final.json",
+                    "path": "C:\\Users\\anise\\code\\Dev-Management\\reports\\ai-slop.final.json",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
                     "name": "artifact-hygiene.final.md",
                     "path": "C:\\Users\\anise\\code\\Dev-Management\\reports\\artifact-hygiene.final.md",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "codex-global-config-cleanup.final.json",
+                    "path": "C:\\Users\\anise\\code\\Dev-Management\\reports\\codex-global-config-cleanup.final.json",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "codex-global-config-cleanup.final.md",
+                    "path": "C:\\Users\\anise\\code\\Dev-Management\\reports\\codex-global-config-cleanup.final.md",
                     "type": "file",
                     "exists": true,
                     "children": [],
@@ -965,6 +1413,15 @@
                   {
                     "name": "config-provenance.final.md",
                     "path": "C:\\Users\\anise\\code\\Dev-Management\\reports\\config-provenance.final.md",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "domain-mission-refresh.final.json",
+                    "path": "C:\\Users\\anise\\code\\Dev-Management\\reports\\domain-mission-refresh.final.json",
                     "type": "file",
                     "exists": true,
                     "children": [],
@@ -999,6 +1456,24 @@
                     "error": ""
                   },
                   {
+                    "name": "reviewer-verdict-cleanup.final.json",
+                    "path": "C:\\Users\\anise\\code\\Dev-Management\\reports\\reviewer-verdict-cleanup.final.json",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "score-layer.final.json",
+                    "path": "C:\\Users\\anise\\code\\Dev-Management\\reports\\score-layer.final.json",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
                     "name": "score-layer.final.md",
                     "path": "C:\\Users\\anise\\code\\Dev-Management\\reports\\score-layer.final.md",
                     "type": "file",
@@ -1008,8 +1483,26 @@
                     "error": ""
                   },
                   {
+                    "name": "scorecard-authority-audit.json",
+                    "path": "C:\\Users\\anise\\code\\Dev-Management\\reports\\scorecard-authority-audit.json",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
                     "name": "toolchain-surface.final.md",
                     "path": "C:\\Users\\anise\\code\\Dev-Management\\reports\\toolchain-surface.final.md",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "traceability-report.json",
+                    "path": "C:\\Users\\anise\\code\\Dev-Management\\reports\\traceability-report.json",
                     "type": "file",
                     "exists": true,
                     "children": [],
@@ -1028,6 +1521,15 @@
                   {
                     "name": "user-dev-environment-baseline.final.md",
                     "path": "C:\\Users\\anise\\code\\Dev-Management\\reports\\user-dev-environment-baseline.final.md",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "user-readiness.json",
+                    "path": "C:\\Users\\anise\\code\\Dev-Management\\reports\\user-readiness.json",
                     "type": "file",
                     "exists": true,
                     "children": [],
@@ -1071,8 +1573,35 @@
                     "error": ""
                   },
                   {
-                    "name": "windows-process-burst.baseline.json",
-                    "path": "C:\\Users\\anise\\code\\Dev-Management\\reports\\windows-process-burst.baseline.json",
+                    "name": "windows-app-resource-health.normal-defaultpref.json",
+                    "path": "C:\\Users\\anise\\code\\Dev-Management\\reports\\windows-app-resource-health.normal-defaultpref.json",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "windows-app-resource-health.priority-1-BelowNormal.json",
+                    "path": "C:\\Users\\anise\\code\\Dev-Management\\reports\\windows-app-resource-health.priority-1-BelowNormal.json",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "windows-app-resource-health.priority-2-Normal.json",
+                    "path": "C:\\Users\\anise\\code\\Dev-Management\\reports\\windows-app-resource-health.priority-2-Normal.json",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "windows-app-resource-health.priority-3-BelowNormal.json",
+                    "path": "C:\\Users\\anise\\code\\Dev-Management\\reports\\windows-app-resource-health.priority-3-BelowNormal.json",
                     "type": "file",
                     "exists": true,
                     "children": [],
@@ -1120,7 +1649,7 @@
                 "error": "",
                 "child_summary": {
                   "directories": 2,
-                  "files": 19,
+                  "files": 32,
                   "skipped_or_truncated": 0
                 }
               },
@@ -1178,6 +1707,15 @@
                   {
                     "name": "check_global_agent_workflow.py",
                     "path": "C:\\Users\\anise\\code\\Dev-Management\\scripts\\check_global_agent_workflow.py",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "check_serena_dashboard_repro.py",
+                    "path": "C:\\Users\\anise\\code\\Dev-Management\\scripts\\check_serena_dashboard_repro.py",
                     "type": "file",
                     "exists": true,
                     "children": [],
@@ -1284,6 +1822,33 @@
                     "error": ""
                   },
                   {
+                    "name": "install_codex_app_maintenance_task.ps1",
+                    "path": "C:\\Users\\anise\\code\\Dev-Management\\scripts\\install_codex_app_maintenance_task.ps1",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "install_scorecard_runtime_hook.py",
+                    "path": "C:\\Users\\anise\\code\\Dev-Management\\scripts\\install_scorecard_runtime_hook.py",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "maintain_codex_app_state.py",
+                    "path": "C:\\Users\\anise\\code\\Dev-Management\\scripts\\maintain_codex_app_state.py",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
                     "name": "merge_reviewer_penalties.py",
                     "path": "C:\\Users\\anise\\code\\Dev-Management\\scripts\\merge_reviewer_penalties.py",
                     "type": "file",
@@ -1311,6 +1876,33 @@
                     "error": ""
                   },
                   {
+                    "name": "restart_codex_app_graphics_mode.ps1",
+                    "path": "C:\\Users\\anise\\code\\Dev-Management\\scripts\\restart_codex_app_graphics_mode.ps1",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "run_codex_app_maintenance_cycle.py",
+                    "path": "C:\\Users\\anise\\code\\Dev-Management\\scripts\\run_codex_app_maintenance_cycle.py",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "run_codex_app_maintenance_scheduled.ps1",
+                    "path": "C:\\Users\\anise\\code\\Dev-Management\\scripts\\run_codex_app_maintenance_scheduled.ps1",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
                     "name": "scorecard_runtime_hook.py",
                     "path": "C:\\Users\\anise\\code\\Dev-Management\\scripts\\scorecard_runtime_hook.py",
                     "type": "file",
@@ -1324,7 +1916,7 @@
                 "error": "",
                 "child_summary": {
                   "directories": 0,
-                  "files": 21,
+                  "files": 28,
                   "skipped_or_truncated": 1
                 }
               },
@@ -1364,6 +1956,24 @@
                   {
                     "name": "test_check_user_dev_environment.py",
                     "path": "C:\\Users\\anise\\code\\Dev-Management\\tests\\test_check_user_dev_environment.py",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "test_codex_app_maintenance.py",
+                    "path": "C:\\Users\\anise\\code\\Dev-Management\\tests\\test_codex_app_maintenance.py",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "test_codex_app_maintenance_cycle.py",
+                    "path": "C:\\Users\\anise\\code\\Dev-Management\\tests\\test_codex_app_maintenance_cycle.py",
                     "type": "file",
                     "exists": true,
                     "children": [],
@@ -1479,6 +2089,15 @@
                     "error": ""
                   },
                   {
+                    "name": "test_serena_dashboard_repro.py",
+                    "path": "C:\\Users\\anise\\code\\Dev-Management\\tests\\test_serena_dashboard_repro.py",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
                     "name": "test_subprocess_safe.py",
                     "path": "C:\\Users\\anise\\code\\Dev-Management\\tests\\test_subprocess_safe.py",
                     "type": "file",
@@ -1537,9 +2156,18 @@
                 "error": "",
                 "child_summary": {
                   "directories": 0,
-                  "files": 22,
+                  "files": 25,
                   "skipped_or_truncated": 1
                 }
+              },
+              {
+                "name": ".env",
+                "path": "C:\\Users\\anise\\code\\Dev-Management\\.env",
+                "type": "file",
+                "exists": true,
+                "children": [],
+                "truncated": false,
+                "error": ""
               },
               {
                 "name": ".env.example",
@@ -1576,14 +2204,41 @@
                 "children": [],
                 "truncated": false,
                 "error": ""
+              },
+              {
+                "name": "biome.json",
+                "path": "C:\\Users\\anise\\code\\Dev-Management\\biome.json",
+                "type": "file",
+                "exists": true,
+                "children": [],
+                "truncated": false,
+                "error": ""
+              },
+              {
+                "name": "pyproject.toml",
+                "path": "C:\\Users\\anise\\code\\Dev-Management\\pyproject.toml",
+                "type": "file",
+                "exists": true,
+                "children": [],
+                "truncated": false,
+                "error": ""
+              },
+              {
+                "name": "SUMMARY.md",
+                "path": "C:\\Users\\anise\\code\\Dev-Management\\SUMMARY.md",
+                "type": "file",
+                "exists": true,
+                "children": [],
+                "truncated": false,
+                "error": ""
               }
             ],
             "truncated": false,
             "error": "",
             "child_summary": {
-              "directories": 9,
-              "files": 4,
-              "skipped_or_truncated": 1
+              "directories": 10,
+              "files": 8,
+              "skipped_or_truncated": 2
             }
           }
         },
@@ -2454,6 +3109,15 @@
                     "error": ""
                   },
                   {
+                    "name": "execution-surface-reconciliation-closeout.md",
+                    "path": "C:\\Users\\anise\\code\\Dev-Workflow\\reports\\execution-surface-reconciliation-closeout.md",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
                     "name": "execution-surfaces.json",
                     "path": "C:\\Users\\anise\\code\\Dev-Workflow\\reports\\execution-surfaces.json",
                     "type": "file",
@@ -2602,7 +3266,7 @@
                 "error": "",
                 "child_summary": {
                   "directories": 1,
-                  "files": 20,
+                  "files": 21,
                   "skipped_or_truncated": 0
                 }
               },
@@ -2661,6 +3325,15 @@
                         "error": ""
                       },
                       {
+                        "name": "surfaces.py",
+                        "path": "C:\\Users\\anise\\code\\Dev-Workflow\\scripts\\lib\\surfaces.py",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
                         "name": "windowsShellLauncher.mjs",
                         "path": "C:\\Users\\anise\\code\\Dev-Workflow\\scripts\\lib\\windowsShellLauncher.mjs",
                         "type": "file",
@@ -2683,7 +3356,7 @@
                     "error": "",
                     "child_summary": {
                       "directories": 0,
-                      "files": 3,
+                      "files": 4,
                       "skipped_or_truncated": 1
                     }
                   },
@@ -6695,6 +7368,120 @@
             "exists": true,
             "children": [
               {
+                "name": "20260427-report-output-cleanup-hardening",
+                "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\20260427-report-output-cleanup-hardening",
+                "type": "directory",
+                "exists": true,
+                "children": [
+                  {
+                    "name": "ai-slop-final.json",
+                    "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\20260427-report-output-cleanup-hardening\\ai-slop-final.json",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "ai-slop.json",
+                    "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\20260427-report-output-cleanup-hardening\\ai-slop.json",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "codex-app-maintenance.json",
+                    "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\20260427-report-output-cleanup-hardening\\codex-app-maintenance.json",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "codex-app-maintenance.md",
+                    "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\20260427-report-output-cleanup-hardening\\codex-app-maintenance.md",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "config-provenance.json",
+                    "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\20260427-report-output-cleanup-hardening\\config-provenance.json",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "config-provenance.md",
+                    "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\20260427-report-output-cleanup-hardening\\config-provenance.md",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "global-agent-workflow.json",
+                    "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\20260427-report-output-cleanup-hardening\\global-agent-workflow.json",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "global-agent-workflow.md",
+                    "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\20260427-report-output-cleanup-hardening\\global-agent-workflow.md",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "user-dev-environment.json",
+                    "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\20260427-report-output-cleanup-hardening\\user-dev-environment.json",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "user-dev-environment.md",
+                    "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\20260427-report-output-cleanup-hardening\\user-dev-environment.md",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "windows-app-resource-health.json",
+                    "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\20260427-report-output-cleanup-hardening\\windows-app-resource-health.json",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  }
+                ],
+                "truncated": false,
+                "error": "",
+                "child_summary": {
+                  "directories": 0,
+                  "files": 11,
+                  "skipped_or_truncated": 0
+                }
+              },
+              {
                 "name": "anti-slop-nonassertive-pass",
                 "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\anti-slop-nonassertive-pass",
                 "type": "directory",
@@ -6823,6 +7610,120 @@
                 "child_summary": {
                   "directories": 0,
                   "files": 1,
+                  "skipped_or_truncated": 0
+                }
+              },
+              {
+                "name": "cleanup-iteration-20260427",
+                "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\cleanup-iteration-20260427",
+                "type": "directory",
+                "exists": true,
+                "children": [
+                  {
+                    "name": "config-provenance.json",
+                    "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\cleanup-iteration-20260427\\config-provenance.json",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "config-provenance.md",
+                    "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\cleanup-iteration-20260427\\config-provenance.md",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "global-agent-workflow.json",
+                    "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\cleanup-iteration-20260427\\global-agent-workflow.json",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "global-agent-workflow.md",
+                    "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\cleanup-iteration-20260427\\global-agent-workflow.md",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "user-dev-environment-after-patch.json",
+                    "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\cleanup-iteration-20260427\\user-dev-environment-after-patch.json",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "user-dev-environment-after-patch.md",
+                    "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\cleanup-iteration-20260427\\user-dev-environment-after-patch.md",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "user-dev-environment-after-testfix.json",
+                    "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\cleanup-iteration-20260427\\user-dev-environment-after-testfix.json",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "user-dev-environment-after-testfix.md",
+                    "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\cleanup-iteration-20260427\\user-dev-environment-after-testfix.md",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "user-dev-environment.json",
+                    "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\cleanup-iteration-20260427\\user-dev-environment.json",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "user-dev-environment.md",
+                    "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\cleanup-iteration-20260427\\user-dev-environment.md",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "windows-app-resource-health.json",
+                    "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\cleanup-iteration-20260427\\windows-app-resource-health.json",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  }
+                ],
+                "truncated": false,
+                "error": "",
+                "child_summary": {
+                  "directories": 0,
+                  "files": 11,
                   "skipped_or_truncated": 0
                 }
               },
@@ -7151,6 +8052,20 @@
                 }
               },
               {
+                "name": "recycle-bin-harness",
+                "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\recycle-bin-harness",
+                "type": "directory",
+                "exists": true,
+                "children": [],
+                "truncated": false,
+                "error": "",
+                "child_summary": {
+                  "directories": 0,
+                  "files": 0,
+                  "skipped_or_truncated": 0
+                }
+              },
+              {
                 "name": "runs",
                 "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\runs",
                 "type": "directory",
@@ -7337,8 +8252,292 @@
                 }
               },
               {
+                "name": "serena-dashboard-repro",
+                "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\serena-dashboard-repro",
+                "type": "directory",
+                "exists": true,
+                "children": [],
+                "truncated": false,
+                "error": "",
+                "child_summary": {
+                  "directories": 0,
+                  "files": 0,
+                  "skipped_or_truncated": 0
+                }
+              },
+              {
                 "name": "check_user_dev_environment_scratch_surface_harness.py",
                 "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\check_user_dev_environment_scratch_surface_harness.py",
+                "type": "file",
+                "exists": true,
+                "children": [],
+                "truncated": false,
+                "error": ""
+              },
+              {
+                "name": "codex-analytics-optout-health.stdout.json",
+                "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\codex-analytics-optout-health.stdout.json",
+                "type": "file",
+                "exists": true,
+                "children": [],
+                "truncated": false,
+                "error": ""
+              },
+              {
+                "name": "codex-analytics-optout-restart.json",
+                "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\codex-analytics-optout-restart.json",
+                "type": "file",
+                "exists": true,
+                "children": [],
+                "truncated": false,
+                "error": ""
+              },
+              {
+                "name": "codex-analytics-optout.err.txt",
+                "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\codex-analytics-optout.err.txt",
+                "type": "file",
+                "exists": true,
+                "children": [],
+                "truncated": false,
+                "error": ""
+              },
+              {
+                "name": "codex-app-eol-normalization.json",
+                "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\codex-app-eol-normalization.json",
+                "type": "file",
+                "exists": true,
+                "children": [],
+                "truncated": false,
+                "error": ""
+              },
+              {
+                "name": "codex-app-maintenance-cycle-low-power.json",
+                "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\codex-app-maintenance-cycle-low-power.json",
+                "type": "file",
+                "exists": true,
+                "children": [],
+                "truncated": false,
+                "error": ""
+              },
+              {
+                "name": "codex-capped-rendering-followup.stdout.json",
+                "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\codex-capped-rendering-followup.stdout.json",
+                "type": "file",
+                "exists": true,
+                "children": [],
+                "truncated": false,
+                "error": ""
+              },
+              {
+                "name": "codex-capped-rendering-health.stdout.json",
+                "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\codex-capped-rendering-health.stdout.json",
+                "type": "file",
+                "exists": true,
+                "children": [],
+                "truncated": false,
+                "error": ""
+              },
+              {
+                "name": "codex-capped-rendering-restart.json",
+                "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\codex-capped-rendering-restart.json",
+                "type": "file",
+                "exists": true,
+                "children": [],
+                "truncated": false,
+                "error": ""
+              },
+              {
+                "name": "codex-capped-rendering.err.txt",
+                "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\codex-capped-rendering.err.txt",
+                "type": "file",
+                "exists": true,
+                "children": [],
+                "truncated": false,
+                "error": ""
+              },
+              {
+                "name": "codex-force-low-power-health.stdout.json",
+                "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\codex-force-low-power-health.stdout.json",
+                "type": "file",
+                "exists": true,
+                "children": [],
+                "truncated": false,
+                "error": ""
+              },
+              {
+                "name": "codex-force-low-power-restart.json",
+                "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\codex-force-low-power-restart.json",
+                "type": "file",
+                "exists": true,
+                "children": [],
+                "truncated": false,
+                "error": ""
+              },
+              {
+                "name": "codex-force-low-power.err.txt",
+                "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\codex-force-low-power.err.txt",
+                "type": "file",
+                "exists": true,
+                "children": [],
+                "truncated": false,
+                "error": ""
+              },
+              {
+                "name": "codex-reduced-ui-controls-health.stdout.json",
+                "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\codex-reduced-ui-controls-health.stdout.json",
+                "type": "file",
+                "exists": true,
+                "children": [],
+                "truncated": false,
+                "error": ""
+              },
+              {
+                "name": "codex-reduced-ui-controls-motion-visible-health.stdout.json",
+                "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\codex-reduced-ui-controls-motion-visible-health.stdout.json",
+                "type": "file",
+                "exists": true,
+                "children": [],
+                "truncated": false,
+                "error": ""
+              },
+              {
+                "name": "codex-reduced-ui-controls-motion-visible-restart.json",
+                "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\codex-reduced-ui-controls-motion-visible-restart.json",
+                "type": "file",
+                "exists": true,
+                "children": [],
+                "truncated": false,
+                "error": ""
+              },
+              {
+                "name": "codex-reduced-ui-controls-motion-visible.err.txt",
+                "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\codex-reduced-ui-controls-motion-visible.err.txt",
+                "type": "file",
+                "exists": true,
+                "children": [],
+                "truncated": false,
+                "error": ""
+              },
+              {
+                "name": "codex-reduced-ui-controls-restart.json",
+                "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\codex-reduced-ui-controls-restart.json",
+                "type": "file",
+                "exists": true,
+                "children": [],
+                "truncated": false,
+                "error": ""
+              },
+              {
+                "name": "codex-reduced-ui-controls.err.txt",
+                "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\codex-reduced-ui-controls.err.txt",
+                "type": "file",
+                "exists": true,
+                "children": [],
+                "truncated": false,
+                "error": ""
+              },
+              {
+                "name": "codex-reduced-ui-scale-125-health.stdout.json",
+                "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\codex-reduced-ui-scale-125-health.stdout.json",
+                "type": "file",
+                "exists": true,
+                "children": [],
+                "truncated": false,
+                "error": ""
+              },
+              {
+                "name": "codex-reduced-ui-scale-125-restart.json",
+                "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\codex-reduced-ui-scale-125-restart.json",
+                "type": "file",
+                "exists": true,
+                "children": [],
+                "truncated": false,
+                "error": ""
+              },
+              {
+                "name": "codex-reduced-ui-scale-125.err.txt",
+                "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\codex-reduced-ui-scale-125.err.txt",
+                "type": "file",
+                "exists": true,
+                "children": [],
+                "truncated": false,
+                "error": ""
+              },
+              {
+                "name": "codex-reduced-ui-scale-150-health.stdout.json",
+                "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\codex-reduced-ui-scale-150-health.stdout.json",
+                "type": "file",
+                "exists": true,
+                "children": [],
+                "truncated": false,
+                "error": ""
+              },
+              {
+                "name": "codex-reduced-ui-scale-150-restart.json",
+                "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\codex-reduced-ui-scale-150-restart.json",
+                "type": "file",
+                "exists": true,
+                "children": [],
+                "truncated": false,
+                "error": ""
+              },
+              {
+                "name": "codex-reduced-ui-scale-150.err.txt",
+                "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\codex-reduced-ui-scale-150.err.txt",
+                "type": "file",
+                "exists": true,
+                "children": [],
+                "truncated": false,
+                "error": ""
+              },
+              {
+                "name": "codex-render-cache-clean-fixed-health.stdout.json",
+                "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\codex-render-cache-clean-fixed-health.stdout.json",
+                "type": "file",
+                "exists": true,
+                "children": [],
+                "truncated": false,
+                "error": ""
+              },
+              {
+                "name": "codex-render-cache-clean-fixed.err.txt",
+                "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\codex-render-cache-clean-fixed.err.txt",
+                "type": "file",
+                "exists": true,
+                "children": [],
+                "truncated": false,
+                "error": ""
+              },
+              {
+                "name": "codex-render-cache-clean-health.stdout.json",
+                "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\codex-render-cache-clean-health.stdout.json",
+                "type": "file",
+                "exists": true,
+                "children": [],
+                "truncated": false,
+                "error": ""
+              },
+              {
+                "name": "codex-render-cache-clean-restart-fixed.json",
+                "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\codex-render-cache-clean-restart-fixed.json",
+                "type": "file",
+                "exists": true,
+                "children": [],
+                "truncated": false,
+                "error": ""
+              },
+              {
+                "name": "codex-render-cache-clean-restart.json",
+                "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\codex-render-cache-clean-restart.json",
+                "type": "file",
+                "exists": true,
+                "children": [],
+                "truncated": false,
+                "error": ""
+              },
+              {
+                "name": "codex-render-cache-clean.err.txt",
+                "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\codex-render-cache-clean.err.txt",
                 "type": "file",
                 "exists": true,
                 "children": [],
@@ -7376,8 +8575,8 @@
             "truncated": false,
             "error": "",
             "child_summary": {
-              "directories": 8,
-              "files": 4,
+              "directories": 12,
+              "files": 34,
               "skipped_or_truncated": 0
             }
           }
@@ -7543,36 +8742,8 @@
                     }
                   },
                   {
-                    "name": "34fa0807c002f83ae71cf8a4d432d97eab639dfb",
-                    "path": "C:\\Users\\anise\\.codex\\ambient-suggestions\\34fa0807c002f83ae71cf8a4d432d97eab639dfb",
-                    "type": "directory",
-                    "exists": true,
-                    "children": [],
-                    "truncated": false,
-                    "error": "",
-                    "child_summary": {
-                      "directories": 0,
-                      "files": 1,
-                      "skipped_or_truncated": 0
-                    }
-                  },
-                  {
                     "name": "435005d653dcfe1c012e5ac25111784f9933db38",
                     "path": "C:\\Users\\anise\\.codex\\ambient-suggestions\\435005d653dcfe1c012e5ac25111784f9933db38",
-                    "type": "directory",
-                    "exists": true,
-                    "children": [],
-                    "truncated": false,
-                    "error": "",
-                    "child_summary": {
-                      "directories": 0,
-                      "files": 1,
-                      "skipped_or_truncated": 0
-                    }
-                  },
-                  {
-                    "name": "4d40bf7fb587b4b285cff2584cde51bddcd9be67",
-                    "path": "C:\\Users\\anise\\.codex\\ambient-suggestions\\4d40bf7fb587b4b285cff2584cde51bddcd9be67",
                     "type": "directory",
                     "exists": true,
                     "children": [],
@@ -7599,20 +8770,6 @@
                     }
                   },
                   {
-                    "name": "714cd35935d54957aab31930f7639d39cbafa252",
-                    "path": "C:\\Users\\anise\\.codex\\ambient-suggestions\\714cd35935d54957aab31930f7639d39cbafa252",
-                    "type": "directory",
-                    "exists": true,
-                    "children": [],
-                    "truncated": false,
-                    "error": "",
-                    "child_summary": {
-                      "directories": 0,
-                      "files": 1,
-                      "skipped_or_truncated": 0
-                    }
-                  },
-                  {
                     "name": "747c0080b811df4dfa6cc07fb106a7e785233d81",
                     "path": "C:\\Users\\anise\\.codex\\ambient-suggestions\\747c0080b811df4dfa6cc07fb106a7e785233d81",
                     "type": "directory",
@@ -7627,50 +8784,8 @@
                     }
                   },
                   {
-                    "name": "788735442fa72440257d128d8fcca99f0803a8e0",
-                    "path": "C:\\Users\\anise\\.codex\\ambient-suggestions\\788735442fa72440257d128d8fcca99f0803a8e0",
-                    "type": "directory",
-                    "exists": true,
-                    "children": [],
-                    "truncated": false,
-                    "error": "",
-                    "child_summary": {
-                      "directories": 0,
-                      "files": 1,
-                      "skipped_or_truncated": 0
-                    }
-                  },
-                  {
-                    "name": "79ea914c687bc0ac2acf073f9691453089807f51",
-                    "path": "C:\\Users\\anise\\.codex\\ambient-suggestions\\79ea914c687bc0ac2acf073f9691453089807f51",
-                    "type": "directory",
-                    "exists": true,
-                    "children": [],
-                    "truncated": false,
-                    "error": "",
-                    "child_summary": {
-                      "directories": 0,
-                      "files": 1,
-                      "skipped_or_truncated": 0
-                    }
-                  },
-                  {
                     "name": "890bc1b675cd96012a9cdb8ca9a81cd68379f0d9",
                     "path": "C:\\Users\\anise\\.codex\\ambient-suggestions\\890bc1b675cd96012a9cdb8ca9a81cd68379f0d9",
-                    "type": "directory",
-                    "exists": true,
-                    "children": [],
-                    "truncated": false,
-                    "error": "",
-                    "child_summary": {
-                      "directories": 0,
-                      "files": 1,
-                      "skipped_or_truncated": 0
-                    }
-                  },
-                  {
-                    "name": "a5da0ca0ad0db383df09148f767510b4ad2467a6",
-                    "path": "C:\\Users\\anise\\.codex\\ambient-suggestions\\a5da0ca0ad0db383df09148f767510b4ad2467a6",
                     "type": "directory",
                     "exists": true,
                     "children": [],
@@ -7700,7 +8815,7 @@
                 "truncated": false,
                 "error": "",
                 "child_summary": {
-                  "directories": 12,
+                  "directories": 6,
                   "files": 0,
                   "skipped_or_truncated": 0
                 }
@@ -7863,6 +8978,279 @@
                 }
               },
               {
+                "name": "maintenance-archives",
+                "path": "C:\\Users\\anise\\.codex\\maintenance-archives",
+                "type": "directory",
+                "exists": true,
+                "children": [
+                  {
+                    "name": "20260426-105224",
+                    "path": "C:\\Users\\anise\\.codex\\maintenance-archives\\20260426-105224",
+                    "type": "directory",
+                    "exists": true,
+                    "children": [
+                      {
+                        "name": "ambient-suggestions",
+                        "path": "C:\\Users\\anise\\.codex\\maintenance-archives\\20260426-105224\\ambient-suggestions",
+                        "type": "directory",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      }
+                    ],
+                    "truncated": false,
+                    "error": "",
+                    "child_summary": {
+                      "directories": 1,
+                      "files": 2,
+                      "skipped_or_truncated": 0
+                    }
+                  },
+                  {
+                    "name": "20260426-113448",
+                    "path": "C:\\Users\\anise\\.codex\\maintenance-archives\\20260426-113448",
+                    "type": "directory",
+                    "exists": true,
+                    "children": [
+                      {
+                        "name": "ambient-suggestions",
+                        "path": "C:\\Users\\anise\\.codex\\maintenance-archives\\20260426-113448\\ambient-suggestions",
+                        "type": "directory",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      }
+                    ],
+                    "truncated": false,
+                    "error": "",
+                    "child_summary": {
+                      "directories": 1,
+                      "files": 1,
+                      "skipped_or_truncated": 0
+                    }
+                  },
+                  {
+                    "name": "20260426-115522",
+                    "path": "C:\\Users\\anise\\.codex\\maintenance-archives\\20260426-115522",
+                    "type": "directory",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": "",
+                    "child_summary": {
+                      "directories": 0,
+                      "files": 2,
+                      "skipped_or_truncated": 0
+                    }
+                  },
+                  {
+                    "name": "20260426-121005",
+                    "path": "C:\\Users\\anise\\.codex\\maintenance-archives\\20260426-121005",
+                    "type": "directory",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": "",
+                    "child_summary": {
+                      "directories": 0,
+                      "files": 3,
+                      "skipped_or_truncated": 0
+                    }
+                  },
+                  {
+                    "name": "20260426-122346",
+                    "path": "C:\\Users\\anise\\.codex\\maintenance-archives\\20260426-122346",
+                    "type": "directory",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": "",
+                    "child_summary": {
+                      "directories": 0,
+                      "files": 2,
+                      "skipped_or_truncated": 0
+                    }
+                  },
+                  {
+                    "name": "20260426-141341",
+                    "path": "C:\\Users\\anise\\.codex\\maintenance-archives\\20260426-141341",
+                    "type": "directory",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": "",
+                    "child_summary": {
+                      "directories": 0,
+                      "files": 3,
+                      "skipped_or_truncated": 0
+                    }
+                  },
+                  {
+                    "name": "20260426-142402",
+                    "path": "C:\\Users\\anise\\.codex\\maintenance-archives\\20260426-142402",
+                    "type": "directory",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": "",
+                    "child_summary": {
+                      "directories": 0,
+                      "files": 2,
+                      "skipped_or_truncated": 0
+                    }
+                  },
+                  {
+                    "name": "20260426-144139",
+                    "path": "C:\\Users\\anise\\.codex\\maintenance-archives\\20260426-144139",
+                    "type": "directory",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": "",
+                    "child_summary": {
+                      "directories": 0,
+                      "files": 2,
+                      "skipped_or_truncated": 0
+                    }
+                  },
+                  {
+                    "name": "20260426-145159",
+                    "path": "C:\\Users\\anise\\.codex\\maintenance-archives\\20260426-145159",
+                    "type": "directory",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": "",
+                    "child_summary": {
+                      "directories": 0,
+                      "files": 1,
+                      "skipped_or_truncated": 0
+                    }
+                  },
+                  {
+                    "name": "20260426-152229",
+                    "path": "C:\\Users\\anise\\.codex\\maintenance-archives\\20260426-152229",
+                    "type": "directory",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": "",
+                    "child_summary": {
+                      "directories": 0,
+                      "files": 1,
+                      "skipped_or_truncated": 0
+                    }
+                  },
+                  {
+                    "name": "20260426-153037",
+                    "path": "C:\\Users\\anise\\.codex\\maintenance-archives\\20260426-153037",
+                    "type": "directory",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": "",
+                    "child_summary": {
+                      "directories": 0,
+                      "files": 1,
+                      "skipped_or_truncated": 0
+                    }
+                  },
+                  {
+                    "name": "20260426-153510",
+                    "path": "C:\\Users\\anise\\.codex\\maintenance-archives\\20260426-153510",
+                    "type": "directory",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": "",
+                    "child_summary": {
+                      "directories": 0,
+                      "files": 1,
+                      "skipped_or_truncated": 0
+                    }
+                  },
+                  {
+                    "name": "20260426-155550",
+                    "path": "C:\\Users\\anise\\.codex\\maintenance-archives\\20260426-155550",
+                    "type": "directory",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": "",
+                    "child_summary": {
+                      "directories": 0,
+                      "files": 1,
+                      "skipped_or_truncated": 0
+                    }
+                  },
+                  {
+                    "name": "20260426-155903",
+                    "path": "C:\\Users\\anise\\.codex\\maintenance-archives\\20260426-155903",
+                    "type": "directory",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": "",
+                    "child_summary": {
+                      "directories": 0,
+                      "files": 1,
+                      "skipped_or_truncated": 0
+                    }
+                  },
+                  {
+                    "name": "20260426-160216",
+                    "path": "C:\\Users\\anise\\.codex\\maintenance-archives\\20260426-160216",
+                    "type": "directory",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": "",
+                    "child_summary": {
+                      "directories": 0,
+                      "files": 1,
+                      "skipped_or_truncated": 0
+                    }
+                  },
+                  {
+                    "name": "20260426-161637",
+                    "path": "C:\\Users\\anise\\.codex\\maintenance-archives\\20260426-161637",
+                    "type": "directory",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": "",
+                    "child_summary": {
+                      "directories": 0,
+                      "files": 2,
+                      "skipped_or_truncated": 0
+                    }
+                  },
+                  {
+                    "name": "20260426-173331",
+                    "path": "C:\\Users\\anise\\.codex\\maintenance-archives\\20260426-173331",
+                    "type": "directory",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": "",
+                    "child_summary": {
+                      "directories": 0,
+                      "files": 3,
+                      "skipped_or_truncated": 0
+                    }
+                  }
+                ],
+                "truncated": false,
+                "error": "",
+                "child_summary": {
+                  "directories": 17,
+                  "files": 0,
+                  "skipped_or_truncated": 0
+                }
+              },
+              {
                 "name": "memories",
                 "path": "C:\\Users\\anise\\.codex\\memories",
                 "type": "directory",
@@ -7902,7 +9290,7 @@
                     "error": "",
                     "child_summary": {
                       "directories": 0,
-                      "files": 46,
+                      "files": 52,
                       "skipped_or_truncated": 0
                     }
                   },
@@ -7929,12 +9317,21 @@
                         "children": [],
                         "truncated": false,
                         "error": ""
+                      },
+                      {
+                        "name": "dev-workflow-gate-reporting",
+                        "path": "C:\\Users\\anise\\.codex\\memories\\skills\\dev-workflow-gate-reporting",
+                        "type": "directory",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
                       }
                     ],
                     "truncated": false,
                     "error": "",
                     "child_summary": {
-                      "directories": 2,
+                      "directories": 3,
                       "files": 0,
                       "skipped_or_truncated": 0
                     }
@@ -8054,7 +9451,7 @@
                 "error": "",
                 "child_summary": {
                   "directories": 0,
-                  "files": 6,
+                  "files": 0,
                   "skipped_or_truncated": 0
                 }
               },
@@ -8167,13 +9564,46 @@
                         "children": [],
                         "truncated": false,
                         "error": ""
+                      },
+                      {
+                        "name": "locks",
+                        "path": "C:\\Users\\anise\\.codex\\state\\iaw\\locks",
+                        "type": "directory",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      }
+                    ],
+                    "truncated": false,
+                    "error": "",
+                    "child_summary": {
+                      "directories": 2,
+                      "files": 1,
+                      "skipped_or_truncated": 0
+                    }
+                  },
+                  {
+                    "name": "reviewer-verdicts",
+                    "path": "C:\\Users\\anise\\.codex\\state\\reviewer-verdicts",
+                    "type": "directory",
+                    "exists": true,
+                    "children": [
+                      {
+                        "name": "Dev-Management",
+                        "path": "C:\\Users\\anise\\.codex\\state\\reviewer-verdicts\\Dev-Management",
+                        "type": "directory",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
                       }
                     ],
                     "truncated": false,
                     "error": "",
                     "child_summary": {
                       "directories": 1,
-                      "files": 1,
+                      "files": 0,
                       "skipped_or_truncated": 0
                     }
                   },
@@ -8183,6 +9613,15 @@
                     "type": "directory",
                     "exists": true,
                     "children": [
+                      {
+                        "name": "c90c42fd-f419-4bdf-b71c-2202413700d1",
+                        "path": "C:\\Users\\anise\\.codex\\state\\scorecard-context\\c90c42fd-f419-4bdf-b71c-2202413700d1",
+                        "type": "directory",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
                       {
                         "name": "Dev-Management",
                         "path": "C:\\Users\\anise\\.codex\\state\\scorecard-context\\Dev-Management",
@@ -8202,8 +9641,125 @@
                         "error": ""
                       },
                       {
+                        "name": "dw-fallback-38a84d18747645c9aab7ccb5ae50a31c",
+                        "path": "C:\\Users\\anise\\.codex\\state\\scorecard-context\\dw-fallback-38a84d18747645c9aab7ccb5ae50a31c",
+                        "type": "directory",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
                         "name": "reservation-system",
                         "path": "C:\\Users\\anise\\.codex\\state\\scorecard-context\\reservation-system",
+                        "type": "directory",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "tmp15pdt3rb",
+                        "path": "C:\\Users\\anise\\.codex\\state\\scorecard-context\\tmp15pdt3rb",
+                        "type": "directory",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "tmp2o14z103",
+                        "path": "C:\\Users\\anise\\.codex\\state\\scorecard-context\\tmp2o14z103",
+                        "type": "directory",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "tmp8or78zl8",
+                        "path": "C:\\Users\\anise\\.codex\\state\\scorecard-context\\tmp8or78zl8",
+                        "type": "directory",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "tmpdcria6ky",
+                        "path": "C:\\Users\\anise\\.codex\\state\\scorecard-context\\tmpdcria6ky",
+                        "type": "directory",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "tmpdj63jqwj",
+                        "path": "C:\\Users\\anise\\.codex\\state\\scorecard-context\\tmpdj63jqwj",
+                        "type": "directory",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "tmpevfpzqf9",
+                        "path": "C:\\Users\\anise\\.codex\\state\\scorecard-context\\tmpevfpzqf9",
+                        "type": "directory",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "tmpi04hbd_q",
+                        "path": "C:\\Users\\anise\\.codex\\state\\scorecard-context\\tmpi04hbd_q",
+                        "type": "directory",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "tmpkuxy0naz",
+                        "path": "C:\\Users\\anise\\.codex\\state\\scorecard-context\\tmpkuxy0naz",
+                        "type": "directory",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "tmpmx7mrhan",
+                        "path": "C:\\Users\\anise\\.codex\\state\\scorecard-context\\tmpmx7mrhan",
+                        "type": "directory",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "tmpo7yrjfz8",
+                        "path": "C:\\Users\\anise\\.codex\\state\\scorecard-context\\tmpo7yrjfz8",
+                        "type": "directory",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "tmpqjltai26",
+                        "path": "C:\\Users\\anise\\.codex\\state\\scorecard-context\\tmpqjltai26",
+                        "type": "directory",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "tmpyi_4tadn",
+                        "path": "C:\\Users\\anise\\.codex\\state\\scorecard-context\\tmpyi_4tadn",
                         "type": "directory",
                         "exists": true,
                         "children": [],
@@ -8214,8 +9770,22 @@
                     "truncated": false,
                     "error": "",
                     "child_summary": {
-                      "directories": 3,
+                      "directories": 17,
                       "files": 0,
+                      "skipped_or_truncated": 0
+                    }
+                  },
+                  {
+                    "name": "scorecard-hook",
+                    "path": "C:\\Users\\anise\\.codex\\state\\scorecard-hook",
+                    "type": "directory",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": "",
+                    "child_summary": {
+                      "directories": 0,
+                      "files": 1,
                       "skipped_or_truncated": 0
                     }
                   },
@@ -8229,7 +9799,7 @@
                     "error": "",
                     "child_summary": {
                       "directories": 0,
-                      "files": 0,
+                      "files": 1,
                       "skipped_or_truncated": 0
                     }
                   }
@@ -8237,7 +9807,7 @@
                 "truncated": false,
                 "error": "",
                 "child_summary": {
-                  "directories": 3,
+                  "directories": 5,
                   "files": 1,
                   "skipped_or_truncated": 0
                 }
@@ -8255,8 +9825,8 @@
                     "exists": true,
                     "children": [
                       {
-                        "name": "codex-arg0hdafo2",
-                        "path": "C:\\Users\\anise\\.codex\\tmp\\arg0\\codex-arg0hdafo2",
+                        "name": "codex-arg0dLN7gf",
+                        "path": "C:\\Users\\anise\\.codex\\tmp\\arg0\\codex-arg0dLN7gf",
                         "type": "directory",
                         "exists": true,
                         "children": [],
@@ -8363,8 +9933,8 @@
             "truncated": false,
             "error": "",
             "child_summary": {
-              "directories": 22,
-              "files": 16,
+              "directories": 23,
+              "files": 17,
               "skipped_or_truncated": 0
             }
           }
@@ -8469,7 +10039,7 @@
             "error": "",
             "child_summary": {
               "directories": 3,
-              "files": 1,
+              "files": 2,
               "skipped_or_truncated": 0
             }
           }

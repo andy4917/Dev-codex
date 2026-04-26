@@ -12,7 +12,7 @@
     "product": "dev_product"
   },
   "runtime_paths": {
-    "codex_cli_bin": "C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.422.2437.0_x64__2p2nqsd0c76g0\\app\\resources\\codex.exe",
+    "codex_cli_bin": "C:\\Users\\anise\\AppData\\Local\\OpenAI\\Codex\\bin\\codex.exe",
     "codex_user_home": "C:\\Users\\anise\\.codex",
     "windows_codex_home": "C:\\Users\\anise\\.codex",
     "dev_management_scratch": "C:\\Users\\anise\\code\\.scratch\\Dev-Management",

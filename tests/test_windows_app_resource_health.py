@@ -66,7 +66,7 @@ class WindowsAppResourceHealthTests(unittest.TestCase):
             stale_minutes=10,
             cleanup_duplicate_serena_roots=True,
         )
-        self.assertEqual(report["status"], "WARN")
+        self.assertEqual(report["status"], "BLOCKED")
         self.assertEqual(report["process_counts"]["serena_roots"], 2)
         self.assertEqual({item["pid"] for item in report["cleanup_candidates"]}, {20, 21, 22})
 
@@ -81,6 +81,7 @@ class WindowsAppResourceHealthTests(unittest.TestCase):
             duplicate_serena_grace_minutes=1,
         )
         self.assertEqual(report["cleanup_candidate_summary"]["count"], 0)
+        self.assertEqual(report["status"], "BLOCKED")
         self.assertEqual(
             report["cleanup_candidate_summary"]["protected_duplicate_serena_roots"][0]["pid"],
             20,
@@ -99,6 +100,7 @@ class WindowsAppResourceHealthTests(unittest.TestCase):
             cleanup_duplicate_serena_roots=True,
         )
         self.assertEqual({item["pid"] for item in report["cleanup_candidates"]}, {20, 21})
+        self.assertEqual(report["status"], "BLOCKED")
 
     def test_duplicate_serena_grace_prevents_immediate_startup_cleanup(self) -> None:
         active = self._proc(10, 1, "serena.exe", "serena.exe start-mcp-server --project-from-cwd --context=codex", 0, 5)
@@ -110,6 +112,7 @@ class WindowsAppResourceHealthTests(unittest.TestCase):
             duplicate_serena_grace_minutes=1,
         )
         self.assertEqual(report["cleanup_candidate_summary"]["count"], 0)
+        self.assertEqual(report["status"], "BLOCKED")
 
     def test_single_fresh_serena_root_passes_when_codex_is_running(self) -> None:
         report = self.module.evaluate_processes(
@@ -397,6 +400,7 @@ class WindowsAppResourceHealthTests(unittest.TestCase):
         )
         self.assertEqual(report["cleanup_candidates"][0]["pid"], 20)
         self.assertEqual(report["cleanup_candidate_summary"]["kept_serena_roots"], [10])
+        self.assertEqual(report["status"], "BLOCKED")
 
 
 if __name__ == "__main__":

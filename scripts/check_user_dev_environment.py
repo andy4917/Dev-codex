@@ -36,6 +36,90 @@ AI_PYTHON_PACKAGE_DISTRIBUTIONS = {
     "openai-agents": "openai-agents",
     "mcp": "mcp",
 }
+APPDATA = Path(os.environ.get("APPDATA", str(Path.home() / "AppData" / "Roaming")))
+LOCALAPPDATA = Path(os.environ.get("LOCALAPPDATA", str(Path.home() / "AppData" / "Local")))
+SCOOP_ROOT = Path.home() / "scoop"
+TOOLCHAIN_REQUIRED = {
+    "git": "git",
+    "pwsh": "pwsh",
+    "python": "python",
+    "node": "node",
+    "npm": "npm",
+    "scoop": "scoop",
+    "java": "java",
+    "javac": "javac",
+    "tsc": "tsc",
+    "dotenv_cli": "dotenv",
+    "ruff": "ruff",
+    "biome": "biome",
+    "zig": "zig",
+}
+TOOLCHAIN_OPTIONAL = {
+    "corepack": "corepack",
+    "pnpm": "pnpm",
+    "bun": "bun",
+    "deno": "deno",
+    "tsx": "tsx",
+    "zx": "zx",
+    "zod": "zod",
+    "npkill": "npkill",
+    "fzf": "fzf",
+    "autohotkey": "autohotkey",
+    "wiztree64": "wiztree64",
+    "everything": "everything",
+    "everything_cli": "es",
+    "process_explorer": "procexp",
+    "powertoys": "PowerToys",
+    "micromamba": "micromamba",
+    "maven": "mvn",
+    "gradle": "gradle",
+    "vs_build_tools": "vswhere",
+    "winget": "winget",
+    "choco": "choco",
+    "7zip": "7z",
+    "docker": "docker",
+    "dotnet": "dotnet",
+    "gh": "gh",
+    "uv": "uv",
+    "pipx": "pipx",
+    "syncthing": "syncthing",
+}
+TOOLCHAIN_FALLBACK_PATHS = {
+    "gh": [Path(r"C:\Program Files\GitHub CLI\gh.exe")],
+    "scoop": [SCOOP_ROOT / "shims" / "scoop.cmd", SCOOP_ROOT / "shims" / "scoop.ps1"],
+    "java": [SCOOP_ROOT / "apps" / "temurin21-jdk" / "current" / "bin" / "java.exe"],
+    "javac": [SCOOP_ROOT / "apps" / "temurin21-jdk" / "current" / "bin" / "javac.exe"],
+    "maven": [SCOOP_ROOT / "apps" / "maven" / "current" / "bin" / "mvn.cmd"],
+    "gradle": [SCOOP_ROOT / "shims" / "gradle.cmd"],
+    "bun": [SCOOP_ROOT / "shims" / "bun.exe", SCOOP_ROOT / "persist" / "bun" / "bin" / "bun.exe"],
+    "deno": [SCOOP_ROOT / "shims" / "deno.exe"],
+    "fzf": [SCOOP_ROOT / "shims" / "fzf.exe"],
+    "autohotkey": [SCOOP_ROOT / "shims" / "autohotkey.exe"],
+    "wiztree64": [SCOOP_ROOT / "shims" / "wiztree64.exe"],
+    "everything": [SCOOP_ROOT / "shims" / "everything.exe"],
+    "everything_cli": [SCOOP_ROOT / "shims" / "es.exe"],
+    "process_explorer": [SCOOP_ROOT / "shims" / "procexp.exe", SCOOP_ROOT / "shims" / "procexp64.exe"],
+    "powertoys": [LOCALAPPDATA / "PowerToys" / "PowerToys.exe"],
+    "micromamba": [LOCALAPPDATA / "Microsoft" / "WinGet" / "Links" / "micromamba.exe"],
+    "tsc": [APPDATA / "npm" / "tsc.cmd"],
+    "tsx": [APPDATA / "npm" / "tsx.cmd"],
+    "pnpm": [APPDATA / "npm" / "pnpm.cmd"],
+    "dotenv_cli": [APPDATA / "npm" / "dotenv.cmd"],
+    "ruff": [Path.home() / ".local" / "bin" / "ruff.exe", APPDATA / "Python" / "Python314" / "Scripts" / "ruff.exe"],
+    "biome": [APPDATA / "npm" / "biome.cmd"],
+    "zig": [SCOOP_ROOT / "shims" / "zig.exe"],
+    "zx": [APPDATA / "npm" / "zx.cmd"],
+    "zod": [APPDATA / "npm" / "node_modules" / "zod" / "package.json"],
+    "npkill": [APPDATA / "npm" / "npkill.cmd"],
+    "vs_build_tools": [Path(os.environ.get("ProgramFiles(x86)", r"C:\Program Files (x86)")) / "Microsoft Visual Studio" / "Installer" / "vswhere.exe"],
+    "winget": [LOCALAPPDATA / "Microsoft" / "WindowsApps" / "winget.exe", LOCALAPPDATA / "Microsoft" / "WinGet" / "Links" / "winget.exe"],
+    "choco": [Path(os.environ.get("ProgramData", r"C:\ProgramData")) / "chocolatey" / "bin" / "choco.exe"],
+    "7zip": [Path(os.environ.get("ProgramFiles", r"C:\Program Files")) / "7-Zip" / "7z.exe"],
+    "uv": [Path.home() / ".cargo" / "bin" / "uv.exe", LOCALAPPDATA / "Programs" / "uv" / "uv.exe", LOCALAPPDATA / "Microsoft" / "WinGet" / "Links" / "uv.exe"],
+    "pipx": [APPDATA / "Python" / "Python314" / "Scripts" / "pipx.exe", Path.home() / ".local" / "bin" / "pipx.exe"],
+    "syncthing": [LOCALAPPDATA / "Syncthing" / "syncthing.exe"],
+}
+TOOLCHAIN_PREFER_FALLBACK = {"dotenv_cli"}
 DEV_MANAGEMENT_SCRATCH = Path(r"C:\Users\anise\code\.scratch\Dev-Management")
 MIGRATION_EVIDENCE_ROOT = ROOT / "reports" / "migration-evidence" / "20260425-windows-native-transition"
 POWERSHELL_ROOT = Path.home() / "Documents" / "PowerShell"
@@ -231,28 +315,32 @@ def inspect_repo_roots(roots: dict[str, Path]) -> dict[str, Any]:
     return {"status": collapse_status(statuses), "findings": findings, "reasons": reasons}
 
 
+def resolve_tool_path(name: str, exe: str) -> str | None:
+    if name in TOOLCHAIN_PREFER_FALLBACK:
+        preferred = next((str(candidate) for candidate in TOOLCHAIN_FALLBACK_PATHS.get(name, []) if candidate.exists()), None)
+        if preferred:
+            return preferred
+    path = shutil.which(exe)
+    if path:
+        return path
+    return next((str(candidate) for candidate in TOOLCHAIN_FALLBACK_PATHS.get(name, []) if candidate.exists()), None)
+
+
 def inspect_toolchain() -> dict[str, Any]:
-    required = {"git": "git", "python": "python", "node": "node", "npm": "npm", "pwsh": "pwsh"}
-    optional = {"docker": "docker", "dotnet": "dotnet", "uv": "uv", "gh": "gh"}
-    fallback_paths = {
-        "gh": [Path(r"C:\Program Files\GitHub CLI\gh.exe")],
-    }
     tools: dict[str, dict[str, Any]] = {}
     statuses: list[str] = []
     reasons: list[str] = []
-    for name, exe in required.items():
-        path = shutil.which(exe)
+    for name, exe in TOOLCHAIN_REQUIRED.items():
+        path = resolve_tool_path(name, exe)
         status = "PASS" if path else "BLOCKED"
-        tools[name] = {"path": path or "", "status": status, "required": True}
+        tools[name] = {"command": exe, "path": path or "", "status": status, "required": True}
         statuses.append(status)
         if not path:
             reasons.append(f"required tool is missing: {name}")
-    for name, exe in optional.items():
-        path = shutil.which(exe)
-        if not path:
-            path = next((str(candidate) for candidate in fallback_paths.get(name, []) if candidate.exists()), None)
+    for name, exe in TOOLCHAIN_OPTIONAL.items():
+        path = resolve_tool_path(name, exe)
         status = "PASS" if path else "WARN"
-        tools[name] = {"path": path or "", "status": status, "required": False}
+        tools[name] = {"command": exe, "path": path or "", "status": status, "required": False}
         statuses.append(status)
         if not path:
             reasons.append(f"optional tool is missing: {name}")
@@ -292,6 +380,11 @@ def inspect_powershell_profile() -> dict[str, Any]:
     required_profile_markers = [
         r'. "$PSScriptRoot\policies\utf8.ps1"',
         r'. "$PSScriptRoot\policies\native-args.ps1"',
+        "$DevToolPathCandidates",
+        r".local\bin",
+        r"scoop\shims",
+        r"npm\dotenv.cmd",
+        "function dotenv",
     ]
     required_utf8_markers = [
         "[Console]::InputEncoding",

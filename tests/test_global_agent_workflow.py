@@ -156,6 +156,18 @@ class GlobalAgentWorkflowTests(unittest.TestCase):
         self.assertEqual(report["status"], "BLOCKED")
         self.assertIn("subagent_delegation_policy does not match the required delegation decision contract", report["blockers"])
 
+    def test_maintenance_keeps_serena_limit_and_no_blind_priority_gpu_defaults(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            policy = self._policy()
+            policy["codex_app_performance_maintenance"]["max_serena_roots"] = 2
+            policy["codex_app_performance_maintenance"]["codex_priority_throttle_default"] = True
+            self._build_repo(root, policy=policy)
+            report = self.module.evaluate_global_agent_workflow(root)
+        self.assertEqual(report["status"], "BLOCKED")
+        self.assertIn("codex_app_performance_maintenance.max_serena_roots must be 1", report["blockers"])
+        self.assertIn("codex_app_performance_maintenance.codex_priority_throttle_default must be false", report["blockers"])
+
     def test_missing_subagent_delegation_doc_blocks(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)

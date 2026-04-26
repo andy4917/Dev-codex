@@ -82,17 +82,47 @@ def main() -> int:
     parser.add_argument("--max-log-rows", type=int, default=10000)
     parser.add_argument("--max-session-files", type=int, default=60)
     parser.add_argument("--max-live-threads", type=int, default=12)
+    parser.add_argument("--keep-serena-roots", type=int, default=1)
+    parser.add_argument("--duplicate-serena-grace-minutes", type=float, default=10)
     parser.add_argument(
         "--resource-cpu-sample-seconds",
         type=int,
         default=3,
         help="Seconds to sample Codex App CPU during the resource-health step; set 0 to disable.",
     )
+    parser.add_argument(
+        "--throttle-codex-priority",
+        action="store_true",
+        help="Opt-in only: lower live Codex App process priority after a measured resource-health finding.",
+    )
+    parser.add_argument(
+        "--prefer-low-power-gpu",
+        action="store_true",
+        help="Opt-in only: set Windows per-app GPU preference for live Codex executables.",
+    )
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args()
 
     maintenance_output = ROOT / "reports" / "codex-app-maintenance.scheduled.json"
     health_output = ROOT / "reports" / "windows-app-resource-health.scheduled.json"
+    health_command = [
+        sys.executable,
+        str(ROOT / "scripts" / "check_windows_app_resource_health.py"),
+        "--cleanup-stale-serena",
+        "--keep-serena-roots",
+        str(args.keep_serena_roots),
+        "--duplicate-serena-grace-minutes",
+        str(args.duplicate_serena_grace_minutes),
+        "--cpu-sample-seconds",
+        str(args.resource_cpu_sample_seconds),
+        "--output-file",
+        str(health_output),
+        "--json",
+    ]
+    if args.throttle_codex_priority:
+        health_command.append("--throttle-codex-priority")
+    if args.prefer_low_power_gpu:
+        health_command.append("--prefer-low-power-gpu")
     steps = [
         run_step(
             "codex_app_state_maintenance",
@@ -115,18 +145,7 @@ def main() -> int:
         ),
         run_step(
             "windows_app_resource_health",
-            [
-                sys.executable,
-                str(ROOT / "scripts" / "check_windows_app_resource_health.py"),
-                "--cleanup-stale-serena",
-                "--throttle-codex-priority",
-                "--prefer-low-power-gpu",
-                "--cpu-sample-seconds",
-                str(args.resource_cpu_sample_seconds),
-                "--output-file",
-                str(health_output),
-                "--json",
-            ],
+            health_command,
         ),
     ]
     statuses = [str(step.get("status", "WARN")) for step in steps]
@@ -139,6 +158,10 @@ def main() -> int:
             "max_log_rows": args.max_log_rows,
             "max_session_files": args.max_session_files,
             "max_live_threads": args.max_live_threads,
+            "keep_serena_roots": args.keep_serena_roots,
+            "duplicate_serena_grace_minutes": args.duplicate_serena_grace_minutes,
+            "codex_priority_throttle_default": False,
+            "codex_low_power_gpu_default": False,
         },
         "steps": steps,
     }

@@ -225,10 +225,29 @@ class CheckUserDevEnvironmentTests(unittest.TestCase):
         self.assertEqual(self.module.inspect_execution_route({"mode_selected": "ssh-managed"})["status"], "BLOCKED")
 
     def test_toolchain_blocks_missing_required_tool(self) -> None:
-        with patch.object(self.module.shutil, "which", return_value=None):
+        with patch.object(self.module, "resolve_tool_path", return_value=None):
             report = self.module.inspect_toolchain()
         self.assertEqual(report["status"], "BLOCKED")
         self.assertEqual(report["tools"]["git"]["status"], "BLOCKED")
+
+    def test_toolchain_surface_includes_windows_native_stack(self) -> None:
+        report = self.module.inspect_toolchain()
+        for tool in (
+            "java",
+            "javac",
+            "tsc",
+            "dotenv_cli",
+            "ruff",
+            "biome",
+            "zig",
+            "zx",
+            "zod",
+            "bun",
+            "fzf",
+            "everything_cli",
+            "process_explorer",
+        ):
+            self.assertIn(tool, report["tools"])
 
     def test_explicit_output_file_does_not_refresh_default_report(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

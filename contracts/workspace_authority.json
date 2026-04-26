@@ -523,7 +523,7 @@
     "legacy_backups": "dispose_to_recycle_bin",
     "temporary_artifacts": "dispose_to_recycle_bin",
     "maintenance_archives": "durable_retention_evidence_only",
-      "legacy_hooks": "remove_now_except_approved_scorecard_user_prompt_hook",
+    "legacy_hooks": "remove_now_except_approved_scorecard_user_prompt_hook",
     "runtime_state": "preserve_as_state_not_policy",
     "repo_local_global_policy": "move_out_of_product_repo",
     "old_marker_files": "remove_or_inert_archive_only_when_forensic_context_requires_retention",
@@ -534,7 +534,7 @@
       "windows": {
         "agents": "C:\\Users\\anise\\.codex\\AGENTS.md",
         "config": "C:\\Users\\anise\\.codex\\config.toml",
-        "launcher": "C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.422.2437.0_x64__2p2nqsd0c76g0\\app\\resources\\codex.exe"
+        "launcher": "C:\\Users\\anise\\AppData\\Local\\OpenAI\\Codex\\bin\\codex.exe"
       }
     },
     "scorecard": {

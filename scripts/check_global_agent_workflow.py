@@ -283,6 +283,14 @@ def validate_policy(policy: dict[str, Any]) -> dict[str, Any]:
         blockers.append("codex_app_performance_maintenance.scheduled_interval_minutes must be 240")
     if maintenance.get("run_at_logon") is not True:
         blockers.append("codex_app_performance_maintenance.run_at_logon must be true")
+    if maintenance.get("max_serena_roots") != 1:
+        blockers.append("codex_app_performance_maintenance.max_serena_roots must be 1")
+    if maintenance.get("duplicate_serena_grace_minutes") != 10:
+        blockers.append("codex_app_performance_maintenance.duplicate_serena_grace_minutes must be 10")
+    if maintenance.get("codex_priority_throttle_default") is not False:
+        blockers.append("codex_app_performance_maintenance.codex_priority_throttle_default must be false")
+    if maintenance.get("codex_low_power_gpu_default") is not False:
+        blockers.append("codex_app_performance_maintenance.codex_low_power_gpu_default must be false")
     hook = policy.get("scorecard_runtime_hook", {})
     if hook.get("required") is not True:
         blockers.append("scorecard_runtime_hook.required must be true")

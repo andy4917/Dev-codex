@@ -200,7 +200,11 @@
     "run_at_logon": true,
     "max_log_rows": 30000,
     "max_session_files": 60,
-    "resource_health_cleanup": "cleanup_stale_serena_every_cycle"
+    "max_serena_roots": 1,
+    "duplicate_serena_grace_minutes": 10,
+    "resource_health_cleanup": "cleanup_stale_serena_every_cycle",
+    "codex_priority_throttle_default": false,
+    "codex_low_power_gpu_default": false
   },
   "scorecard_runtime_hook": {
     "required": true,

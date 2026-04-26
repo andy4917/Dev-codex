@@ -58,6 +58,10 @@ class WindowsProcessBurstTests(unittest.TestCase):
         self.assertEqual(top["parent_command_line"], "powershell.exe -File process-burst-harness.ps1")
         self.assertEqual(top["observed_child_names"], ["node.exe", "python.exe", "ssh.exe"])
 
+    def test_defaults_include_serena_uv_fanout_processes(self) -> None:
+        for name in ("serena.exe", "uv.exe", "uvx.exe"):
+            self.assertIn(name, self.module.DEFAULT_TARGET_NAMES)
+
     def test_no_fanout_passes_but_keeps_observed_groups(self) -> None:
         parent = proc(100, 1, "powershell.exe", "powershell.exe")
         samples = [

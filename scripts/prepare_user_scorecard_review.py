@@ -23,7 +23,6 @@ from _scorecard_common import (
     reviewer_verdict_dir,
     save_json,
     scorecard_context_path,
-    stable_json_hash,
     strip_signature,
     utc_timestamp,
     user_review_update_authorized,

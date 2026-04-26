@@ -99,7 +99,10 @@ def _age_minutes(proc: dict[str, Any], now: datetime) -> float | None:
 def get_windows_processes() -> list[dict[str, Any]]:
     command = (
         "$ErrorActionPreference='Stop'; "
-        "Get-CimInstance Win32_Process | "
+        "$query = 'Win32_Process'; "
+        "try { $rows = Get-CimInstance $query } "
+        "catch { $rows = Get-WmiObject $query }; "
+        "$rows | "
         "Select-Object ProcessId,ParentProcessId,Name,ExecutablePath,CommandLine,CreationDate,WorkingSetSize | "
         "ConvertTo-Json -Depth 3"
     )
@@ -510,6 +513,7 @@ def evaluate_processes(
     serena_roots_warn: int = 1,
     node_count_warn: int = 12,
     python_count_warn: int = 12,
+    serena_roots_max: int = 1,
 ) -> dict[str, Any]:
     now = now or datetime.now(timezone.utc)
     warnings: list[str] = []
@@ -540,6 +544,8 @@ def evaluate_processes(
         blockers.append("Codex App process is not running.")
     if len(serena_roots) > serena_roots_warn:
         warnings.append(f"duplicate Serena MCP roots detected: {len(serena_roots)}")
+    if len(serena_roots) > serena_roots_max:
+        blockers.append(f"Serena MCP root count exceeds maximum: {len(serena_roots)} > {serena_roots_max}")
     if stale_al:
         warnings.append(f"stale Serena AL language server processes detected: {len(stale_al)}")
     if len(node) > node_count_warn:
@@ -612,6 +618,7 @@ def evaluate_processes(
         "checked_at": now.isoformat(),
         "stale_minutes": stale_minutes,
         "keep_serena_roots": keep_serena_roots,
+        "serena_roots_max": serena_roots_max,
         "duplicate_serena_grace_minutes": duplicate_serena_grace_minutes,
         "process_counts": process_counts,
         "working_sets": working_sets,

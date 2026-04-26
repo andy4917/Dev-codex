@@ -8,9 +8,11 @@ Codex App state is a user control-plane surface, not repo authority. Dev-Managem
 - Apply: `python scripts/maintain_codex_app_state.py --apply`
 - Full cycle: `python scripts/run_codex_app_maintenance_cycle.py --json`
 - Resource-health CPU sample: the full cycle samples Codex App CPU for `3` seconds by default; set `--resource-cpu-sample-seconds 0` only when the machine is too sluggish to sample.
+- Serena MCP root ceiling: the full cycle passes `--keep-serena-roots 1 --duplicate-serena-grace-minutes 10` to the resource-health check.
 - Renderer/GPU/app-server evidence: `python scripts/check_windows_app_resource_health.py --cpu-sample-seconds 5 --json` records Codex CPU by subprocess role.
 - Git worker loop evidence: the resource-health report flags dirty tracked files whose working-tree line endings are `CRLF` or mixed even though repo attributes require `eol=lf`; this catches `safecrlf` failures that can keep Codex App review/git workers busy.
 - CPU sample unit: `codex_cpu_pct` is percent of one logical CPU; `codex_system_cpu_pct` is the system-normalized estimate using the current logical processor count.
+- Priority/GPU changes are opt-in only: `python scripts/run_codex_app_maintenance_cycle.py --throttle-codex-priority --prefer-low-power-gpu --json` is the explicit path after measured evidence justifies it.
 - Low-power GPU preference: `python scripts/check_windows_app_resource_health.py --prefer-low-power-gpu --json` sets Windows per-app graphics preference for Codex executables to Power Saving; the setting takes effect after the next Codex App launch.
 - Render cache cleanup: `python scripts/maintain_codex_app_state.py --apply --cleanup-render-cache --json` sends Codex Electron `Cache`, `Code Cache`, and `GPUCache` directories to the Recycle Bin. Use it immediately before app restart; persistent app state is not removed.
 - Low-power GPU relaunch: `pwsh scripts/restart_codex_app_graphics_mode.ps1 -Mode ForceLowPowerGpu -ClearRenderCache` restarts Codex with Electron's `--force_low_power_gpu` switch after render-cache cleanup.
@@ -33,8 +35,7 @@ Codex App state is a user control-plane surface, not repo authority. Dev-Managem
 - Optionally recycles renderer cache directories that Chromium/Electron can regenerate on next launch.
 - Sends original stale session/log/suggestion files to the Windows Recycle Bin after any required archive is written.
 - Runs stale Serena/resource-health cleanup in the recurring maintenance cycle.
-- Lowers live Codex App subprocess priority during the recurring cycle so renderer/GPU spikes yield to the rest of the workstation.
-- Sets Codex App's Windows per-app GPU preference to Power Saving during the recurring cycle; this is safer than disabling GPU rendering because disabling GPU can move rendering work onto CPU.
+- Keeps live Codex App priority and GPU preference unchanged during the recurring cycle unless the opt-in flags are passed.
 - Provides a capped rendering relaunch mode for renderer/GPU CPU incidents where the app is still usable but Chromium raster/render parallelism needs a lower ceiling.
 - Provides a reduced UI controls relaunch mode for high-DPI renderer/GPU incidents where scale and essential progress animation must remain visible, while smooth scrolling and raster parallelism can be reduced.
 - Keeps resource-health `cpu_samples`, `warnings`, and `blockers` in the cycle summary so high Codex CPU cannot be hidden behind stale-cleanup `PASS`.

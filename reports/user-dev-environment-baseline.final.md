@@ -1,7 +1,7 @@
 # User Dev Environment Baseline
 
-- Status: PASS
-- Production readiness: READY
+- Status: WARN
+- Production readiness: READY_WITH_WARNINGS
 - Canonical execution host: windows-native
 - Expected repo root prefix: C:\Users\anise\code
 
@@ -14,4 +14,4 @@
 - Keep migration evidence until the user explicitly removes migration records.
 
 ## Current Deviations
-- No current deviations detected.
+- [WARN] toolchain: optional tool is missing: syncthing

@@ -1,0 +1,14 @@
+[tool.ruff]
+line-length = 120
+extend-exclude = [
+  ".agent-runs",
+  ".serena",
+  "reports",
+]
+
+[tool.ruff.lint]
+select = ["E", "F"]
+ignore = [
+  "E402",
+  "E501",
+]

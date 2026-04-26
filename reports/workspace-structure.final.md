@@ -35,14 +35,50 @@
 ### Dev-Management (CONTRACT_AUTHORITY, detailed)
 - Path: C:\Users\anise\code\Dev-Management
 - Dev-Management/
+  - .agent-runs/
+    - 20260427-codex-app-global-cleanup-delegation/
+      - ARTIFACT_REFRESH_MANIFEST.json
+      - CLAIM_LEDGER.json
+      - COMMAND_LOG.jsonl
+      - CONVENTION_LOCK.json
+      - CROSS_VERIFICATION.json
+      - DELEGATION_DECISION.json
+      - DELEGATION_LEDGER.json
+      - DELEGATION_PLAN.json
+      - EVIDENCE_MANIFEST.json
+      - EXTERNAL_RESEARCH.json
+      - gate_receipt.json
+      - INTEGRATION_DECISION_LOG.json
+      - MISSION_CLOSEOUT.json
+      - MISSION_FRAME.json
+      - PLAN.json
+      - REPEATED_VERIFY.json
+      - REPLAY.md
+      - SLOP_LEDGER.json
+      - SUBAGENT_RESULTS.json
+      - SUBAGENT_TASKS.json
+      - SUMMARY_COVERAGE.json
+      - TASK_TREE.json
+      - TASTE_GATE.json
+      - WAIVERS.json
+      - WORKORDER.json
+    - 20260427-report-output-cleanup-hardening/
+      - DELEGATION_DECISION.json
+      - EVIDENCE_MANIFEST.json
+      - SLOP_LEDGER.json
+      - WORKORDER.json
   - .patch-links/
     - regression_app_v2_no_legacy_refs.mjs
   - .serena/
     - cache/
-      - al/
       - python/
+    - logs/
+      - health-checks/
     - memories/
-      - children: 0 dirs, 0 files, 0 skipped
+      - project_overview.md
+      - style_and_conventions.md
+      - suggested_commands.md
+      - task_closeout.md
     - .gitignore
     - project.local.yml
     - project.yml
@@ -69,18 +105,22 @@
   - devmgmt_runtime/
     - __init__.py
     - authority.py
+    - codex_app_maintenance.py
     - path_authority.py
     - paths.py
     - redaction.py
     - reference_graph.py
     - reports.py
     - retention.py
+    - scorecard_hook.py
     - status.py
     - subprocess_safe.py
+    - trash.py
     - windows_policy.py
   - docs/
     - AGENT_GUARDRAILS.md
     - AI_TOOLCHAIN_USAGE.md
+    - CODEX_APP_MAINTENANCE.md
     - CODEX_APP_USER_SETUP.md
     - CONTEXT7_USAGE.md
     - GLOBAL_AGENT_WORKFLOW.md
@@ -91,6 +131,8 @@
     - SERENA_USAGE.md
     - USER_DEV_ENVIRONMENT_BASELINE.md
     - USER_SCORECARD.md
+    - WINDOWS_NATIVE_DOMAIN_KNOWLEDGE.md
+    - WINDOWS_NATIVE_TOOLCHAIN.md
   - quarantine/
     - 2026-04-16/
       - preexisting-dev-management-agent/
@@ -109,21 +151,34 @@
       - children: 0 dirs, 0 files, 0 skipped
     - migration-evidence/
       - 20260425-windows-native-transition/
+    - acceptance-report.json
+    - ai-slop.final.json
     - artifact-hygiene.final.md
+    - codex-global-config-cleanup.final.json
+    - codex-global-config-cleanup.final.md
     - config-provenance.final.json
     - config-provenance.final.md
+    - domain-mission-refresh.final.json
     - global-agent-workflow.final.json
     - global-agent-workflow.final.md
     - hook-readiness.final.md
+    - reviewer-verdict-cleanup.final.json
+    - score-layer.final.json
     - score-layer.final.md
+    - scorecard-authority-audit.json
     - toolchain-surface.final.md
+    - traceability-report.json
     - user-dev-environment-baseline.final.json
     - user-dev-environment-baseline.final.md
+    - user-readiness.json
     - user-scorecard.json
     - user-scorecard.review.json
     - windows-app-local-readiness.final.json
     - windows-app-resource-health.final.json
-    - windows-process-burst.baseline.json
+    - windows-app-resource-health.normal-defaultpref.json
+    - windows-app-resource-health.priority-1-BelowNormal.json
+    - windows-app-resource-health.priority-2-Normal.json
+    - windows-app-resource-health.priority-3-BelowNormal.json
     - windows-process-burst.final.json
     - workspace-dependency-surface.json
     - workspace-structure.final.json
@@ -135,6 +190,7 @@
     - check_disqualifiers.py
     - check_domain_mission_refresh.py
     - check_global_agent_workflow.py
+    - check_serena_dashboard_repro.py
     - check_user_dev_environment.py
     - check_windows_app_local_readiness.py
     - check_windows_app_resource_health.py
@@ -146,15 +202,23 @@
     - generate_reference_graph.py
     - generate_retention_manifest.py
     - iaw_closeout.py
+    - install_codex_app_maintenance_task.ps1
+    - install_scorecard_runtime_hook.py
+    - maintain_codex_app_state.py
     - merge_reviewer_penalties.py
     - prepare_user_scorecard_review.py
     - record_reviewer_verdict.py
+    - restart_codex_app_graphics_mode.ps1
+    - run_codex_app_maintenance_cycle.py
+    - run_codex_app_maintenance_scheduled.ps1
     - scorecard_runtime_hook.py
   - tests/
     - test_check_ai_slop.py
     - test_check_config_provenance.py
     - test_check_domain_mission_refresh.py
     - test_check_user_dev_environment.py
+    - test_codex_app_maintenance.py
+    - test_codex_app_maintenance_cycle.py
     - test_compute_user_scorecard_v12.py
     - test_delivery_gate.py
     - test_devmgmt_runtime_helpers.py
@@ -167,16 +231,21 @@
     - test_reference_graph.py
     - test_retention_manifest.py
     - test_scorecard_runtime_hook.py
+    - test_serena_dashboard_repro.py
     - test_subprocess_safe.py
     - test_user_dev_environment_policy.py
     - test_windows_app_local_readiness.py
     - test_windows_app_resource_health.py
     - test_windows_process_burst.py
     - test_workspace_structure.py
+  - .env
   - .env.example
   - .envrc
   - .gitattributes
   - .gitignore
+  - biome.json
+  - pyproject.toml
+  - SUMMARY.md
 
 ### Dev-Workflow (SDK, detailed)
 - Path: C:\Users\anise\code\Dev-Workflow
@@ -264,6 +333,7 @@
     - bootstrap-report.json
     - context7-usage.json
     - delivery-gate.json
+    - execution-surface-reconciliation-closeout.md
     - execution-surfaces.json
     - frontend-design-md-adoption.json
     - inventory.summary.json
@@ -286,6 +356,7 @@
       - check_contract_surfaces.py
     - lib/
       - atomicWriteJsonFile.mjs
+      - surfaces.py
       - windowsShellLauncher.mjs
       - workspace_alignment.py
     - workspace_alignment/
@@ -698,6 +769,18 @@
 ### .scratch/Dev-Management (SCRATCH_HARNESS, detailed)
 - Path: C:\Users\anise\code\.scratch\Dev-Management
 - Dev-Management/
+  - 20260427-report-output-cleanup-hardening/
+    - ai-slop-final.json
+    - ai-slop.json
+    - codex-app-maintenance.json
+    - codex-app-maintenance.md
+    - config-provenance.json
+    - config-provenance.md
+    - global-agent-workflow.json
+    - global-agent-workflow.md
+    - user-dev-environment.json
+    - user-dev-environment.md
+    - windows-app-resource-health.json
   - anti-slop-nonassertive-pass/
     - .agent-runs/
       - run-nonassertive/
@@ -710,6 +793,18 @@
     - harness.mjs
   - checkin-checkout-extension-skeleton/
     - harness.mjs
+  - cleanup-iteration-20260427/
+    - config-provenance.json
+    - config-provenance.md
+    - global-agent-workflow.json
+    - global-agent-workflow.md
+    - user-dev-environment-after-patch.json
+    - user-dev-environment-after-patch.md
+    - user-dev-environment-after-testfix.json
+    - user-dev-environment-after-testfix.md
+    - user-dev-environment.json
+    - user-dev-environment.md
+    - windows-app-resource-health.json
   - mission-refresh-e2e/
     - .agent-runs/
       - run-e2e/
@@ -742,6 +837,8 @@
     - SUMMARY.md
   - path-visibility-stale-hints/
     - codex-global-state.before.json
+  - recycle-bin-harness/
+    - children: 0 dirs, 0 files, 0 skipped
   - runs/
     - apply-touched-code-runtime-rule/
       - snapshot/
@@ -760,7 +857,39 @@
     - windows-native-cutover-harness.json
     - windows-native-cutover-harness.py
     - workspace-tree-runtime-harness.py
+  - serena-dashboard-repro/
+    - children: 0 dirs, 0 files, 0 skipped
   - check_user_dev_environment_scratch_surface_harness.py
+  - codex-analytics-optout-health.stdout.json
+  - codex-analytics-optout-restart.json
+  - codex-analytics-optout.err.txt
+  - codex-app-eol-normalization.json
+  - codex-app-maintenance-cycle-low-power.json
+  - codex-capped-rendering-followup.stdout.json
+  - codex-capped-rendering-health.stdout.json
+  - codex-capped-rendering-restart.json
+  - codex-capped-rendering.err.txt
+  - codex-force-low-power-health.stdout.json
+  - codex-force-low-power-restart.json
+  - codex-force-low-power.err.txt
+  - codex-reduced-ui-controls-health.stdout.json
+  - codex-reduced-ui-controls-motion-visible-health.stdout.json
+  - codex-reduced-ui-controls-motion-visible-restart.json
+  - codex-reduced-ui-controls-motion-visible.err.txt
+  - codex-reduced-ui-controls-restart.json
+  - codex-reduced-ui-controls.err.txt
+  - codex-reduced-ui-scale-125-health.stdout.json
+  - codex-reduced-ui-scale-125-restart.json
+  - codex-reduced-ui-scale-125.err.txt
+  - codex-reduced-ui-scale-150-health.stdout.json
+  - codex-reduced-ui-scale-150-restart.json
+  - codex-reduced-ui-scale-150.err.txt
+  - codex-render-cache-clean-fixed-health.stdout.json
+  - codex-render-cache-clean-fixed.err.txt
+  - codex-render-cache-clean-health.stdout.json
+  - codex-render-cache-clean-restart-fixed.json
+  - codex-render-cache-clean-restart.json
+  - codex-render-cache-clean.err.txt
   - domain-mission-refresh-l1-smoke.json
   - process-burst-harness.ps1
   - run-touched-behavior.ps1
@@ -785,25 +914,13 @@
   - ambient-suggestions/
     - 116dfebc3147f1b0ac90c5691bb9bb078d321c5c/
       - children: 0 dirs, 1 files, 0 skipped
-    - 34fa0807c002f83ae71cf8a4d432d97eab639dfb/
-      - children: 0 dirs, 1 files, 0 skipped
     - 435005d653dcfe1c012e5ac25111784f9933db38/
-      - children: 0 dirs, 1 files, 0 skipped
-    - 4d40bf7fb587b4b285cff2584cde51bddcd9be67/
       - children: 0 dirs, 1 files, 0 skipped
     - 50403a3c1b65d06adcac0ae6b8383752a2f63ab0/
       - children: 0 dirs, 1 files, 0 skipped
-    - 714cd35935d54957aab31930f7639d39cbafa252/
-      - children: 0 dirs, 1 files, 0 skipped
     - 747c0080b811df4dfa6cc07fb106a7e785233d81/
       - children: 0 dirs, 1 files, 0 skipped
-    - 788735442fa72440257d128d8fcca99f0803a8e0/
-      - children: 0 dirs, 1 files, 0 skipped
-    - 79ea914c687bc0ac2acf073f9691453089807f51/
-      - children: 0 dirs, 1 files, 0 skipped
     - 890bc1b675cd96012a9cdb8ca9a81cd68379f0d9/
-      - children: 0 dirs, 1 files, 0 skipped
-    - a5da0ca0ad0db383df09148f767510b4ad2467a6/
       - children: 0 dirs, 1 files, 0 skipped
     - e233f4283db360c131dc861395f498cd0a8562e3/
       - children: 0 dirs, 1 files, 0 skipped
@@ -826,14 +943,50 @@
     - children: 0 dirs, 0 files, 0 skipped
   - local-environments/
     - children: 0 dirs, 2 files, 0 skipped
+  - maintenance-archives/
+    - 20260426-105224/
+      - ambient-suggestions/
+    - 20260426-113448/
+      - ambient-suggestions/
+    - 20260426-115522/
+      - children: 0 dirs, 2 files, 0 skipped
+    - 20260426-121005/
+      - children: 0 dirs, 3 files, 0 skipped
+    - 20260426-122346/
+      - children: 0 dirs, 2 files, 0 skipped
+    - 20260426-141341/
+      - children: 0 dirs, 3 files, 0 skipped
+    - 20260426-142402/
+      - children: 0 dirs, 2 files, 0 skipped
+    - 20260426-144139/
+      - children: 0 dirs, 2 files, 0 skipped
+    - 20260426-145159/
+      - children: 0 dirs, 1 files, 0 skipped
+    - 20260426-152229/
+      - children: 0 dirs, 1 files, 0 skipped
+    - 20260426-153037/
+      - children: 0 dirs, 1 files, 0 skipped
+    - 20260426-153510/
+      - children: 0 dirs, 1 files, 0 skipped
+    - 20260426-155550/
+      - children: 0 dirs, 1 files, 0 skipped
+    - 20260426-155903/
+      - children: 0 dirs, 1 files, 0 skipped
+    - 20260426-160216/
+      - children: 0 dirs, 1 files, 0 skipped
+    - 20260426-161637/
+      - children: 0 dirs, 2 files, 0 skipped
+    - 20260426-173331/
+      - children: 0 dirs, 3 files, 0 skipped
   - memories/
     - .serena/
       - memories/
     - rollout_summaries/
-      - children: 0 dirs, 46 files, 0 skipped
+      - children: 0 dirs, 52 files, 0 skipped
     - skills/
       - dev-management-app-readiness/
       - dev-management-user-environment-closeout/
+      - dev-workflow-gate-reporting/
   - plugins/
     - cache/
       - openai-bundled/
@@ -843,7 +996,7 @@
     - 2026/
       - 04/
   - shell_snapshots/
-    - children: 0 dirs, 6 files, 0 skipped
+    - children: 0 dirs, 0 files, 0 skipped
   - skills/
     - .system/
       - imagegen/
@@ -856,15 +1009,34 @@
   - state/
     - iaw/
       - gate-receipts/
+      - locks/
+    - reviewer-verdicts/
+      - Dev-Management/
     - scorecard-context/
+      - c90c42fd-f419-4bdf-b71c-2202413700d1/
       - Dev-Management/
       - Dev-Workflow/
+      - dw-fallback-38a84d18747645c9aab7ccb5ae50a31c/
       - reservation-system/
+      - tmp15pdt3rb/
+      - tmp2o14z103/
+      - tmp8or78zl8/
+      - tmpdcria6ky/
+      - tmpdj63jqwj/
+      - tmpevfpzqf9/
+      - tmpi04hbd_q/
+      - tmpkuxy0naz/
+      - tmpmx7mrhan/
+      - tmpo7yrjfz8/
+      - tmpqjltai26/
+      - tmpyi_4tadn/
+    - scorecard-hook/
+      - children: 0 dirs, 1 files, 0 skipped
     - workspace-authority/
-      - children: 0 dirs, 0 files, 0 skipped
+      - children: 0 dirs, 1 files, 0 skipped
   - tmp/
     - arg0/
-      - codex-arg0hdafo2/
+      - codex-arg0dLN7gf/
   - vendor_imports/
     - skills/
       - skills/

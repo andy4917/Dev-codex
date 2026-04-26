@@ -104,7 +104,10 @@ def read_serena_global_config(path: Path = SERENA_CONFIG_PATH) -> dict[str, Any]
 def get_windows_processes() -> list[dict[str, Any]]:
     command = (
         "$ErrorActionPreference='Stop'; "
-        "Get-CimInstance Win32_Process | "
+        "$query = 'Win32_Process'; "
+        "try { $rows = Get-CimInstance $query } "
+        "catch { $rows = Get-WmiObject $query }; "
+        "$rows | "
         "Where-Object { $_.Name -match '^(serena|python|python3\\.13|codex|Codex)\\.exe$' } | "
         "Select-Object ProcessId,ParentProcessId,Name,CommandLine,CreationDate,WorkingSetSize | "
         "ConvertTo-Json -Depth 3"
@@ -342,7 +345,7 @@ def build_report(*, run_probe: bool = False, log_limit: int = 12) -> dict[str, A
         },
         "serena_mcp_evidence": {
             "project_activation": "current session activated Dev-Management",
-            "onboarding": "check_onboarding_performed reported no onboarding, and the current exposed tool namespace did not provide an onboarding callable.",
+            "onboarding": "onboarding is callable when the Serena tool namespace is surfaced; check_onboarding_performed can still report no saved onboarding until write_memory completes.",
         },
     }
     if run_probe:

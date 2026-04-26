@@ -6,11 +6,35 @@
       "pwsh",
       "python",
       "node",
-      "npm"
+      "npm",
+      "scoop",
+      "java",
+      "javac",
+      "tsc",
+      "dotenv_cli",
+      "ruff",
+      "biome",
+      "zig"
     ],
     "optional_tools": [
       "corepack",
       "pnpm",
+      "bun",
+      "deno",
+      "tsx",
+      "zx",
+      "zod",
+      "npkill",
+      "fzf",
+      "autohotkey",
+      "wiztree64",
+      "everything",
+      "everything_cli",
+      "process_explorer",
+      "powertoys",
+      "micromamba",
+      "maven",
+      "gradle",
       "syncthing",
       "winget",
       "choco",
@@ -31,7 +55,25 @@
       "node",
       "npm",
       "corepack",
-      "winget"
+      "pnpm",
+      "winget",
+      "scoop",
+      "java",
+      "javac",
+      "maven",
+      "gradle",
+      "bun",
+      "deno",
+      "tsc",
+      "tsx",
+      "dotenv_cli",
+      "ruff",
+      "biome",
+      "zig",
+      "zx",
+      "npkill",
+      "fzf",
+      "everything_cli"
     ],
     "candidate_paths": {
       "git": [
@@ -79,6 +121,81 @@
       ],
       "scoop": [
         "%USERPROFILE%\\scoop\\shims\\scoop.cmd"
+      ],
+      "java": [
+        "%USERPROFILE%\\scoop\\apps\\temurin21-jdk\\current\\bin\\java.exe"
+      ],
+      "javac": [
+        "%USERPROFILE%\\scoop\\apps\\temurin21-jdk\\current\\bin\\javac.exe"
+      ],
+      "maven": [
+        "%USERPROFILE%\\scoop\\apps\\maven\\current\\bin\\mvn.cmd"
+      ],
+      "gradle": [
+        "%USERPROFILE%\\scoop\\shims\\gradle.cmd"
+      ],
+      "bun": [
+        "%USERPROFILE%\\scoop\\shims\\bun.exe",
+        "%USERPROFILE%\\scoop\\persist\\bun\\bin\\bun.exe"
+      ],
+      "deno": [
+        "%USERPROFILE%\\scoop\\shims\\deno.exe"
+      ],
+      "tsc": [
+        "%APPDATA%\\npm\\tsc.cmd"
+      ],
+      "tsx": [
+        "%APPDATA%\\npm\\tsx.cmd"
+      ],
+      "pnpm": [
+        "%APPDATA%\\npm\\pnpm.cmd"
+      ],
+      "dotenv_cli": [
+        "%APPDATA%\\npm\\dotenv.cmd"
+      ],
+      "ruff": [
+        "%USERPROFILE%\\.local\\bin\\ruff.exe",
+        "%APPDATA%\\Python\\Python314\\Scripts\\ruff.exe"
+      ],
+      "biome": [
+        "%APPDATA%\\npm\\biome.cmd"
+      ],
+      "zig": [
+        "%USERPROFILE%\\scoop\\shims\\zig.exe"
+      ],
+      "zx": [
+        "%APPDATA%\\npm\\zx.cmd"
+      ],
+      "zod": [
+        "%APPDATA%\\npm\\node_modules\\zod\\package.json"
+      ],
+      "npkill": [
+        "%APPDATA%\\npm\\npkill.cmd"
+      ],
+      "fzf": [
+        "%USERPROFILE%\\scoop\\shims\\fzf.exe"
+      ],
+      "autohotkey": [
+        "%USERPROFILE%\\scoop\\shims\\autohotkey.exe"
+      ],
+      "wiztree64": [
+        "%USERPROFILE%\\scoop\\shims\\wiztree64.exe"
+      ],
+      "everything": [
+        "%USERPROFILE%\\scoop\\shims\\everything.exe"
+      ],
+      "everything_cli": [
+        "%USERPROFILE%\\scoop\\shims\\es.exe"
+      ],
+      "process_explorer": [
+        "%USERPROFILE%\\scoop\\shims\\procexp.exe",
+        "%USERPROFILE%\\scoop\\shims\\procexp64.exe"
+      ],
+      "powertoys": [
+        "%LOCALAPPDATA%\\PowerToys\\PowerToys.exe"
+      ],
+      "micromamba": [
+        "%LOCALAPPDATA%\\Microsoft\\WinGet\\Links\\micromamba.exe"
       ],
       "syncthing": [
         "%LOCALAPPDATA%\\Syncthing\\syncthing.exe"
@@ -165,6 +282,38 @@
       "distribution": "mcp",
       "role": "Python MCP client/server integration support"
     }
+  },
+  "active_coding_references": {
+    "typescript_runtime_schema": "zod",
+    "javascript_shell_scripting": "zx_by_google",
+    "python_shell_parsing": "stdlib_shlex",
+    "javascript_style": "airbnb_javascript_style_guide",
+    "python_style": "google_python_style_guide",
+    "refactoring_patterns": "refactoring_guru",
+    "implementation_idioms": "30_seconds_of_code",
+    "external_code_review_reference": "greptile_when_available"
+  },
+  "code_guardrails": {
+    "python": [
+      "ruff check ."
+    ],
+    "javascript_typescript": [
+      "biome check ."
+    ],
+    "zig": [
+      "zig fmt --check <zig-files>",
+      "zig build test"
+    ],
+    "guardrail_order": "repo_owned_scripts_first_then_global_fallbacks"
+  },
+  "windows_native_domain_knowledge": {
+    "document": "docs/WINDOWS_NATIVE_DOMAIN_KNOWLEDGE.md",
+    "topics": [
+      "powershell_7_core_api_aliases_and_objects",
+      "unc_paths_and_long_paths",
+      "win32_api_and_registry_paths",
+      "execution_policy"
+    ]
   },
   "marketplace_artifacts": {
     "skills": [

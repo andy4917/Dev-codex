@@ -2,6 +2,12 @@
 
 This document fixes the Windows-only toolchain roles for governed Codex work.
 
+Detailed Windows-native runtime/tool adoption is recorded in:
+
+```text
+C:\Users\anise\code\Dev-Management\docs\WINDOWS_NATIVE_TOOLCHAIN.md
+```
+
 ## Runtime Roles
 
 - Codex App and Codex CLI are external OpenAI products. Use them as installed; do not fork, wrap, or treat local config as product source code.
@@ -82,6 +88,12 @@ apps, memories, plugins, tool_search, tool_suggest, tool_call_mcp_elicitation
 The intended steady state is:
 
 - Python packages installed in the active Windows Python environment.
+- Java, JavaScript, TypeScript, and Python development tools installed on the Windows-native control plane.
+- Zod, zx, Python `shlex`, ruff, Biome, and Zig are part of the active global coding/toolchain baseline.
+- Airbnb JavaScript Style Guide, Google Python Style Guide, Refactoring.Guru, 30 seconds of code, and Greptile are recorded as coding/review references, subordinate to repo contracts and tests.
+- `.env.example` tracked as the repo-local variable contract, with local `.env` ignored by Git and loaded through npm `dotenv-cli`.
+- Scoop shims, Java, Maven, Bun, npm globals, winget links, and Python script paths made visible in the PowerShell profile PATH.
+- Everything HTTP enabled on `127.0.0.1:8088` with file downloads disabled and `C:\Users\anise\code` folder-indexed.
 - `C:\Users\anise\AppData\Roaming\Python\Python314\Scripts` present in the PowerShell profile PATH.
 - Marketplace skill installed under `C:\Users\anise\.agents\skills`.
 - No active marketplace hooks under `C:\Users\anise\.codex\hooks`.

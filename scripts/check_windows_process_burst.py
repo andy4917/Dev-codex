@@ -21,7 +21,7 @@ from devmgmt_runtime.status import status_exit_code
 
 
 DEFAULT_OUTPUT_PATH = ROOT / "reports" / "windows-process-burst.final.json"
-DEFAULT_TARGET_NAMES = ("python.exe", "python3.13.exe", "node.exe", "ssh.exe")
+DEFAULT_TARGET_NAMES = ("python.exe", "python3.13.exe", "node.exe", "ssh.exe", "uv.exe", "uvx.exe", "serena.exe")
 
 
 def _utc_now() -> str:
@@ -55,7 +55,10 @@ def _working_set_mb(proc: dict[str, Any]) -> float:
 def get_windows_processes() -> list[dict[str, Any]]:
     command = (
         "$ErrorActionPreference='Stop'; "
-        "Get-CimInstance -ClassName Win32_Process | "
+        "$query = 'Win32_Process'; "
+        "try { $rows = Get-CimInstance -ClassName $query } "
+        "catch { $rows = Get-WmiObject -Class $query }; "
+        "$rows | "
         "Select-Object ProcessId,ParentProcessId,Name,CommandLine,CreationDate,WorkingSetSize | "
         "ConvertTo-Json -Depth 3"
     )

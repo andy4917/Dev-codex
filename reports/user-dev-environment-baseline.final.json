@@ -1,6 +1,6 @@
 {
-  "status": "PASS",
-  "checked_at": "2026-04-26T17:27:56.685681+00:00",
+  "status": "WARN",
+  "checked_at": "2026-04-26T19:12:15.183599+00:00",
   "policy_version": 7,
   "environment": {
     "repo_root": "C:\\Users\\anise\\code\\Dev-Management",
@@ -349,55 +349,258 @@
       "reasons": []
     },
     "toolchain": {
-      "status": "PASS",
+      "status": "WARN",
       "tools": {
         "git": {
+          "command": "git",
           "path": "C:\\Program Files\\Git\\cmd\\git.EXE",
           "status": "PASS",
           "required": true
         },
+        "pwsh": {
+          "command": "pwsh",
+          "path": "C:\\Program Files\\WindowsApps\\Microsoft.PowerShell_7.6.1.0_x64__8wekyb3d8bbwe\\pwsh.EXE",
+          "status": "PASS",
+          "required": true
+        },
         "python": {
+          "command": "python",
           "path": "C:\\Python314\\python.EXE",
           "status": "PASS",
           "required": true
         },
         "node": {
+          "command": "node",
           "path": "C:\\Program Files\\nodejs\\node.EXE",
           "status": "PASS",
           "required": true
         },
         "npm": {
+          "command": "npm",
           "path": "C:\\Program Files\\nodejs\\npm.CMD",
           "status": "PASS",
           "required": true
         },
-        "pwsh": {
-          "path": "C:\\Program Files\\WindowsApps\\Microsoft.PowerShell_7.6.1.0_x64__8wekyb3d8bbwe\\pwsh.EXE",
+        "scoop": {
+          "command": "scoop",
+          "path": "C:\\Users\\anise\\scoop\\shims\\scoop.CMD",
           "status": "PASS",
           "required": true
         },
+        "java": {
+          "command": "java",
+          "path": "C:\\Users\\anise\\scoop\\apps\\temurin21-jdk\\current\\bin\\java.EXE",
+          "status": "PASS",
+          "required": true
+        },
+        "javac": {
+          "command": "javac",
+          "path": "C:\\Users\\anise\\scoop\\apps\\temurin21-jdk\\current\\bin\\javac.EXE",
+          "status": "PASS",
+          "required": true
+        },
+        "tsc": {
+          "command": "tsc",
+          "path": "C:\\Users\\anise\\AppData\\Roaming\\npm\\tsc.CMD",
+          "status": "PASS",
+          "required": true
+        },
+        "dotenv_cli": {
+          "command": "dotenv",
+          "path": "C:\\Users\\anise\\AppData\\Roaming\\npm\\dotenv.cmd",
+          "status": "PASS",
+          "required": true
+        },
+        "ruff": {
+          "command": "ruff",
+          "path": "C:\\Users\\anise\\.local\\bin\\ruff.EXE",
+          "status": "PASS",
+          "required": true
+        },
+        "biome": {
+          "command": "biome",
+          "path": "C:\\Users\\anise\\AppData\\Roaming\\npm\\biome.CMD",
+          "status": "PASS",
+          "required": true
+        },
+        "zig": {
+          "command": "zig",
+          "path": "C:\\Users\\anise\\scoop\\shims\\zig.EXE",
+          "status": "PASS",
+          "required": true
+        },
+        "corepack": {
+          "command": "corepack",
+          "path": "C:\\Program Files\\nodejs\\corepack.CMD",
+          "status": "PASS",
+          "required": false
+        },
+        "pnpm": {
+          "command": "pnpm",
+          "path": "C:\\Users\\anise\\AppData\\Roaming\\npm\\pnpm.CMD",
+          "status": "PASS",
+          "required": false
+        },
+        "bun": {
+          "command": "bun",
+          "path": "C:\\Users\\anise\\scoop\\shims\\bun.EXE",
+          "status": "PASS",
+          "required": false
+        },
+        "deno": {
+          "command": "deno",
+          "path": "C:\\Users\\anise\\scoop\\shims\\deno.EXE",
+          "status": "PASS",
+          "required": false
+        },
+        "tsx": {
+          "command": "tsx",
+          "path": "C:\\Users\\anise\\AppData\\Roaming\\npm\\tsx.CMD",
+          "status": "PASS",
+          "required": false
+        },
+        "zx": {
+          "command": "zx",
+          "path": "C:\\Users\\anise\\AppData\\Roaming\\npm\\zx.CMD",
+          "status": "PASS",
+          "required": false
+        },
+        "zod": {
+          "command": "zod",
+          "path": "C:\\Users\\anise\\AppData\\Roaming\\npm\\node_modules\\zod\\package.json",
+          "status": "PASS",
+          "required": false
+        },
+        "npkill": {
+          "command": "npkill",
+          "path": "C:\\Users\\anise\\AppData\\Roaming\\npm\\npkill.CMD",
+          "status": "PASS",
+          "required": false
+        },
+        "fzf": {
+          "command": "fzf",
+          "path": "C:\\Users\\anise\\scoop\\shims\\fzf.EXE",
+          "status": "PASS",
+          "required": false
+        },
+        "autohotkey": {
+          "command": "autohotkey",
+          "path": "C:\\Users\\anise\\scoop\\shims\\autohotkey.EXE",
+          "status": "PASS",
+          "required": false
+        },
+        "wiztree64": {
+          "command": "wiztree64",
+          "path": "C:\\Users\\anise\\scoop\\shims\\wiztree64.EXE",
+          "status": "PASS",
+          "required": false
+        },
+        "everything": {
+          "command": "everything",
+          "path": "C:\\Users\\anise\\scoop\\shims\\everything.EXE",
+          "status": "PASS",
+          "required": false
+        },
+        "everything_cli": {
+          "command": "es",
+          "path": "C:\\Users\\anise\\scoop\\shims\\es.EXE",
+          "status": "PASS",
+          "required": false
+        },
+        "process_explorer": {
+          "command": "procexp",
+          "path": "C:\\Users\\anise\\scoop\\shims\\procexp.EXE",
+          "status": "PASS",
+          "required": false
+        },
+        "powertoys": {
+          "command": "PowerToys",
+          "path": "C:\\Users\\anise\\AppData\\Local\\PowerToys\\PowerToys.exe",
+          "status": "PASS",
+          "required": false
+        },
+        "micromamba": {
+          "command": "micromamba",
+          "path": "C:\\Users\\anise\\AppData\\Local\\Microsoft\\WinGet\\Links\\micromamba.EXE",
+          "status": "PASS",
+          "required": false
+        },
+        "maven": {
+          "command": "mvn",
+          "path": "C:\\Users\\anise\\scoop\\apps\\maven\\current\\bin\\mvn.CMD",
+          "status": "PASS",
+          "required": false
+        },
+        "gradle": {
+          "command": "gradle",
+          "path": "C:\\Users\\anise\\scoop\\shims\\gradle.CMD",
+          "status": "PASS",
+          "required": false
+        },
+        "vs_build_tools": {
+          "command": "vswhere",
+          "path": "C:\\Program Files (x86)\\Microsoft Visual Studio\\Installer\\vswhere.exe",
+          "status": "PASS",
+          "required": false
+        },
+        "winget": {
+          "command": "winget",
+          "path": "C:\\Users\\anise\\AppData\\Local\\Microsoft\\WindowsApps\\winget.EXE",
+          "status": "PASS",
+          "required": false
+        },
+        "choco": {
+          "command": "choco",
+          "path": "C:\\ProgramData\\chocolatey\\bin\\choco.EXE",
+          "status": "PASS",
+          "required": false
+        },
+        "7zip": {
+          "command": "7z",
+          "path": "C:\\Program Files\\7-Zip\\7z.EXE",
+          "status": "PASS",
+          "required": false
+        },
         "docker": {
+          "command": "docker",
           "path": "C:\\Program Files\\Docker\\Docker\\resources\\bin\\docker.EXE",
           "status": "PASS",
           "required": false
         },
         "dotnet": {
+          "command": "dotnet",
           "path": "C:\\Program Files\\dotnet\\dotnet.EXE",
           "status": "PASS",
           "required": false
         },
+        "gh": {
+          "command": "gh",
+          "path": "C:\\Program Files\\GitHub CLI\\gh.EXE",
+          "status": "PASS",
+          "required": false
+        },
         "uv": {
+          "command": "uv",
           "path": "C:\\Users\\anise\\AppData\\Local\\Microsoft\\WinGet\\Links\\uv.EXE",
           "status": "PASS",
           "required": false
         },
-        "gh": {
-          "path": "C:\\Program Files\\GitHub CLI\\gh.EXE",
+        "pipx": {
+          "command": "pipx",
+          "path": "c:\\users\\anise\\appdata\\local\\packages\\openai.codex_2p2nqsd0c76g0\\localcache\\roaming\\python\\python314\\scripts\\pipx.EXE",
           "status": "PASS",
+          "required": false
+        },
+        "syncthing": {
+          "command": "syncthing",
+          "path": "",
+          "status": "WARN",
           "required": false
         }
       },
-      "reasons": []
+      "reasons": [
+        "optional tool is missing: syncthing"
+      ]
     },
     "ai_python_packages": {
       "status": "PASS",
@@ -458,45 +661,45 @@
         "DEV_WORKFLOW_ROOT": "C:\\Users\\anise\\code\\Dev-Workflow",
         "DEV_PRODUCT_ROOT": "C:\\Users\\anise\\code\\Dev-Product",
         "CANONICAL_EXECUTION_HOST": "windows-native",
-        "CODEX_CLI_BIN": "C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.422.2437.0_x64__2p2nqsd0c76g0\\app\\resources\\codex.exe",
+        "CODEX_CLI_BIN": "C:\\Users\\anise\\AppData\\Local\\OpenAI\\Codex\\bin\\codex.exe",
         "CODEX_HOME": "C:\\Users\\anise\\.codex"
       },
       "findings": [
         {
           "env_var": "DEVMGMT_ROOT",
-          "status": "ABSENT",
+          "status": "MATCH",
           "expected": "C:\\Users\\anise\\code\\Dev-Management",
-          "actual": ""
+          "actual": "C:\\Users\\anise\\code\\Dev-Management"
         },
         {
           "env_var": "DEV_WORKFLOW_ROOT",
-          "status": "ABSENT",
+          "status": "MATCH",
           "expected": "C:\\Users\\anise\\code\\Dev-Workflow",
-          "actual": ""
+          "actual": "C:\\Users\\anise\\code\\Dev-Workflow"
         },
         {
           "env_var": "DEV_PRODUCT_ROOT",
-          "status": "ABSENT",
+          "status": "MATCH",
           "expected": "C:\\Users\\anise\\code\\Dev-Product",
-          "actual": ""
+          "actual": "C:\\Users\\anise\\code\\Dev-Product"
         },
         {
           "env_var": "CANONICAL_EXECUTION_HOST",
-          "status": "ABSENT",
+          "status": "MATCH",
           "expected": "windows-native",
-          "actual": ""
+          "actual": "windows-native"
         },
         {
           "env_var": "CODEX_CLI_BIN",
-          "status": "ABSENT",
-          "expected": "C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.422.2437.0_x64__2p2nqsd0c76g0\\app\\resources\\codex.exe",
-          "actual": ""
+          "status": "MATCH",
+          "expected": "C:\\Users\\anise\\AppData\\Local\\OpenAI\\Codex\\bin\\codex.exe",
+          "actual": "C:\\Users\\anise\\AppData\\Local\\OpenAI\\Codex\\bin\\codex.exe"
         },
         {
           "env_var": "CODEX_HOME",
-          "status": "ABSENT",
+          "status": "MATCH",
           "expected": "C:\\Users\\anise\\.codex",
-          "actual": ""
+          "actual": "C:\\Users\\anise\\.codex"
         }
       ],
       "reasons": []
@@ -522,9 +725,17 @@
     "Treat Docker as optional build/verification/packaging/integration support, not canonical local execution.",
     "Keep migration evidence until the user explicitly removes migration records."
   ],
-  "current_deviations": [],
+  "current_deviations": [
+    {
+      "check": "toolchain",
+      "status": "WARN",
+      "reasons": [
+        "optional tool is missing: syncthing"
+      ]
+    }
+  ],
   "production_readiness": {
-    "status": "READY",
-    "summary": "Windows-native development environment baseline is ready."
+    "status": "READY_WITH_WARNINGS",
+    "summary": "optional tool is missing: syncthing"
   }
 }
