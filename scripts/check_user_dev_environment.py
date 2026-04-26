@@ -20,7 +20,7 @@ if str(ROOT) not in sys.path:
 
 from check_windows_app_local_readiness import evaluate_windows_app_local_readiness
 from devmgmt_runtime.path_authority import canonical_roots, load_path_policy, validate_env_alignment, windows_codex_home
-from devmgmt_runtime.reports import load_json, save_json, write_markdown
+from devmgmt_runtime.reports import load_json, write_json_and_markdown
 from devmgmt_runtime.scorecard_hook import installed_hook_status
 from devmgmt_runtime.status import collapse_status, status_exit_code
 from devmgmt_runtime.windows_policy import classify_windows_policy_candidate
@@ -534,8 +534,7 @@ def render_markdown(report: dict[str, Any]) -> str:
 
 def write_reports(report: dict[str, Any], *, output_file: Path | None = None) -> None:
     target = output_file or DEFAULT_OUTPUT_PATH
-    save_json(target, report)
-    write_markdown(target.with_suffix(".md"), render_markdown(report))
+    write_json_and_markdown(target, report, render_markdown(report))
 
 
 def main() -> int:

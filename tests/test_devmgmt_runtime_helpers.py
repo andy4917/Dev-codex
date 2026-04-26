@@ -6,7 +6,7 @@ from pathlib import Path
 
 from devmgmt_runtime.authority import authority_path_for
 from devmgmt_runtime.paths import is_forbidden_runtime_value
-from devmgmt_runtime.reports import save_json, write_markdown
+from devmgmt_runtime.reports import save_json, write_json_and_markdown, write_markdown
 from devmgmt_runtime.status import collapse_status, status_exit_code
 
 
@@ -41,6 +41,14 @@ class DevMgmtRuntimeHelpersTests(unittest.TestCase):
 
             self.assertNotIn(b"\r\n", json_path.read_bytes())
             self.assertNotIn(b"\r\n", md_path.read_bytes())
+
+    def test_write_json_and_markdown_targets_sibling_markdown(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            report_path = Path(tmpdir) / "nested" / "report.json"
+            write_json_and_markdown(report_path, {"status": "PASS"}, "status: PASS\n")
+
+            self.assertTrue(report_path.exists())
+            self.assertEqual("status: PASS\n", report_path.with_suffix(".md").read_text(encoding="utf-8"))
 
 
 if __name__ == "__main__":

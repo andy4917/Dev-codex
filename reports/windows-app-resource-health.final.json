@@ -1,97 +1,97 @@
 {
   "status": "WARN",
-  "checked_at": "2026-04-26T17:24:57.798416+00:00",
+  "checked_at": "2026-04-26T17:44:05.212352+00:00",
   "stale_minutes": 10,
   "keep_serena_roots": 1,
   "duplicate_serena_grace_minutes": 10,
   "process_counts": {
     "codex": 6,
-    "node": 7,
-    "python": 32,
-    "serena_roots": 8,
+    "node": 9,
+    "python": 42,
+    "serena_roots": 10,
     "stale_al_language_servers": 0
   },
   "working_sets": {
-    "codex_mb": 1448.2,
-    "node_mb": 538.1,
-    "python_mb": 1249.5
+    "codex_mb": 1313.5,
+    "node_mb": 616.2,
+    "python_mb": 1396.5
   },
   "cpu_samples": {
-    "codex_cpu_pct": 80.8,
+    "codex_cpu_pct": 73.0,
     "codex_cpu_unit": "pct_of_one_logical_cpu",
     "logical_processors": 8,
-    "codex_system_cpu_pct": 10.1,
+    "codex_system_cpu_pct": 9.1,
     "codex_by_role": {
-      "gpu_process": 46.6,
-      "renderer": 24.5,
-      "main": 8.9,
-      "app_server": 0.6,
-      "utility": 0.2,
-      "crashpad": 0.0
+      "renderer": 39.1,
+      "gpu_process": 25.0,
+      "app_server": 7.3,
+      "main": 1.6,
+      "crashpad": 0.0,
+      "utility": 0.0
     },
     "codex_processes": [
       {
-        "pid": 18560,
-        "role": "gpu_process",
-        "avg_cpu_pct": 46.6,
-        "working_set_mb": 314.1,
-        "command_line": "\"C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.422.3464.0_x64__2p2nqsd0c76g0\\app\\Codex.exe\" --type=gpu-process --force_low_power_gpu --user-data-dir=\"C:\\Users\\anise\\AppData\\Roaming\\Codex\" --gpu-preferences=SAAAAAAAAADgAAAEAAAAAAAAAAAAAGAAAQAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAQAAAAAAAAABAAAAAAAAAACAAAAAAAAAAIAAAAAAAAAA== --field-trial-handle=1788,i,16717822666367389883,6829973472107427368,262144 --enable-features=DocumentPolicyIncludeJSCallStacksInCrashReports,EnableTransparentHwndEnlargement,PdfUseShowSaveFilePicker --disable-features=DropInputEventsWhilePaintHolding,LocalNetworkAccessChecks,NetworkServiceSandbox,ScreenAIOCREnabled,SpareRendererForSitePerProcess,TraceSiteInstanceGetProcessCreation --variations-seed-version --pseudonymization-salt-handle=1804,i,3443234005396520173,6925049093881268938,4 --trace-process-track-uuid=3190708988185955192 --mojo-platform-channel-handle=1784 /prefetch:2"
-      },
-      {
         "pid": 28680,
         "role": "renderer",
-        "avg_cpu_pct": 24.5,
-        "working_set_mb": 575.2,
+        "avg_cpu_pct": 39.1,
+        "working_set_mb": 517.0,
         "command_line": "\"C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.422.3464.0_x64__2p2nqsd0c76g0\\app\\Codex.exe\" --type=renderer --user-data-dir=\"C:\\Users\\anise\\AppData\\Roaming\\Codex\" --standard-schemes=app --secure-schemes=app,sentry-ipc --bypasscsp-schemes=sentry-ipc --cors-schemes=sentry-ipc --fetch-schemes=app,sentry-ipc --streaming-schemes=app --app-user-model-id=com.openai.codex --app-path=\"C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.422.3464.0_x64__2p2nqsd0c76g0\\app\\resources\\app.asar\" --enable-sandbox --video-capture-use-gpu-memory-buffer --lang=ko --device-scale-factor=2 --num-raster-threads=2 --enable-main-frame-before-activation --renderer-client-id=4 --time-ticks-at-unix-epoch=-1777055684101789 --launch-time-ticks=164514397239 --field-trial-handle=1788,i,16717822666367389883,6829973472107427368,262144 --enable-features=DocumentPolicyIncludeJSCallStacksInCrashReports,EnableTransparentHwndEnlargement,PdfUseShowSaveFilePicker --disable-features=DropInputEventsWhilePaintHolding,LocalNetworkAccessChecks,NetworkServiceSandbox,ScreenAIOCREnabled,SpareRendererForSitePerProcess,TraceSiteInstanceGetProcessCreation --variations-seed-version --pseudonymization-salt-handle=1804,i,3443234005396520173,6925049093881268938,4 --trace-process-track-uuid=3190708990060038890 --mojo-platform-channel-handle=3232 /prefetch:1"
       },
       {
-        "pid": 24044,
-        "role": "main",
-        "avg_cpu_pct": 8.9,
-        "working_set_mb": 272.3,
-        "command_line": "\"C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.422.3464.0_x64__2p2nqsd0c76g0\\app\\Codex.exe\" --force_low_power_gpu --renderer-process-limit=2 --num-raster-threads=2 --disable-smooth-scrolling"
+        "pid": 18560,
+        "role": "gpu_process",
+        "avg_cpu_pct": 25.0,
+        "working_set_mb": 306.8,
+        "command_line": "\"C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.422.3464.0_x64__2p2nqsd0c76g0\\app\\Codex.exe\" --type=gpu-process --force_low_power_gpu --user-data-dir=\"C:\\Users\\anise\\AppData\\Roaming\\Codex\" --gpu-preferences=SAAAAAAAAADgAAAEAAAAAAAAAAAAAGAAAQAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAQAAAAAAAAABAAAAAAAAAACAAAAAAAAAAIAAAAAAAAAA== --field-trial-handle=1788,i,16717822666367389883,6829973472107427368,262144 --enable-features=DocumentPolicyIncludeJSCallStacksInCrashReports,EnableTransparentHwndEnlargement,PdfUseShowSaveFilePicker --disable-features=DropInputEventsWhilePaintHolding,LocalNetworkAccessChecks,NetworkServiceSandbox,ScreenAIOCREnabled,SpareRendererForSitePerProcess,TraceSiteInstanceGetProcessCreation --variations-seed-version --pseudonymization-salt-handle=1804,i,3443234005396520173,6925049093881268938,4 --trace-process-track-uuid=3190708988185955192 --mojo-platform-channel-handle=1784 /prefetch:2"
       },
       {
         "pid": 12904,
         "role": "app_server",
-        "avg_cpu_pct": 0.6,
-        "working_set_mb": 194.2,
+        "avg_cpu_pct": 7.3,
+        "working_set_mb": 213.2,
         "command_line": "\"C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.422.3464.0_x64__2p2nqsd0c76g0\\app\\resources\\codex.exe\" app-server --analytics-default-enabled"
       },
       {
-        "pid": 28852,
-        "role": "utility",
-        "avg_cpu_pct": 0.2,
-        "working_set_mb": 59.4,
-        "command_line": "\"C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.422.3464.0_x64__2p2nqsd0c76g0\\app\\Codex.exe\" --type=utility --utility-sub-type=network.mojom.NetworkService --lang=ko --service-sandbox-type=none --user-data-dir=\"C:\\Users\\anise\\AppData\\Roaming\\Codex\" --standard-schemes=app --secure-schemes=app,sentry-ipc --bypasscsp-schemes=sentry-ipc --cors-schemes=sentry-ipc --fetch-schemes=app,sentry-ipc --streaming-schemes=app --field-trial-handle=1788,i,16717822666367389883,6829973472107427368,262144 --enable-features=DocumentPolicyIncludeJSCallStacksInCrashReports,EnableTransparentHwndEnlargement,PdfUseShowSaveFilePicker --disable-features=DropInputEventsWhilePaintHolding,LocalNetworkAccessChecks,NetworkServiceSandbox,ScreenAIOCREnabled,SpareRendererForSitePerProcess,TraceSiteInstanceGetProcessCreation --variations-seed-version --pseudonymization-salt-handle=1804,i,3443234005396520173,6925049093881268938,4 --trace-process-track-uuid=3190708989122997041 --mojo-platform-channel-handle=2088 /prefetch:11"
+        "pid": 24044,
+        "role": "main",
+        "avg_cpu_pct": 1.6,
+        "working_set_mb": 189.2,
+        "command_line": "\"C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.422.3464.0_x64__2p2nqsd0c76g0\\app\\Codex.exe\" --force_low_power_gpu --renderer-process-limit=2 --num-raster-threads=2 --disable-smooth-scrolling"
       },
       {
         "pid": 16876,
         "role": "crashpad",
         "avg_cpu_pct": 0.0,
-        "working_set_mb": 33.0,
+        "working_set_mb": 32.2,
         "command_line": "\"C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.422.3464.0_x64__2p2nqsd0c76g0\\app\\Codex.exe\" --type=crashpad-handler --user-data-dir=C:\\Users\\anise\\AppData\\Roaming\\Codex /prefetch:4 --no-rate-limit --monitor-self-annotation=ptype=crashpad-handler --database=C:\\Users\\anise\\AppData\\Roaming\\Codex\\Crashpad --url=https://f.a.k/e --annotation=_productName=Codex --annotation=_version=26.422.30944 --annotation=plat=Win64 --annotation=prod=Electron --annotation=ver=41.2.0 --initial-client-data=0x508,0x50c,0x510,0x500,0x514,0x7ff73878e8d4,0x7ff73878e8e0,0x7ff73878e8f0"
+      },
+      {
+        "pid": 28852,
+        "role": "utility",
+        "avg_cpu_pct": 0.0,
+        "working_set_mb": 55.1,
+        "command_line": "\"C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.422.3464.0_x64__2p2nqsd0c76g0\\app\\Codex.exe\" --type=utility --utility-sub-type=network.mojom.NetworkService --lang=ko --service-sandbox-type=none --user-data-dir=\"C:\\Users\\anise\\AppData\\Roaming\\Codex\" --standard-schemes=app --secure-schemes=app,sentry-ipc --bypasscsp-schemes=sentry-ipc --cors-schemes=sentry-ipc --fetch-schemes=app,sentry-ipc --streaming-schemes=app --field-trial-handle=1788,i,16717822666367389883,6829973472107427368,262144 --enable-features=DocumentPolicyIncludeJSCallStacksInCrashReports,EnableTransparentHwndEnlargement,PdfUseShowSaveFilePicker --disable-features=DropInputEventsWhilePaintHolding,LocalNetworkAccessChecks,NetworkServiceSandbox,ScreenAIOCREnabled,SpareRendererForSitePerProcess,TraceSiteInstanceGetProcessCreation --variations-seed-version --pseudonymization-salt-handle=1804,i,3443234005396520173,6925049093881268938,4 --trace-process-track-uuid=3190708989122997041 --mojo-platform-channel-handle=2088 /prefetch:11"
       }
     ],
     "top": [
       {
         "instance": "codex",
-        "avg_cpu_pct": 80.8
-      },
-      {
-        "instance": "python",
-        "avg_cpu_pct": 0.8
-      },
-      {
-        "instance": "explorer",
-        "avg_cpu_pct": 0.0
-      },
-      {
-        "instance": "flicklift",
-        "avg_cpu_pct": 0.0
+        "avg_cpu_pct": 73.0
       },
       {
         "instance": "logioptionsplus_agent",
+        "avg_cpu_pct": 1.0
+      },
+      {
+        "instance": "explorer",
+        "avg_cpu_pct": 0.5
+      },
+      {
+        "instance": "python",
+        "avg_cpu_pct": 0.5
+      },
+      {
+        "instance": "flicklift",
         "avg_cpu_pct": 0.0
       },
       {
@@ -117,12 +117,12 @@
     ]
   },
   "warnings": [
-    "duplicate Serena MCP roots detected: 8",
-    "Python process count is high: 32",
-    "Codex App sampled CPU is high: 80.8% of one logical CPU",
-    "Codex App gpu_process sampled CPU is high: 46.6%",
-    "Codex App renderer sampled CPU is high: 24.5%",
-    "duplicate Serena MCP roots observed but protected from default cleanup: 7"
+    "duplicate Serena MCP roots detected: 10",
+    "Python process count is high: 42",
+    "Codex App sampled CPU is high: 73.0% of one logical CPU",
+    "Codex App renderer sampled CPU is high: 39.1%",
+    "Codex App gpu_process sampled CPU is high: 25.0%",
+    "duplicate Serena MCP roots observed but protected from default cleanup: 9"
   ],
   "blockers": [],
   "cleanup_candidates": [],
@@ -130,299 +130,57 @@
     "count": 0,
     "working_set_mb": 0,
     "kept_serena_roots": [
-      28532
+      19436
     ],
     "duplicate_serena_root_cleanup_enabled": false,
     "protected_duplicate_serena_roots": [
       {
+        "pid": 34188,
+        "age_minutes": 17.2,
+        "reason": "duplicate_serena_cleanup_disabled"
+      },
+      {
+        "pid": 28532,
+        "age_minutes": 34.1,
+        "reason": "duplicate_serena_cleanup_disabled"
+      },
+      {
         "pid": 19980,
-        "age_minutes": 15.0,
+        "age_minutes": 34.1,
         "reason": "duplicate_serena_cleanup_disabled"
       },
       {
         "pid": 21484,
-        "age_minutes": 15.0,
+        "age_minutes": 34.2,
         "reason": "duplicate_serena_cleanup_disabled"
       },
       {
         "pid": 33316,
-        "age_minutes": 15.1,
+        "age_minutes": 34.2,
         "reason": "duplicate_serena_cleanup_disabled"
       },
       {
         "pid": 28320,
-        "age_minutes": 32.5,
+        "age_minutes": 51.7,
         "reason": "duplicate_serena_cleanup_disabled"
       },
       {
         "pid": 25468,
-        "age_minutes": 32.6,
+        "age_minutes": 51.7,
         "reason": "duplicate_serena_cleanup_disabled"
       },
       {
         "pid": 14728,
-        "age_minutes": 34.7,
+        "age_minutes": 53.8,
         "reason": "duplicate_serena_cleanup_disabled"
       },
       {
         "pid": 15716,
-        "age_minutes": 35.2,
+        "age_minutes": 54.3,
         "reason": "duplicate_serena_cleanup_disabled"
       }
     ],
     "candidate_reasons": {}
-  },
-  "codex_priority_throttle": {
-    "attempted": [
-      12904,
-      16876,
-      18560,
-      24044,
-      28680,
-      28852
-    ],
-    "changed": [
-      {
-        "pid": 12904,
-        "old_priority": "BelowNormal",
-        "new_priority": "BelowNormal",
-        "priority_boost_enabled": false,
-        "status": "changed"
-      },
-      {
-        "pid": 16876,
-        "old_priority": "BelowNormal",
-        "new_priority": "BelowNormal",
-        "priority_boost_enabled": false,
-        "status": "changed"
-      },
-      {
-        "pid": 18560,
-        "old_priority": "BelowNormal",
-        "new_priority": "BelowNormal",
-        "priority_boost_enabled": false,
-        "status": "changed"
-      },
-      {
-        "pid": 24044,
-        "old_priority": "BelowNormal",
-        "new_priority": "BelowNormal",
-        "priority_boost_enabled": false,
-        "status": "changed"
-      },
-      {
-        "pid": 28680,
-        "old_priority": "BelowNormal",
-        "new_priority": "BelowNormal",
-        "priority_boost_enabled": false,
-        "status": "changed"
-      },
-      {
-        "pid": 28852,
-        "old_priority": "BelowNormal",
-        "new_priority": "BelowNormal",
-        "priority_boost_enabled": false,
-        "status": "changed"
-      }
-    ],
-    "failed": []
-  },
-  "post_priority_throttle": {
-    "status": "WARN",
-    "checked_at": "2026-04-26T17:25:19.966295+00:00",
-    "stale_minutes": 10,
-    "keep_serena_roots": 1,
-    "duplicate_serena_grace_minutes": 10,
-    "process_counts": {
-      "codex": 6,
-      "node": 7,
-      "python": 32,
-      "serena_roots": 8,
-      "stale_al_language_servers": 0
-    },
-    "working_sets": {
-      "codex_mb": 1416.4,
-      "node_mb": 538.1,
-      "python_mb": 1250.3
-    },
-    "cpu_samples": {
-      "codex_cpu_pct": 72.2,
-      "codex_cpu_unit": "pct_of_one_logical_cpu",
-      "logical_processors": 8,
-      "codex_system_cpu_pct": 9.0,
-      "codex_by_role": {
-        "gpu_process": 35.0,
-        "renderer": 29.5,
-        "main": 7.5,
-        "utility": 0.2,
-        "app_server": 0.0,
-        "crashpad": 0.0
-      },
-      "codex_processes": [
-        {
-          "pid": 18560,
-          "role": "gpu_process",
-          "avg_cpu_pct": 35.0,
-          "working_set_mb": 289.4,
-          "command_line": "\"C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.422.3464.0_x64__2p2nqsd0c76g0\\app\\Codex.exe\" --type=gpu-process --force_low_power_gpu --user-data-dir=\"C:\\Users\\anise\\AppData\\Roaming\\Codex\" --gpu-preferences=SAAAAAAAAADgAAAEAAAAAAAAAAAAAGAAAQAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAQAAAAAAAAABAAAAAAAAAACAAAAAAAAAAIAAAAAAAAAA== --field-trial-handle=1788,i,16717822666367389883,6829973472107427368,262144 --enable-features=DocumentPolicyIncludeJSCallStacksInCrashReports,EnableTransparentHwndEnlargement,PdfUseShowSaveFilePicker --disable-features=DropInputEventsWhilePaintHolding,LocalNetworkAccessChecks,NetworkServiceSandbox,ScreenAIOCREnabled,SpareRendererForSitePerProcess,TraceSiteInstanceGetProcessCreation --variations-seed-version --pseudonymization-salt-handle=1804,i,3443234005396520173,6925049093881268938,4 --trace-process-track-uuid=3190708988185955192 --mojo-platform-channel-handle=1784 /prefetch:2"
-        },
-        {
-          "pid": 28680,
-          "role": "renderer",
-          "avg_cpu_pct": 29.5,
-          "working_set_mb": 569.4,
-          "command_line": "\"C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.422.3464.0_x64__2p2nqsd0c76g0\\app\\Codex.exe\" --type=renderer --user-data-dir=\"C:\\Users\\anise\\AppData\\Roaming\\Codex\" --standard-schemes=app --secure-schemes=app,sentry-ipc --bypasscsp-schemes=sentry-ipc --cors-schemes=sentry-ipc --fetch-schemes=app,sentry-ipc --streaming-schemes=app --app-user-model-id=com.openai.codex --app-path=\"C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.422.3464.0_x64__2p2nqsd0c76g0\\app\\resources\\app.asar\" --enable-sandbox --video-capture-use-gpu-memory-buffer --lang=ko --device-scale-factor=2 --num-raster-threads=2 --enable-main-frame-before-activation --renderer-client-id=4 --time-ticks-at-unix-epoch=-1777055684101789 --launch-time-ticks=164514397239 --field-trial-handle=1788,i,16717822666367389883,6829973472107427368,262144 --enable-features=DocumentPolicyIncludeJSCallStacksInCrashReports,EnableTransparentHwndEnlargement,PdfUseShowSaveFilePicker --disable-features=DropInputEventsWhilePaintHolding,LocalNetworkAccessChecks,NetworkServiceSandbox,ScreenAIOCREnabled,SpareRendererForSitePerProcess,TraceSiteInstanceGetProcessCreation --variations-seed-version --pseudonymization-salt-handle=1804,i,3443234005396520173,6925049093881268938,4 --trace-process-track-uuid=3190708990060038890 --mojo-platform-channel-handle=3232 /prefetch:1"
-        },
-        {
-          "pid": 24044,
-          "role": "main",
-          "avg_cpu_pct": 7.5,
-          "working_set_mb": 271.2,
-          "command_line": "\"C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.422.3464.0_x64__2p2nqsd0c76g0\\app\\Codex.exe\" --force_low_power_gpu --renderer-process-limit=2 --num-raster-threads=2 --disable-smooth-scrolling"
-        },
-        {
-          "pid": 28852,
-          "role": "utility",
-          "avg_cpu_pct": 0.2,
-          "working_set_mb": 59.3,
-          "command_line": "\"C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.422.3464.0_x64__2p2nqsd0c76g0\\app\\Codex.exe\" --type=utility --utility-sub-type=network.mojom.NetworkService --lang=ko --service-sandbox-type=none --user-data-dir=\"C:\\Users\\anise\\AppData\\Roaming\\Codex\" --standard-schemes=app --secure-schemes=app,sentry-ipc --bypasscsp-schemes=sentry-ipc --cors-schemes=sentry-ipc --fetch-schemes=app,sentry-ipc --streaming-schemes=app --field-trial-handle=1788,i,16717822666367389883,6829973472107427368,262144 --enable-features=DocumentPolicyIncludeJSCallStacksInCrashReports,EnableTransparentHwndEnlargement,PdfUseShowSaveFilePicker --disable-features=DropInputEventsWhilePaintHolding,LocalNetworkAccessChecks,NetworkServiceSandbox,ScreenAIOCREnabled,SpareRendererForSitePerProcess,TraceSiteInstanceGetProcessCreation --variations-seed-version --pseudonymization-salt-handle=1804,i,3443234005396520173,6925049093881268938,4 --trace-process-track-uuid=3190708989122997041 --mojo-platform-channel-handle=2088 /prefetch:11"
-        },
-        {
-          "pid": 12904,
-          "role": "app_server",
-          "avg_cpu_pct": 0.0,
-          "working_set_mb": 194.1,
-          "command_line": "\"C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.422.3464.0_x64__2p2nqsd0c76g0\\app\\resources\\codex.exe\" app-server --analytics-default-enabled"
-        },
-        {
-          "pid": 16876,
-          "role": "crashpad",
-          "avg_cpu_pct": 0.0,
-          "working_set_mb": 33.0,
-          "command_line": "\"C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.422.3464.0_x64__2p2nqsd0c76g0\\app\\Codex.exe\" --type=crashpad-handler --user-data-dir=C:\\Users\\anise\\AppData\\Roaming\\Codex /prefetch:4 --no-rate-limit --monitor-self-annotation=ptype=crashpad-handler --database=C:\\Users\\anise\\AppData\\Roaming\\Codex\\Crashpad --url=https://f.a.k/e --annotation=_productName=Codex --annotation=_version=26.422.30944 --annotation=plat=Win64 --annotation=prod=Electron --annotation=ver=41.2.0 --initial-client-data=0x508,0x50c,0x510,0x500,0x514,0x7ff73878e8d4,0x7ff73878e8e0,0x7ff73878e8f0"
-        }
-      ],
-      "top": [
-        {
-          "instance": "codex",
-          "avg_cpu_pct": 72.2
-        },
-        {
-          "instance": "logioptionsplus_agent",
-          "avg_cpu_pct": 0.2
-        },
-        {
-          "instance": "node",
-          "avg_cpu_pct": 0.2
-        },
-        {
-          "instance": "explorer",
-          "avg_cpu_pct": 0.0
-        },
-        {
-          "instance": "flicklift",
-          "avg_cpu_pct": 0.0
-        },
-        {
-          "instance": "notepad",
-          "avg_cpu_pct": 0.0
-        },
-        {
-          "instance": "powertoys.peek.ui",
-          "avg_cpu_pct": 0.0
-        },
-        {
-          "instance": "python",
-          "avg_cpu_pct": 0.0
-        },
-        {
-          "instance": "python3.13",
-          "avg_cpu_pct": 0.0
-        },
-        {
-          "instance": "workloadssessionhost",
-          "avg_cpu_pct": 0.0
-        }
-      ]
-    },
-    "warnings": [
-      "duplicate Serena MCP roots detected: 8",
-      "Python process count is high: 32",
-      "Codex App sampled CPU is high: 72.2% of one logical CPU",
-      "Codex App gpu_process sampled CPU is high: 35.0%",
-      "Codex App renderer sampled CPU is high: 29.5%",
-      "duplicate Serena MCP roots observed but protected from default cleanup: 7"
-    ],
-    "blockers": [],
-    "cleanup_candidates": [],
-    "cleanup_candidate_summary": {
-      "count": 0,
-      "working_set_mb": 0,
-      "kept_serena_roots": [
-        28532
-      ],
-      "duplicate_serena_root_cleanup_enabled": false,
-      "protected_duplicate_serena_roots": [
-        {
-          "pid": 19980,
-          "age_minutes": 15.4,
-          "reason": "duplicate_serena_cleanup_disabled"
-        },
-        {
-          "pid": 21484,
-          "age_minutes": 15.4,
-          "reason": "duplicate_serena_cleanup_disabled"
-        },
-        {
-          "pid": 33316,
-          "age_minutes": 15.4,
-          "reason": "duplicate_serena_cleanup_disabled"
-        },
-        {
-          "pid": 28320,
-          "age_minutes": 32.9,
-          "reason": "duplicate_serena_cleanup_disabled"
-        },
-        {
-          "pid": 25468,
-          "age_minutes": 32.9,
-          "reason": "duplicate_serena_cleanup_disabled"
-        },
-        {
-          "pid": 14728,
-          "age_minutes": 35.1,
-          "reason": "duplicate_serena_cleanup_disabled"
-        },
-        {
-          "pid": 15716,
-          "age_minutes": 35.6,
-          "reason": "duplicate_serena_cleanup_disabled"
-        }
-      ],
-      "candidate_reasons": {}
-    }
-  },
-  "codex_gpu_preference": {
-    "attempted": [
-      "C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.422.3464.0_x64__2p2nqsd0c76g0\\app\\Codex.exe",
-      "C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.422.3464.0_x64__2p2nqsd0c76g0\\app\\resources\\codex.exe"
-    ],
-    "changed": [
-      {
-        "path": "C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.422.3464.0_x64__2p2nqsd0c76g0\\app\\Codex.exe",
-        "value": "GpuPreference=1;",
-        "status": "changed"
-      },
-      {
-        "path": "C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.422.3464.0_x64__2p2nqsd0c76g0\\app\\resources\\codex.exe",
-        "value": "GpuPreference=1;",
-        "status": "changed"
-      }
-    ],
-    "failed": [],
-    "preference": "power_saving",
-    "value": "GpuPreference=1;",
-    "requires_restart": true
   },
   "git_eol_hazards": {
     "count": 0,

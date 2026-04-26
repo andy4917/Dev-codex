@@ -25,6 +25,11 @@ def write_markdown(path: Path, text: str) -> None:
     path.write_text(text, encoding="utf-8", newline="\n")
 
 
+def write_json_and_markdown(path: Path, payload: Any, markdown_text: str) -> None:
+    save_json(path, payload)
+    write_markdown(path.with_suffix(".md"), markdown_text)
+
+
 def load_first_report(reports_root: Path, candidates: list[str]) -> tuple[dict[str, Any], str, bool]:
     for candidate in candidates:
         path = reports_root / candidate

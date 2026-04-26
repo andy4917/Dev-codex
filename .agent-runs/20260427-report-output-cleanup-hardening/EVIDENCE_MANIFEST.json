@@ -1,0 +1,93 @@
+{
+  "schema_version": 1,
+  "run_id": "20260427-report-output-cleanup-hardening",
+  "workspace_root_realpath": "C:\\Users\\anise\\code\\Dev-Management",
+  "repo_root": "C:\\Users\\anise\\code\\Dev-Management",
+  "git_root": "C:\\Users\\anise\\code\\Dev-Management",
+  "base_commit": "9e479be63d59d856be6561948c53e4818403dd2a",
+  "head_commit": "9e479be63d59d856be6561948c53e4818403dd2a",
+  "changed_files": [
+    ".agent-runs/20260427-report-output-cleanup-hardening/DELEGATION_DECISION.json",
+    ".agent-runs/20260427-report-output-cleanup-hardening/EVIDENCE_MANIFEST.json",
+    ".agent-runs/20260427-report-output-cleanup-hardening/SLOP_LEDGER.json",
+    ".agent-runs/20260427-report-output-cleanup-hardening/WORKORDER.json",
+    "devmgmt_runtime/reports.py",
+    "reports/windows-app-resource-health.final.json",
+    "scripts/check_user_dev_environment.py",
+    "tests/test_devmgmt_runtime_helpers.py"
+  ],
+  "changed_file_count": 8,
+  "changed_file_set_hash": "c86bab63c428f0a8c9cff547090cdb83eb5f6b3c7df318290ace984d45ff6ff2",
+  "changed_file_content_hash": "75445b8183ac73a2a8ee6e0026dd2a94d19f08058473d86048458934e313c6e3",
+  "policy_hashes": {
+    "current": {
+      "workspace_authority.json": "2a27cb97abfda605e7e285ea481596fbecc1ac756528b3728acde33980405acc",
+      "score_policy.json": "6f2a777520437437e89d023784bc9b67d15b02cdd50b1c8003f7e557ecef5f89",
+      "user_score_policy.json": "ff6b404a044af93292db40588bfae0cdc518c04655412a5cd73f9569897b5876",
+      "disqualifier_policy.json": "384603dd0f7d0e309d00864038b517684392b4af7e65fd7cdc381a99ec33dfcf"
+    }
+  },
+  "script_hashes": {
+    "prepare_user_scorecard_review.py": "df4d87dfe1fda3f5e88133e71b053b6540abea5c0bf48a82a774d19823cbe3e6",
+    "iaw_closeout.py": "e930288418ab295eeb6886378148edbc3fdd15b3a7448be3aca86506183d418c",
+    "check_ai_slop.py": "0e50230febb8337a697c61c463d2dae35a6af0dbfa061eb3e9c9e4361fbf40f5",
+    "check_domain_mission_refresh.py": "d3dae470079b619c62724b26f86c516f8e86bb8deb6005efd915d3307c6759ac",
+    "delivery_gate.py": "cda73481fa3bab534e0149bd5b9d54971b7299864de8bb322660bc98452d895d",
+    "export_user_score_summary.py": "0b1d4806421412f267bda8caee9f4beb2469c5963861787544086dc12956bbd5",
+    "check_user_dev_environment.py": "6616dca3a4266c0b96fcaab336706f478c7511bbcebc283733c1b38d8c8f412e",
+    "check_global_agent_workflow.py": "2b21d448d6478278f9a16f024f1877802166fad905e0b7a9aa2deb0dc48075c5"
+  },
+  "commands": [
+    {
+      "cmd": "python -m unittest tests.test_devmgmt_runtime_helpers tests.test_check_user_dev_environment tests.test_check_ai_slop",
+      "exit_code": 0,
+      "command_id": "cmd-1",
+      "cwd": "C:\\Users\\anise\\code\\Dev-Management",
+      "started_at": "2026-04-26T17:46:22.073556+00:00",
+      "ended_at": "2026-04-26T17:46:22.073556+00:00"
+    },
+    {
+      "cmd": "python -m unittest tests.test_global_agent_workflow tests.test_check_ai_slop tests.test_codex_app_maintenance tests.test_codex_app_maintenance_cycle tests.test_windows_app_resource_health tests.test_devmgmt_runtime_helpers tests.test_check_user_dev_environment",
+      "exit_code": 0,
+      "command_id": "cmd-2",
+      "cwd": "C:\\Users\\anise\\code\\Dev-Management",
+      "started_at": "2026-04-26T17:46:22.073556+00:00",
+      "ended_at": "2026-04-26T17:46:22.073556+00:00"
+    },
+    {
+      "cmd": "python scripts/check_user_dev_environment.py --output-file C:\\Users\\anise\\code\\.scratch\\Dev-Management\\20260427-report-output-cleanup-hardening\\user-dev-environment.json --json",
+      "exit_code": 0,
+      "command_id": "cmd-3",
+      "cwd": "C:\\Users\\anise\\code\\Dev-Management",
+      "started_at": "2026-04-26T17:46:22.073556+00:00",
+      "ended_at": "2026-04-26T17:46:22.073556+00:00"
+    },
+    {
+      "cmd": "python scripts/maintain_codex_app_state.py --output-file C:\\Users\\anise\\code\\.scratch\\Dev-Management\\20260427-report-output-cleanup-hardening\\codex-app-maintenance.json --json",
+      "exit_code": 0,
+      "command_id": "cmd-4",
+      "cwd": "C:\\Users\\anise\\code\\Dev-Management",
+      "started_at": "2026-04-26T17:46:22.073556+00:00",
+      "ended_at": "2026-04-26T17:46:22.073556+00:00"
+    },
+    {
+      "cmd": "python scripts/check_windows_app_resource_health.py --cpu-sample-seconds 10 --output-file reports\\windows-app-resource-health.final.json --json --throttle-codex-priority --prefer-low-power-gpu",
+      "exit_code": 1,
+      "expected_status": "WARN",
+      "command_id": "cmd-5",
+      "cwd": "C:\\Users\\anise\\code\\Dev-Management",
+      "started_at": "2026-04-26T17:46:22.073556+00:00",
+      "ended_at": "2026-04-26T17:46:22.073556+00:00"
+    },
+    {
+      "command_id": "iaw-closeout-l1-blocked-stale-reviewer-truth",
+      "cmd": "python scripts/iaw_closeout.py --workspace-root C:\\Users\\anise\\code\\Dev-Management --run-id 20260427-report-output-cleanup-hardening --profile L1 --mode verify",
+      "cwd": "C:\\Users\\anise\\code\\Dev-Management",
+      "exit_code": 1,
+      "expected_status": "BLOCKED",
+      "started_at": "2026-04-26T17:48:02.973317+00:00",
+      "ended_at": "2026-04-26T17:48:02.973317+00:00"
+    }
+  ],
+  "created_at": "2026-04-26T17:46:01.175689+00:00"
+}

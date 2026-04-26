@@ -1,0 +1,16 @@
+{
+  "created_at": "2026-04-26T17:42:00+00:00",
+  "decision": "waive",
+  "delegation_mode": "main_only",
+  "reason": "The follow-up implementation was a tightly coupled report-writer cleanup and verification pass with no safe disjoint write scopes after the dirty report surface was classified.",
+  "run_id": "20260427-report-output-cleanup-hardening",
+  "schema_version": 1,
+  "trigger_classes": [
+    "broad_multi_surface_audit",
+    "global_cleanup",
+    "dirty_closeout",
+    "policy_checker_change",
+    "l2_plus_verification"
+  ],
+  "waiver_reason": "no_parallelizable_sidecar"
+}
