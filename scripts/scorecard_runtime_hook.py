@@ -18,7 +18,7 @@ from devmgmt_runtime.path_authority import get_devmgmt_root
 
 
 DEFAULT_AUTHORITY_PATH = ROOT / "contracts" / "workspace_authority.json"
-DEFAULT_USER_PROMPT_THROTTLE_SECONDS = 300
+DEFAULT_USER_PROMPT_THROTTLE_SECONDS = 0
 
 
 def load_json(path: Path) -> dict[str, Any]:
@@ -127,6 +127,18 @@ def build_notice(authority: dict[str, Any], workspace_root: Path) -> str:
     )
 
 
+def user_prompt_submit_response(notice: str) -> dict[str, Any]:
+    if not notice:
+        return {}
+    return {
+        "continue": True,
+        "hookSpecificOutput": {
+            "hookEventName": "UserPromptSubmit",
+            "additionalContext": notice,
+        },
+    }
+
+
 def emit_notice(
     *,
     authority: dict[str, Any],
@@ -159,7 +171,9 @@ def main() -> int:
         cwd=Path(args.cwd),
         event=str(args.event),
     )
-    if notice:
+    if args.event == "UserPromptSubmit":
+        print(json.dumps(user_prompt_submit_response(notice), ensure_ascii=False))
+    elif notice:
         print(notice)
     return 0
 

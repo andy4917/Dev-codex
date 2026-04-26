@@ -111,6 +111,30 @@ class ComputeUserScorecardV12Tests(unittest.TestCase):
         self.assertEqual(credited[0]["block_reason"], "requested_only_source")
         self.assertEqual([signal["code"] for signal in signals], ["non_user_source_award"])
 
+    def test_artifact_hygiene_signal_detects_retained_backup_artifacts(self) -> None:
+        policy = self.module.load_json(self.module.DEFAULT_POLICY_FILE)
+
+        signals = self.module._manifest_anti_cheat_signals(
+            policy,
+            {
+                "evidence_manifest": {
+                    "changed_files": ["C:/Users/anise/.codex/maintenance-backups/state_5.sqlite"],
+                    "artifacts": [],
+                    "commands": [],
+                    "waivers": [],
+                    "policy_hashes": {"current": {}},
+                },
+                "workorder": {},
+                "command_log": [],
+                "is_current": True,
+            },
+            mode="verify",
+            existing_readiness={"status": "PASS"},
+            clean_room_verify={"status": "UNKNOWN"},
+        )
+
+        self.assertIn("artifact_hygiene_policy_violation", [signal["code"] for signal in signals])
+
     def test_claim_phrase_findings_detect_verification_words_without_artifacts(self) -> None:
         findings = self.module._claim_phrase_findings(
             {

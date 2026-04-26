@@ -10,7 +10,7 @@
       "app_host",
       "local_execution_surface"
     ],
-    "canonical_execution_surface": "local-windows-agent",
+    "canonical_execution_surface": "windows-native",
     "canonical_agent_binary": "Windows-native Codex App agent"
   },
   "settings_flow": {
@@ -19,7 +19,17 @@
     "integrated_terminal": "PowerShell 7 (pwsh)",
     "required_windows_features": [
       "remote_control",
-      "remote_connections",
+      "remote_connections"
+    ],
+    "supported_experimental_features": [
+      "apps",
+      "memories",
+      "plugins",
+      "tool_call_mcp_elicitation",
+      "tool_search",
+      "tool_suggest"
+    ],
+    "unsupported_experimental_features": [
       "workspace_dependencies"
     ],
     "local_project": "C:\\Users\\anise\\code\\Dev-Management",
@@ -30,7 +40,7 @@
   "control_thread": {
     "required": true,
     "name": "Dev-Management Control",
-    "host": "local-windows",
+    "host": "windows-native",
     "project_path": "C:\\Users\\anise\\code\\Dev-Management",
     "purpose": [
       "readiness",
@@ -70,6 +80,24 @@
     "app_memory_is_authority": false,
     "thread_memory_is_authority": false
   },
+  "app_state_maintenance": {
+    "script": "C:\\Users\\anise\\code\\Dev-Management\\scripts\\maintain_codex_app_state.py",
+    "scheduled_task": "DevManagementCodexAppMaintenance",
+    "default_log_retention_days": 1,
+    "default_max_log_rows": 30000,
+    "default_max_session_files": 60,
+    "scheduled_interval_minutes": 240,
+    "run_at_logon": true,
+    "backup_before_apply": false,
+    "backup_and_temp_disposal": "recycle_bin",
+    "archive_instead_of_discard": true,
+    "archives_are_durable_retention_evidence": true,
+    "session_jsonl_retention": "compress_archived_or_over_limit_sessions",
+    "stale_restore_refs": "archive_or_mark_inactive",
+    "fallback_roots": "remove_from_active_app_state",
+    "legacy_runtime_refs": "remove_from_active_app_state",
+    "codex_app_binaries": "do_not_modify"
+  },
   "windows_control_plane_boundary": {
     "codex_home": "C:\\Users\\anise\\.codex",
     "validated_relative_paths": [
@@ -81,7 +109,7 @@
     "blocked_relative_paths": [
     ],
     "approved_marketplace_hook_packages": [],
-    "active_windows_hooks_status": "remove",
+    "active_windows_hooks_status": "approved_scorecard_user_prompt_hook_only",
     "hooks_are_triggers_only": true,
     "app_state_role": "validated_user_control_plane",
     "policy_surface_reason": "Codex App actively reads Windows .codex config, AGENTS, hooks, and skills. Dev-Management validates this user-owned control plane and reports authority-breaking content."

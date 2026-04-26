@@ -32,12 +32,17 @@
   },
   "blocked_active_feature_flags": [
     "telepathy",
-    "use_agent_identity"
-  ],
-  "conditionally_reauthorizable_feature_flags": [
+    "use_agent_identity",
     "workspace_dependencies"
   ],
-  "workspace_dependencies_reauthorized": true,
+  "supported_experimental_features": [
+    "apps",
+    "memories",
+    "plugins",
+    "tool_call_mcp_elicitation",
+    "tool_search",
+    "tool_suggest"
+  ],
   "blocked_generated_config_values": {
     "approval_policy": [],
     "sandbox_mode": []
@@ -55,9 +60,9 @@
       "skills"
     ],
     "allowed_marketplace_hooks": [],
-    "blocked_hook_feature_flag": "codex_hooks",
+    "approved_hook_feature_flag": "codex_hooks",
     "hooks_are_triggers_only": true,
-    "remove_active_windows_hooks": true,
+    "remove_active_windows_hooks": "unless_exact_approved_scorecard_user_prompt_hook",
     "known_generated_cleanup_requires_generated_header": true,
     "unknown_policy_surface_status": "WARN"
   },

@@ -1564,6 +1564,55 @@ def _credit_input_spoof_signals(policy: dict[str, Any], review: dict[str, Any], 
     return signals
 
 
+def _artifact_hygiene_violations(manifest: dict[str, Any], workorder: dict[str, Any], support: dict[str, Any]) -> list[str]:
+    paths: list[str] = []
+    for key in ("changed_files",):
+        paths.extend(str(item).strip() for item in manifest.get(key, []) if str(item).strip())
+    for artifact in manifest.get("artifacts", []):
+        if isinstance(artifact, dict):
+            for key in ("path", "target", "source"):
+                value = str(artifact.get(key, "")).strip()
+                if value:
+                    paths.append(value)
+        elif str(artifact).strip():
+            paths.append(str(artifact).strip())
+    for command in [*manifest.get("commands", []), *support.get("command_log", [])]:
+        if isinstance(command, dict):
+            cmd = str(command.get("cmd", "")).strip()
+            if cmd:
+                paths.append(cmd)
+
+    declared = workorder.get("artifact_hygiene", {}) if isinstance(workorder.get("artifact_hygiene"), dict) else {}
+    recycle_declared = str(declared.get("backup_and_temp_disposal", "")).strip().lower() in {
+        "recycle_bin",
+        "none_present",
+        "not_applicable",
+    }
+    allowed_markers = (
+        "reports/migration-evidence",
+        "reports\\migration-evidence",
+        "maintenance-archives",
+        ".agent-runs",
+        "reports/",
+        "reports\\",
+    )
+    violations = []
+    for raw in paths:
+        normalized = raw.replace("\\", "/").lower()
+        parts = [part for part in normalized.split("/") if part]
+        has_violation = any(
+            part in {"backup", "backups", "temp", "tmp", "maintenance-backups"}
+            or part.endswith((".tmp", ".bak", ".backup"))
+            for part in parts
+        )
+        if not has_violation:
+            continue
+        if any(marker.replace("\\", "/").lower() in normalized for marker in allowed_markers) and recycle_declared:
+            continue
+        violations.append(raw)
+    return sorted(set(violations))
+
+
 def _manifest_anti_cheat_signals(
     policy: dict[str, Any],
     support: dict[str, Any],
@@ -1582,6 +1631,21 @@ def _manifest_anti_cheat_signals(
         fallback_path=str(manifest_path) if isinstance(manifest_path, Path) else "",
     )
     signals: list[dict[str, Any]] = []
+
+    artifact_hygiene_paths = _artifact_hygiene_violations(manifest, workorder, support)
+    if artifact_hygiene_paths:
+        signals.append(
+            _anti_cheat_signal(
+                rules,
+                "artifact_hygiene_policy_violation",
+                reason="backup or temporary artifacts were retained instead of being disposed through the Recycle Bin policy",
+                evidence_refs=evidence_refs + artifact_hygiene_paths[:5],
+                details={"paths": artifact_hygiene_paths},
+                confidence="high",
+                detected_by="compute_user_scorecard.py",
+                provenance=provenance,
+            )
+        )
 
     verify_claimed = normalize_status(existing_readiness.get("status"), "UNKNOWN") in {"PASS", "WAIVED"} or normalize_status(clean_room_verify.get("status"), "UNKNOWN") in {"PASS", "WAIVED"}
     if mode in {"verify", "release"} and verify_claimed and not bool(support.get("is_current", False)):

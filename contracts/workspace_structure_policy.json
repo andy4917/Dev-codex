@@ -14,6 +14,8 @@
     "CONFIG_ENV",
     "GENERATED_EVIDENCE",
     "TESTS",
+    "SCRATCH_HARNESS",
+    "MIGRATION_EVIDENCE",
     "SKILLS",
     "PRODUCT_SOURCE",
     "USER_CONTROL_PLANE",
@@ -36,6 +38,13 @@
     "Dev-Product": {
       "path": "C:\\Users\\anise\\code\\Dev-Product",
       "role": "PRODUCT_SOURCE",
+      "required": true
+    },
+    ".scratch/Dev-Management": {
+      "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management",
+      "role": "SCRATCH_HARNESS",
+      "repo_authority": false,
+      "outside_repo": true,
       "required": true
     },
     ".codex": {
@@ -88,6 +97,10 @@
     },
     "reports": {
       "role": "GENERATED_EVIDENCE",
+      "required": true
+    },
+    "reports/migration-evidence": {
+      "role": "MIGRATION_EVIDENCE",
       "required": true
     },
     "tools": {

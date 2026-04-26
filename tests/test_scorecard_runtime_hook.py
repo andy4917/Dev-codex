@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 import tempfile
 import unittest
 from pathlib import Path
@@ -36,7 +37,7 @@ class ScorecardRuntimeHookTests(unittest.TestCase):
                     "summary_export": r"C:\Users\anise\code\Dev-Management\scripts\export_user_score_summary.py",
                     "runtime_hook": {
                         "state_root": "/tmp/scorecard-hook-tests",
-                        "user_prompt_throttle_seconds": 300,
+                        "user_prompt_throttle_seconds": 0,
                     },
                 }
             },
@@ -68,7 +69,7 @@ class ScorecardRuntimeHookTests(unittest.TestCase):
 
         self.assertEqual(notice, "")
 
-    def test_user_prompt_submit_is_throttled_per_workspace(self) -> None:
+    def test_user_prompt_submit_emits_every_task_turn_when_unthrottled(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             state_dir = Path(tmpdir)
             first = self.module.emit_notice(
@@ -82,20 +83,36 @@ class ScorecardRuntimeHookTests(unittest.TestCase):
                 authority=self.authority,
                 cwd=self.workflow_root,
                 event="UserPromptSubmit",
-                now=1100.0,
-                state_dir=state_dir,
-            )
-            third = self.module.emit_notice(
-                authority=self.authority,
-                cwd=self.workflow_root,
-                event="UserPromptSubmit",
-                now=1405.0,
+                now=1001.0,
                 state_dir=state_dir,
             )
 
         self.assertTrue(first)
-        self.assertEqual(second, "")
-        self.assertTrue(third)
+        self.assertTrue(second)
+
+    def test_user_prompt_submit_response_is_json_object_with_additional_context(self) -> None:
+        notice = "[scorecard-hook] Binding scorecard layer"
+        payload = self.module.user_prompt_submit_response(notice)
+
+        self.assertIs(payload["continue"], True)
+        self.assertEqual(payload["hookSpecificOutput"]["hookEventName"], "UserPromptSubmit")
+        self.assertEqual(payload["hookSpecificOutput"]["additionalContext"], notice)
+        json.dumps(payload)
+
+    def test_user_prompt_submit_response_empty_notice_is_empty_json_object(self) -> None:
+        self.assertEqual(self.module.user_prompt_submit_response(""), {})
+
+    def test_hooks_payload_targets_user_prompt_submit(self) -> None:
+        from devmgmt_runtime.scorecard_hook import hooks_payload
+
+        payload = hooks_payload(self.authority)
+        hook = payload["hooks"]["UserPromptSubmit"][0]["hooks"][0]
+
+        self.assertEqual(payload["hooks"]["UserPromptSubmit"][0]["matcher"], ".*")
+        self.assertEqual(hook["type"], "command")
+        self.assertIn("scorecard_runtime_hook.py", hook["command"])
+        self.assertIn("--event UserPromptSubmit", hook["command"])
+        json.dumps(payload)
 
 
 if __name__ == "__main__":

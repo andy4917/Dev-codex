@@ -1,10 +1,10 @@
 {
   "status": "PASS",
-  "checked_at": "2026-04-25T13:25:20.454184+00:00",
-  "policy_version": 6,
+  "checked_at": "2026-04-26T17:27:56.685681+00:00",
+  "policy_version": 7,
   "environment": {
     "repo_root": "C:\\Users\\anise\\code\\Dev-Management",
-    "canonical_execution_host": "local-windows",
+    "canonical_execution_host": "windows-native",
     "windows_codex_home": "C:\\Users\\anise\\.codex",
     "expected_repo_root_prefix": "C:\\Users\\anise\\code",
     "current_working_directory": "C:\\Users\\anise\\code\\Dev-Management"
@@ -18,22 +18,24 @@
       "approval_policy": "never",
       "sandbox_mode": "danger-full-access",
       "windows_sandbox": "elevated",
-      "model_reasoning_effort": "xhigh",
+      "model_reasoning_effort": "high",
       "remote_control_enabled": true,
       "remote_connections_enabled": true,
-      "workspace_dependencies_enabled": true,
+      "supported_experimental_features_enabled": [
+        "apps",
+        "memories",
+        "plugins",
+        "tool_call_mcp_elicitation",
+        "tool_search",
+        "tool_suggest"
+      ],
+      "unsupported_experimental_features_enabled": [],
       "trusted_project_paths": [
-        "c:/users/anise/documents/codex/2026-04-23-codex",
-        "c:/users/anise/documents/codex/2026-04-23-imagegen-c-users-anise-codex-skills",
-        "c:/users/anise/documents/codex/2026-04-23-ssh",
-        "c:/users/anise/documents/codex/2026-04-23-ssh-2",
-        "c:/users/anise/documents/codex/2026-04-23-new-chat",
-        "c:/users/anise/documents/codex/2026-04-23-new-chat-2",
-        "c:/users/anise/documents/codex/2026-04-25/codex-app-windows-windows-native-agent",
         "c:/users/anise/code/dev-management",
         "c:/users/anise/code/dev-workflow",
         "c:/users/anise/code/dev-product",
-        "c:/users/anise/code/dev-product/reservation-system"
+        "c:/users/anise/code/dev-product/reservation-system",
+        "c:/users/anise/code/dev-product/입실퇴실 안내문 생성기"
       ],
       "missing_trusted_project_roots": [],
       "surface_findings": {
@@ -54,12 +56,18 @@
               "remote_connections"
             ],
             "feature_keys": [
+              "apps",
+              "codex_hooks",
               "memories",
+              "plugins",
               "remote_connections",
               "remote_control",
-              "workspace_dependencies"
+              "tool_call_mcp_elicitation",
+              "tool_search",
+              "tool_suggest"
             ],
             "top_level_keys": [
+              "analytics",
               "approval_policy",
               "features",
               "marketplaces",
@@ -87,36 +95,40 @@
           "path": "C:\\Users\\anise\\.codex\\AGENTS.md",
           "present": true,
           "kind": "file",
-          "classification": "user_managed_custom_instructions",
+          "classification": "APP_GLOBAL_AUTHORITY_CAPSULE",
           "disposition": "RETAIN_SAFE",
           "operation": "retain",
           "status": "PASS",
           "generated_marker_found": false,
           "repo_owned": false,
-          "reason": "Windows AGENTS.md contains user-managed global custom instructions within validated boundaries.",
+          "reason": "Windows AGENTS.md contains the approved concise global authority capsule.",
           "details": {
-            "byte_length": 677,
+            "byte_length": 1064,
             "nonempty_lines": [
-              "Before work, read and follow:",
+              "Global authority capsule:",
+              "- The user's explicit instruction is the highest project authority inside allowed system/developer constraints.",
+              "- Before work, read and follow:",
               "C:\\Users\\anise\\code\\Dev-Management\\docs\\GLOBAL_AGENT_WORKFLOW.md",
-              "Codex App is my UI and Windows-native execution control plane. Repo-specific stack and commands come from that repo's AGENTS.md and package scripts.",
-              "Use Serena for codebase exploration, Context7 for external docs, and tests/reports for final claims. If required evidence is missing, report the gap and do not fabricate it.",
-              "Always run the exact code path touched before claiming behavior; exercise all touched functions directly when practical, and use C:\\Users\\anise\\code\\.scratch\\Dev-Management scratch harnesses to copy relevant production context and observe actual behavior."
+              "- Codex App is my UI and Windows-native execution control plane. Repo-specific stack and commands come from that repo's AGENTS.md and package scripts.",
+              "- Use Serena for codebase exploration, Context7 for external docs, and tests/reports for final claims. If required evidence is missing, report the gap and do not fabricate it.",
+              "- Always run the exact code path touched before claiming behavior; exercise all touched functions directly when practical, and use C:\\Users\\anise\\code\\.scratch\\Dev-Management scratch harnesses to copy relevant production context and observe actual behavior.",
+              "- Test means limited counterexample search plus partial evidence; verification means declared oracle/scope/policy match; review means adversarial reading; PASS means no counterexample found within declared scope/oracle, not formal approval."
             ],
-            "pointer_only": false
+            "pointer_only": false,
+            "authority_capsule": true
           }
         },
         "hooks": {
           "path": "C:\\Users\\anise\\.codex\\hooks.json",
-          "present": false,
+          "present": true,
           "kind": "file",
-          "classification": "absent",
-          "disposition": "ACCEPTED_NONBLOCKING",
+          "classification": "approved_scorecard_runtime_hook",
+          "disposition": "RETAIN_SAFE",
           "operation": "retain",
           "status": "PASS",
           "generated_marker_found": false,
-          "repo_owned": false,
-          "reason": "path is absent",
+          "repo_owned": true,
+          "reason": "Windows hooks.json contains only the approved scorecard UserPromptSubmit hook.",
           "details": {}
         },
         "skills": {
@@ -291,6 +303,14 @@
           }
         }
       },
+      "scorecard_hook_enforcement": {
+        "status": "PASS",
+        "config_path": "C:\\Users\\anise\\.codex\\config.toml",
+        "hooks_path": "C:\\Users\\anise\\.codex\\hooks.json",
+        "codex_hooks_enabled": true,
+        "hooks_json_exact": true,
+        "reasons": []
+      },
       "reasons": [],
       "user_actions": []
     },
@@ -423,16 +443,6 @@
       "status": "PASS",
       "external_scratch": "C:\\Users\\anise\\code\\.scratch\\Dev-Management",
       "external_scratch_exists": true,
-      "repo_root_scratch": "C:\\Users\\anise\\code\\Dev-Management\\codex-scripts",
-      "repo_root_scratch_exists": false,
-      "reasons": []
-    },
-    "ssh_decommission": {
-      "status": "PASS",
-      "path": "C:\\Users\\anise\\.ssh",
-      "exists": false,
-      "active_development_surface": false,
-      "secret_values_reported": false,
       "reasons": []
     },
     "git_eol_policy": {
@@ -447,7 +457,7 @@
         "DEVMGMT_ROOT": "C:\\Users\\anise\\code\\Dev-Management",
         "DEV_WORKFLOW_ROOT": "C:\\Users\\anise\\code\\Dev-Workflow",
         "DEV_PRODUCT_ROOT": "C:\\Users\\anise\\code\\Dev-Product",
-        "CANONICAL_EXECUTION_HOST": "local-windows",
+        "CANONICAL_EXECUTION_HOST": "windows-native",
         "CODEX_CLI_BIN": "C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.422.2437.0_x64__2p2nqsd0c76g0\\app\\resources\\codex.exe",
         "CODEX_HOME": "C:\\Users\\anise\\.codex"
       },
@@ -473,7 +483,7 @@
         {
           "env_var": "CANONICAL_EXECUTION_HOST",
           "status": "ABSENT",
-          "expected": "local-windows",
+          "expected": "windows-native",
           "actual": ""
         },
         {

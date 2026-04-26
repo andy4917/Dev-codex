@@ -1,6 +1,6 @@
 {
   "schema_version": "2026.04.path-authority.windows-native.v1",
-  "canonical_execution_host": "local-windows",
+  "canonical_execution_host": "windows-native",
   "canonical_roots": {
     "dev_management": "C:\\Users\\anise\\code\\Dev-Management",
     "dev_workflow": "C:\\Users\\anise\\code\\Dev-Workflow",

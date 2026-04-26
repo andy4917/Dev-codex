@@ -6,6 +6,7 @@ from pathlib import Path
 
 from devmgmt_runtime.authority import authority_path_for
 from devmgmt_runtime.paths import is_forbidden_runtime_value
+from devmgmt_runtime.reports import save_json, write_markdown
 from devmgmt_runtime.status import collapse_status, status_exit_code
 
 
@@ -28,6 +29,18 @@ class DevMgmtRuntimeHelpersTests(unittest.TestCase):
         authority = {"forbidden_primary_runtime_paths": ["mounted-linux-launcher", "legacy-remote-route"]}
         self.assertTrue(is_forbidden_runtime_value("mounted-linux-launcher/codex", authority))
         self.assertFalse(is_forbidden_runtime_value("C:/Users/anise/code/Dev-Management", authority))
+
+    def test_report_writers_use_lf_on_windows(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp = Path(tmpdir)
+            json_path = tmp / "report.json"
+            md_path = tmp / "report.md"
+
+            save_json(json_path, {"status": "PASS", "items": ["a", "b"]})
+            write_markdown(md_path, "line one\nline two\n")
+
+            self.assertNotIn(b"\r\n", json_path.read_bytes())
+            self.assertNotIn(b"\r\n", md_path.read_bytes())
 
 
 if __name__ == "__main__":

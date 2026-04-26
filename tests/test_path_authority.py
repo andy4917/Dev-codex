@@ -25,7 +25,7 @@ class PathAuthorityTests(unittest.TestCase):
         codex_bin.write_text("", encoding="utf-8")
         policy = {
             "schema_version": "2026.04.path-authority.windows-native.v1",
-            "canonical_execution_host": "local-windows",
+            "canonical_execution_host": "windows-native",
             "canonical_roots": {
                 "dev_management": str(repo),
                 "dev_workflow": str(workflow),
@@ -54,11 +54,11 @@ class PathAuthorityTests(unittest.TestCase):
             },
             "forbidden_primary_runtime_paths": list(policy["forbidden_primary_paths"]),
             "canonical_execution_surface": {
-                "host_alias": "local-windows",
+                "host_alias": "windows-native",
                 "repo_root": str(repo),
             },
             "canonical_remote_execution_surface": {
-                "host_alias": "local-windows",
+                "host_alias": "windows-native",
                 "repo_root": str(repo),
             },
         }
@@ -74,7 +74,7 @@ class PathAuthorityTests(unittest.TestCase):
                 "DEVMGMT_ROOT": str(repo),
                 "DEV_WORKFLOW_ROOT": str(Path(policy["canonical_roots"]["dev_workflow"])),
                 "DEV_PRODUCT_ROOT": str(Path(policy["canonical_roots"]["dev_product"])),
-                "CANONICAL_EXECUTION_HOST": "local-windows",
+                "CANONICAL_EXECUTION_HOST": "windows-native",
                 "CODEX_CLI_BIN": str(Path(policy["runtime_paths"]["codex_cli_bin"])),
                 "CODEX_HOME": str(Path(policy["runtime_paths"]["windows_codex_home"])),
             }
@@ -87,7 +87,7 @@ class PathAuthorityTests(unittest.TestCase):
             loaded = path_authority.load_path_policy(repo)
             env = {
                 "DEVMGMT_ROOT": str(repo.parent / "elsewhere"),
-                "CANONICAL_EXECUTION_HOST": "local-windows",
+                "CANONICAL_EXECUTION_HOST": "windows-native",
                 "CODEX_CLI_BIN": str(Path(policy["runtime_paths"]["codex_cli_bin"])),
             }
             report = path_authority.validate_env_alignment(loaded, env=env)

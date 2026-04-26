@@ -42,7 +42,6 @@ sandbox = "elevated"
 - Moving repo-specific stack or product rules into global app instructions.
 - Using remote Linux execution as a governed runtime.
 - Using mounted Linux launchers or remote routes as the primary agent path.
-- Reintroducing `C:\Users\anise\.ssh` as an active development surface.
 - Deleting migration evidence without an explicit cleanup decision.
 
 ## Verification

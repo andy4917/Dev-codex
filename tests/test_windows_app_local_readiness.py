@@ -56,6 +56,7 @@ class WindowsAppLocalReadinessTests(unittest.TestCase):
             with patch.object(self.module, "PATH_POLICY", policy), patch.object(self.module, "WINDOWS_CODEX_HOME", codex_home), patch.object(self.module, "WINDOWS_APP_CONFIG", codex_home / "config.toml"), patch.object(self.module.shutil, "which", return_value="tool"):
                 report = self.module.evaluate_windows_app_local_readiness(devmgmt)
         self.assertEqual(report["status"], "APP_READY")
+        self.assertEqual(report["readiness_model"], "windows-native")
 
     def test_legacy_project_reference_blocks_readiness(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

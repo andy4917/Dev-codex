@@ -6,11 +6,17 @@ import json
 import os
 import secrets
 import subprocess
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from devmgmt_runtime.trash import recycle_path
+
 CONTRACTS = ROOT / "contracts"
 REPORTS = ROOT / "reports"
 DEFAULT_POLICY_FILE = CONTRACTS / "user_score_policy.json"
@@ -79,7 +85,7 @@ def load_authority(path: Path | None = None) -> dict[str, Any]:
 
 def save_json(path: Path, payload: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("w", encoding="utf-8") as handle:
+    with path.open("w", encoding="utf-8", newline="\n") as handle:
         json.dump(payload, handle, indent=2, ensure_ascii=False)
         handle.write("\n")
 
@@ -88,7 +94,7 @@ def atomic_save_json(path: Path, payload: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     temp_path = path.parent / f".{path.name}.{os.getpid()}.{secrets.token_hex(8)}.tmp"
     try:
-        with temp_path.open("w", encoding="utf-8") as handle:
+        with temp_path.open("w", encoding="utf-8", newline="\n") as handle:
             json.dump(payload, handle, indent=2, ensure_ascii=False)
             handle.write("\n")
             handle.flush()
@@ -97,7 +103,7 @@ def atomic_save_json(path: Path, payload: Any) -> None:
     finally:
         if temp_path.exists():
             try:
-                temp_path.unlink()
+                recycle_path(temp_path)
             except OSError:
                 pass
 

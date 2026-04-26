@@ -64,12 +64,14 @@
     }
   },
   "global_invariants": [
+    "The user's explicit instruction is the highest project authority inside allowed system/developer constraints.",
     "Codex App is the primary user control surface.",
     "Windows-native Codex App agent is the canonical execution surface.",
     "Dev-Management is policy/runtime verification authority.",
     "Repo AGENTS.md and package scripts are repo-local stack/workflow authority.",
     "Legacy Linux/remote execution authority is decommissioned after migration evidence and Windows checks pass.",
-    "Hooks are triggers only; audit, tests, and score are the final gates."
+    "Hooks are triggers only; audit, tests, and score are the final gates.",
+    "The approved scorecard UserPromptSubmit hook must bind the score layer once per task turn."
   ],
   "generated_mirror_contract": {
     "role": "generated_mirror",
@@ -137,7 +139,7 @@
   },
   "control_thread_policy": {
     "name": "Dev-Management Control",
-    "remote_host": "local-windows",
+    "remote_host": "windows-native",
     "project_path": "C:\\Users\\anise\\code\\Dev-Management",
     "default_mode": "local_windows_project",
     "default_worktree_mode": false,
@@ -215,8 +217,8 @@
     "legacy-remote-route"
   ],
   "canonical_execution_surface": {
-    "id": "local-windows-agent",
-    "host_alias": "local-windows",
+    "id": "windows-native",
+    "host_alias": "windows-native",
     "repo_root": "C:\\Users\\anise\\code\\Dev-Management",
     "expected_os": "windows",
     "expected_primary_resolution": "Windows-native Codex app agent running PowerShell 7",
@@ -492,7 +494,6 @@
     "feature_rules": {
       "forbidden_feature_flags": [
         "telepathy",
-        "workspace_dependencies",
         "use_agent_identity"
       ]
     }
@@ -519,8 +520,10 @@
     "quarantine_root": "C:\\Users\\anise\\code\\Dev-Management/quarantine",
     "ambiguous_items": "remove_or_inert_archive_only_when_forensic_context_requires_retention",
     "exact_duplicates": "delete_only_after_checksum_match_or_generated_match",
-    "legacy_backups": "remove_now",
-    "legacy_hooks": "remove_now",
+    "legacy_backups": "dispose_to_recycle_bin",
+    "temporary_artifacts": "dispose_to_recycle_bin",
+    "maintenance_archives": "durable_retention_evidence_only",
+      "legacy_hooks": "remove_now_except_approved_scorecard_user_prompt_hook",
     "runtime_state": "preserve_as_state_not_policy",
     "repo_local_global_policy": "move_out_of_product_repo",
     "old_marker_files": "remove_or_inert_archive_only_when_forensic_context_requires_retention",
@@ -575,7 +578,8 @@
         "role": "trigger_only",
         "script": "C:\\Users\\anise\\code\\Dev-Management/scripts/scorecard_runtime_hook.py",
         "state_root": "C:\\Users\\anise\\.codex/state/scorecard-hook",
-        "user_prompt_throttle_seconds": 300,
+        "user_prompt_throttle_seconds": 0,
+        "required_each_task_turn": true,
         "events": {
           "UserPromptSubmit": {
             "matcher": ".*"
@@ -613,6 +617,11 @@
         "image_generation",
         "js_repl",
         "memories",
+        "apps",
+        "plugins",
+        "tool_call_mcp_elicitation",
+        "tool_search",
+        "tool_suggest",
         "multi_agent_v2",
         "prevent_idle_sleep",
         "realtime_conversation",
@@ -633,5 +642,5 @@
       "app_skill_bundle_root": "C:\\Users\\anise\\.codex\\skills"
     }
   },
-  "canonical_execution_host": "local-windows"
+  "canonical_execution_host": "windows-native"
 }

@@ -126,7 +126,7 @@ def evaluate_windows_app_local_readiness(
     return {
         "status": status,
         "checked_at": datetime.now(timezone.utc).isoformat(),
-        "readiness_model": "windows-native-local",
+        "readiness_model": "windows-native",
         "local_project_root": str(root),
         "windows_codex_home": str(WINDOWS_CODEX_HOME),
         "windows_app_config": str(WINDOWS_APP_CONFIG),

@@ -2,7 +2,7 @@
 
 - Status: PASS
 - Production readiness: READY
-- Canonical execution host: local-windows
+- Canonical execution host: windows-native
 - Expected repo root prefix: C:\Users\anise\code
 
 ## Final Recommended Setup

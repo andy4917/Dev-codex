@@ -1,6 +1,6 @@
 {
   "status": "PASS",
-  "checked_at": "2026-04-25T13:25:20.165779+00:00",
+  "checked_at": "2026-04-26T08:57:00.399405+00:00",
   "policy_path": "C:\\Users\\anise\\code\\Dev-Management\\contracts\\workspace_structure_policy.json",
   "workspace_root": "C:\\Users\\anise\\code",
   "management_root": "C:\\Users\\anise\\code\\Dev-Management",
@@ -36,6 +36,16 @@
           "label": "Dev-Product",
           "path": "C:\\Users\\anise\\code\\Dev-Product",
           "role": "PRODUCT_SOURCE",
+          "required": true,
+          "expected_absent": false,
+          "exists": true,
+          "status": "PASS",
+          "reason": ""
+        },
+        {
+          "label": ".scratch/Dev-Management",
+          "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management",
+          "role": "SCRATCH_HARNESS",
           "required": true,
           "expected_absent": false,
           "exists": true,
@@ -136,6 +146,15 @@
           "path": "C:\\Users\\anise\\code\\Dev-Management\\reports",
           "relative_path": "reports",
           "role": "GENERATED_EVIDENCE",
+          "required": true,
+          "exists": true,
+          "status": "PASS",
+          "reason": ""
+        },
+        {
+          "path": "C:\\Users\\anise\\code\\Dev-Management\\reports\\migration-evidence",
+          "relative_path": "reports/migration-evidence",
+          "role": "MIGRATION_EVIDENCE",
           "required": true,
           "exists": true,
           "status": "PASS",
@@ -1016,8 +1035,53 @@
                     "error": ""
                   },
                   {
+                    "name": "user-scorecard.json",
+                    "path": "C:\\Users\\anise\\code\\Dev-Management\\reports\\user-scorecard.json",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "user-scorecard.review.json",
+                    "path": "C:\\Users\\anise\\code\\Dev-Management\\reports\\user-scorecard.review.json",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
                     "name": "windows-app-local-readiness.final.json",
                     "path": "C:\\Users\\anise\\code\\Dev-Management\\reports\\windows-app-local-readiness.final.json",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "windows-app-resource-health.final.json",
+                    "path": "C:\\Users\\anise\\code\\Dev-Management\\reports\\windows-app-resource-health.final.json",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "windows-process-burst.baseline.json",
+                    "path": "C:\\Users\\anise\\code\\Dev-Management\\reports\\windows-process-burst.baseline.json",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "windows-process-burst.final.json",
+                    "path": "C:\\Users\\anise\\code\\Dev-Management\\reports\\windows-process-burst.final.json",
                     "type": "file",
                     "exists": true,
                     "children": [],
@@ -1056,7 +1120,7 @@
                 "error": "",
                 "child_summary": {
                   "directories": 2,
-                  "files": 14,
+                  "files": 19,
                   "skipped_or_truncated": 0
                 }
               },
@@ -1132,6 +1196,24 @@
                   {
                     "name": "check_windows_app_local_readiness.py",
                     "path": "C:\\Users\\anise\\code\\Dev-Management\\scripts\\check_windows_app_local_readiness.py",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "check_windows_app_resource_health.py",
+                    "path": "C:\\Users\\anise\\code\\Dev-Management\\scripts\\check_windows_app_resource_health.py",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "check_windows_process_burst.py",
+                    "path": "C:\\Users\\anise\\code\\Dev-Management\\scripts\\check_windows_process_burst.py",
                     "type": "file",
                     "exists": true,
                     "children": [],
@@ -1242,7 +1324,7 @@
                 "error": "",
                 "child_summary": {
                   "directories": 0,
-                  "files": 19,
+                  "files": 21,
                   "skipped_or_truncated": 1
                 }
               },
@@ -1424,6 +1506,24 @@
                     "error": ""
                   },
                   {
+                    "name": "test_windows_app_resource_health.py",
+                    "path": "C:\\Users\\anise\\code\\Dev-Management\\tests\\test_windows_app_resource_health.py",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "test_windows_process_burst.py",
+                    "path": "C:\\Users\\anise\\code\\Dev-Management\\tests\\test_windows_process_burst.py",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
                     "name": "test_workspace_structure.py",
                     "path": "C:\\Users\\anise\\code\\Dev-Management\\tests\\test_workspace_structure.py",
                     "type": "file",
@@ -1437,7 +1537,7 @@
                 "error": "",
                 "child_summary": {
                   "directories": 0,
-                  "files": 20,
+                  "files": 22,
                   "skipped_or_truncated": 1
                 }
               },
@@ -2123,6 +2223,66 @@
                 }
               },
               {
+                "name": "contracts",
+                "path": "C:\\Users\\anise\\code\\Dev-Workflow\\contracts",
+                "type": "directory",
+                "exists": true,
+                "children": [
+                  {
+                    "name": "acceptance.json",
+                    "path": "C:\\Users\\anise\\code\\Dev-Workflow\\contracts\\acceptance.json",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "project_policy.json",
+                    "path": "C:\\Users\\anise\\code\\Dev-Workflow\\contracts\\project_policy.json",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "risk_register.json",
+                    "path": "C:\\Users\\anise\\code\\Dev-Workflow\\contracts\\risk_register.json",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "traceability.json",
+                    "path": "C:\\Users\\anise\\code\\Dev-Workflow\\contracts\\traceability.json",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "unknowns.json",
+                    "path": "C:\\Users\\anise\\code\\Dev-Workflow\\contracts\\unknowns.json",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  }
+                ],
+                "truncated": false,
+                "error": "",
+                "child_summary": {
+                  "directories": 0,
+                  "files": 5,
+                  "skipped_or_truncated": 0
+                }
+              },
+              {
                 "name": "docs",
                 "path": "C:\\Users\\anise\\code\\Dev-Workflow\\docs",
                 "type": "directory",
@@ -2160,13 +2320,22 @@
                       "files": 2,
                       "skipped_or_truncated": 0
                     }
+                  },
+                  {
+                    "name": "LOCAL_ENVIRONMENTS.md",
+                    "path": "C:\\Users\\anise\\code\\Dev-Workflow\\docs\\LOCAL_ENVIRONMENTS.md",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
                   }
                 ],
                 "truncated": false,
                 "error": "",
                 "child_summary": {
                   "directories": 1,
-                  "files": 0,
+                  "files": 1,
                   "skipped_or_truncated": 0
                 }
               },
@@ -2249,6 +2418,24 @@
                     }
                   },
                   {
+                    "name": "acceptance-report.json",
+                    "path": "C:\\Users\\anise\\code\\Dev-Workflow\\reports\\acceptance-report.json",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "bootstrap-report.json",
+                    "path": "C:\\Users\\anise\\code\\Dev-Workflow\\reports\\bootstrap-report.json",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
                     "name": "context7-usage.json",
                     "path": "C:\\Users\\anise\\code\\Dev-Workflow\\reports\\context7-usage.json",
                     "type": "file",
@@ -2269,6 +2456,15 @@
                   {
                     "name": "execution-surfaces.json",
                     "path": "C:\\Users\\anise\\code\\Dev-Workflow\\reports\\execution-surfaces.json",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "frontend-design-md-adoption.json",
+                    "path": "C:\\Users\\anise\\code\\Dev-Workflow\\reports\\frontend-design-md-adoption.json",
                     "type": "file",
                     "exists": true,
                     "children": [],
@@ -2303,8 +2499,44 @@
                     "error": ""
                   },
                   {
+                    "name": "path-visibility-stale-hints-closeout.md",
+                    "path": "C:\\Users\\anise\\code\\Dev-Workflow\\reports\\path-visibility-stale-hints-closeout.md",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
                     "name": "path-visibility.json",
                     "path": "C:\\Users\\anise\\code\\Dev-Workflow\\reports\\path-visibility.json",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "project-policy-restore-closeout.md",
+                    "path": "C:\\Users\\anise\\code\\Dev-Workflow\\reports\\project-policy-restore-closeout.md",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "runaway-report.json",
+                    "path": "C:\\Users\\anise\\code\\Dev-Workflow\\reports\\runaway-report.json",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "scorecard-authority-audit.json",
+                    "path": "C:\\Users\\anise\\code\\Dev-Workflow\\reports\\scorecard-authority-audit.json",
                     "type": "file",
                     "exists": true,
                     "children": [],
@@ -2339,6 +2571,24 @@
                     "error": ""
                   },
                   {
+                    "name": "traceability-report.json",
+                    "path": "C:\\Users\\anise\\code\\Dev-Workflow\\reports\\traceability-report.json",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "unknowns-report.json",
+                    "path": "C:\\Users\\anise\\code\\Dev-Workflow\\reports\\unknowns-report.json",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
                     "name": "user-readiness.json",
                     "path": "C:\\Users\\anise\\code\\Dev-Workflow\\reports\\user-readiness.json",
                     "type": "file",
@@ -2352,7 +2602,7 @@
                 "error": "",
                 "child_summary": {
                   "directories": 1,
-                  "files": 11,
+                  "files": 20,
                   "skipped_or_truncated": 0
                 }
               },
@@ -2642,6 +2892,24 @@
                     "error": ""
                   },
                   {
+                    "name": "project_setup.py",
+                    "path": "C:\\Users\\anise\\code\\Dev-Workflow\\scripts\\project_setup.py",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "run_acceptance.py",
+                    "path": "C:\\Users\\anise\\code\\Dev-Workflow\\scripts\\run_acceptance.py",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
                     "name": "session_router.py",
                     "path": "C:\\Users\\anise\\code\\Dev-Workflow\\scripts\\session_router.py",
                     "type": "file",
@@ -2664,7 +2932,7 @@
                 "error": "",
                 "child_summary": {
                   "directories": 3,
-                  "files": 21,
+                  "files": 23,
                   "skipped_or_truncated": 1
                 }
               },
@@ -3678,12 +3946,36 @@
                       "files": 46,
                       "skipped_or_truncated": 0
                     }
+                  },
+                  {
+                    "name": "frontend",
+                    "path": "C:\\Users\\anise\\code\\Dev-Workflow\\templates\\frontend",
+                    "type": "directory",
+                    "exists": true,
+                    "children": [
+                      {
+                        "name": "DESIGN.md",
+                        "path": "C:\\Users\\anise\\code\\Dev-Workflow\\templates\\frontend\\DESIGN.md",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      }
+                    ],
+                    "truncated": false,
+                    "error": "",
+                    "child_summary": {
+                      "directories": 0,
+                      "files": 1,
+                      "skipped_or_truncated": 0
+                    }
                   }
                 ],
                 "truncated": false,
                 "error": "",
                 "child_summary": {
-                  "directories": 1,
+                  "directories": 2,
                   "files": 0,
                   "skipped_or_truncated": 0
                 }
@@ -3731,8 +4023,35 @@
                     "error": ""
                   },
                   {
+                    "name": "test_frontend_design_md_workflow.py",
+                    "path": "C:\\Users\\anise\\code\\Dev-Workflow\\tests\\test_frontend_design_md_workflow.py",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "test_local_environments_contract.py",
+                    "path": "C:\\Users\\anise\\code\\Dev-Workflow\\tests\\test_local_environments_contract.py",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
                     "name": "test_mission_refresh.py",
                     "path": "C:\\Users\\anise\\code\\Dev-Workflow\\tests\\test_mission_refresh.py",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "test_project_policy_contract.py",
+                    "path": "C:\\Users\\anise\\code\\Dev-Workflow\\tests\\test_project_policy_contract.py",
                     "type": "file",
                     "exists": true,
                     "children": [],
@@ -3789,7 +4108,7 @@
                 "error": "",
                 "child_summary": {
                   "directories": 0,
-                  "files": 10,
+                  "files": 13,
                   "skipped_or_truncated": 1
                 }
               },
@@ -3820,6 +4139,15 @@
                   {
                     "name": "DOMAIN_AWARE_MISSION_REFRESH.md",
                     "path": "C:\\Users\\anise\\code\\Dev-Workflow\\workflows\\DOMAIN_AWARE_MISSION_REFRESH.md",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "FRONTEND_DESIGN_MD.md",
+                    "path": "C:\\Users\\anise\\code\\Dev-Workflow\\workflows\\FRONTEND_DESIGN_MD.md",
                     "type": "file",
                     "exists": true,
                     "children": [],
@@ -3894,7 +4222,7 @@
                 "error": "",
                 "child_summary": {
                   "directories": 0,
-                  "files": 10,
+                  "files": 11,
                   "skipped_or_truncated": 0
                 }
               },
@@ -3947,7 +4275,7 @@
             "truncated": false,
             "error": "",
             "child_summary": {
-              "directories": 13,
+              "directories": 14,
               "files": 5,
               "skipped_or_truncated": 1
             }
@@ -5938,13 +6266,1118 @@
                   "files": 21,
                   "skipped_or_truncated": 3
                 }
+              },
+              {
+                "name": "입실퇴실 안내문 생성기",
+                "path": "C:\\Users\\anise\\code\\Dev-Product\\입실퇴실 안내문 생성기",
+                "type": "directory",
+                "exists": true,
+                "children": [
+                  {
+                    "name": ".serena",
+                    "path": "C:\\Users\\anise\\code\\Dev-Product\\입실퇴실 안내문 생성기\\.serena",
+                    "type": "directory",
+                    "exists": true,
+                    "children": [
+                      {
+                        "name": "cache",
+                        "path": "C:\\Users\\anise\\code\\Dev-Product\\입실퇴실 안내문 생성기\\.serena\\cache",
+                        "type": "directory",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "memories",
+                        "path": "C:\\Users\\anise\\code\\Dev-Product\\입실퇴실 안내문 생성기\\.serena\\memories",
+                        "type": "directory",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": ".gitignore",
+                        "path": "C:\\Users\\anise\\code\\Dev-Product\\입실퇴실 안내문 생성기\\.serena\\.gitignore",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "project.local.yml",
+                        "path": "C:\\Users\\anise\\code\\Dev-Product\\입실퇴실 안내문 생성기\\.serena\\project.local.yml",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "project.yml",
+                        "path": "C:\\Users\\anise\\code\\Dev-Product\\입실퇴실 안내문 생성기\\.serena\\project.yml",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      }
+                    ],
+                    "truncated": false,
+                    "error": "",
+                    "child_summary": {
+                      "directories": 2,
+                      "files": 3,
+                      "skipped_or_truncated": 0
+                    }
+                  },
+                  {
+                    "name": "assets",
+                    "path": "C:\\Users\\anise\\code\\Dev-Product\\입실퇴실 안내문 생성기\\assets",
+                    "type": "directory",
+                    "exists": true,
+                    "children": [
+                      {
+                        "name": "coex",
+                        "path": "C:\\Users\\anise\\code\\Dev-Product\\입실퇴실 안내문 생성기\\assets\\coex",
+                        "type": "directory",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      }
+                    ],
+                    "truncated": false,
+                    "error": "",
+                    "child_summary": {
+                      "directories": 1,
+                      "files": 0,
+                      "skipped_or_truncated": 0
+                    }
+                  },
+                  {
+                    "name": "docs",
+                    "path": "C:\\Users\\anise\\code\\Dev-Product\\입실퇴실 안내문 생성기\\docs",
+                    "type": "directory",
+                    "exists": true,
+                    "children": [
+                      {
+                        "name": "STRUCTURE_MAPPING.md",
+                        "path": "C:\\Users\\anise\\code\\Dev-Product\\입실퇴실 안내문 생성기\\docs\\STRUCTURE_MAPPING.md",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "TEMPLATE_CATALOG_POLICY.md",
+                        "path": "C:\\Users\\anise\\code\\Dev-Product\\입실퇴실 안내문 생성기\\docs\\TEMPLATE_CATALOG_POLICY.md",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "WINDOWS_UNPACKED_EXTENSION.md",
+                        "path": "C:\\Users\\anise\\code\\Dev-Product\\입실퇴실 안내문 생성기\\docs\\WINDOWS_UNPACKED_EXTENSION.md",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      }
+                    ],
+                    "truncated": false,
+                    "error": "",
+                    "child_summary": {
+                      "directories": 0,
+                      "files": 3,
+                      "skipped_or_truncated": 0
+                    }
+                  },
+                  {
+                    "name": "icons",
+                    "path": "C:\\Users\\anise\\code\\Dev-Product\\입실퇴실 안내문 생성기\\icons",
+                    "type": "directory",
+                    "exists": true,
+                    "children": [
+                      {
+                        "name": "logo-128.png",
+                        "path": "C:\\Users\\anise\\code\\Dev-Product\\입실퇴실 안내문 생성기\\icons\\logo-128.png",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "logo-16.png",
+                        "path": "C:\\Users\\anise\\code\\Dev-Product\\입실퇴실 안내문 생성기\\icons\\logo-16.png",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "logo-32.png",
+                        "path": "C:\\Users\\anise\\code\\Dev-Product\\입실퇴실 안내문 생성기\\icons\\logo-32.png",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "logo-34.png",
+                        "path": "C:\\Users\\anise\\code\\Dev-Product\\입실퇴실 안내문 생성기\\icons\\logo-34.png",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "logo-48.png",
+                        "path": "C:\\Users\\anise\\code\\Dev-Product\\입실퇴실 안내문 생성기\\icons\\logo-48.png",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      }
+                    ],
+                    "truncated": false,
+                    "error": "",
+                    "child_summary": {
+                      "directories": 0,
+                      "files": 5,
+                      "skipped_or_truncated": 0
+                    }
+                  },
+                  {
+                    "name": "scripts",
+                    "path": "C:\\Users\\anise\\code\\Dev-Product\\입실퇴실 안내문 생성기\\scripts",
+                    "type": "directory",
+                    "exists": true,
+                    "children": [
+                      {
+                        "name": "extension-id.js",
+                        "path": "C:\\Users\\anise\\code\\Dev-Product\\입실퇴실 안내문 생성기\\scripts\\extension-id.js",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "print-extension-id.js",
+                        "path": "C:\\Users\\anise\\code\\Dev-Product\\입실퇴실 안내문 생성기\\scripts\\print-extension-id.js",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      }
+                    ],
+                    "truncated": false,
+                    "error": "",
+                    "child_summary": {
+                      "directories": 0,
+                      "files": 2,
+                      "skipped_or_truncated": 0
+                    }
+                  },
+                  {
+                    "name": "src",
+                    "path": "C:\\Users\\anise\\code\\Dev-Product\\입실퇴실 안내문 생성기\\src",
+                    "type": "directory",
+                    "exists": true,
+                    "children": [
+                      {
+                        "name": "assets",
+                        "path": "C:\\Users\\anise\\code\\Dev-Product\\입실퇴실 안내문 생성기\\src\\assets",
+                        "type": "directory",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "background",
+                        "path": "C:\\Users\\anise\\code\\Dev-Product\\입실퇴실 안내문 생성기\\src\\background",
+                        "type": "directory",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "config",
+                        "path": "C:\\Users\\anise\\code\\Dev-Product\\입실퇴실 안내문 생성기\\src\\config",
+                        "type": "directory",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "domain",
+                        "path": "C:\\Users\\anise\\code\\Dev-Product\\입실퇴실 안내문 생성기\\src\\domain",
+                        "type": "directory",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "messages",
+                        "path": "C:\\Users\\anise\\code\\Dev-Product\\입실퇴실 안내문 생성기\\src\\messages",
+                        "type": "directory",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "pms",
+                        "path": "C:\\Users\\anise\\code\\Dev-Product\\입실퇴실 안내문 생성기\\src\\pms",
+                        "type": "directory",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "sidepanel",
+                        "path": "C:\\Users\\anise\\code\\Dev-Product\\입실퇴실 안내문 생성기\\src\\sidepanel",
+                        "type": "directory",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      }
+                    ],
+                    "truncated": false,
+                    "error": "",
+                    "child_summary": {
+                      "directories": 7,
+                      "files": 0,
+                      "skipped_or_truncated": 0
+                    }
+                  },
+                  {
+                    "name": "styles",
+                    "path": "C:\\Users\\anise\\code\\Dev-Product\\입실퇴실 안내문 생성기\\styles",
+                    "type": "directory",
+                    "exists": true,
+                    "children": [
+                      {
+                        "name": "sidepanel.css",
+                        "path": "C:\\Users\\anise\\code\\Dev-Product\\입실퇴실 안내문 생성기\\styles\\sidepanel.css",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      }
+                    ],
+                    "truncated": false,
+                    "error": "",
+                    "child_summary": {
+                      "directories": 0,
+                      "files": 1,
+                      "skipped_or_truncated": 0
+                    }
+                  },
+                  {
+                    "name": "tests",
+                    "path": "C:\\Users\\anise\\code\\Dev-Product\\입실퇴실 안내문 생성기\\tests",
+                    "type": "directory",
+                    "exists": true,
+                    "children": [
+                      {
+                        "name": "domain.test.js",
+                        "path": "C:\\Users\\anise\\code\\Dev-Product\\입실퇴실 안내문 생성기\\tests\\domain.test.js",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "pms-api.test.js",
+                        "path": "C:\\Users\\anise\\code\\Dev-Product\\입실퇴실 안내문 생성기\\tests\\pms-api.test.js",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      }
+                    ],
+                    "truncated": false,
+                    "error": "",
+                    "child_summary": {
+                      "directories": 0,
+                      "files": 2,
+                      "skipped_or_truncated": 0
+                    }
+                  },
+                  {
+                    "name": "logo.png",
+                    "path": "C:\\Users\\anise\\code\\Dev-Product\\입실퇴실 안내문 생성기\\logo.png",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "manifest.json",
+                    "path": "C:\\Users\\anise\\code\\Dev-Product\\입실퇴실 안내문 생성기\\manifest.json",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "package.json",
+                    "path": "C:\\Users\\anise\\code\\Dev-Product\\입실퇴실 안내문 생성기\\package.json",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "sidepanel.html",
+                    "path": "C:\\Users\\anise\\code\\Dev-Product\\입실퇴실 안내문 생성기\\sidepanel.html",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  }
+                ],
+                "truncated": false,
+                "error": "",
+                "child_summary": {
+                  "directories": 8,
+                  "files": 4,
+                  "skipped_or_truncated": 0
+                }
               }
             ],
             "truncated": false,
             "error": "",
             "child_summary": {
-              "directories": 1,
+              "directories": 2,
               "files": 0,
+              "skipped_or_truncated": 0
+            }
+          }
+        },
+        {
+          "label": ".scratch/Dev-Management",
+          "role": "SCRATCH_HARNESS",
+          "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management",
+          "exists": true,
+          "listing_mode": "detailed",
+          "tree": {
+            "name": "Dev-Management",
+            "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management",
+            "type": "directory",
+            "exists": true,
+            "children": [
+              {
+                "name": "anti-slop-nonassertive-pass",
+                "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\anti-slop-nonassertive-pass",
+                "type": "directory",
+                "exists": true,
+                "children": [
+                  {
+                    "name": ".agent-runs",
+                    "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\anti-slop-nonassertive-pass\\.agent-runs",
+                    "type": "directory",
+                    "exists": true,
+                    "children": [
+                      {
+                        "name": "run-nonassertive",
+                        "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\anti-slop-nonassertive-pass\\.agent-runs\\run-nonassertive",
+                        "type": "directory",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      }
+                    ],
+                    "truncated": false,
+                    "error": "",
+                    "child_summary": {
+                      "directories": 1,
+                      "files": 0,
+                      "skipped_or_truncated": 0
+                    }
+                  },
+                  {
+                    "name": "ai-slop.final.json",
+                    "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\anti-slop-nonassertive-pass\\ai-slop.final.json",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "domain-mission-refresh.final.json",
+                    "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\anti-slop-nonassertive-pass\\domain-mission-refresh.final.json",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "prompt.txt",
+                    "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\anti-slop-nonassertive-pass\\prompt.txt",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "README.md",
+                    "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\anti-slop-nonassertive-pass\\README.md",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "SUMMARY.md",
+                    "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\anti-slop-nonassertive-pass\\SUMMARY.md",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  }
+                ],
+                "truncated": false,
+                "error": "",
+                "child_summary": {
+                  "directories": 1,
+                  "files": 5,
+                  "skipped_or_truncated": 1
+                }
+              },
+              {
+                "name": "checkin-checkout-branch-policy",
+                "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\checkin-checkout-branch-policy",
+                "type": "directory",
+                "exists": true,
+                "children": [
+                  {
+                    "name": "harness.mjs",
+                    "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\checkin-checkout-branch-policy\\harness.mjs",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  }
+                ],
+                "truncated": false,
+                "error": "",
+                "child_summary": {
+                  "directories": 0,
+                  "files": 1,
+                  "skipped_or_truncated": 0
+                }
+              },
+              {
+                "name": "checkin-checkout-extension-skeleton",
+                "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\checkin-checkout-extension-skeleton",
+                "type": "directory",
+                "exists": true,
+                "children": [
+                  {
+                    "name": "harness.mjs",
+                    "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\checkin-checkout-extension-skeleton\\harness.mjs",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  }
+                ],
+                "truncated": false,
+                "error": "",
+                "child_summary": {
+                  "directories": 0,
+                  "files": 1,
+                  "skipped_or_truncated": 0
+                }
+              },
+              {
+                "name": "mission-refresh-e2e",
+                "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\mission-refresh-e2e",
+                "type": "directory",
+                "exists": true,
+                "children": [
+                  {
+                    "name": ".agent-runs",
+                    "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\mission-refresh-e2e\\.agent-runs",
+                    "type": "directory",
+                    "exists": true,
+                    "children": [
+                      {
+                        "name": "run-e2e",
+                        "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\mission-refresh-e2e\\.agent-runs\\run-e2e",
+                        "type": "directory",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      }
+                    ],
+                    "truncated": false,
+                    "error": "",
+                    "child_summary": {
+                      "directories": 1,
+                      "files": 0,
+                      "skipped_or_truncated": 0
+                    }
+                  },
+                  {
+                    "name": "reports",
+                    "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\mission-refresh-e2e\\reports",
+                    "type": "directory",
+                    "exists": true,
+                    "children": [
+                      {
+                        "name": "session-router.json",
+                        "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\mission-refresh-e2e\\reports\\session-router.json",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      }
+                    ],
+                    "truncated": false,
+                    "error": "",
+                    "child_summary": {
+                      "directories": 0,
+                      "files": 1,
+                      "skipped_or_truncated": 0
+                    }
+                  },
+                  {
+                    "name": "tests",
+                    "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\mission-refresh-e2e\\tests",
+                    "type": "directory",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": "",
+                    "child_summary": {
+                      "directories": 0,
+                      "files": 0,
+                      "skipped_or_truncated": 0
+                    }
+                  },
+                  {
+                    "name": "domain-mission-refresh.final.json",
+                    "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\mission-refresh-e2e\\domain-mission-refresh.final.json",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "prompt.txt",
+                    "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\mission-refresh-e2e\\prompt.txt",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "README.md",
+                    "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\mission-refresh-e2e\\README.md",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "SUMMARY.md",
+                    "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\mission-refresh-e2e\\SUMMARY.md",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  }
+                ],
+                "truncated": false,
+                "error": "",
+                "child_summary": {
+                  "directories": 3,
+                  "files": 4,
+                  "skipped_or_truncated": 1
+                }
+              },
+              {
+                "name": "mission-refresh-e2e-pass",
+                "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\mission-refresh-e2e-pass",
+                "type": "directory",
+                "exists": true,
+                "children": [
+                  {
+                    "name": ".agent-runs",
+                    "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\mission-refresh-e2e-pass\\.agent-runs",
+                    "type": "directory",
+                    "exists": true,
+                    "children": [
+                      {
+                        "name": "run-e2e",
+                        "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\mission-refresh-e2e-pass\\.agent-runs\\run-e2e",
+                        "type": "directory",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      }
+                    ],
+                    "truncated": false,
+                    "error": "",
+                    "child_summary": {
+                      "directories": 1,
+                      "files": 0,
+                      "skipped_or_truncated": 0
+                    }
+                  },
+                  {
+                    "name": "tests",
+                    "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\mission-refresh-e2e-pass\\tests",
+                    "type": "directory",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": "",
+                    "child_summary": {
+                      "directories": 0,
+                      "files": 0,
+                      "skipped_or_truncated": 0
+                    }
+                  },
+                  {
+                    "name": "domain-mission-refresh.final.json",
+                    "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\mission-refresh-e2e-pass\\domain-mission-refresh.final.json",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "prompt.txt",
+                    "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\mission-refresh-e2e-pass\\prompt.txt",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "README.md",
+                    "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\mission-refresh-e2e-pass\\README.md",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "SUMMARY.md",
+                    "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\mission-refresh-e2e-pass\\SUMMARY.md",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  }
+                ],
+                "truncated": false,
+                "error": "",
+                "child_summary": {
+                  "directories": 2,
+                  "files": 4,
+                  "skipped_or_truncated": 1
+                }
+              },
+              {
+                "name": "mission-refresh-nonassertive-pass",
+                "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\mission-refresh-nonassertive-pass",
+                "type": "directory",
+                "exists": true,
+                "children": [
+                  {
+                    "name": ".agent-runs",
+                    "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\mission-refresh-nonassertive-pass\\.agent-runs",
+                    "type": "directory",
+                    "exists": true,
+                    "children": [
+                      {
+                        "name": "run-e2e",
+                        "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\mission-refresh-nonassertive-pass\\.agent-runs\\run-e2e",
+                        "type": "directory",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      }
+                    ],
+                    "truncated": false,
+                    "error": "",
+                    "child_summary": {
+                      "directories": 1,
+                      "files": 0,
+                      "skipped_or_truncated": 0
+                    }
+                  },
+                  {
+                    "name": "tests",
+                    "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\mission-refresh-nonassertive-pass\\tests",
+                    "type": "directory",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": "",
+                    "child_summary": {
+                      "directories": 0,
+                      "files": 0,
+                      "skipped_or_truncated": 0
+                    }
+                  },
+                  {
+                    "name": "ai-slop.final.json",
+                    "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\mission-refresh-nonassertive-pass\\ai-slop.final.json",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "domain-mission-refresh.final.json",
+                    "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\mission-refresh-nonassertive-pass\\domain-mission-refresh.final.json",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "prompt.txt",
+                    "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\mission-refresh-nonassertive-pass\\prompt.txt",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "README.md",
+                    "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\mission-refresh-nonassertive-pass\\README.md",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "SUMMARY.md",
+                    "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\mission-refresh-nonassertive-pass\\SUMMARY.md",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  }
+                ],
+                "truncated": false,
+                "error": "",
+                "child_summary": {
+                  "directories": 2,
+                  "files": 5,
+                  "skipped_or_truncated": 1
+                }
+              },
+              {
+                "name": "path-visibility-stale-hints",
+                "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\path-visibility-stale-hints",
+                "type": "directory",
+                "exists": true,
+                "children": [
+                  {
+                    "name": "codex-global-state.before.json",
+                    "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\path-visibility-stale-hints\\codex-global-state.before.json",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  }
+                ],
+                "truncated": false,
+                "error": "",
+                "child_summary": {
+                  "directories": 0,
+                  "files": 1,
+                  "skipped_or_truncated": 0
+                }
+              },
+              {
+                "name": "runs",
+                "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\runs",
+                "type": "directory",
+                "exists": true,
+                "children": [
+                  {
+                    "name": "apply-touched-code-runtime-rule",
+                    "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\runs\\apply-touched-code-runtime-rule",
+                    "type": "directory",
+                    "exists": true,
+                    "children": [
+                      {
+                        "name": "snapshot",
+                        "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\runs\\apply-touched-code-runtime-rule\\snapshot",
+                        "type": "directory",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "command.log",
+                        "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\runs\\apply-touched-code-runtime-rule\\command.log",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "metadata.json",
+                        "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\runs\\apply-touched-code-runtime-rule\\metadata.json",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      }
+                    ],
+                    "truncated": false,
+                    "error": "",
+                    "child_summary": {
+                      "directories": 1,
+                      "files": 2,
+                      "skipped_or_truncated": 0
+                    }
+                  },
+                  {
+                    "name": "vibe-director-plugin-eval",
+                    "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\runs\\vibe-director-plugin-eval",
+                    "type": "directory",
+                    "exists": true,
+                    "children": [
+                      {
+                        "name": "benchmark.json",
+                        "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\runs\\vibe-director-plugin-eval\\benchmark.json",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      }
+                    ],
+                    "truncated": false,
+                    "error": "",
+                    "child_summary": {
+                      "directories": 0,
+                      "files": 1,
+                      "skipped_or_truncated": 0
+                    }
+                  },
+                  {
+                    "name": "vibe-director-smoke",
+                    "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\runs\\vibe-director-smoke",
+                    "type": "directory",
+                    "exists": true,
+                    "children": [
+                      {
+                        "name": ".agent-runs",
+                        "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\runs\\vibe-director-smoke\\.agent-runs",
+                        "type": "directory",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "reports",
+                        "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\runs\\vibe-director-smoke\\reports",
+                        "type": "directory",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "ai-slop.final.json",
+                        "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\runs\\vibe-director-smoke\\ai-slop.final.json",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      },
+                      {
+                        "name": "prompt.txt",
+                        "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\runs\\vibe-director-smoke\\prompt.txt",
+                        "type": "file",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      }
+                    ],
+                    "truncated": false,
+                    "error": "",
+                    "child_summary": {
+                      "directories": 2,
+                      "files": 2,
+                      "skipped_or_truncated": 0
+                    }
+                  },
+                  {
+                    "name": "global-agent-workflow-check.json",
+                    "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\runs\\global-agent-workflow-check.json",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "global-agent-workflow-check.md",
+                    "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\runs\\global-agent-workflow-check.md",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "global-dirty-cleanup-summary.md",
+                    "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\runs\\global-dirty-cleanup-summary.md",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "windows-native-cutover-harness.json",
+                    "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\runs\\windows-native-cutover-harness.json",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "windows-native-cutover-harness.py",
+                    "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\runs\\windows-native-cutover-harness.py",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  },
+                  {
+                    "name": "workspace-tree-runtime-harness.py",
+                    "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\runs\\workspace-tree-runtime-harness.py",
+                    "type": "file",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": ""
+                  }
+                ],
+                "truncated": false,
+                "error": "",
+                "child_summary": {
+                  "directories": 3,
+                  "files": 6,
+                  "skipped_or_truncated": 0
+                }
+              },
+              {
+                "name": "check_user_dev_environment_scratch_surface_harness.py",
+                "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\check_user_dev_environment_scratch_surface_harness.py",
+                "type": "file",
+                "exists": true,
+                "children": [],
+                "truncated": false,
+                "error": ""
+              },
+              {
+                "name": "domain-mission-refresh-l1-smoke.json",
+                "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\domain-mission-refresh-l1-smoke.json",
+                "type": "file",
+                "exists": true,
+                "children": [],
+                "truncated": false,
+                "error": ""
+              },
+              {
+                "name": "process-burst-harness.ps1",
+                "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\process-burst-harness.ps1",
+                "type": "file",
+                "exists": true,
+                "children": [],
+                "truncated": false,
+                "error": ""
+              },
+              {
+                "name": "run-touched-behavior.ps1",
+                "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management\\run-touched-behavior.ps1",
+                "type": "file",
+                "exists": true,
+                "children": [],
+                "truncated": false,
+                "error": ""
+              }
+            ],
+            "truncated": false,
+            "error": "",
+            "child_summary": {
+              "directories": 8,
+              "files": 4,
               "skipped_or_truncated": 0
             }
           }
@@ -6152,6 +7585,48 @@
                     }
                   },
                   {
+                    "name": "50403a3c1b65d06adcac0ae6b8383752a2f63ab0",
+                    "path": "C:\\Users\\anise\\.codex\\ambient-suggestions\\50403a3c1b65d06adcac0ae6b8383752a2f63ab0",
+                    "type": "directory",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": "",
+                    "child_summary": {
+                      "directories": 0,
+                      "files": 1,
+                      "skipped_or_truncated": 0
+                    }
+                  },
+                  {
+                    "name": "714cd35935d54957aab31930f7639d39cbafa252",
+                    "path": "C:\\Users\\anise\\.codex\\ambient-suggestions\\714cd35935d54957aab31930f7639d39cbafa252",
+                    "type": "directory",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": "",
+                    "child_summary": {
+                      "directories": 0,
+                      "files": 1,
+                      "skipped_or_truncated": 0
+                    }
+                  },
+                  {
+                    "name": "747c0080b811df4dfa6cc07fb106a7e785233d81",
+                    "path": "C:\\Users\\anise\\.codex\\ambient-suggestions\\747c0080b811df4dfa6cc07fb106a7e785233d81",
+                    "type": "directory",
+                    "exists": true,
+                    "children": [],
+                    "truncated": false,
+                    "error": "",
+                    "child_summary": {
+                      "directories": 0,
+                      "files": 1,
+                      "skipped_or_truncated": 0
+                    }
+                  },
+                  {
                     "name": "788735442fa72440257d128d8fcca99f0803a8e0",
                     "path": "C:\\Users\\anise\\.codex\\ambient-suggestions\\788735442fa72440257d128d8fcca99f0803a8e0",
                     "type": "directory",
@@ -6225,7 +7700,7 @@
                 "truncated": false,
                 "error": "",
                 "child_summary": {
-                  "directories": 9,
+                  "directories": 12,
                   "files": 0,
                   "skipped_or_truncated": 0
                 }
@@ -6383,7 +7858,7 @@
                 "error": "",
                 "child_summary": {
                   "directories": 0,
-                  "files": 1,
+                  "files": 2,
                   "skipped_or_truncated": 0
                 }
               },
@@ -6394,6 +7869,30 @@
                 "exists": true,
                 "children": [
                   {
+                    "name": ".serena",
+                    "path": "C:\\Users\\anise\\.codex\\memories\\.serena",
+                    "type": "directory",
+                    "exists": true,
+                    "children": [
+                      {
+                        "name": "memories",
+                        "path": "C:\\Users\\anise\\.codex\\memories\\.serena\\memories",
+                        "type": "directory",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      }
+                    ],
+                    "truncated": false,
+                    "error": "",
+                    "child_summary": {
+                      "directories": 1,
+                      "files": 3,
+                      "skipped_or_truncated": 0
+                    }
+                  },
+                  {
                     "name": "rollout_summaries",
                     "path": "C:\\Users\\anise\\.codex\\memories\\rollout_summaries",
                     "type": "directory",
@@ -6403,7 +7902,7 @@
                     "error": "",
                     "child_summary": {
                       "directories": 0,
-                      "files": 42,
+                      "files": 46,
                       "skipped_or_truncated": 0
                     }
                   },
@@ -6444,7 +7943,7 @@
                 "truncated": false,
                 "error": "",
                 "child_summary": {
-                  "directories": 2,
+                  "directories": 3,
                   "files": 3,
                   "skipped_or_truncated": 0
                 }
@@ -6555,7 +8054,7 @@
                 "error": "",
                 "child_summary": {
                   "directories": 0,
-                  "files": 7,
+                  "files": 6,
                   "skipped_or_truncated": 0
                 }
               },
@@ -6756,8 +8255,8 @@
                     "exists": true,
                     "children": [
                       {
-                        "name": "codex-arg0Ai4VgU",
-                        "path": "C:\\Users\\anise\\.codex\\tmp\\arg0\\codex-arg0Ai4VgU",
+                        "name": "codex-arg0hdafo2",
+                        "path": "C:\\Users\\anise\\.codex\\tmp\\arg0\\codex-arg0hdafo2",
                         "type": "directory",
                         "exists": true,
                         "children": [],
@@ -6820,12 +8319,51 @@
                   "files": 1,
                   "skipped_or_truncated": 0
                 }
+              },
+              {
+                "name": "worktrees",
+                "path": "C:\\Users\\anise\\.codex\\worktrees",
+                "type": "directory",
+                "exists": true,
+                "children": [
+                  {
+                    "name": "1dd9",
+                    "path": "C:\\Users\\anise\\.codex\\worktrees\\1dd9",
+                    "type": "directory",
+                    "exists": true,
+                    "children": [
+                      {
+                        "name": "Dev-Management",
+                        "path": "C:\\Users\\anise\\.codex\\worktrees\\1dd9\\Dev-Management",
+                        "type": "directory",
+                        "exists": true,
+                        "children": [],
+                        "truncated": false,
+                        "error": ""
+                      }
+                    ],
+                    "truncated": false,
+                    "error": "",
+                    "child_summary": {
+                      "directories": 1,
+                      "files": 0,
+                      "skipped_or_truncated": 0
+                    }
+                  }
+                ],
+                "truncated": false,
+                "error": "",
+                "child_summary": {
+                  "directories": 1,
+                  "files": 0,
+                  "skipped_or_truncated": 0
+                }
               }
             ],
             "truncated": false,
             "error": "",
             "child_summary": {
-              "directories": 21,
+              "directories": 22,
               "files": 16,
               "skipped_or_truncated": 0
             }

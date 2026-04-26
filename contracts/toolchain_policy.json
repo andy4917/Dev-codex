@@ -134,7 +134,6 @@
     "skills",
     "subagents",
     "plugin_mcp_surface",
-    "workspace_dependencies",
     "chronicle",
     "projectless_chats",
     "automations",
@@ -145,6 +144,9 @@
     "in_app_browser",
     "serena",
     "context7"
+  ],
+  "unsupported_app_surface_features": [
+    "workspace_dependencies"
   ],
   "ai_python_packages": {
     "langchain": {

@@ -18,7 +18,7 @@ if str(ROOT) not in sys.path:
 from devmgmt_runtime.authority import authority_path_for, canonical_authority_path, canonical_repo_root, load_authority
 from devmgmt_runtime.path_authority import load_path_policy, windows_codex_home
 from devmgmt_runtime.paths import runtime_paths
-from devmgmt_runtime.reports import load_json, save_json
+from devmgmt_runtime.reports import load_json, save_json, write_markdown
 from devmgmt_runtime.status import collapse_status, status_exit_code
 from devmgmt_runtime.windows_policy import windows_policy_surface_report
 
@@ -212,13 +212,11 @@ def config_policy_findings(path: Path, policy: dict[str, Any], classification: s
     required_true = required_true_features(policy, authority)
     active_forbidden = sorted(str(feature) for feature, enabled in features.items() if enabled and str(feature) in blocked_flags)
     reasons: list[str] = []
-    workspace_reauthorized = bool(policy.get("workspace_dependencies_reauthorized", False))
     for feature in active_forbidden:
         if feature == "telepathy":
             reasons.append("active telepathy flag detected")
         elif feature == "workspace_dependencies":
-            if not workspace_reauthorized:
-                reasons.append("active workspace_dependencies flag detected without explicit authority re-authorization")
+            reasons.append("active unsupported workspace_dependencies feature flag detected")
         else:
             reasons.append(f"active forbidden feature flag detected: {feature}")
     blocked_values = policy.get("blocked_generated_config_values", {})
@@ -261,11 +259,6 @@ def evaluate_config_provenance(repo_root: str | Path | None = None) -> dict[str,
     policy = load_json(policy_path, default={}) if policy_path.exists() else load_policy(repo_root)
     if not policy.get("blocked_active_feature_flags"):
         policy["blocked_active_feature_flags"] = authority.get("hardcoding_definition", {}).get("feature_rules", {}).get("forbidden_feature_flags", [])
-    if "workspace_dependencies" in policy.get("blocked_active_feature_flags", []) and policy.get("workspace_dependencies_reauthorized"):
-        policy["blocked_active_feature_flags"] = [
-            item for item in policy.get("blocked_active_feature_flags", []) if item != "workspace_dependencies"
-        ]
-    policy.setdefault("workspace_dependencies_reauthorized", False)
     policy.setdefault(
         "blocked_generated_config_values",
         {
@@ -276,8 +269,8 @@ def evaluate_config_provenance(repo_root: str | Path | None = None) -> dict[str,
     paths = runtime_paths(authority)
     surface = authority.get("canonical_execution_surface", {}) if isinstance(authority.get("canonical_execution_surface"), dict) else {}
     windows_native = (
-        str(authority.get("canonical_execution_host", "")).strip() == "local-windows"
-        or str(surface.get("id", "")).strip() == "local-windows-agent"
+        str(authority.get("canonical_execution_host", "")).strip() == "windows-native"
+        or str(surface.get("id", "")).strip() == "windows-native"
         or str(surface.get("expected_os", "")).strip().lower() == "windows"
     )
     override_source_paths = [str(item) for item in user_override_config_paths(authority)]
@@ -390,7 +383,7 @@ def main() -> int:
     report = evaluate_config_provenance(args.repo_root)
     output_path = Path(args.output_file).expanduser().resolve()
     save_json(output_path, report)
-    output_path.with_suffix(".md").write_text(render_markdown(report), encoding="utf-8")
+    write_markdown(output_path.with_suffix(".md"), render_markdown(report))
     if args.json:
         print(json.dumps(report, ensure_ascii=False, indent=2))
     else:

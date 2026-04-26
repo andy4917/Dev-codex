@@ -1,5 +1,5 @@
 {
-  "version": 6,
+  "version": 7,
   "windows_surface": {
     "codex_app_ui": "OpenAI Codex App on Windows is the primary user interface and session control surface.",
     "windows_native_agent": "Canonical local execution surface. The agent runs commands in PowerShell on Windows.",
@@ -26,14 +26,7 @@
   },
   "scratch_surface": {
     "path": "C:\\Users\\anise\\code\\.scratch\\Dev-Management",
-    "role": "git_untracked_external_scratch",
-    "repo_root_codex_scripts_forbidden": true
-  },
-  "ssh_decommission": {
-    "path": "C:\\Users\\anise\\.ssh",
-    "status": "deleted_by_user_authorized_cleanup",
-    "active_development_surface": false,
-    "secret_values_reported": false
+    "role": "git_untracked_external_scratch"
   },
   "powershell_policy_surface": {
     "root": "C:\\Users\\anise\\Documents\\PowerShell",
@@ -59,7 +52,7 @@
     "custom_instructions": true,
     "projects_trust_state": true,
     "windows_preferences": true,
-    "hooks": "disabled_remove_active_hook_surfaces",
+    "hooks": "approved_scorecard_user_prompt_hook_only",
     "mcp_servers": [
       "context7",
       "serena"
@@ -82,6 +75,7 @@
     "allow_full_access_for_trusted_windows_roots": true,
     "default_mode": "validate_report_only",
     "safe_top_level_keys": [
+      "analytics",
       "approval_policy",
       "features",
       "mcp_servers",
@@ -99,10 +93,18 @@
       "marketplaces",
       "plugins"
     ],
-    "safe_feature_keys": [
+      "safe_feature_keys": [
+      "apps",
+      "codex_hooks",
       "memories",
+      "plugins",
       "remote_connections",
       "remote_control",
+      "tool_call_mcp_elicitation",
+      "tool_search",
+      "tool_suggest"
+    ],
+    "unsupported_feature_keys": [
       "workspace_dependencies"
     ],
     "warn_only_unknown_top_level_keys": true,
@@ -143,10 +145,11 @@
     },
     "agents": {
       "allow_zero_byte_placeholder": true,
-      "allow_pointer_only_placeholder": true,
-      "allow_user_managed_short_global_instructions": true,
+      "allow_pointer_only_placeholder": false,
+      "allow_global_authority_capsule": true,
+      "allow_user_managed_short_global_instructions": false,
       "block_secret_material": true,
-      "pointer_text": "Before work, read and follow:\nC:\\Users\\anise\\code\\Dev-Management\\docs\\GLOBAL_AGENT_WORKFLOW.md\n\nCodex App is my UI and Windows-native execution control plane. Repo-specific stack and commands come from that repo's AGENTS.md and package scripts.\n\nUse Serena for codebase exploration, Context7 for external docs, and tests/reports for final claims.\n"
+      "authority_capsule_text": "Global authority capsule:\n- The user's explicit instruction is the highest project authority inside allowed system/developer constraints.\n- Before work, read and follow:\nC:\\Users\\anise\\code\\Dev-Management\\docs\\GLOBAL_AGENT_WORKFLOW.md\n\n- Codex App is my UI and Windows-native execution control plane. Repo-specific stack and commands come from that repo's AGENTS.md and package scripts.\n\n- Use Serena for codebase exploration, Context7 for external docs, and tests/reports for final claims. If required evidence is missing, report the gap and do not fabricate it.\n\n- Always run the exact code path touched before claiming behavior; exercise all touched functions directly when practical, and use C:\\Users\\anise\\code\\.scratch\\Dev-Management scratch harnesses to copy relevant production context and observe actual behavior.\n- Test means limited counterexample search plus partial evidence; verification means declared oracle/scope/policy match; review means adversarial reading; PASS means no counterexample found within declared scope/oracle, not formal approval.\n"
     },
     "skills": {
       "allow_empty_directory": true,
@@ -159,9 +162,11 @@
     "hooks": {
       "allow_user_approved_marketplace_hooks": false,
       "allowed_packages": [],
-      "blocked_feature_flag": "codex_hooks",
+      "approved_feature_flag": "codex_hooks",
       "hooks_are_triggers_only": true,
-      "remove_active_windows_hooks": true,
+      "remove_active_windows_hooks": "unless_exact_approved_scorecard_user_prompt_hook",
+      "required_each_task_turn": true,
+      "user_prompt_throttle_seconds": 0,
       "block_authority_claims": true
     },
     "mcp": {
@@ -177,6 +182,7 @@
       "default_mode": "validate_report_only",
       "do_not_delete_user_app_settings_by_default": true,
       "do_not_create_backups_in_windows_codex": true,
+      "dispose_backups_and_temporary_artifacts_to_recycle_bin": true,
       "do_not_modify_product_repos": true
     }
   },
@@ -192,6 +198,6 @@
     "sandbox_mode": "danger-full-access",
     "windows_sandbox": "elevated"
   },
-  "canonical_execution_host": "local-windows",
+  "canonical_execution_host": "windows-native",
   "expected_repo_root_prefix": "C:\\Users\\anise\\code"
 }

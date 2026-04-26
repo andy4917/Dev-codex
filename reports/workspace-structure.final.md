@@ -10,6 +10,7 @@
   - Dev-Management => CONTRACT_AUTHORITY: ok
   - Dev-Workflow => SDK: ok
   - Dev-Product => PRODUCT_SOURCE: ok
+  - .scratch/Dev-Management => SCRATCH_HARNESS: ok
   - .codex => USER_CONTROL_PLANE: ok
   - .ssh => DECOMMISSIONED: ok
   - Documents/PowerShell => CONFIG_ENV: ok
@@ -21,6 +22,7 @@
   - scripts => SCRIPTS: ok
   - tests => TESTS: ok
   - reports => GENERATED_EVIDENCE: ok
+  - reports/migration-evidence => MIGRATION_EVIDENCE: ok
   - tools => TOOLS: optional path is absent
   - patches => PATCHES: optional path is absent
   - third_party => THIRD_PARTY: optional path is absent
@@ -117,7 +119,12 @@
     - toolchain-surface.final.md
     - user-dev-environment-baseline.final.json
     - user-dev-environment-baseline.final.md
+    - user-scorecard.json
+    - user-scorecard.review.json
     - windows-app-local-readiness.final.json
+    - windows-app-resource-health.final.json
+    - windows-process-burst.baseline.json
+    - windows-process-burst.final.json
     - workspace-dependency-surface.json
     - workspace-structure.final.json
     - workspace-structure.final.md
@@ -130,6 +137,8 @@
     - check_global_agent_workflow.py
     - check_user_dev_environment.py
     - check_windows_app_local_readiness.py
+    - check_windows_app_resource_health.py
+    - check_windows_process_burst.py
     - check_workspace_structure.py
     - compute_user_scorecard.py
     - delivery_gate.py
@@ -161,6 +170,8 @@
     - test_subprocess_safe.py
     - test_user_dev_environment_policy.py
     - test_windows_app_local_readiness.py
+    - test_windows_app_resource_health.py
+    - test_windows_process_burst.py
     - test_workspace_structure.py
   - .env.example
   - .envrc
@@ -231,10 +242,17 @@
     - guardrails/
       - banned-patterns.json
       - semgrep.yml
+  - contracts/
+    - acceptance.json
+    - project_policy.json
+    - risk_register.json
+    - traceability.json
+    - unknowns.json
   - docs/
     - adr/
       - ADR-0001-induced-agentic-workframe.md
       - ADR-0002-iaw-option-c.md
+    - LOCAL_ENVIRONMENTS.md
   - plugins/
     - codex-vibe-execution/
       - .codex-plugin/
@@ -242,16 +260,25 @@
   - reports/
     - authority/
       - fresh-evidence.json
+    - acceptance-report.json
+    - bootstrap-report.json
     - context7-usage.json
     - delivery-gate.json
     - execution-surfaces.json
+    - frontend-design-md-adoption.json
     - inventory.summary.json
     - inventory.windows.json
     - local-environments-report.json
+    - path-visibility-stale-hints-closeout.md
     - path-visibility.json
+    - project-policy-restore-closeout.md
+    - runaway-report.json
+    - scorecard-authority-audit.json
     - serena-status.json
     - session-router.json
     - toolchain.windows.json
+    - traceability-report.json
+    - unknowns-report.json
     - user-readiness.json
   - scripts/
     - guardrails/
@@ -283,6 +310,8 @@
     - install_or_repair_toolchain.py
     - issue_workspace_authority.py
     - mission_refresh.py
+    - project_setup.py
+    - run_acceptance.py
     - session_router.py
     - vibe_director.py
   - skills/
@@ -381,12 +410,17 @@
       - TASTE_GATE.schema.json
       - WAIVERS.json
       - WORKORDER.schema.json
+    - frontend/
+      - DESIGN.md
   - tests/
     - test_audit_execution_surfaces.py
     - test_authoritative_controls.py
     - test_context7_usage.py
     - test_delivery_gate_scorecard_slice.py
+    - test_frontend_design_md_workflow.py
+    - test_local_environments_contract.py
     - test_mission_refresh.py
+    - test_project_policy_contract.py
     - test_runtime_surface_hardening.py
     - test_serena_advisory.py
     - test_vibe_director.py
@@ -396,6 +430,7 @@
     - CODEX_RUNTIME_REPAIR_SAFETY.md
     - CODEX_RUNTIME_UNIFICATION.md
     - DOMAIN_AWARE_MISSION_REFRESH.md
+    - FRONTEND_DESIGN_MD.md
     - IAW_CLOSEOUT_AUTHORITY.md
     - IAW_GLOBAL_HOOKS.md
     - IAW_VERIFY_CHAIN_HARDENING.md
@@ -620,6 +655,115 @@
     - tsconfig.json
     - uv.lock
     - 앱 실행.cmd
+  - 입실퇴실 안내문 생성기/
+    - .serena/
+      - cache/
+      - memories/
+      - .gitignore
+      - project.local.yml
+      - project.yml
+    - assets/
+      - coex/
+    - docs/
+      - STRUCTURE_MAPPING.md
+      - TEMPLATE_CATALOG_POLICY.md
+      - WINDOWS_UNPACKED_EXTENSION.md
+    - icons/
+      - logo-128.png
+      - logo-16.png
+      - logo-32.png
+      - logo-34.png
+      - logo-48.png
+    - scripts/
+      - extension-id.js
+      - print-extension-id.js
+    - src/
+      - assets/
+      - background/
+      - config/
+      - domain/
+      - messages/
+      - pms/
+      - sidepanel/
+    - styles/
+      - sidepanel.css
+    - tests/
+      - domain.test.js
+      - pms-api.test.js
+    - logo.png
+    - manifest.json
+    - package.json
+    - sidepanel.html
+
+### .scratch/Dev-Management (SCRATCH_HARNESS, detailed)
+- Path: C:\Users\anise\code\.scratch\Dev-Management
+- Dev-Management/
+  - anti-slop-nonassertive-pass/
+    - .agent-runs/
+      - run-nonassertive/
+    - ai-slop.final.json
+    - domain-mission-refresh.final.json
+    - prompt.txt
+    - README.md
+    - SUMMARY.md
+  - checkin-checkout-branch-policy/
+    - harness.mjs
+  - checkin-checkout-extension-skeleton/
+    - harness.mjs
+  - mission-refresh-e2e/
+    - .agent-runs/
+      - run-e2e/
+    - reports/
+      - session-router.json
+    - tests/
+      - children: 0 dirs, 0 files, 0 skipped
+    - domain-mission-refresh.final.json
+    - prompt.txt
+    - README.md
+    - SUMMARY.md
+  - mission-refresh-e2e-pass/
+    - .agent-runs/
+      - run-e2e/
+    - tests/
+      - children: 0 dirs, 0 files, 0 skipped
+    - domain-mission-refresh.final.json
+    - prompt.txt
+    - README.md
+    - SUMMARY.md
+  - mission-refresh-nonassertive-pass/
+    - .agent-runs/
+      - run-e2e/
+    - tests/
+      - children: 0 dirs, 0 files, 0 skipped
+    - ai-slop.final.json
+    - domain-mission-refresh.final.json
+    - prompt.txt
+    - README.md
+    - SUMMARY.md
+  - path-visibility-stale-hints/
+    - codex-global-state.before.json
+  - runs/
+    - apply-touched-code-runtime-rule/
+      - snapshot/
+      - command.log
+      - metadata.json
+    - vibe-director-plugin-eval/
+      - benchmark.json
+    - vibe-director-smoke/
+      - .agent-runs/
+      - reports/
+      - ai-slop.final.json
+      - prompt.txt
+    - global-agent-workflow-check.json
+    - global-agent-workflow-check.md
+    - global-dirty-cleanup-summary.md
+    - windows-native-cutover-harness.json
+    - windows-native-cutover-harness.py
+    - workspace-tree-runtime-harness.py
+  - check_user_dev_environment_scratch_surface_harness.py
+  - domain-mission-refresh-l1-smoke.json
+  - process-burst-harness.ps1
+  - run-touched-behavior.ps1
 
 ### .codex (USER_CONTROL_PLANE, control_plane)
 - Path: C:\Users\anise\.codex
@@ -646,6 +790,12 @@
     - 435005d653dcfe1c012e5ac25111784f9933db38/
       - children: 0 dirs, 1 files, 0 skipped
     - 4d40bf7fb587b4b285cff2584cde51bddcd9be67/
+      - children: 0 dirs, 1 files, 0 skipped
+    - 50403a3c1b65d06adcac0ae6b8383752a2f63ab0/
+      - children: 0 dirs, 1 files, 0 skipped
+    - 714cd35935d54957aab31930f7639d39cbafa252/
+      - children: 0 dirs, 1 files, 0 skipped
+    - 747c0080b811df4dfa6cc07fb106a7e785233d81/
       - children: 0 dirs, 1 files, 0 skipped
     - 788735442fa72440257d128d8fcca99f0803a8e0/
       - children: 0 dirs, 1 files, 0 skipped
@@ -675,10 +825,12 @@
   - hooks/
     - children: 0 dirs, 0 files, 0 skipped
   - local-environments/
-    - children: 0 dirs, 1 files, 0 skipped
+    - children: 0 dirs, 2 files, 0 skipped
   - memories/
+    - .serena/
+      - memories/
     - rollout_summaries/
-      - children: 0 dirs, 42 files, 0 skipped
+      - children: 0 dirs, 46 files, 0 skipped
     - skills/
       - dev-management-app-readiness/
       - dev-management-user-environment-closeout/
@@ -691,7 +843,7 @@
     - 2026/
       - 04/
   - shell_snapshots/
-    - children: 0 dirs, 7 files, 0 skipped
+    - children: 0 dirs, 6 files, 0 skipped
   - skills/
     - .system/
       - imagegen/
@@ -712,10 +864,13 @@
       - children: 0 dirs, 0 files, 0 skipped
   - tmp/
     - arg0/
-      - codex-arg0Ai4VgU/
+      - codex-arg0hdafo2/
   - vendor_imports/
     - skills/
       - skills/
+  - worktrees/
+    - 1dd9/
+      - Dev-Management/
 
 ### .ssh (DECOMMISSIONED, decommissioned)
 - Path: C:\Users\anise\.ssh

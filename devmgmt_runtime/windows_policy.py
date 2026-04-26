@@ -7,6 +7,8 @@ from pathlib import Path
 from typing import Any, Iterable
 
 from .path_authority import canonical_roots, load_path_policy, workflow_doc_path
+from .scorecard_hook import is_expected_hooks_json
+from .trash import recycle_path
 
 
 GENERATED_DIRECTORY_MARKERS = {
@@ -36,8 +38,18 @@ SKILL_MANIFEST_NAMES = {
     "setup.py",
 }
 WINDOWS_BOOTSTRAP_FEATURES = ("remote_control", "remote_connections")
-WINDOWS_SAFE_FEATURE_KEYS = {"memories", "workspace_dependencies", *WINDOWS_BOOTSTRAP_FEATURES}
+WINDOWS_SAFE_FEATURE_KEYS = {
+    "apps",
+    "codex_hooks",
+    "memories",
+    "plugins",
+    "tool_call_mcp_elicitation",
+    "tool_search",
+    "tool_suggest",
+    *WINDOWS_BOOTSTRAP_FEATURES,
+}
 WINDOWS_SAFE_TOP_LEVEL_KEYS = {
+    "analytics",
     "approval_policy",
     "features",
     "marketplaces",
@@ -61,7 +73,7 @@ WINDOWS_BLOCKED_TOP_LEVEL_KEYS = {
     "skills",
     "telepathy",
 }
-WINDOWS_BLOCKED_FEATURE_KEYS = {"codex_hooks", "telepathy"}
+WINDOWS_BLOCKED_FEATURE_KEYS = {"telepathy"}
 WINDOWS_BLOCKED_POINTER_KEYS = {
     "workspace_authority",
     "path_authority",
@@ -180,8 +192,8 @@ def _authority_markers(authority: dict[str, Any] | None = None) -> tuple[str, ..
     }
     surface = payload.get("canonical_execution_surface", {}) if isinstance(payload.get("canonical_execution_surface"), dict) else {}
     if (
-        str(payload.get("canonical_execution_host", "")).strip() == "local-windows"
-        or str(surface.get("id", "")).strip() == "local-windows-agent"
+        str(payload.get("canonical_execution_host", "")).strip() == "windows-native"
+        or str(surface.get("id", "")).strip() == "windows-native"
         or str(surface.get("expected_os", "")).strip().lower() == "windows"
     ):
         return tuple(sorted(markers))
@@ -196,25 +208,32 @@ def _authority_markers(authority: dict[str, Any] | None = None) -> tuple[str, ..
     return tuple(sorted(markers))
 
 
-def _pointer_only_text(authority: dict[str, Any] | None = None) -> str:
+def approved_global_agents_text(authority: dict[str, Any] | None = None) -> str:
     policy = authority if isinstance(authority, dict) else None
     try:
         workflow_doc = workflow_doc_path(policy)
     except Exception:
-        workflow_doc = Path("GLOBAL_AGENT_WORKFLOW.md")
+        root = ""
+        if isinstance(policy, dict):
+            root = str(policy.get("authority_root", "") or policy.get("canonical_repo_root", "")).strip()
+        workflow_doc = Path(root) / "docs" / "GLOBAL_AGENT_WORKFLOW.md" if root else Path("GLOBAL_AGENT_WORKFLOW.md")
     return (
-        "Before work, read and follow:\n"
+        "Global authority capsule:\n"
+        "- The user's explicit instruction is the highest project authority inside allowed system/developer constraints.\n"
+        "- Before work, read and follow:\n"
         f"{workflow_doc}\n\n"
-        "Codex App is my UI and Windows-native execution control plane. "
+        "- Codex App is my UI and Windows-native execution control plane. "
         "Repo-specific stack and commands come from that repo's AGENTS.md and package scripts.\n\n"
-        "Windows .codex is the Codex App user control plane. Dev-Management validates it, "
-        "while repo-local stack and workflow stay in the repositories.\n\n"
-        "Use Serena for codebase exploration, symbol/reference impact, and refactor evidence. "
-        "Use Context7 for external library/framework/API documentation. Use product docs or Domain RAG for business/domain rules. "
-        "Skills provide workflow only, not factual authority.\n\n"
-        "If required evidence is missing, report the missing evidence and do not fabricate it. "
-        "Do not fabricate missing evidence or move repo-specific rules into the app control plane.\n"
+        "- Use Serena for codebase exploration, Context7 for external docs, and tests/reports for final claims. "
+        "If required evidence is missing, report the gap and do not fabricate it.\n\n"
+        "- Always run the exact code path touched before claiming behavior; exercise all touched functions directly when practical, "
+        "and use C:\\Users\\anise\\code\\.scratch\\Dev-Management scratch harnesses to copy relevant production context and observe actual behavior.\n"
+        "- Test means limited counterexample search plus partial evidence; verification means declared oracle/scope/policy match; review means adversarial reading; PASS means no counterexample found within declared scope/oracle, not formal approval.\n"
     )
+
+
+def _pointer_only_text(authority: dict[str, Any] | None = None) -> str:
+    return approved_global_agents_text(authority)
 
 
 def _contains_authority_reference(payload: dict[str, Any], authority: dict[str, Any] | None = None) -> bool:
@@ -340,7 +359,7 @@ def _agents_block_reasons(text: str, authority: dict[str, Any]) -> list[str]:
             reasons.append("Windows AGENTS.md contains repo-specific or Dev-Management authority paths.")
             break
     if "source of truth" in normalized or "ssot" in normalized:
-        reasons.append("Windows AGENTS.md must not claim source-of-truth or authority status.")
+        reasons.append("Windows AGENTS.md must not claim source-of-truth status.")
     return reasons
 
 
@@ -373,7 +392,7 @@ def _skill_text_block_reasons(text: str) -> list[str]:
 
 
 def is_structural_devmgmt_windows_config(text: str, authority: dict[str, Any] | None = None) -> bool:
-    if isinstance(authority, dict) and str(authority.get("canonical_execution_host", "")).strip() == "local-windows":
+    if isinstance(authority, dict) and str(authority.get("canonical_execution_host", "")).strip() == "windows-native":
         return False
     payload = _loads_toml(text)
     if not payload:
@@ -769,15 +788,16 @@ def _agents_finding(path: Path, authority: dict[str, Any]) -> dict[str, Any]:
         )
         return finding
 
-    if normalized == _pointer_only_text(authority).strip():
-        finding["details"]["pointer_only"] = True
+    if normalized == approved_global_agents_text(authority).strip():
+        finding["details"]["pointer_only"] = False
+        finding["details"]["authority_capsule"] = True
         finding.update(
             {
-                "classification": "APP_PLACEHOLDER_POINTER",
+                "classification": "APP_GLOBAL_AUTHORITY_CAPSULE",
                 "disposition": "RETAIN_SAFE",
                 "operation": "retain",
                 "status": "PASS",
-                "reason": "Windows AGENTS.md contains the approved workflow pointer text and remains non-authoritative.",
+                "reason": "Windows AGENTS.md contains the approved concise global authority capsule.",
             }
         )
         return finding
@@ -797,17 +817,17 @@ def _agents_finding(path: Path, authority: dict[str, Any]) -> dict[str, Any]:
 
     finding.update(
         {
-            "classification": "user_managed_custom_instructions",
-            "disposition": "RETAIN_SAFE",
+            "classification": "noncanonical_global_instruction_surface",
+            "disposition": "MANUAL_REMEDIATION",
             "operation": "retain",
-            "status": "PASS",
-            "reason": "Windows AGENTS.md contains user-managed global custom instructions within validated boundaries.",
+            "status": "BLOCKED",
+            "reason": "Windows AGENTS.md must match the approved concise global authority capsule exactly; user-managed instruction exceptions are not allowed.",
         }
     )
     return finding
 
 
-def _hooks_finding(path: Path, *, expected_linux_hooks: str | None = None) -> dict[str, Any]:
+def _hooks_finding(path: Path, authority: dict[str, Any], *, expected_linux_hooks: str | None = None) -> dict[str, Any]:
     text = read_text(path)
     finding = {
         "path": str(path),
@@ -829,6 +849,18 @@ def _hooks_finding(path: Path, *, expected_linux_hooks: str | None = None) -> di
     if expected_linux_hooks is not None and text == expected_linux_hooks:
         generated = True
     finding["generated_marker_found"] = generated
+    if is_expected_hooks_json(text, authority):
+        finding.update(
+            {
+                "classification": "approved_scorecard_runtime_hook",
+                "disposition": "RETAIN_SAFE",
+                "operation": "retain",
+                "status": "PASS",
+                "repo_owned": True,
+                "reason": "Windows hooks.json contains only the approved scorecard UserPromptSubmit hook.",
+            }
+        )
+        return finding
     if generated or is_structural_devmgmt_hook_surface(text):
         finding.update(
             {
@@ -837,7 +869,7 @@ def _hooks_finding(path: Path, *, expected_linux_hooks: str | None = None) -> di
                 "operation": "remove",
                 "status": "BLOCKED",
                 "repo_owned": True,
-                "reason": "Windows hooks content is a generated or structural Dev-Management policy surface and must be removed.",
+                "reason": "Windows hooks content resembles Dev-Management hook policy but does not match the approved scorecard hook payload.",
             }
         )
         return finding
@@ -848,7 +880,7 @@ def _hooks_finding(path: Path, *, expected_linux_hooks: str | None = None) -> di
             "disposition": "REMOVE_NOW",
             "operation": "remove",
             "status": "BLOCKED",
-            "reason": "Windows hooks.json is an active hook surface that can trigger repeated PostToolUse work and must be removed.",
+            "reason": "Windows hooks.json is an unapproved active hook surface and must be removed.",
         }
     )
     return finding
@@ -1004,7 +1036,7 @@ def classify_windows_policy_candidate(
     if path.name == "AGENTS.md":
         return _agents_finding(path, authority)
     if path.name == "hooks.json":
-        return _hooks_finding(path, expected_linux_hooks=expected_linux_hooks)
+        return _hooks_finding(path, authority, expected_linux_hooks=expected_linux_hooks)
     return _skills_finding(path, authority)
 
 
@@ -1065,24 +1097,7 @@ def windows_policy_surface_report(
 
 
 def remove_directory_tree(path: Path) -> int:
-    removed = 0
     if not path_exists(path):
-        return removed
-    for root, dirs, files in os.walk(path, topdown=False, followlinks=False):
-        root_path = Path(root)
-        for name in files:
-            child = root_path / name
-            if path_exists(child) or path_is_symlink(child):
-                child.unlink()
-                removed += 1
-        for name in dirs:
-            child = root_path / name
-            if path_is_symlink(child):
-                child.unlink()
-                removed += 1
-            elif path_exists(child):
-                child.rmdir()
-                removed += 1
-    path.rmdir()
-    removed += 1
-    return removed
+        return 0
+    recycle_path(path)
+    return 1

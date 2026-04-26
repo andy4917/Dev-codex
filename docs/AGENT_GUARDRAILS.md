@@ -4,7 +4,7 @@
 
 - Follow [GLOBAL_AGENT_WORKFLOW.md](./GLOBAL_AGENT_WORKFLOW.md).
 - Treat Codex App as the UI and Windows-native execution control plane.
-- Treat `local-windows` as the canonical execution surface.
+- Treat `windows-native` as the canonical execution surface.
 - Treat the Windows-native Codex App agent as the canonical agent binary.
 - Treat Dev-Management docs/contracts/checkers as runtime and workflow authority.
 - Treat `C:\Users\anise\.codex` as the validated Codex App user control plane.

@@ -46,6 +46,8 @@ class WorkspaceStructurePolicyTests(unittest.TestCase):
                 "CONFIG_ENV",
                 "GENERATED_EVIDENCE",
                 "TESTS",
+                "SCRATCH_HARNESS",
+                "MIGRATION_EVIDENCE",
                 "SKILLS",
                 "PRODUCT_SOURCE",
                 "USER_CONTROL_PLANE",
@@ -74,8 +76,10 @@ class WorkspaceStructurePolicyTests(unittest.TestCase):
                 management / "scripts",
                 management / "tests",
                 management / "reports",
+                management / "reports" / "migration-evidence",
                 workflow,
                 product,
+                home / ".scratch" / "Dev-Management",
                 home / ".codex",
                 home / ".local" / "share",
             ):
@@ -88,6 +92,7 @@ class WorkspaceStructurePolicyTests(unittest.TestCase):
                 }
             }
             policy = json.loads(POLICY_PATH.read_text(encoding="utf-8"))
+            policy["root_roles"][".scratch/Dev-Management"]["path"] = ".scratch/Dev-Management"
             policy["root_roles"][".codex"]["path"] = ".codex"
             policy["root_roles"][".ssh"]["path"] = ".ssh"
             policy["root_roles"]["Documents/PowerShell"]["required"] = False
@@ -101,10 +106,18 @@ class WorkspaceStructurePolicyTests(unittest.TestCase):
         tree_items = report["checks"]["workspace_tree"]["items"]
         by_label = {item["label"]: item for item in tree_items}
         self.assertEqual(by_label["Dev-Management"]["listing_mode"], "detailed")
+        self.assertEqual(by_label[".scratch/Dev-Management"]["listing_mode"], "detailed")
+        self.assertEqual(by_label[".scratch/Dev-Management"]["role"], "SCRATCH_HARNESS")
         self.assertEqual(by_label[".codex"]["listing_mode"], "control_plane")
         self.assertEqual(by_label[".ssh"]["listing_mode"], "decommissioned")
         self.assertFalse(by_label[".ssh"]["exists"])
         self.assertIn("tree", by_label["Dev-Management"])
+        management_items = {
+            item["relative_path"]: item
+            for item in report["checks"]["dev_management_layout"]["items"]
+        }
+        self.assertEqual(management_items["reports/migration-evidence"]["role"], "MIGRATION_EVIDENCE")
+        self.assertTrue(management_items["reports/migration-evidence"]["exists"])
 
     def test_decommissioned_ssh_blocks_without_leaking_file_names(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -119,8 +132,10 @@ class WorkspaceStructurePolicyTests(unittest.TestCase):
                 management / "scripts",
                 management / "tests",
                 management / "reports",
+                management / "reports" / "migration-evidence",
                 workflow,
                 product,
+                home / ".scratch" / "Dev-Management",
                 home / ".codex" / "sessions",
                 home / ".ssh",
             ):
@@ -134,6 +149,7 @@ class WorkspaceStructurePolicyTests(unittest.TestCase):
                 }
             }
             policy = json.loads(POLICY_PATH.read_text(encoding="utf-8"))
+            policy["root_roles"][".scratch/Dev-Management"]["path"] = ".scratch/Dev-Management"
             policy["root_roles"][".codex"]["path"] = ".codex"
             policy["root_roles"][".ssh"]["path"] = ".ssh"
             policy["root_roles"]["Documents/PowerShell"]["required"] = False
@@ -163,9 +179,11 @@ class WorkspaceStructurePolicyTests(unittest.TestCase):
                 management / "scripts",
                 management / "tests",
                 management / "reports",
+                management / "reports" / "migration-evidence",
                 management / "third_party",
                 workflow,
                 product,
+                home / ".scratch" / "Dev-Management",
                 home / ".codex",
                 home / ".local" / "share",
             ):
@@ -177,9 +195,11 @@ class WorkspaceStructurePolicyTests(unittest.TestCase):
                     "product": str(product),
                 }
             }
+            policy = json.loads(POLICY_PATH.read_text(encoding="utf-8"))
+            policy["root_roles"][".scratch/Dev-Management"]["path"] = ".scratch/Dev-Management"
             report = self.module.evaluate_workspace_structure(
                 repo_root=management,
-                policy_override=json.loads(POLICY_PATH.read_text(encoding="utf-8")),
+                policy_override=policy,
                 authority_override=authority,
                 home_override=home,
             )
@@ -198,8 +218,10 @@ class WorkspaceStructurePolicyTests(unittest.TestCase):
                 management / "docs",
                 management / "scripts",
                 management / "reports",
+                management / "reports" / "migration-evidence",
                 workflow,
                 product,
+                home / ".scratch" / "Dev-Management",
                 home / ".codex",
                 home / ".local" / "share",
             ):
@@ -211,9 +233,11 @@ class WorkspaceStructurePolicyTests(unittest.TestCase):
                     "product": str(product),
                 }
             }
+            policy = json.loads(POLICY_PATH.read_text(encoding="utf-8"))
+            policy["root_roles"][".scratch/Dev-Management"]["path"] = ".scratch/Dev-Management"
             report = self.module.evaluate_workspace_structure(
                 repo_root=management,
-                policy_override=json.loads(POLICY_PATH.read_text(encoding="utf-8")),
+                policy_override=policy,
                 authority_override=authority,
                 home_override=home,
             )

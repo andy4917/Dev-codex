@@ -43,28 +43,39 @@ Important conflict rule:
 
 - If the skill conflicts with Codex frontend instructions or repo UI rules, the higher-priority instructions win.
 
-## Marketplace Hooks
+## Scorecard Hook
 
-Installed hooks:
+Approved global hook:
 
 ```text
-none
+C:\Users\anise\.codex\hooks.json
 ```
 
 Role:
 
-- Windows Codex hooks are disabled for the user/app control plane.
-- PostToolUse hooks caused repeated hook runs and could launch `.sh` files through the Windows file association path.
-- Hooks remain trigger-only when used in another controlled context; they are never Dev-Management policy authority or a replacement for tests, score gates, audit, or final reports.
+- The only approved Windows Codex hook is the Dev-Management scorecard `UserPromptSubmit` hook.
+- It runs once per task turn with no throttle and binds the score layer so it cannot be silently skipped.
+- Hooks remain trigger-only; they are never Dev-Management policy authority or a replacement for tests, score gates, audit, or final reports.
+- PostToolUse hooks remain blocked because they previously caused repeated runs and unsafe file-association launch paths.
 
 Required app flag:
 
 ```toml
 [features]
-# codex_hooks must be absent in the Windows user control plane.
+codex_hooks = true
 ```
 
-Dev-Management validates active Windows `hooks.json` as a removable hook surface instead of an approved marketplace exception.
+Dev-Management validates Windows `hooks.json` as PASS only when it exactly matches the approved scorecard `UserPromptSubmit` payload.
+
+## Under-Development App Features
+
+Observed supported experimental feature names:
+
+```text
+apps, memories, plugins, tool_search, tool_suggest, tool_call_mcp_elicitation
+```
+
+`workspace_dependencies` is not an approved app experimental flag in the current Windows app surface. The app log reports it as unsupported for `experimentalFeature/enablement/set`, so Dev-Management must not require or enable it in `C:\Users\anise\.codex\config.toml`.
 
 ## Adoption Status
 
@@ -74,4 +85,4 @@ The intended steady state is:
 - `C:\Users\anise\AppData\Roaming\Python\Python314\Scripts` present in the PowerShell profile PATH.
 - Marketplace skill installed under `C:\Users\anise\.agents\skills`.
 - No active marketplace hooks under `C:\Users\anise\.codex\hooks`.
-- `C:\Users\anise\.codex\config.toml` does not enable `codex_hooks`.
+- `C:\Users\anise\.codex\config.toml` enables `codex_hooks` only for the approved scorecard runtime hook.

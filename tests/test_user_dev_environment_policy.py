@@ -12,12 +12,16 @@ POLICY_PATH = ROOT / "contracts" / "user_dev_environment_policy.json"
 class UserDevEnvironmentPolicyTests(unittest.TestCase):
     def test_policy_declares_windows_native_control_plane(self) -> None:
         payload = json.loads(POLICY_PATH.read_text(encoding="utf-8"))
-        self.assertEqual(payload["version"], 6)
+        self.assertEqual(payload["version"], 7)
         self.assertEqual(payload["app_control_plane"]["role"], "windows_native_app_control_plane")
         self.assertEqual(payload["windows_codex_boundary"]["role"], "WINDOWS_NATIVE_CONTROL_PLANE_VALIDATED")
         self.assertTrue(payload["windows_codex_boundary"]["allow_full_access_for_trusted_windows_roots"])
         self.assertEqual(payload["windows_surface"]["windows_codex_control_plane"], "Windows .codex is USER_CONTROL_PLANE + APP_STATE, not repo authority.")
-        self.assertFalse(payload["ssh_decommission"]["active_development_surface"])
+        self.assertFalse(payload["windows_codex_boundary"]["agents"]["allow_pointer_only_placeholder"])
+        self.assertTrue(payload["windows_codex_boundary"]["agents"]["allow_global_authority_capsule"])
+        self.assertIn("highest project authority", payload["windows_codex_boundary"]["agents"]["authority_capsule_text"])
+        self.assertNotIn("ssh_decommission", payload)
+        self.assertNotIn("repo_root_codex_scripts_forbidden", payload["scratch_surface"])
         self.assertIn("utf8", payload["powershell_policy_surface"]["policies"])
 
     def test_target_config_accepts_trusted_full_access(self) -> None:

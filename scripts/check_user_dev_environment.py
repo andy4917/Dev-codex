@@ -21,6 +21,7 @@ if str(ROOT) not in sys.path:
 from check_windows_app_local_readiness import evaluate_windows_app_local_readiness
 from devmgmt_runtime.path_authority import canonical_roots, load_path_policy, validate_env_alignment, windows_codex_home
 from devmgmt_runtime.reports import load_json, save_json, write_markdown
+from devmgmt_runtime.scorecard_hook import installed_hook_status
 from devmgmt_runtime.status import collapse_status, status_exit_code
 from devmgmt_runtime.windows_policy import classify_windows_policy_candidate
 
@@ -36,9 +37,7 @@ AI_PYTHON_PACKAGE_DISTRIBUTIONS = {
     "mcp": "mcp",
 }
 DEV_MANAGEMENT_SCRATCH = Path(r"C:\Users\anise\code\.scratch\Dev-Management")
-REPO_SCRATCH = ROOT / "codex-scripts"
 MIGRATION_EVIDENCE_ROOT = ROOT / "reports" / "migration-evidence" / "20260425-windows-native-transition"
-USER_SSH_ROOT = Path(r"C:\Users\anise\.ssh")
 POWERSHELL_ROOT = Path.home() / "Documents" / "PowerShell"
 POWERSHELL_PROFILE = POWERSHELL_ROOT / "Microsoft.PowerShell_profile.ps1"
 POWERSHELL_UTF8_POLICY = POWERSHELL_ROOT / "policies" / "utf8.ps1"
@@ -105,6 +104,11 @@ def inspect_windows_codex_boundary(user_policy: dict[str, Any], path_policy: dic
     skills_path = codex_home / "skills"
     config_payload = load_toml(config_path)
     target = user_policy.get("target_app_config", {}) if isinstance(user_policy.get("target_app_config"), dict) else {}
+    repair_behavior = (
+        user_policy.get("windows_codex_boundary", {}).get("repair_behavior", {})
+        if isinstance(user_policy.get("windows_codex_boundary", {}), dict)
+        else {}
+    )
     features = config_payload.get("features", {}) if isinstance(config_payload.get("features"), dict) else {}
     windows_cfg = config_payload.get("windows", {}) if isinstance(config_payload.get("windows"), dict) else {}
     projects = config_payload.get("projects", {}) if isinstance(config_payload.get("projects"), dict) else {}
@@ -115,6 +119,7 @@ def inspect_windows_codex_boundary(user_policy: dict[str, Any], path_policy: dic
         "hooks": classify_windows_policy_candidate(hooks_path, path_policy),
         "skills": classify_windows_policy_candidate(skills_path, path_policy),
     }
+    hook_enforcement = installed_hook_status(codex_home, path_policy)
     blockers: list[str] = []
     warnings: list[str] = []
     for finding in findings.values():
@@ -144,6 +149,17 @@ def inspect_windows_codex_boundary(user_policy: dict[str, Any], path_policy: dic
         blockers.append(f"windows.sandbox is {windows_sandbox or 'unset'}, expected elevated.")
     if missing_projects:
         blockers.append("Codex config is missing trusted local Windows project roots: " + ", ".join(missing_projects))
+    unsupported_features = [
+        str(item)
+        for item in user_policy.get("windows_codex_boundary", {}).get("unsupported_feature_keys", [])
+        if str(item).strip() and features.get(str(item)) is True
+    ]
+    if unsupported_features:
+        blockers.append("Codex config enables unsupported experimental features: " + ", ".join(sorted(unsupported_features)))
+    if repair_behavior.get("dispose_backups_and_temporary_artifacts_to_recycle_bin") is not True:
+        blockers.append("Windows Codex repair behavior must dispose backups and temporary artifacts to the Recycle Bin.")
+    if hook_enforcement.get("status") != "PASS":
+        blockers.extend(str(item) for item in hook_enforcement.get("reasons", []) if str(item).strip())
 
     legacy_refs = [
         path
@@ -165,10 +181,16 @@ def inspect_windows_codex_boundary(user_policy: dict[str, Any], path_policy: dic
         "model_reasoning_effort": reasoning,
         "remote_control_enabled": features.get("remote_control") is True,
         "remote_connections_enabled": features.get("remote_connections") is True,
-        "workspace_dependencies_enabled": features.get("workspace_dependencies") is True,
+        "supported_experimental_features_enabled": sorted(
+            key
+            for key in ("apps", "memories", "plugins", "tool_call_mcp_elicitation", "tool_search", "tool_suggest")
+            if features.get(key) is True
+        ),
+        "unsupported_experimental_features_enabled": unsupported_features,
         "trusted_project_paths": trusted_project_paths,
         "missing_trusted_project_roots": missing_projects,
         "surface_findings": findings,
+        "scorecard_hook_enforcement": hook_enforcement,
         "reasons": blockers + warnings,
         "user_actions": [] if status == "PASS" else ["Normalize Windows Codex config to the Windows-native target posture."],
     }
@@ -301,27 +323,11 @@ def inspect_scratch_surface() -> dict[str, Any]:
     reasons: list[str] = []
     if not DEV_MANAGEMENT_SCRATCH.exists():
         reasons.append(f"external scratch root is missing: {DEV_MANAGEMENT_SCRATCH}")
-    if REPO_SCRATCH.exists():
-        reasons.append(f"repo-root scratch directory is forbidden: {REPO_SCRATCH}")
     return {
         "status": "BLOCKED" if reasons else "PASS",
         "external_scratch": str(DEV_MANAGEMENT_SCRATCH),
         "external_scratch_exists": DEV_MANAGEMENT_SCRATCH.exists(),
-        "repo_root_scratch": str(REPO_SCRATCH),
-        "repo_root_scratch_exists": REPO_SCRATCH.exists(),
         "reasons": reasons,
-    }
-
-
-def inspect_ssh_decommission() -> dict[str, Any]:
-    exists = USER_SSH_ROOT.exists()
-    return {
-        "status": "BLOCKED" if exists else "PASS",
-        "path": str(USER_SSH_ROOT),
-        "exists": exists,
-        "active_development_surface": False,
-        "secret_values_reported": False,
-        "reasons": [f"decommissioned SSH directory still exists: {USER_SSH_ROOT}"] if exists else [],
     }
 
 
@@ -422,12 +428,12 @@ def classify_docker_bind_sources(mounts: list[dict[str, Any]]) -> dict[str, Any]
 
 def inspect_execution_route(global_runtime: dict[str, Any]) -> dict[str, Any]:
     mode_selected = str(global_runtime.get("mode_selected", "")).strip()
-    if mode_selected in {"local", "local-windows", "windows-native"}:
+    if mode_selected == "windows-native":
         return {"status": "PASS", "mode_selected": mode_selected, "reasons": []}
     return {
         "status": "BLOCKED",
         "mode_selected": mode_selected,
-        "reasons": [f"execution route is {mode_selected or 'unset'}, expected local Windows-native execution."],
+        "reasons": [f"execution route is {mode_selected or 'unset'}, expected canonical execution label windows-native."],
         "user_actions": ["Switch Codex App agent to Windows native and open the Windows local project root."],
     }
 
@@ -475,7 +481,6 @@ def evaluate_user_dev_environment(repo_root: str | Path | None = None, *, live_s
         "ai_python_packages": inspect_ai_python_packages(),
         "powershell_profile": inspect_powershell_profile(),
         "scratch_surface": inspect_scratch_surface(),
-        "ssh_decommission": inspect_ssh_decommission(),
         "git_eol_policy": inspect_git_eol_policy(root_map),
         "path_authority_consistency": inspect_path_authority_consistency(path_policy),
         "decommission_gate": inspect_decommission_gate(root_map),
@@ -488,7 +493,7 @@ def evaluate_user_dev_environment(repo_root: str | Path | None = None, *, live_s
         "policy_version": user_policy.get("version", 1),
         "environment": {
             "repo_root": str(root),
-            "canonical_execution_host": str(path_policy.get("canonical_execution_host", "local-windows")),
+            "canonical_execution_host": str(path_policy.get("canonical_execution_host", "windows-native")),
             "windows_codex_home": str(windows_codex_home(path_policy)),
             "expected_repo_root_prefix": r"C:\Users\anise\code",
             "current_working_directory": os.getcwd(),
@@ -510,7 +515,7 @@ def render_markdown(report: dict[str, Any]) -> str:
         "",
         f"- Status: {report.get('status', 'WARN')}",
         f"- Production readiness: {report.get('production_readiness', {}).get('status', 'NOT_READY')}",
-        f"- Canonical execution host: {report.get('environment', {}).get('canonical_execution_host', 'local-windows')}",
+        f"- Canonical execution host: {report.get('environment', {}).get('canonical_execution_host', 'windows-native')}",
         f"- Expected repo root prefix: {report.get('environment', {}).get('expected_repo_root_prefix', '')}",
         "",
         "## Final Recommended Setup",
