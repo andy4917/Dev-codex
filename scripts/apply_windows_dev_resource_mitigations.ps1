@@ -8,6 +8,9 @@ param(
     ),
     [switch]$StopWindowsSearch,
     [switch]$SetWindowsSearchDemandStart,
+    [switch]$DisableWindowsSearch,
+    [switch]$StopDeliveryOptimization,
+    [switch]$StopLenovoUdc,
     [switch]$Json
 )
 
@@ -32,11 +35,14 @@ $rows = [ordered]@{
     windows_search = [ordered]@{
         stop_requested = [bool]$StopWindowsSearch
         demand_start_requested = [bool]$SetWindowsSearchDemandStart
+        disable_requested = [bool]$DisableWindowsSearch
         status_before = $null
         status_after = $null
+        start_type_after = $null
         actions = @()
         failed = @()
     }
+    services = @()
 }
 
 try {
@@ -94,7 +100,14 @@ try {
     }
 }
 
-if ($SetWindowsSearchDemandStart) {
+if ($DisableWindowsSearch) {
+    try {
+        sc.exe config WSearch start= disabled | Out-Null
+        $rows.windows_search.actions += "set_start_disabled"
+    } catch {
+        $rows.windows_search.failed += "set_start_disabled: $($_.Exception.Message)"
+    }
+} elseif ($SetWindowsSearchDemandStart) {
     try {
         sc.exe config WSearch start= demand | Out-Null
         $rows.windows_search.actions += "set_start_demand"
@@ -115,8 +128,79 @@ if ($StopWindowsSearch) {
 try {
     $svcAfter = Get-Service -Name WSearch -ErrorAction Stop
     $rows.windows_search.status_after = $svcAfter.Status.ToString()
+    $rows.windows_search.start_type_after = $svcAfter.StartType.ToString()
 } catch {
     $rows.windows_search.failed += "query_after: $($_.Exception.Message)"
+}
+
+if ($StopDeliveryOptimization) {
+    $item = [ordered]@{
+        service = "DoSvc"
+        stop_requested = $true
+        manual_start_requested = $true
+        status_after = $null
+        start_type_after = $null
+        failed = @()
+    }
+    try {
+        Set-Service -Name DoSvc -StartupType Manual -ErrorAction Stop
+    } catch {
+        $item.failed += "set_manual: $($_.Exception.Message)"
+    }
+    try {
+        Stop-Service -Name DoSvc -Force -ErrorAction Stop
+    } catch {
+        $item.failed += "stop_service: $($_.Exception.Message)"
+    }
+    try {
+        $svc = Get-Service -Name DoSvc -ErrorAction Stop
+        $item.status_after = $svc.Status.ToString()
+        $item.start_type_after = $svc.StartType.ToString()
+    } catch {
+        $item.failed += "query_after: $($_.Exception.Message)"
+    }
+    $rows.services += [pscustomobject]$item
+}
+
+if ($StopLenovoUdc) {
+    $item = [ordered]@{
+        service = "UDCService"
+        stop_requested = $true
+        manual_start_requested = $true
+        stopped_processes = @()
+        status_after = $null
+        start_type_after = $null
+        failed = @()
+    }
+    try {
+        Set-Service -Name UDCService -StartupType Manual -ErrorAction Stop
+    } catch {
+        $item.failed += "set_manual: $($_.Exception.Message)"
+    }
+    try {
+        Stop-Service -Name UDCService -Force -ErrorAction Stop
+    } catch {
+        $item.failed += "stop_service: $($_.Exception.Message)"
+    }
+    foreach ($proc in Get-Process -Name UDClientService, UDCUserAgent, MessagingPlugin -ErrorAction SilentlyContinue) {
+        try {
+            $item.stopped_processes += [pscustomobject]@{
+                pid = $proc.Id
+                name = $proc.ProcessName
+            }
+            Stop-Process -Id $proc.Id -Force -ErrorAction Stop
+        } catch {
+            $item.failed += "stop_process_$($proc.Id): $($_.Exception.Message)"
+        }
+    }
+    try {
+        $svc = Get-Service -Name UDCService -ErrorAction Stop
+        $item.status_after = $svc.Status.ToString()
+        $item.start_type_after = $svc.StartType.ToString()
+    } catch {
+        $item.failed += "query_after: $($_.Exception.Message)"
+    }
+    $rows.services += [pscustomobject]$item
 }
 
 $result = [pscustomobject]$rows

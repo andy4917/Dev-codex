@@ -50,6 +50,12 @@ If Windows Search restarts immediately during an incident, run the same script w
 pwsh scripts\apply_windows_dev_resource_mitigations.ps1 -StopWindowsSearch -SetWindowsSearchDemandStart -Json
 ```
 
+If Search still restarts or WMI-Activity shows Lenovo UDC / Delivery Optimization polling loops, use the active-incident profile:
+
+```powershell
+pwsh scripts\apply_windows_dev_resource_mitigations.ps1 -StopWindowsSearch -DisableWindowsSearch -StopLenovoUdc -StopDeliveryOptimization -Json
+```
+
 Then sample with both process and kernel counters:
 
 ```powershell
