@@ -164,6 +164,14 @@ C:\Users\anise\.venvs\directml-py312
 
 Use it for Windows GPU smoke tests and ONNX Runtime DirectML checks. Do not use Intel IPEX as the default Windows path because the current Intel Extension for PyTorch line is end-of-life in 2026.
 
+When graphics driver installation is blocked or Codex App renderer/GPU CPU stays high, use:
+
+```powershell
+python scripts\check_windows_driver_health.py --json
+```
+
+Record the result before changing Codex App rendering mode.
+
 ## Coding References
 
 Use these references actively when writing or reviewing code:

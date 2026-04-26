@@ -22,7 +22,19 @@ $switchesByMode = @{
         "--num-raster-threads=2",
         "--disable-smooth-scrolling"
     )
-    DisableGpu = @("--disable-gpu")
+    DisableGpu = @(
+        "--disable-gpu",
+        "--disable-gpu-compositing",
+        "--disable-gpu-rasterization",
+        "--disable-zero-copy",
+        "--disable-backgrounding-occluded-windows",
+        "--disable-renderer-backgrounding",
+        "--disable-background-timer-throttling",
+        "--disable-smooth-scrolling",
+        "--renderer-process-limit=2",
+        "--num-raster-threads=1",
+        "--disable-features=CalculateNativeWinOcclusion"
+    )
 }
 
 function Get-CodexExecutablePath {

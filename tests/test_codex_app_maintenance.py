@@ -44,6 +44,17 @@ class CodexAppMaintenanceTests(unittest.TestCase):
                 "\\\\wsl.localhost\\Ubuntu\\home\\andy4917\\Dev-Management",
             ],
             "electron-persisted-atom-state": {
+                "codexCloudAccess": "enabled",
+                "environment": {
+                    "machine_id": "wham-public/wham-universal",
+                    "workspace_dir": "/workspace",
+                    "task_count": 7,
+                    "repo_map": {
+                        "github-1111487545": {
+                            "clone_url": "https://github.com/andy4917/-.git",
+                        },
+                    },
+                },
                 "prompt-history": [
                     "open C:\\Users\\anise\\code\\Dev-Management",
                     "open /home/andy4917/Dev-Management",
@@ -61,6 +72,8 @@ class CodexAppMaintenanceTests(unittest.TestCase):
         self.assertEqual(cleaned["remote-connection-auto-connect-by-host-id"], {"local": True})
         self.assertEqual(cleaned["remote-projects"], [])
         self.assertEqual(cleaned["electron-saved-workspace-roots"], ["C:\\Users\\anise\\code\\Dev-Management"])
+        self.assertNotIn("environment", cleaned["electron-persisted-atom-state"])
+        self.assertNotIn("codexCloudAccess", cleaned["electron-persisted-atom-state"])
         self.assertEqual(cleaned["electron-persisted-atom-state"]["prompt-history"], ["open C:\\Users\\anise\\code\\Dev-Management"])
         self.assertEqual(
             cleaned["electron-persisted-atom-state"]["sidebar-collapsed-groups"],
@@ -70,6 +83,13 @@ class CodexAppMaintenanceTests(unittest.TestCase):
         self.assertEqual(changes["removed_prompt_history_items"], 1)
         self.assertEqual(changes["removed_projectless_thread_ids"], ["legacy"])
         self.assertEqual(changes["removed_sidebar_collapsed_groups"], ["/home/andy4917/Dev-Management"])
+        self.assertEqual(
+            changes["removed_cloud_task_state_keys"],
+            [
+                "electron-persisted-atom-state.environment",
+                "electron-persisted-atom-state.codexCloudAccess",
+            ],
+        )
 
     def test_cap_sid_sanitizer_removes_legacy_workspace_mapping(self) -> None:
         payload = {
@@ -113,6 +133,43 @@ class CodexAppMaintenanceTests(unittest.TestCase):
             self.assertEqual(rows, {"current": 0, "legacy": 1})
             self.assertIsNone(report["backup"])
             self.assertEqual(report["backup_policy"], "disabled_by_policy")
+            self.assertEqual(report["stale_reason_summary"], {"legacy_or_missing_cwd": 1})
+
+    def test_archive_stale_threads_marks_legacy_git_origin_inactive(self) -> None:
+        now = datetime(2026, 4, 26, tzinfo=timezone.utc)
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            db = root / "state_5.sqlite"
+            con = sqlite3.connect(db)
+            con.execute(
+                "create table threads (id text primary key, cwd text not null, archived integer not null, archived_at integer, git_origin_url text)"
+            )
+            con.executemany(
+                "insert into threads (id, cwd, archived, archived_at, git_origin_url) values (?, ?, ?, ?, ?)",
+                [
+                    ("current", "C:\\Users\\anise\\code\\Dev-Management", 0, None, None),
+                    (
+                        "legacy-origin",
+                        "C:\\Users\\anise\\code\\Dev-Management",
+                        0,
+                        None,
+                        "https://github.com/andy4917/Dev-codex.git",
+                    ),
+                ],
+            )
+            con.commit()
+            con.close()
+
+            report = archive_stale_threads(db, root / "backup", apply=True, now=now)
+
+            self.assertEqual(report["stale_count"], 1)
+            self.assertEqual(report["stale_reason_summary"], {"legacy_git_origin": 1})
+            verify = sqlite3.connect(db)
+            try:
+                rows = dict(verify.execute("select id, archived from threads").fetchall())
+            finally:
+                verify.close()
+            self.assertEqual(rows, {"current": 0, "legacy-origin": 1})
 
     def test_archive_live_thread_overflow_keeps_newest_threads(self) -> None:
         now = datetime(2026, 4, 26, tzinfo=timezone.utc)

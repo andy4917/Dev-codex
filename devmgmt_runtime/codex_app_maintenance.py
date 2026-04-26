@@ -18,11 +18,20 @@ LEGACY_RUNTIME_MARKERS = (
     "/home/andy4917",
     "\\home\\andy4917",
     "c:\\home\\andy4917",
+    "\\mnt\\c\\users\\anise",
     "wsl.localhost",
     "devmgmt-wsl",
     "wsl-ubuntu",
     "legacy-linux",
     "legacy-remote",
+)
+LEGACY_GIT_ORIGIN_MARKERS = (
+    "github.com/andy4917/dev-codex",
+)
+STALE_CLOUD_ENVIRONMENT_MARKERS = (
+    "wham-public/",
+    "\"workspace_dir\": \"/workspace\"",
+    "github.com/andy4917/-.git",
 )
 STALE_WORKSPACE_MARKERS = (
     "c:\\users\\anise\\documents\\codex",
@@ -95,6 +104,24 @@ def contains_stale_workspace_marker(value: Any) -> bool:
     return any(marker in text for marker in STALE_WORKSPACE_MARKERS)
 
 
+def contains_legacy_git_origin(value: Any) -> bool:
+    text = str(value or "").strip().replace("\\", "/").lower()
+    return any(marker in text for marker in LEGACY_GIT_ORIGIN_MARKERS)
+
+
+def contains_stale_cloud_environment(value: Any) -> bool:
+    if not isinstance(value, dict):
+        return False
+    text = json.dumps(value, ensure_ascii=False, sort_keys=True).lower()
+    if any(marker in text for marker in STALE_CLOUD_ENVIRONMENT_MARKERS):
+        return True
+    return bool(value.get("task_count")) and (
+        value.get("workspace_dir") == "/workspace"
+        or isinstance(value.get("repo_map"), dict)
+        or isinstance(value.get("repos"), list)
+    )
+
+
 def looks_like_windows_path(value: Any) -> bool:
     text = normalize_path_text(value)
     return len(text) >= 3 and text[1:3] == ":\\"
@@ -163,6 +190,7 @@ def sanitize_global_state_payload(
         "removed_projectless_thread_ids": [],
         "removed_sidebar_collapsed_groups": [],
         "removed_workspace_root_labels": [],
+        "removed_cloud_task_state_keys": [],
     }
 
     remote_auto = cleaned.get("remote-connection-auto-connect-by-host-id")
@@ -190,6 +218,14 @@ def sanitize_global_state_payload(
 
     atoms = cleaned.get("electron-persisted-atom-state")
     if isinstance(atoms, dict):
+        cloud_environment_removed = False
+        if contains_stale_cloud_environment(atoms.get("environment")):
+            atoms.pop("environment", None)
+            cloud_environment_removed = True
+            changes["removed_cloud_task_state_keys"].append("electron-persisted-atom-state.environment")
+        if cloud_environment_removed and atoms.get("codexCloudAccess") == "enabled":
+            atoms.pop("codexCloudAccess", None)
+            changes["removed_cloud_task_state_keys"].append("electron-persisted-atom-state.codexCloudAccess")
         history = atoms.get("prompt-history")
         if isinstance(history, list):
             kept_history = [item for item in history if not contains_legacy_marker(item)]
@@ -336,29 +372,47 @@ def thread_cwd_is_stale(cwd: str) -> bool:
     return False
 
 
+def thread_is_stale(cwd: str, git_origin_url: str = "") -> tuple[bool, str]:
+    if thread_cwd_is_stale(cwd):
+        return True, "legacy_or_missing_cwd"
+    if contains_legacy_git_origin(git_origin_url):
+        return True, "legacy_git_origin"
+    return False, ""
+
+
+def sqlite_table_columns(con: sqlite3.Connection, table: str) -> set[str]:
+    return {str(row[1]) for row in con.execute(f"pragma table_info({table})").fetchall()}
+
+
 def inspect_stale_threads(sqlite_path: Path) -> dict[str, Any]:
     if not sqlite_path.exists():
         return {"path": str(sqlite_path), "exists": False, "stale_count": 0}
     con = sqlite3.connect(f"file:{sqlite_path}?mode=ro", uri=True, timeout=30)
     try:
-        rows = con.execute("select id, cwd, archived from threads").fetchall()
+        columns = sqlite_table_columns(con, "threads")
+        git_origin_expr = "git_origin_url" if "git_origin_url" in columns else "'' as git_origin_url"
+        rows = con.execute(f"select id, cwd, archived, {git_origin_expr} from threads").fetchall()
     finally:
         con.close()
-    stale = [
-        {"id": row[0], "cwd": row[1], "archived": row[2]}
-        for row in rows
-        if not int(row[2] or 0) and thread_cwd_is_stale(str(row[1] or ""))
-    ]
+    stale = []
+    for row in rows:
+        stale_match, reason = thread_is_stale(str(row[1] or ""), str(row[3] or ""))
+        if not int(row[2] or 0) and stale_match:
+            stale.append({"id": row[0], "cwd": row[1], "archived": row[2], "git_origin_url": row[3], "reason": reason})
     summary: dict[str, int] = {}
+    reason_summary: dict[str, int] = {}
     for row in stale:
         summary[row["cwd"]] = summary.get(row["cwd"], 0) + 1
+        reason_summary[row["reason"]] = reason_summary.get(row["reason"], 0) + 1
     return {
         "path": str(sqlite_path),
         "exists": True,
         "thread_count": len(rows),
         "stale_count": len(stale),
         "stale_cwd_summary": summary,
+        "stale_reason_summary": reason_summary,
         "stale_thread_ids": [row["id"] for row in stale],
+        "stale_threads": stale,
     }
 
 

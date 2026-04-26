@@ -170,6 +170,87 @@ class WindowsAppResourceHealthTests(unittest.TestCase):
         self.assertIn("Codex App renderer sampled CPU is high: 21.5%", report["warnings"])
         self.assertIn("Codex App gpu_process sampled CPU is high: 12.0%", report["warnings"])
 
+    def test_system_pressure_warnings_include_search_defender_dwm_and_kernel_shape(self) -> None:
+        main = self._proc(29, 1, "Codex.exe", "Codex.exe", 1, 300)
+        renderer = self._proc(30, 29, "Codex.exe", "Codex.exe --type=renderer", 1, 400)
+        gpu = self._proc(31, 29, "Codex.exe", "Codex.exe --type=gpu-process", 1, 280)
+
+        report = self.module.evaluate_processes(
+            [main, renderer, gpu],
+            now=self.now,
+            cpu_samples={
+                "codex": 40.0,
+                "searchindexer": 6.0,
+                "msmpeng": 7.0,
+                "system": 12.0,
+                "dwm": 11.0,
+                "wmiprvse": 6.0,
+            },
+            process_cpu_samples=[
+                {"pid": 30, "instance": "codex", "avg_cpu_pct": 20.0},
+                {"pid": 31, "instance": "codex", "avg_cpu_pct": 15.0},
+            ],
+            kernel_samples={
+                "failed": False,
+                "averages": {
+                    "privileged_pct": 28.0,
+                    "interrupt_pct": 1.0,
+                    "dpc_pct": 0.5,
+                },
+            },
+        )
+
+        joined = " ".join(report["warnings"])
+        pressure = report["cpu_samples"]["system_pressure"]
+        self.assertEqual(pressure["windows_search_cpu_pct"], 6.0)
+        self.assertEqual(pressure["defender_cpu_pct"], 7.0)
+        self.assertFalse(pressure["codex_disable_gpu_active"])
+        self.assertIn("Windows Search indexing sampled CPU is high", joined)
+        self.assertIn("Microsoft Defender sampled CPU is high", joined)
+        self.assertIn("Windows System sampled CPU is high", joined)
+        self.assertIn("WMI Provider Host sampled CPU is high", joined)
+        self.assertIn("Desktop Window Manager CPU is high alongside Codex GPU/renderer load", joined)
+        self.assertIn("DisableGpu mode is not active", joined)
+        self.assertIn("Kernel privileged CPU is high while interrupt/DPC stay low", joined)
+
+    def test_disable_gpu_mode_is_detected_from_main_codex_process(self) -> None:
+        main = self._proc(29, 1, "Codex.exe", "Codex.exe --disable-gpu", 1, 300)
+        gpu = self._proc(31, 29, "Codex.exe", "Codex.exe --type=gpu-process", 1, 280)
+
+        report = self.module.evaluate_processes(
+            [main, gpu],
+            now=self.now,
+            cpu_samples={"codex": 20.0},
+            process_cpu_samples=[{"pid": 31, "instance": "codex", "avg_cpu_pct": 15.0}],
+        )
+
+        self.assertTrue(report["cpu_samples"]["system_pressure"]["codex_disable_gpu_active"])
+        self.assertNotIn("DisableGpu mode is not active", " ".join(report["warnings"]))
+
+    def test_kernel_cpu_snapshot_parses_typeperf_output_with_leading_blank_line(self) -> None:
+        completed = type(
+            "Completed",
+            (),
+            {
+                "stdout": (
+                    "\n"
+                    '"(PDH-CSV 4.0)","\\\\HOST\\Processor Information(_Total)\\% Processor Time",'
+                    '"\\\\HOST\\Processor Information(_Total)\\% Privileged Time",'
+                    '"\\\\HOST\\Processor Information(_Total)\\% Interrupt Time",'
+                    '"\\\\HOST\\Processor Information(_Total)\\% DPC Time",'
+                    '"\\\\HOST\\System\\Processor Queue Length"\n'
+                    '"04/27/2026 05:07:54.119","12.0","8.0","1.0","0.5","2.0"\n'
+                ),
+            },
+        )()
+        with mock.patch.object(self.module.subprocess, "run", return_value=completed):
+            result = self.module.get_kernel_cpu_snapshot(1)
+
+        self.assertFalse(result["failed"])
+        self.assertEqual(result["averages"]["processor_pct"], 12.0)
+        self.assertEqual(result["averages"]["privileged_pct"], 8.0)
+        self.assertEqual(result["averages"]["processor_queue_length"], 2.0)
+
     def test_codex_cpu_report_includes_system_normalized_percent(self) -> None:
         report = self.module.evaluate_processes(
             [self._proc(30, 1, "Codex.exe", "Codex.exe", 1, 200)],

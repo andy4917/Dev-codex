@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 import argparse
+import csv
+import io
 import json
 import re
 import subprocess
@@ -33,17 +35,33 @@ SERENA_LANGUAGE_MARKERS = (
 MANAGED_PROCESS_NAMES = {"serena.exe", "python.exe", "python3.13.exe", "node.exe", "cmd.exe"}
 RESOURCE_WATCH_NAMES = (
     "codex",
+    "dwm",
+    "msmpeng",
     "node",
     "python",
     "python3.13",
+    "searchfilterhost",
+    "searchindexer",
+    "searchprotocolhost",
+    "system",
+    "wmiprvse",
     "notepad",
     "logioptionsplus_agent",
+    "microsoft.cmdpal.ui",
+    "powertoys.powerlauncher",
     "powertoys.peek.ui",
     "explorer",
     "flicklift",
     "workloadssessionhost",
 )
 CODEX_ROLE_CPU_WARN_PCT = 10.0
+SYSTEM_PROCESS_CPU_WARN_PCT = 10.0
+SEARCH_CPU_WARN_PCT = 5.0
+DEFENDER_CPU_WARN_PCT = 5.0
+DWM_CPU_WARN_PCT = 10.0
+WMI_CPU_WARN_PCT = 5.0
+KERNEL_PRIVILEGED_WARN_PCT = 20.0
+KERNEL_INTERRUPT_DPC_STORM_PCT = 5.0
 WINDOWS_GPU_PREFERENCE_VALUES = {
     "default": "GpuPreference=0;",
     "power_saving": "GpuPreference=1;",
@@ -121,6 +139,53 @@ def get_windows_processes() -> list[dict[str, Any]]:
 
 def get_cpu_samples(sample_seconds: int = 3) -> dict[str, float]:
     return get_cpu_snapshot(sample_seconds).get("aggregate", {})
+
+
+def get_kernel_cpu_snapshot(sample_count: int = 0) -> dict[str, Any]:
+    if sample_count <= 0:
+        return {}
+    counters = {
+        "processor_pct": r"\Processor Information(_Total)\% Processor Time",
+        "privileged_pct": r"\Processor Information(_Total)\% Privileged Time",
+        "interrupt_pct": r"\Processor Information(_Total)\% Interrupt Time",
+        "dpc_pct": r"\Processor Information(_Total)\% DPC Time",
+        "processor_queue_length": r"\System\Processor Queue Length",
+    }
+    try:
+        completed = subprocess.run(
+            ["typeperf", *counters.values(), "-sc", str(sample_count)],
+            check=True,
+            text=True,
+            capture_output=True,
+            timeout=max(15, sample_count + 10),
+        )
+    except (OSError, subprocess.CalledProcessError, subprocess.TimeoutExpired) as exc:
+        return {"failed": True, "error": str(exc)}
+    rows = [row for row in csv.reader(io.StringIO(completed.stdout)) if row]
+    if len(rows) < 2:
+        return {"failed": True, "error": "typeperf returned no counter rows"}
+    header = rows[0]
+    values_by_key: dict[str, list[float]] = {key: [] for key in counters}
+    for row in rows[1:]:
+        if len(row) != len(header):
+            continue
+        for index, column in enumerate(header[1:], start=1):
+            for key, counter in counters.items():
+                if column.lower().endswith(counter.lower()):
+                    try:
+                        values_by_key[key].append(float(row[index]))
+                    except ValueError:
+                        pass
+    averages = {
+        key: round(sum(values) / len(values), 1)
+        for key, values in values_by_key.items()
+        if values
+    }
+    return {
+        "failed": False,
+        "sample_count": sample_count,
+        "averages": averages,
+    }
 
 
 def get_cpu_snapshot(sample_seconds: int = 3) -> dict[str, Any]:
@@ -224,6 +289,15 @@ def codex_process_role(proc: dict[str, Any]) -> str:
     if name == "codex.exe":
         return "main"
     return "other"
+
+
+def codex_disable_gpu_enabled(processes: list[dict[str, Any]]) -> bool:
+    for proc in processes:
+        if codex_process_role(proc) != "main":
+            continue
+        if "--disable-gpu" in _normalize_command(proc.get("CommandLine")).lower():
+            return True
+    return False
 
 
 def process_executable_path(proc: dict[str, Any]) -> str:
@@ -504,6 +578,7 @@ def evaluate_processes(
     cpu_samples: dict[str, float] | None = None,
     process_cpu_samples: list[dict[str, Any]] | None = None,
     logical_processors: int | None = None,
+    kernel_samples: dict[str, Any] | None = None,
     stale_minutes: float = 10,
     keep_serena_roots: int = 1,
     duplicate_serena_grace_minutes: float = 10,
@@ -591,6 +666,61 @@ def evaluate_processes(
         value = round(value, 1)
         if value > CODEX_ROLE_CPU_WARN_PCT:
             warnings.append(f"Codex App {role} sampled CPU is high: {value}%")
+    search_cpu = round(
+        sum(
+            value
+            for instance, value in cpu_samples.items()
+            if instance in {"searchindexer", "searchprotocolhost", "searchfilterhost"}
+        ),
+        1,
+    )
+    defender_cpu = round(float(cpu_samples.get("msmpeng", 0)), 1)
+    system_cpu = round(float(cpu_samples.get("system", 0)), 1)
+    dwm_cpu = round(float(cpu_samples.get("dwm", 0)), 1)
+    wmi_cpu = round(float(cpu_samples.get("wmiprvse", 0)), 1)
+    if search_cpu > SEARCH_CPU_WARN_PCT:
+        warnings.append(
+            "Windows Search indexing sampled CPU is high: "
+            f"{search_cpu}%; exclude high-churn development and Codex app-state paths."
+        )
+    if defender_cpu > DEFENDER_CPU_WARN_PCT:
+        warnings.append(
+            "Microsoft Defender sampled CPU is high: "
+            f"{defender_cpu}%; add measured dev-path exclusions before broad code/log scans."
+        )
+    if system_cpu > SYSTEM_PROCESS_CPU_WARN_PCT:
+        warnings.append(
+            f"Windows System sampled CPU is high: {system_cpu}%; inspect kernel/file-system/driver pressure."
+        )
+    if wmi_cpu > WMI_CPU_WARN_PCT:
+        warnings.append(f"WMI Provider Host sampled CPU is high: {wmi_cpu}%; avoid repeated CIM polling.")
+    codex_gpu_cpu = round(codex_cpu_by_role.get("gpu_process", 0.0), 1)
+    codex_renderer_cpu = round(codex_cpu_by_role.get("renderer", 0.0), 1)
+    if dwm_cpu > DWM_CPU_WARN_PCT and (codex_gpu_cpu > CODEX_ROLE_CPU_WARN_PCT or codex_renderer_cpu > CODEX_ROLE_CPU_WARN_PCT):
+        warnings.append(
+            "Desktop Window Manager CPU is high alongside Codex GPU/renderer load; "
+            "suspect Chromium compositor or graphics-driver interaction."
+        )
+    disable_gpu_active = codex_disable_gpu_enabled(processes)
+    if codex_gpu_cpu > CODEX_ROLE_CPU_WARN_PCT and not disable_gpu_active:
+        warnings.append(
+            "Codex App GPU process is hot while DisableGpu mode is not active; "
+            "defer app restart until safe, then relaunch with DisableGpu and cleared render cache."
+        )
+    kernel_samples = kernel_samples or {}
+    kernel_averages = kernel_samples.get("averages", {}) if isinstance(kernel_samples, dict) else {}
+    privileged_pct = float(kernel_averages.get("privileged_pct") or 0)
+    interrupt_pct = float(kernel_averages.get("interrupt_pct") or 0)
+    dpc_pct = float(kernel_averages.get("dpc_pct") or 0)
+    if (
+        privileged_pct > KERNEL_PRIVILEGED_WARN_PCT
+        and interrupt_pct < KERNEL_INTERRUPT_DPC_STORM_PCT
+        and dpc_pct < KERNEL_INTERRUPT_DPC_STORM_PCT
+    ):
+        warnings.append(
+            "Kernel privileged CPU is high while interrupt/DPC stay low; "
+            "this fits file-system, graphics, WMI, or antivirus pressure more than a pure ISR/DPC storm."
+        )
     if cleanup_targets:
         warnings.append(f"managed cleanup candidates available: {len(cleanup_targets)}")
     protected_duplicate_count = len(cleanup_details.get("protected_duplicate_serena_roots", []))
@@ -627,6 +757,14 @@ def evaluate_processes(
             "codex_cpu_unit": "pct_of_one_logical_cpu",
             "logical_processors": logical_processors,
             "codex_system_cpu_pct": codex_system_cpu_pct,
+            "system_pressure": {
+                "system_cpu_pct": system_cpu,
+                "windows_search_cpu_pct": search_cpu,
+                "defender_cpu_pct": defender_cpu,
+                "dwm_cpu_pct": dwm_cpu,
+                "wmi_cpu_pct": wmi_cpu,
+                "codex_disable_gpu_active": disable_gpu_active,
+            },
             "codex_by_role": {
                 role: round(value, 1)
                 for role, value in sorted(codex_cpu_by_role.items(), key=lambda item: item[1], reverse=True)
@@ -641,6 +779,7 @@ def evaluate_processes(
                 for instance, value in sorted(cpu_samples.items(), key=lambda item: item[1], reverse=True)[:10]
             ],
         },
+        "kernel_samples": kernel_samples,
         "warnings": warnings,
         "blockers": blockers,
         "cleanup_candidates": [
@@ -750,9 +889,20 @@ def main() -> int:
     parser.add_argument(
         "--cleanup-duplicate-serena-roots",
         action="store_true",
-        help="Deprecated unsafe request. Reports duplicate-root cleanup as blocked instead of killing MCP transports.",
+        help="Prepare duplicate Serena MCP root cleanup candidates. Default execution is blocked unless force is also set.",
+    )
+    parser.add_argument(
+        "--force-kill-duplicate-serena-roots",
+        action="store_true",
+        help="Actually stop duplicate Serena MCP roots and descendants. Use only after commit/push or explicit user approval.",
     )
     parser.add_argument("--cpu-sample-seconds", type=int, default=0)
+    parser.add_argument(
+        "--kernel-sample-count",
+        type=int,
+        default=0,
+        help="Sample kernel/system PDH counters with typeperf without using WMI/CIM.",
+    )
     parser.add_argument("--cleanup-stale-serena", action="store_true")
     parser.add_argument(
         "--throttle-codex-priority",
@@ -769,21 +919,39 @@ def main() -> int:
     processes = get_windows_processes()
     now = datetime.now(timezone.utc)
     cpu_snapshot = get_cpu_snapshot(args.cpu_sample_seconds)
+    kernel_snapshot = get_kernel_cpu_snapshot(args.kernel_sample_count)
     report = evaluate_processes(
         processes,
         now=now,
         cpu_samples=cpu_snapshot.get("aggregate", {}),
         process_cpu_samples=cpu_snapshot.get("processes", []),
         logical_processors=cpu_snapshot.get("logical_processors"),
+        kernel_samples=kernel_snapshot,
         stale_minutes=args.stale_minutes,
         keep_serena_roots=args.keep_serena_roots,
         duplicate_serena_grace_minutes=args.duplicate_serena_grace_minutes,
         cleanup_duplicate_serena_roots=args.cleanup_duplicate_serena_roots,
     )
+    if args.force_kill_duplicate_serena_roots and not args.cleanup_duplicate_serena_roots:
+        report.setdefault("blockers", []).append(
+            "--force-kill-duplicate-serena-roots requires --cleanup-duplicate-serena-roots"
+        )
     if args.cleanup_stale_serena:
         if args.cleanup_duplicate_serena_roots:
-            report["cleanup_result"] = duplicate_serena_cleanup_risk_report(report)
-            report["warnings"].append("duplicate Serena MCP root cleanup was blocked to protect the active transport")
+            if args.force_kill_duplicate_serena_roots:
+                targets, _details = managed_cleanup_targets(
+                    processes,
+                    now=now,
+                    stale_minutes=args.stale_minutes,
+                    keep_serena_roots=args.keep_serena_roots,
+                    duplicate_serena_grace_minutes=args.duplicate_serena_grace_minutes,
+                    cleanup_duplicate_serena_roots=True,
+                )
+                report["cleanup_result"] = stop_processes(targets)
+                report["warnings"].append("duplicate Serena MCP root cleanup was forced by explicit request")
+            else:
+                report["cleanup_result"] = duplicate_serena_cleanup_risk_report(report)
+                report["warnings"].append("duplicate Serena MCP root cleanup was blocked to protect the active transport")
         else:
             targets, _details = managed_cleanup_targets(
                 processes,
@@ -800,6 +968,7 @@ def main() -> int:
             cpu_samples=(refreshed_cpu_snapshot := get_cpu_snapshot(args.cpu_sample_seconds)).get("aggregate", {}),
             process_cpu_samples=refreshed_cpu_snapshot.get("processes", []),
             logical_processors=refreshed_cpu_snapshot.get("logical_processors"),
+            kernel_samples=get_kernel_cpu_snapshot(args.kernel_sample_count),
             stale_minutes=args.stale_minutes,
             keep_serena_roots=args.keep_serena_roots,
             duplicate_serena_grace_minutes=args.duplicate_serena_grace_minutes,
@@ -817,6 +986,7 @@ def main() -> int:
             cpu_samples=refreshed_cpu_snapshot.get("aggregate", {}),
             process_cpu_samples=refreshed_cpu_snapshot.get("processes", []),
             logical_processors=refreshed_cpu_snapshot.get("logical_processors"),
+            kernel_samples=get_kernel_cpu_snapshot(args.kernel_sample_count),
             stale_minutes=args.stale_minutes,
             keep_serena_roots=args.keep_serena_roots,
             duplicate_serena_grace_minutes=args.duplicate_serena_grace_minutes,
