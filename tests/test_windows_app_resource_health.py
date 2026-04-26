@@ -70,6 +70,22 @@ class WindowsAppResourceHealthTests(unittest.TestCase):
         self.assertEqual(report["process_counts"]["serena_roots"], 2)
         self.assertEqual({item["pid"] for item in report["cleanup_candidates"]}, {20, 21, 22})
 
+    def test_uvx_serena_tree_counts_as_one_top_level_root(self) -> None:
+        uvx = self._proc(10, 1, "uvx.exe", "uvx --from serena-agent serena start-mcp-server --project-from-cwd --context=codex", 1, 5)
+        uv = self._proc(11, 10, "uv.exe", "uv run serena start-mcp-server --project-from-cwd --context=codex", 1, 5)
+        serena = self._proc(12, 11, "serena.exe", "serena.exe start-mcp-server --project-from-cwd --context=codex", 1, 5)
+        python = self._proc(13, 12, "python3.14.exe", "python3.14.exe serena start-mcp-server --project-from-cwd --context=codex", 1, 10)
+
+        report = self.module.evaluate_processes(
+            [uvx, uv, serena, python, self._proc(30, 1, "Codex.exe", "Codex.exe", 1, 200)],
+            now=self.now,
+            stale_minutes=10,
+        )
+
+        self.assertEqual(report["status"], "PASS")
+        self.assertEqual(report["process_counts"]["serena_roots"], 1)
+        self.assertEqual(report["process_counts"]["python"], 1)
+
     def test_duplicate_serena_roots_are_protected_by_default(self) -> None:
         active = self._proc(10, 1, "serena.exe", "serena.exe start-mcp-server --project-from-cwd --context=codex", 1, 5)
         duplicate = self._proc(20, 1, "serena.exe", "serena.exe start-mcp-server --project-from-cwd --context=codex", 2, 5)

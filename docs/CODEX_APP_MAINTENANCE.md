@@ -9,6 +9,7 @@ Codex App state is a user control-plane surface, not repo authority. Dev-Managem
 - Full cycle: `python scripts/run_codex_app_maintenance_cycle.py --json`
 - Resource-health CPU sample: the full cycle samples Codex App CPU for `3` seconds by default; set `--resource-cpu-sample-seconds 0` only when the machine is too sluggish to sample.
 - Serena MCP root ceiling: the full cycle passes `--keep-serena-roots 1 --duplicate-serena-grace-minutes 10` to the resource-health check.
+- Managed helper launcher: local app-server helpers that can leave Python/Node/uvx descendant trees must be launched through `python scripts\codex_managed_process_launcher.py --profile serena-mcp` instead of direct `uvx ... start-mcp-server ...`. The launcher owns the role signature, holds a singleton lock, refuses duplicate app-server launches, removes stale same-role roots before start, and stops the child process tree when the wrapper exits.
 - Renderer/GPU/app-server evidence: `python scripts/check_windows_app_resource_health.py --cpu-sample-seconds 5 --json` records Codex CPU by subprocess role.
 - System pressure evidence: add `--kernel-sample-count 5` when Task Manager shows `System`, Search, Defender, WMI, or DWM pressure. The checker uses `typeperf` for kernel counters so it can distinguish high privileged CPU from interrupt/DPC storms without adding more CIM/WMI load.
 - Dev resource mitigations: `pwsh scripts/apply_windows_dev_resource_mitigations.ps1 -StopWindowsSearch -Json` marks high-churn dev/app-state paths as `NotContentIndexed`, adds measured Defender exclusions, and optionally stops Windows Search. Add `-DisableWindowsSearch`, `-StopLenovoUdc`, and `-StopDeliveryOptimization` only during an active incident where Search, Lenovo UDC, or Delivery Optimization keep waking WMI/file-system work. It does not close Codex App.
@@ -39,6 +40,7 @@ Codex App state is a user control-plane surface, not repo authority. Dev-Managem
 - Optionally recycles renderer cache directories that Chromium/Electron can regenerate on next launch.
 - Sends original stale session/log/suggestion files to the Windows Recycle Bin after any required archive is written.
 - Runs stale Serena/resource-health cleanup in the recurring maintenance cycle.
+- Uses a profile-based managed helper launcher for Serena so duplicate app-server MCP retries do not create extra Python, Node, uvx, or language-server roots. This is the durable path; disabling Serena is only an emergency isolation step and must not be left as the steady state.
 - Keeps live Codex App priority and GPU preference unchanged during the recurring cycle unless the opt-in flags are passed.
 - Provides a capped rendering relaunch mode for renderer/GPU CPU incidents where the app is still usable but Chromium raster/render parallelism needs a lower ceiling.
 - Provides a reduced UI controls relaunch mode for high-DPI renderer/GPU incidents where scale and essential progress animation must remain visible, while smooth scrolling and raster parallelism can be reduced.
@@ -54,5 +56,6 @@ Codex App state is a user control-plane surface, not repo authority. Dev-Managem
 - It runs at logon and every `240` minutes when the scheduled task is installed.
 - It does not modify Codex App binaries or repo source history.
 - It cannot remove packaged Codex App features such as the internal remote task handler; it only removes stale user-state inputs that keep that handler matching against old metadata.
+- It cannot multiplex a stdio MCP server across unrelated Codex app-server sessions. The enforced invariant is one live helper root per managed role signature; duplicate launches exit before spawning another child tree.
 - It keeps current Windows-native project roots active.
 - It does not force graphics driver installation; driver updates require an elevated Windows/OEM installer path.

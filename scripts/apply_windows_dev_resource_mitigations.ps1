@@ -22,6 +22,39 @@ function Test-IsElevated {
     return $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 }
 
+function Set-ServiceStartMode {
+    param(
+        [Parameter(Mandatory=$true)][string]$Name,
+        [Parameter(Mandatory=$true)][ValidateSet("Automatic", "Manual", "Disabled")][string]$Mode
+    )
+    $result = [ordered]@{
+        service = $Name
+        requested_mode = $Mode
+        actions = @()
+        failed = @()
+    }
+    try {
+        Set-Service -Name $Name -StartupType $Mode -ErrorAction Stop
+        $result.actions += "set_service_$Mode"
+        return $result
+    } catch {
+        $result.failed += "set_service_$($Mode): $($_.Exception.Message)"
+    }
+
+    $scMode = switch ($Mode) {
+        "Automatic" { "auto" }
+        "Manual" { "demand" }
+        "Disabled" { "disabled" }
+    }
+    $scOutput = & sc.exe config $Name start= $scMode 2>&1
+    if ($LASTEXITCODE -eq 0) {
+        $result.actions += "sc_config_$scMode"
+    } else {
+        $result.failed += "sc_config_$($scMode): $($scOutput -join ' ')"
+    }
+    return $result
+}
+
 $isElevated = Test-IsElevated
 $rows = [ordered]@{
     elevated = $isElevated
@@ -101,19 +134,13 @@ try {
 }
 
 if ($DisableWindowsSearch) {
-    try {
-        sc.exe config WSearch start= disabled | Out-Null
-        $rows.windows_search.actions += "set_start_disabled"
-    } catch {
-        $rows.windows_search.failed += "set_start_disabled: $($_.Exception.Message)"
-    }
+    $startMode = Set-ServiceStartMode -Name WSearch -Mode Disabled
+    $rows.windows_search.actions += $startMode.actions
+    $rows.windows_search.failed += $startMode.failed
 } elseif ($SetWindowsSearchDemandStart) {
-    try {
-        sc.exe config WSearch start= demand | Out-Null
-        $rows.windows_search.actions += "set_start_demand"
-    } catch {
-        $rows.windows_search.failed += "set_start_demand: $($_.Exception.Message)"
-    }
+    $startMode = Set-ServiceStartMode -Name WSearch -Mode Manual
+    $rows.windows_search.actions += $startMode.actions
+    $rows.windows_search.failed += $startMode.failed
 }
 
 if ($StopWindowsSearch) {
@@ -138,15 +165,14 @@ if ($StopDeliveryOptimization) {
         service = "DoSvc"
         stop_requested = $true
         manual_start_requested = $true
+        actions = @()
         status_after = $null
         start_type_after = $null
         failed = @()
     }
-    try {
-        Set-Service -Name DoSvc -StartupType Manual -ErrorAction Stop
-    } catch {
-        $item.failed += "set_manual: $($_.Exception.Message)"
-    }
+    $startMode = Set-ServiceStartMode -Name DoSvc -Mode Manual
+    $item.actions = $startMode.actions
+    $item.failed += $startMode.failed
     try {
         Stop-Service -Name DoSvc -Force -ErrorAction Stop
     } catch {
@@ -167,16 +193,15 @@ if ($StopLenovoUdc) {
         service = "UDCService"
         stop_requested = $true
         manual_start_requested = $true
+        actions = @()
         stopped_processes = @()
         status_after = $null
         start_type_after = $null
         failed = @()
     }
-    try {
-        Set-Service -Name UDCService -StartupType Manual -ErrorAction Stop
-    } catch {
-        $item.failed += "set_manual: $($_.Exception.Message)"
-    }
+    $startMode = Set-ServiceStartMode -Name UDCService -Mode Manual
+    $item.actions = $startMode.actions
+    $item.failed += $startMode.failed
     try {
         Stop-Service -Name UDCService -Force -ErrorAction Stop
     } catch {

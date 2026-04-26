@@ -76,9 +76,17 @@ For the repeated symptom where the app visually updates only after mouse movemen
 pwsh scripts\restart_codex_app_graphics_mode.ps1 -Mode DisableGpu -ClearRenderCache
 ```
 
-## Serena MCP Duplicate Cleanup
+## App-Server Helper Lifecycle
 
-Default checks protect duplicate Serena MCP roots because killing the wrong transport can close the current Codex session. After work is committed and pushed, an explicitly authorized cleanup can run:
+The durable fix for repeated Serena/Python/Node helper fanout is not leaving Serena disabled. Codex app-server must launch Serena through the managed helper launcher:
+
+```powershell
+python scripts\codex_managed_process_launcher.py --profile serena-mcp
+```
+
+The launcher enforces one live helper root for the `start-mcp-server --project-from-cwd --context=codex` role signature, cleans stale same-role uvx/Serena/Python/Node roots before start, and stops the spawned child tree when the launcher exits. The global Codex config should point the Serena MCP command at this launcher rather than direct `uvx`.
+
+Default health checks still protect direct duplicate Serena MCP roots because killing the wrong transport can close the current Codex session. After work is committed and pushed, an explicitly authorized cleanup can run:
 
 ```powershell
 python scripts\check_windows_app_resource_health.py --cleanup-stale-serena --cleanup-duplicate-serena-roots --force-kill-duplicate-serena-roots --json

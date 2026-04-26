@@ -32,14 +32,30 @@ SERENA_LANGUAGE_MARKERS = (
     "ALLanguageServer",
     "Microsoft.Dynamics.Nav.EditorServices.Host.exe",
 )
-MANAGED_PROCESS_NAMES = {"serena.exe", "python.exe", "python3.13.exe", "node.exe", "cmd.exe"}
+SERENA_ROOT_PROCESS_NAMES = {"uvx.exe", "uv.exe", "serena.exe", "python.exe", "python3.13.exe", "python3.14.exe", "py.exe"}
+MANAGED_PROCESS_NAMES = {
+    "cmd.exe",
+    "node.exe",
+    "py.exe",
+    "python.exe",
+    "python3.13.exe",
+    "python3.14.exe",
+    "serena.exe",
+    "uv.exe",
+    "uvx.exe",
+}
 RESOURCE_WATCH_NAMES = (
     "codex",
     "dwm",
     "msmpeng",
     "node",
+    "py",
     "python",
     "python3.13",
+    "python3.14",
+    "serena",
+    "uv",
+    "uvx",
     "searchfilterhost",
     "searchindexer",
     "searchprotocolhost",
@@ -264,8 +280,15 @@ def descendants(root_pid: int, children: dict[int, list[dict[str, Any]]]) -> lis
     return found
 
 
-def is_serena_root(proc: dict[str, Any]) -> bool:
-    return _proc_name(proc) == "serena.exe" and SERENA_SERVER_MARKER in _normalize_command(proc.get("CommandLine"))
+def is_serena_root_candidate(proc: dict[str, Any]) -> bool:
+    return _proc_name(proc) in SERENA_ROOT_PROCESS_NAMES and SERENA_SERVER_MARKER in _normalize_command(
+        proc.get("CommandLine")
+    )
+
+
+def top_level_serena_roots(processes: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    candidates = {_proc_id(proc): proc for proc in processes if is_serena_root_candidate(proc)}
+    return [proc for pid, proc in candidates.items() if _parent_id(proc) not in candidates]
 
 
 def is_stale_al_language_process(proc: dict[str, Any]) -> bool:
@@ -517,7 +540,7 @@ def managed_cleanup_targets(
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     by_parent = children_by_parent(processes)
     roots = sorted(
-        [proc for proc in processes if is_serena_root(proc)],
+        top_level_serena_roots(processes),
         key=lambda proc: _parse_time(proc.get("CreationDate")) or datetime.min.replace(tzinfo=timezone.utc),
         reverse=True,
     )
@@ -597,8 +620,8 @@ def evaluate_processes(
     names = [_proc_name(proc) for proc in processes]
     codex = [proc for proc in processes if _proc_name(proc) in {"codex.exe"}]
     node = [proc for proc in processes if _proc_name(proc) == "node.exe"]
-    python = [proc for proc in processes if _proc_name(proc) in {"python.exe", "python3.13.exe"}]
-    serena_roots = [proc for proc in processes if is_serena_root(proc)]
+    python = [proc for proc in processes if _proc_name(proc) in {"py.exe", "python.exe", "python3.13.exe", "python3.14.exe"}]
+    serena_roots = top_level_serena_roots(processes)
     stale_al = [
         proc
         for proc in processes
