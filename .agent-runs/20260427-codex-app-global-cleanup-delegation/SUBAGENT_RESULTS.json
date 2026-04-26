@@ -1,0 +1,64 @@
+{
+  "results": [
+    {
+      "evidence_refs": [
+        ".gitignore",
+        "reports/windows-app-resource-health.final.json",
+        "reports/codex-global-config-cleanup.final.json"
+      ],
+      "fallback_path": "git status, rg, report inspection, and process-health JSON review",
+      "fallback_refs": [
+        "git status --short --untracked-files=all",
+        "reports/windows-app-resource-health.final.json"
+      ],
+      "fallback_used": true,
+      "role": "read_only_scout",
+      "status": "COMPLETED",
+      "summary": "Classified generated resource-health snapshots and Serena health logs as cleanup noise, and separated performance/delegation/global cleanup surfaces.",
+      "task_id": "plan-scout-dirty-triage",
+      "tool_availability": {
+        "serena": "unavailable_in_plan_subagent_context"
+      },
+      "tool_surface_gaps": [
+        "Serena was not available inside the plan-mode scout context."
+      ]
+    },
+    {
+      "evidence_refs": [
+        "scripts/check_ai_slop.py",
+        "tests/test_check_ai_slop.py"
+      ],
+      "role": "bounded_worker",
+      "status": "COMPLETED",
+      "summary": "Implemented the inactive delegation decision guardrail slice and focused tests for scripts/check_ai_slop.py.",
+      "task_id": "hegel-check-ai-slop-worker",
+      "tool_availability": {
+        "serena": "not_required_for_assigned_bounded_patch"
+      }
+    },
+    {
+      "evidence_refs": [
+        "scripts/check_ai_slop.py",
+        "tests/test_check_ai_slop.py"
+      ],
+      "resolution_status": "patched",
+      "role": "independent_reviewer",
+      "status": "COMPLETED",
+      "summary": "Found active delegation could pass without DELEGATION_DECISION.json; patched check_ai_slop and tests.",
+      "task_id": "helmholtz-delegation-guardrail-review"
+    },
+    {
+      "evidence_refs": [
+        "scripts/check_windows_app_resource_health.py",
+        "tests/test_windows_app_resource_health.py"
+      ],
+      "resolution_status": "patched",
+      "role": "independent_reviewer",
+      "status": "COMPLETED",
+      "summary": "Found requested GPU/priority mitigation failures could still report PASS; patched resource-health issue promotion and tests.",
+      "task_id": "planck-resource-health-review"
+    }
+  ],
+  "run_id": "20260427-codex-app-global-cleanup-delegation",
+  "schema_version": 1
+}

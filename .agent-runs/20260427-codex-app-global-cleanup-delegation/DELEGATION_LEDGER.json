@@ -1,0 +1,30 @@
+{
+  "conflicts": [],
+  "idle_waiting_detected": false,
+  "notes": [
+    "One earlier subagent handle was invalidated by app restart; the recovered Hegel worker completed and was closed.",
+    "Main-thread fallback covered Serena onboarding/tool-surface gaps with rg/git/report evidence."
+  ],
+  "resolved_findings": [
+    {
+      "evidence_refs": [
+        "scripts/check_ai_slop.py",
+        "tests/test_check_ai_slop.py"
+      ],
+      "finding_id": "active-delegation-missing-decision",
+      "status": "patched"
+    },
+    {
+      "evidence_refs": [
+        "scripts/check_windows_app_resource_health.py",
+        "tests/test_windows_app_resource_health.py"
+      ],
+      "finding_id": "resource-action-failure-hidden-pass",
+      "status": "patched"
+    }
+  ],
+  "run_id": "20260427-codex-app-global-cleanup-delegation",
+  "schema_version": 1,
+  "unsupported_claims": [],
+  "updated_at": "2026-04-26T17:24:05.190054+00:00"
+}

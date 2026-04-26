@@ -1,0 +1,39 @@
+{
+  "claims": [
+    {
+      "claim": "ReducedUiControls preserves default UI scale and visible progress animation while capping raster threads and smooth scrolling.",
+      "claim_id": "reduced-ui-controls-default",
+      "evidence_refs": [
+        "scripts/restart_codex_app_graphics_mode.ps1",
+        "docs/CODEX_APP_MAINTENANCE.md",
+        "reports/windows-app-resource-health.final.json"
+      ],
+      "status": "SUPPORTED"
+    },
+    {
+      "claim": "Broad L2+ triggered work now requires active delegation artifacts or an allowed delegate-or-waive decision.",
+      "claim_id": "delegation-guardrail",
+      "evidence_refs": [
+        "contracts/global_agent_workflow_policy.json",
+        "docs/GLOBAL_AGENT_WORKFLOW.md",
+        "scripts/check_global_agent_workflow.py",
+        "scripts/check_ai_slop.py",
+        "tests/test_global_agent_workflow.py",
+        "tests/test_check_ai_slop.py"
+      ],
+      "status": "SUPPORTED"
+    },
+    {
+      "claim": "Inactive Documents\\Codex trusted project entries were removed while canonical code roots, MCP, plugin, and analytics settings were preserved.",
+      "claim_id": "global-config-cleanup",
+      "evidence_refs": [
+        "reports/codex-global-config-cleanup.final.json",
+        "reports/config-provenance.final.json",
+        "reports/user-dev-environment-baseline.final.json"
+      ],
+      "status": "SUPPORTED"
+    }
+  ],
+  "run_id": "20260427-codex-app-global-cleanup-delegation",
+  "schema_version": 1
+}

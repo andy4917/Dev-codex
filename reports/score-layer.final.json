@@ -1,0 +1,8 @@
+{
+  "status": "PASS",
+  "source": "windows_only_closeout_chain",
+  "checks": {
+    "environment_baseline": "C:\\Users\\anise\\code\\Dev-Management\\reports\\user-dev-environment-baseline.final.json",
+    "global_workflow": "C:\\Users\\anise\\code\\Dev-Management\\reports\\global-agent-workflow.final.json"
+  }
+}

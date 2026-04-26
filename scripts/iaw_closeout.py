@@ -347,6 +347,7 @@ def _run_step(label: str, argv: list[str], cwd: Path) -> dict[str, Any]:
         capture_output=True,
         text=True,
         encoding="utf-8",
+        errors="replace",
     )
     return {
         "label": label,
@@ -355,6 +356,13 @@ def _run_step(label: str, argv: list[str], cwd: Path) -> dict[str, Any]:
         "stdout": result.stdout,
         "stderr": result.stderr,
     }
+
+
+def _configure_console_encoding() -> None:
+    for stream in (sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if callable(reconfigure):
+            reconfigure(errors="replace")
 
 
 def _report_path(phase: str) -> Path:
@@ -475,6 +483,7 @@ def _save_receipt(authority: dict[str, Any], workspace_root: Path, run_id: str, 
 
 
 def main() -> int:
+    _configure_console_encoding()
     parser = argparse.ArgumentParser(description="Run the authoritative IAW close-out chain and issue a signed gate receipt.")
     parser.add_argument("--workspace-root", required=True)
     parser.add_argument("--run-id", required=True)

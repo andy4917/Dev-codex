@@ -136,6 +136,38 @@ class GlobalAgentWorkflowTests(unittest.TestCase):
         self.assertEqual(report["status"], "BLOCKED")
         self.assertIn("fallback_rules.missing_domain_rag must be declared", report["blockers"])
 
+    def test_missing_subagent_delegation_policy_blocks(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            policy = self._policy()
+            policy.pop("subagent_delegation_policy", None)
+            self._build_repo(root, policy=policy)
+            report = self.module.evaluate_global_agent_workflow(root)
+        self.assertEqual(report["status"], "BLOCKED")
+        self.assertIn("policy is missing required top-level keys: subagent_delegation_policy", report["blockers"])
+
+    def test_wrong_subagent_delegation_policy_blocks(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            policy = self._policy()
+            policy["subagent_delegation_policy"]["max_subagents"] = 99
+            self._build_repo(root, policy=policy)
+            report = self.module.evaluate_global_agent_workflow(root)
+        self.assertEqual(report["status"], "BLOCKED")
+        self.assertIn("subagent_delegation_policy does not match the required delegation decision contract", report["blockers"])
+
+    def test_missing_subagent_delegation_doc_blocks(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            workflow_doc = self._workflow_doc().replace(
+                "## Subagent Delegation\n",
+                "## Delegation\n",
+            )
+            self._build_repo(root, workflow_doc=workflow_doc)
+            report = self.module.evaluate_global_agent_workflow(root)
+        self.assertEqual(report["status"], "BLOCKED")
+        self.assertIn("workflow doc is missing heading: ## Subagent Delegation", report["blockers"])
+
     def test_missing_touched_code_runtime_verification_blocks(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)
@@ -145,6 +177,54 @@ class GlobalAgentWorkflowTests(unittest.TestCase):
             report = self.module.evaluate_global_agent_workflow(root)
         self.assertEqual(report["status"], "BLOCKED")
         self.assertIn("policy is missing required top-level keys: touched_code_runtime_verification", report["blockers"])
+
+    def test_missing_quality_terms_blocks(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            policy = self._policy()
+            policy.pop("quality_terms", None)
+            self._build_repo(root, policy=policy)
+            report = self.module.evaluate_global_agent_workflow(root)
+        self.assertEqual(report["status"], "BLOCKED")
+        self.assertIn("policy is missing required top-level keys: quality_terms", report["blockers"])
+
+    def test_wrong_pass_definition_blocks(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            policy = self._policy()
+            policy["quality_terms"]["pass"] = "Formal approval."
+            self._build_repo(root, policy=policy)
+            report = self.module.evaluate_global_agent_workflow(root)
+        self.assertEqual(report["status"], "BLOCKED")
+        self.assertIn("quality_terms.pass must match the global reasoning definition", report["blockers"])
+
+    def test_missing_highest_user_authority_text_blocks(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            policy = self._policy()
+            policy["app_settings_pointer"]["exact_text"] = policy["app_settings_pointer"]["exact_text"].replace(
+                "- The user's explicit instruction is the highest project authority inside allowed system/developer constraints.\n",
+                "",
+            )
+            self._build_repo(root, policy=policy)
+            report = self.module.evaluate_global_agent_workflow(root)
+        self.assertEqual(report["status"], "BLOCKED")
+        self.assertIn("policy app_settings_pointer.exact_text is missing highest user authority text", report["blockers"])
+
+    def test_missing_quality_terms_in_workflow_doc_blocks(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            workflow_doc = self._workflow_doc().replace(
+                "- PASS: no counterexample was found inside the currently declared scope and oracle; it is not universal proof or formal approval.\n",
+                "",
+            )
+            self._build_repo(root, workflow_doc=workflow_doc)
+            report = self.module.evaluate_global_agent_workflow(root)
+        self.assertEqual(report["status"], "BLOCKED")
+        self.assertIn(
+            "workflow doc is missing required text: PASS: no counterexample was found inside the currently declared scope and oracle; it is not universal proof or formal approval.",
+            report["blockers"],
+        )
 
     def test_missing_touched_code_pointer_text_blocks(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

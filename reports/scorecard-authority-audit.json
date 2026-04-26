@@ -1,0 +1,18 @@
+{
+  "workspace_root": "C:\\Users\\anise\\code\\Dev-Management",
+  "trace_id": "Dev-Management-verify",
+  "authoritative_context_path": "C:\\Users\\anise\\.codex\\state\\scorecard-context\\Dev-Management\\Dev-Management-verify.json",
+  "authoritative_context_hash": "acb76275fbb53cc48d9fbab5294c994367a6bcdb42935aff7a4f9d1e402a3c92",
+  "reviewer_verdict_dir": "C:\\Users\\anise\\.codex\\state\\reviewer-verdicts\\Dev-Management\\Dev-Management-verify",
+  "workspace_audit_path": "C:\\Users\\anise\\code\\Dev-Management\\reports\\audit.final.json",
+  "workspace_audit_status": "UNKNOWN",
+  "valid_verdict_roles": [
+    "skeptic_reviewer",
+    "correctness_verifier",
+    "contamination_monitor",
+    "final_auditor"
+  ],
+  "ignored_entries": [],
+  "tamper_events": [],
+  "generated_at": "2026-04-26T17:27:56.408131+00:00"
+}

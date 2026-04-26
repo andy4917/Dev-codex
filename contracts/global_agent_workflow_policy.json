@@ -2,12 +2,12 @@
   "schema_version": "2026.04.global-agent-workflow.windows-native.v1",
   "runtime_model": {
     "user_ui": "Codex App",
-    "canonical_execution": "local-windows",
+    "canonical_execution": "windows-native",
     "agent_binary": "windows-native-codex-app-agent",
     "windows_native_for_governed_repos": "required"
   },
   "authority_layers": {
-    "app_settings": "bootstrap_pointer_only",
+    "app_settings": "concise_global_authority_capsule",
     "dev_management": "environment_policy_authority",
     "repo_agents": "stack_workflow_authority",
     "package_scripts": "command_authority",
@@ -73,6 +73,46 @@
       "domain_rag",
       "explicit_tests"
     ]
+  },
+  "subagent_delegation_policy": {
+    "modes": [
+      "read_only_scouts",
+      "bounded_workers",
+      "verification_pair",
+      "none",
+      "main_only"
+    ],
+    "active_modes": [
+      "read_only_scouts",
+      "bounded_workers",
+      "verification_pair"
+    ],
+    "trigger_classes": [
+      "broad_multi_surface_audit",
+      "global_cleanup",
+      "dirty_closeout",
+      "policy_checker_change",
+      "l2_plus_verification",
+      "explicit_exhaustive_file_or_folder_review"
+    ],
+    "waiver_reasons": [
+      "critical_path_live_restart",
+      "narrow_leaf_change",
+      "tool_unavailable",
+      "no_parallelizable_sidecar",
+      "plan_mode_read_only"
+    ],
+    "max_subagents": 2,
+    "decision_artifact": ".agent-runs/<run_id>/DELEGATION_DECISION.json",
+    "active_artifacts": [
+      "DELEGATION_PLAN.json",
+      "SUBAGENT_TASKS.json",
+      "SUBAGENT_RESULTS.json",
+      "INTEGRATION_DECISION_LOG.json",
+      "DELEGATION_LEDGER.json"
+    ],
+    "missing_decision_status": "BLOCKED",
+    "subagent_tool_gap_requires_fallback": true
   },
   "vibe_coding_standard": {
     "exploration_required": true,
@@ -153,6 +193,22 @@
     "fabricated_evidence_forbidden": true,
     "unknown_domain_requirement": "blocked_until_domain_evidence_exists"
   },
+  "codex_app_performance_maintenance": {
+    "log_retention_days_uncompressed": 1,
+    "compress_older_logs": true,
+    "scheduled_interval_minutes": 240,
+    "run_at_logon": true,
+    "max_log_rows": 30000,
+    "max_session_files": 60,
+    "resource_health_cleanup": "cleanup_stale_serena_every_cycle"
+  },
+  "scorecard_runtime_hook": {
+    "required": true,
+    "event": "UserPromptSubmit",
+    "required_each_task_turn": true,
+    "user_prompt_throttle_seconds": 0,
+    "status": "approved_scorecard_user_prompt_hook_only"
+  },
   "quality_workflow": {
     "sqa": "process_assurance",
     "qc": "product_defect_detection",
@@ -165,9 +221,17 @@
       "test documentation"
     ]
   },
+  "quality_terms": {
+    "think_again_explain_why": "Before asserting status, approval, readiness, or PASS, re-check the declared scope, oracle, evidence, and counterexamples, then explain the reason for the claim.",
+    "test": "Limited exploration for counterexamples plus partial evidence of expected behavior.",
+    "verification": "Checking whether current artifacts match the declared oracle, scope, and policy.",
+    "review": "Adversarial reading that exposes hidden assumptions, missing counterexamples, wrong oracles, and oversimplification.",
+    "pass": "No counterexample was found inside the currently declared scope and oracle; it is not universal proof or formal approval.",
+    "formal_approval": "Only an explicit user, reviewer, or gate authority can approve; tests, verification output, and PASS language alone do not grant approval."
+  },
   "app_settings_pointer": {
     "path": "C:\\Users\\anise\\code\\Dev-Management\\docs\\GLOBAL_AGENT_WORKFLOW.md",
-    "exact_text": "Before work, read and follow:\nC:\\Users\\anise\\code\\Dev-Management\\docs\\GLOBAL_AGENT_WORKFLOW.md\n\nCodex App is my UI and Windows-native execution control plane. Repo-specific stack and commands come from that repo's AGENTS.md and package scripts.\n\nUse Serena for codebase exploration, Context7 for external docs, and tests/reports for final claims. If required evidence is missing, report the gap and do not fabricate it.\n\nAlways run the exact code path touched before claiming behavior; exercise all touched functions directly when practical, and use C:\\Users\\anise\\code\\.scratch\\Dev-Management scratch harnesses to copy relevant production context and observe actual behavior.\n"
+    "exact_text": "Global authority capsule:\n- The user's explicit instruction is the highest project authority inside allowed system/developer constraints.\n- Before work, read and follow:\nC:\\Users\\anise\\code\\Dev-Management\\docs\\GLOBAL_AGENT_WORKFLOW.md\n\n- Codex App is my UI and Windows-native execution control plane. Repo-specific stack and commands come from that repo's AGENTS.md and package scripts.\n\n- Use Serena for codebase exploration, Context7 for external docs, and tests/reports for final claims. If required evidence is missing, report the gap and do not fabricate it.\n\n- Always run the exact code path touched before claiming behavior; exercise all touched functions directly when practical, and use C:\\Users\\anise\\code\\.scratch\\Dev-Management scratch harnesses to copy relevant production context and observe actual behavior.\n- Test means limited counterexample search plus partial evidence; verification means declared oracle/scope/policy match; review means adversarial reading; PASS means no counterexample found within declared scope/oracle, not formal approval.\n"
   },
   "blocked_assertions": {
     "skills_as_authority": true,
@@ -185,6 +249,7 @@
     "fake_mcp_evidence",
     "fake_serena_evidence",
     "backup_fallback_removed_surface",
+    "backup_or_temporary_artifact_retention",
     "executable_quarantine",
     "legacy_linux_execution_authority",
     "legacy_remote_runtime_route",

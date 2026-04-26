@@ -1,0 +1,36 @@
+{
+  "impacted_artifacts": [
+    {
+      "artifact_id": "global_agent_workflow_policy",
+      "path": "contracts/global_agent_workflow_policy.json",
+      "status": "refreshed"
+    },
+    {
+      "artifact_id": "global_agent_workflow_doc",
+      "path": "docs/GLOBAL_AGENT_WORKFLOW.md",
+      "status": "refreshed"
+    },
+    {
+      "artifact_id": "codex_app_maintenance_doc",
+      "path": "docs/CODEX_APP_MAINTENANCE.md",
+      "status": "refreshed"
+    },
+    {
+      "artifact_id": "config_provenance_report",
+      "path": "reports/config-provenance.final.json",
+      "status": "refreshed"
+    },
+    {
+      "artifact_id": "resource_health_report",
+      "path": "reports/windows-app-resource-health.final.json",
+      "status": "refreshed"
+    },
+    {
+      "artifact_id": "workspace_structure_report",
+      "path": "reports/workspace-structure.final.json",
+      "status": "refreshed"
+    }
+  ],
+  "run_id": "20260427-codex-app-global-cleanup-delegation",
+  "schema_version": 1
+}

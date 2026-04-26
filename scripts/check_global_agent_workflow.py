@@ -24,12 +24,12 @@ POLICY_PATH = ROOT / "contracts" / "global_agent_workflow_policy.json"
 
 EXPECTED_RUNTIME_MODEL = {
     "user_ui": "Codex App",
-    "canonical_execution": "local-windows",
+    "canonical_execution": "windows-native",
     "agent_binary": "windows-native-codex-app-agent",
     "windows_native_for_governed_repos": "required",
 }
 EXPECTED_AUTHORITY_LAYERS = {
-    "app_settings": "bootstrap_pointer_only",
+    "app_settings": "concise_global_authority_capsule",
     "dev_management": "environment_policy_authority",
     "repo_agents": "stack_workflow_authority",
     "package_scripts": "command_authority",
@@ -38,16 +38,63 @@ EXPECTED_AUTHORITY_LAYERS = {
     "serena": "codebase_semantic_evidence",
     "domain_rag": "business_domain_evidence",
 }
+EXPECTED_QUALITY_TERMS = {
+    "think_again_explain_why": "Before asserting status, approval, readiness, or PASS, re-check the declared scope, oracle, evidence, and counterexamples, then explain the reason for the claim.",
+    "test": "Limited exploration for counterexamples plus partial evidence of expected behavior.",
+    "verification": "Checking whether current artifacts match the declared oracle, scope, and policy.",
+    "review": "Adversarial reading that exposes hidden assumptions, missing counterexamples, wrong oracles, and oversimplification.",
+    "pass": "No counterexample was found inside the currently declared scope and oracle; it is not universal proof or formal approval.",
+    "formal_approval": "Only an explicit user, reviewer, or gate authority can approve; tests, verification output, and PASS language alone do not grant approval.",
+}
+EXPECTED_SUBAGENT_DELEGATION_POLICY = {
+    "modes": [
+        "read_only_scouts",
+        "bounded_workers",
+        "verification_pair",
+        "none",
+        "main_only",
+    ],
+    "active_modes": ["read_only_scouts", "bounded_workers", "verification_pair"],
+    "trigger_classes": [
+        "broad_multi_surface_audit",
+        "global_cleanup",
+        "dirty_closeout",
+        "policy_checker_change",
+        "l2_plus_verification",
+        "explicit_exhaustive_file_or_folder_review",
+    ],
+    "waiver_reasons": [
+        "critical_path_live_restart",
+        "narrow_leaf_change",
+        "tool_unavailable",
+        "no_parallelizable_sidecar",
+        "plan_mode_read_only",
+    ],
+    "max_subagents": 2,
+    "decision_artifact": ".agent-runs/<run_id>/DELEGATION_DECISION.json",
+    "active_artifacts": [
+        "DELEGATION_PLAN.json",
+        "SUBAGENT_TASKS.json",
+        "SUBAGENT_RESULTS.json",
+        "INTEGRATION_DECISION_LOG.json",
+        "DELEGATION_LEDGER.json",
+    ],
+    "missing_decision_status": "BLOCKED",
+    "subagent_tool_gap_requires_fallback": True,
+}
 REQUIRED_HEADINGS = [
     "# Global Agent Workflow",
     "## Runtime Model",
     "## Evidence Roles",
     "## Work Cycle",
+    "## Subagent Delegation",
     "## Quality Gate",
+    "## Reasoning And Quality Terms",
     "## Forbidden",
 ]
 REQUIRED_DOC_PHRASES = [
     "`C:\\Users\\anise\\.codex` is `USER_CONTROL_PLANE + APP_STATE`, not repo authority.",
+    "The user's explicit instruction is the highest project authority inside allowed system/developer constraints.",
     "Repo `AGENTS.md`: stack/workflow authority for that repo.",
     "package scripts: command authority.",
     "Skills: repeatable workflow modules, not factual authority.",
@@ -57,8 +104,22 @@ REQUIRED_DOC_PHRASES = [
     "run the exact code path that was touched",
     "use `C:\\Users\\anise\\code\\.scratch\\Dev-Management\\` for local scratch harnesses",
     "report WARN/BLOCKED with disposition",
+    "before broad multi-surface audits, global cleanup, dirty closeout, policy/checker changes, L2+ verification",
+    "use `read_only_scouts` for parallel repo/app-state/report classification and evidence gathering",
+    "if a triggered task remains `none` or `main_only`, record the waiver in `DELEGATION_DECISION.json` or `WORKORDER.json`",
+    "allowed waiver reasons are `critical_path_live_restart`, `narrow_leaf_change`, `tool_unavailable`, `no_parallelizable_sidecar`, and `plan_mode_read_only`",
     "touched-code runtime verification against actual behavior",
     "Linux/remote execution authority is decommissioned",
+    "dispose them through the Windows Recycle Bin",
+    "keep only 1 day of logs in original live form",
+    "run the recurring app maintenance cycle at logon and every 240 minutes",
+    "the hook must run once per task turn with `user_prompt_throttle_seconds = 0`",
+    "Think again / explain why: before asserting status, approval, readiness, or PASS",
+    "Test: limited exploration for counterexamples plus partial evidence of expected behavior.",
+    "Verification: checking whether current artifacts match the declared oracle, scope, and policy.",
+    "Review: adversarial reading that exposes hidden assumptions, missing counterexamples, wrong oracles, and oversimplification.",
+    "PASS: no counterexample was found inside the currently declared scope and oracle; it is not universal proof or formal approval.",
+    "Formal approval: only an explicit user, reviewer, or gate authority can approve",
 ]
 
 
@@ -98,9 +159,11 @@ def validate_policy(policy: dict[str, Any]) -> dict[str, Any]:
         "runtime_model",
         "authority_layers",
         "required_evidence_matrix",
+        "subagent_delegation_policy",
         "vibe_coding_standard",
         "touched_code_runtime_verification",
         "quality_workflow",
+        "quality_terms",
         "fallback_rules",
         "forbidden",
     }
@@ -123,6 +186,9 @@ def validate_policy(policy: dict[str, Any]) -> dict[str, Any]:
         blockers.append("Context7 is not the required external library/API evidence source")
     if list(matrix.get("code_refactor", [])) != ["serena"]:
         blockers.append("Serena is not the required code refactor evidence source")
+
+    if policy.get("subagent_delegation_policy") != EXPECTED_SUBAGENT_DELEGATION_POLICY:
+        blockers.append("subagent_delegation_policy does not match the required delegation decision contract")
 
     vibe = policy.get("vibe_coding_standard", {})
     for key in (
@@ -165,6 +231,13 @@ def validate_policy(policy: dict[str, Any]) -> dict[str, Any]:
         blockers.append("quality_workflow.qc must be product_defect_detection")
     if quality.get("vv") != "verification_and_validation":
         blockers.append("quality_workflow.vv must be verification_and_validation")
+    if quality.get("valid_quality_gates") is None:
+        blockers.append("quality_workflow.valid_quality_gates must be declared")
+
+    terms = policy.get("quality_terms", {})
+    for key, expected in EXPECTED_QUALITY_TERMS.items():
+        if terms.get(key) != expected:
+            blockers.append(f"quality_terms.{key} must match the global reasoning definition")
 
     blocked_assertions = policy.get("blocked_assertions", {})
     for key in (
@@ -182,6 +255,8 @@ def validate_policy(policy: dict[str, Any]) -> dict[str, Any]:
     pointer = policy.get("app_settings_pointer", {})
     if not str(pointer.get("exact_text", "")).strip():
         blockers.append("policy app_settings_pointer.exact_text is missing")
+    if "The user's explicit instruction is the highest project authority" not in str(pointer.get("exact_text", "")):
+        blockers.append("policy app_settings_pointer.exact_text is missing highest user authority text")
     if "Always run the exact code path touched before claiming behavior" not in str(pointer.get("exact_text", "")):
         blockers.append("policy app_settings_pointer.exact_text is missing touched-code runtime verification text")
 
@@ -196,6 +271,27 @@ def validate_policy(policy: dict[str, Any]) -> dict[str, Any]:
         blockers.append("fallback_rules.skills_cannot_replace_evidence must be true")
     if fallback_rules.get("fabricated_evidence_forbidden") is not True:
         blockers.append("fallback_rules.fabricated_evidence_forbidden must be true")
+    forbidden = set(str(item) for item in policy.get("forbidden", []))
+    if "backup_or_temporary_artifact_retention" not in forbidden:
+        blockers.append("forbidden must include backup_or_temporary_artifact_retention")
+    maintenance = policy.get("codex_app_performance_maintenance", {})
+    if maintenance.get("log_retention_days_uncompressed") != 1:
+        blockers.append("codex_app_performance_maintenance.log_retention_days_uncompressed must be 1")
+    if maintenance.get("compress_older_logs") is not True:
+        blockers.append("codex_app_performance_maintenance.compress_older_logs must be true")
+    if maintenance.get("scheduled_interval_minutes") != 240:
+        blockers.append("codex_app_performance_maintenance.scheduled_interval_minutes must be 240")
+    if maintenance.get("run_at_logon") is not True:
+        blockers.append("codex_app_performance_maintenance.run_at_logon must be true")
+    hook = policy.get("scorecard_runtime_hook", {})
+    if hook.get("required") is not True:
+        blockers.append("scorecard_runtime_hook.required must be true")
+    if hook.get("event") != "UserPromptSubmit":
+        blockers.append("scorecard_runtime_hook.event must be UserPromptSubmit")
+    if hook.get("required_each_task_turn") is not True:
+        blockers.append("scorecard_runtime_hook.required_each_task_turn must be true")
+    if hook.get("user_prompt_throttle_seconds") != 0:
+        blockers.append("scorecard_runtime_hook.user_prompt_throttle_seconds must be 0")
 
     return _check("BLOCKED" if blockers else "PASS", blockers)
 
@@ -216,6 +312,8 @@ def validate_setup_doc(policy: dict[str, Any], text: str) -> dict[str, Any]:
     blockers: list[str] = []
     if not pointer:
         blockers.append("policy app_settings_pointer.exact_text is missing")
+    elif pointer not in text:
+        blockers.append("docs/CODEX_APP_USER_SETUP.md must include the exact app_settings_pointer text")
     for phrase in (
         "Agent environment: Windows native",
         "Integrated terminal: PowerShell 7",

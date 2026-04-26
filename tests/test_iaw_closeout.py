@@ -145,6 +145,35 @@ class IAWCloseoutTests(unittest.TestCase):
         self.assertEqual(receipt["workspace_identity"]["codex_project_id"], workspace.name)
         self.assertTrue(receipt.get("signature"))
 
+    def test_run_step_replaces_non_utf8_output(self) -> None:
+        class Completed:
+            returncode = 0
+            stdout = "ok"
+            stderr = ""
+
+        with patch.object(self.module.subprocess, "run", return_value=Completed()) as run:
+            result = self.module._run_step("export_summary", [sys.executable, "-c", "print('ok')"], ROOT)
+
+        self.assertEqual(result["stdout"], "ok")
+        self.assertEqual(run.call_args.kwargs["encoding"], "utf-8")
+        self.assertEqual(run.call_args.kwargs["errors"], "replace")
+
+    def test_configure_console_encoding_sets_replace_errors(self) -> None:
+        class Stream:
+            def __init__(self) -> None:
+                self.kwargs: dict[str, object] = {}
+
+            def reconfigure(self, **kwargs: object) -> None:
+                self.kwargs.update(kwargs)
+
+        stdout = Stream()
+        stderr = Stream()
+        with patch.object(self.module.sys, "stdout", stdout), patch.object(self.module.sys, "stderr", stderr):
+            self.module._configure_console_encoding()
+
+        self.assertEqual(stdout.kwargs["errors"], "replace")
+        self.assertEqual(stderr.kwargs["errors"], "replace")
+
     def test_validate_profile_artifacts_requires_convention_lock_for_l2(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             workspace = Path(tmpdir) / "workspace"

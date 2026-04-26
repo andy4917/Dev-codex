@@ -1,0 +1,34 @@
+{
+  "status": "PASS",
+  "workspace_root": "C:\\Users\\anise\\code\\Dev-Management",
+  "run_id": "20260427-codex-app-global-cleanup-delegation",
+  "profile": "L2",
+  "blockers": [],
+  "warnings": [],
+  "checks": {
+    "slop_ledger_present": true,
+    "question_queue_present": false,
+    "claim_ledger_present": true,
+    "summary_coverage_present": true,
+    "summary_present": true,
+    "workorder_present": true,
+    "delegation_decision_present": true,
+    "delegation_plan_present": true,
+    "delegation_mode": "bounded_workers"
+  },
+  "artifacts": {
+    "workorder": "C:\\Users\\anise\\code\\Dev-Management\\.agent-runs\\20260427-codex-app-global-cleanup-delegation\\WORKORDER.json",
+    "slop_ledger": "C:\\Users\\anise\\code\\Dev-Management\\.agent-runs\\20260427-codex-app-global-cleanup-delegation\\SLOP_LEDGER.json",
+    "question_queue": "C:\\Users\\anise\\code\\Dev-Management\\.agent-runs\\20260427-codex-app-global-cleanup-delegation\\QUESTION_QUEUE.json",
+    "claim_ledger": "C:\\Users\\anise\\code\\Dev-Management\\.agent-runs\\20260427-codex-app-global-cleanup-delegation\\CLAIM_LEDGER.json",
+    "summary_coverage": "C:\\Users\\anise\\code\\Dev-Management\\.agent-runs\\20260427-codex-app-global-cleanup-delegation\\SUMMARY_COVERAGE.json",
+    "delegation_decision": "C:\\Users\\anise\\code\\Dev-Management\\.agent-runs\\20260427-codex-app-global-cleanup-delegation\\DELEGATION_DECISION.json",
+    "delegation_plan": "C:\\Users\\anise\\code\\Dev-Management\\.agent-runs\\20260427-codex-app-global-cleanup-delegation\\DELEGATION_PLAN.json",
+    "subagent_tasks": "C:\\Users\\anise\\code\\Dev-Management\\.agent-runs\\20260427-codex-app-global-cleanup-delegation\\SUBAGENT_TASKS.json",
+    "subagent_results": "C:\\Users\\anise\\code\\Dev-Management\\.agent-runs\\20260427-codex-app-global-cleanup-delegation\\SUBAGENT_RESULTS.json",
+    "integration_decision_log": "C:\\Users\\anise\\code\\Dev-Management\\.agent-runs\\20260427-codex-app-global-cleanup-delegation\\INTEGRATION_DECISION_LOG.json",
+    "delegation_ledger": "C:\\Users\\anise\\code\\Dev-Management\\.agent-runs\\20260427-codex-app-global-cleanup-delegation\\DELEGATION_LEDGER.json",
+    "summary": "C:\\Users\\anise\\code\\Dev-Management\\SUMMARY.md"
+  },
+  "generated_at": "2026-04-26T17:24:29.619920+00:00"
+}

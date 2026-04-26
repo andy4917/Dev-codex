@@ -1,0 +1,27 @@
+{
+  "applied_to": [
+    "docs/CODEX_APP_MAINTENANCE.md",
+    "scripts/restart_codex_app_graphics_mode.ps1",
+    "scripts/check_windows_app_resource_health.py"
+  ],
+  "run_id": "20260427-codex-app-global-cleanup-delegation",
+  "schema_version": 1,
+  "sources": [
+    {
+      "finding": "A recent Codex Desktop issue reports sustained renderer/GPU activity while visible, consistent with the local renderer/GPU-focused mitigation path.",
+      "url": "https://github.com/openai/codex/issues/18567"
+    },
+    {
+      "finding": "A recent Codex Desktop issue reports high local CPU during small requests, supporting local process-role monitoring rather than assuming workload proportionality.",
+      "url": "https://github.com/openai/codex/issues/18467"
+    },
+    {
+      "finding": "Electron performance guidance links smooth animation/rendering to GPU/main-process work and recommends avoiding early or blocking heavy work.",
+      "url": "https://www.electronjs.org/docs/latest/tutorial/performance"
+    },
+    {
+      "finding": "Electron inherits Chromium's main/renderer multi-process model, matching the repo's separate main/renderer/GPU/app-server health sampling.",
+      "url": "https://www.electronjs.org/docs/latest/tutorial/process-model"
+    }
+  ]
+}

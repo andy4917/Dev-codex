@@ -1,0 +1,46 @@
+{
+  "decisions": [
+    {
+      "decision": "Do not include --force-prefers-reduced-motion in ReducedUiControls because visible thinking/loading animation is required.",
+      "decision_id": "remove-reduced-motion-default",
+      "evidence_refs": [
+        "scripts/restart_codex_app_graphics_mode.ps1",
+        "docs/CODEX_APP_MAINTENANCE.md"
+      ]
+    },
+    {
+      "decision": "Keep the worker check_ai_slop guardrail changes and extend them with tool-gap fallback validation on the main thread.",
+      "decision_id": "integrate-subagent-worker",
+      "evidence_refs": [
+        "scripts/check_ai_slop.py",
+        "tests/test_check_ai_slop.py"
+      ]
+    },
+    {
+      "decision": "Remove only inactive Documents\\Codex trusted project entries from user Codex config and preserve canonical roots/MCP/plugins/analytics settings.",
+      "decision_id": "global-config-bounds",
+      "evidence_refs": [
+        "reports/codex-global-config-cleanup.final.json",
+        "reports/config-provenance.final.json"
+      ]
+    },
+    {
+      "decision": "Active delegation now blocks if DELEGATION_DECISION.json is missing or invalid.",
+      "decision_id": "require-active-delegation-decision",
+      "evidence_refs": [
+        "scripts/check_ai_slop.py",
+        "tests/test_check_ai_slop.py"
+      ]
+    },
+    {
+      "decision": "Requested priority/GPU mitigation failures now become WARN/BLOCKED instead of hidden PASS.",
+      "decision_id": "promote-resource-action-failures",
+      "evidence_refs": [
+        "scripts/check_windows_app_resource_health.py",
+        "tests/test_windows_app_resource_health.py"
+      ]
+    }
+  ],
+  "run_id": "20260427-codex-app-global-cleanup-delegation",
+  "schema_version": 1
+}

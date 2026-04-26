@@ -1,0 +1,432 @@
+{
+  "status": "PASS",
+  "scorecard_schema_version": 2,
+  "scope": "codex-global",
+  "policy_version": 2,
+  "generated_at": "2026-04-26T17:27:56.863787+00:00",
+  "workspace_root": "C:\\Users\\anise\\code\\Dev-Management",
+  "run_id": "20260427-codex-app-global-cleanup-delegation",
+  "mode": "verify",
+  "disqualifier_result": {
+    "status": "PASS",
+    "matched_rules": [],
+    "unknown_ids": [],
+    "reasons": [
+      "no disqualifiers recorded"
+    ],
+    "generated_at": "2026-04-26T17:27:56.857587+00:00"
+  },
+  "authoritative_context_path": "C:\\Users\\anise\\.codex\\state\\scorecard-context\\Dev-Management\\Dev-Management-verify.json",
+  "trace": {
+    "required": true,
+    "status": "PASS",
+    "evidence_refs": [
+      "C:\\Users\\anise\\code\\Dev-Management\\.agent-runs\\20260427-codex-app-global-cleanup-delegation\\WORKORDER.json",
+      "C:\\Users\\anise\\code\\Dev-Management\\.agent-runs\\20260427-codex-app-global-cleanup-delegation\\CLAIM_LEDGER.json",
+      "C:\\Users\\anise\\code\\Dev-Management\\.agent-runs\\20260427-codex-app-global-cleanup-delegation\\SUBAGENT_RESULTS.json",
+      "C:\\Users\\anise\\code\\Dev-Management\\reports\\windows-app-resource-health.final.json",
+      "C:\\Users\\anise\\code\\Dev-Management\\reports\\global-agent-workflow.final.json"
+    ],
+    "notes": "Traceability evidence binds user request, workorder, claim ledger, tests, subagent review findings, and final reports for this Dev-Management closeout.",
+    "created_at": "2026-04-26T17:20:26.770554+00:00",
+    "run_id": "20260427-codex-app-global-cleanup-delegation",
+    "schema_version": 1,
+    "summary": "Traceability evidence binds user request, workorder, claim ledger, tests, subagent review findings, and final reports for this Dev-Management closeout.",
+    "report_path": "C:\\Users\\anise\\code\\Dev-Management\\reports\\traceability-report.json",
+    "present": true,
+    "otel_enabled": false
+  },
+  "evidence_manifest_path": "C:\\Users\\anise\\code\\Dev-Management\\.agent-runs\\20260427-codex-app-global-cleanup-delegation\\EVIDENCE_MANIFEST.json",
+  "workorder_path": "C:\\Users\\anise\\code\\Dev-Management\\.agent-runs\\20260427-codex-app-global-cleanup-delegation\\WORKORDER.json",
+  "taste_gate": {
+    "status": "PASS",
+    "reason": "",
+    "problem_class": "G2_CHECKABLE_EXECUTION",
+    "checkpoint_required": false,
+    "checkpoint_status": "NOT_REQUIRED"
+  },
+  "task_tree": {
+    "status": "PASS",
+    "reason": "",
+    "task_count": 4,
+    "skip_without_rationale_count": 0,
+    "merge_without_rationale_count": 0,
+    "unsupported_transition_count": 0,
+    "task_markdown_issue_count": 0
+  },
+  "evidence_manifest": {
+    "status": "PASS",
+    "reason": "",
+    "current": true
+  },
+  "repeated_verify": {
+    "status": "PASS",
+    "reason": "",
+    "round_count": 2,
+    "no_new_material_findings": true,
+    "waived": false,
+    "distinct_mode_count": 2
+  },
+  "cross_verification": {
+    "status": "PASS",
+    "reason": "",
+    "material_claim_count": 2,
+    "unresolved_disagreement_count": 0,
+    "disagreement_refs": []
+  },
+  "convention_lock": {
+    "status": "PASS",
+    "reason": "",
+    "observed_drift_count": 0,
+    "missing_locked_term_count": 0
+  },
+  "summary_coverage": {
+    "status": "PASS",
+    "reason": "",
+    "uncovered_claim_count": 0,
+    "zombie_section_count": 0,
+    "negative_findings_present": true
+  },
+  "scores": {
+    "trust_score": {
+      "applicable": true,
+      "max_points": 30,
+      "floor": 24,
+      "scoring_mode": "deduction_only",
+      "base_points": 30,
+      "score": 30,
+      "reviewer_deductions": 0,
+      "user_deductions": 0,
+      "derived_award_points": 0,
+      "requested_user_award_points": 0,
+      "user_award_points": 0,
+      "passes_floor": true,
+      "deductions": [],
+      "derived_awards": [],
+      "awards": []
+    },
+    "completion_score": {
+      "applicable": true,
+      "max_points": 30,
+      "floor": 24,
+      "scoring_mode": "verified_work_plus_user_awards",
+      "base_points": 0,
+      "score": 24,
+      "reviewer_deductions": 0,
+      "user_deductions": 0,
+      "derived_award_points": 24,
+      "requested_user_award_points": 0,
+      "user_award_points": 0,
+      "passes_floor": true,
+      "deductions": [],
+      "derived_awards": [
+        {
+          "axis": "completion_score",
+          "award_id": "confirmed_work_execution",
+          "points": 24,
+          "requested_points": 24,
+          "credited_points": 24,
+          "reason": "reserved completion credit generated from clean_room_verify PASS evidence",
+          "category": "system_derived",
+          "evidence_refs": [
+            "C:\\Users\\anise\\code\\Dev-Management\\reports\\acceptance-report.json",
+            "tests.test_check_ai_slop tests.test_windows_app_resource_health tests.test_iaw_closeout",
+            "tests.test_global_agent_workflow tests.test_check_ai_slop",
+            "tests.test_codex_app_maintenance tests.test_codex_app_maintenance_cycle tests.test_windows_app_resource_health tests.test_windows_process_burst tests.test_serena_dashboard_repro",
+            "tests.test_check_config_provenance tests.test_check_user_dev_environment tests.test_devmgmt_runtime_helpers tests.test_scorecard_runtime_hook tests.test_compute_user_scorecard_v12",
+            ".agent-runs/20260427-codex-app-global-cleanup-delegation/SUBAGENT_RESULTS.json",
+            "reports/ai-slop.final.json",
+            "reports/domain-mission-refresh.final.json",
+            "reports/windows-app-resource-health.final.json"
+          ],
+          "reported_by": "clean_room_verify",
+          "source": "clean_room_verify",
+          "credit_block_reason": "",
+          "reserved": true,
+          "credit_status": "PASS"
+        }
+      ],
+      "awards": []
+    },
+    "compliance_score": {
+      "applicable": true,
+      "max_points": 20,
+      "floor": 16,
+      "scoring_mode": "deduction_only",
+      "base_points": 20,
+      "score": 20,
+      "reviewer_deductions": 0,
+      "user_deductions": 0,
+      "derived_award_points": 0,
+      "requested_user_award_points": 0,
+      "user_award_points": 0,
+      "passes_floor": true,
+      "deductions": [],
+      "derived_awards": [],
+      "awards": []
+    },
+    "reliability_score": {
+      "applicable": false,
+      "max_points": 10,
+      "floor": 7,
+      "score": null,
+      "reviewer_deductions": 0,
+      "user_deductions": 0,
+      "passes_floor": null,
+      "deductions": []
+    },
+    "search_evidence_score": {
+      "applicable": true,
+      "max_points": 10,
+      "floor": 7,
+      "scoring_mode": "deduction_only",
+      "base_points": 10,
+      "score": 10,
+      "reviewer_deductions": 0,
+      "user_deductions": 0,
+      "derived_award_points": 0,
+      "requested_user_award_points": 0,
+      "user_award_points": 0,
+      "passes_floor": true,
+      "deductions": [],
+      "derived_awards": [],
+      "awards": []
+    }
+  },
+  "applicable_axes": [
+    "trust_score",
+    "completion_score",
+    "compliance_score",
+    "search_evidence_score"
+  ],
+  "raw_total_score": 84,
+  "guarded_total_score": 84,
+  "capped_total_score": 84,
+  "total_floor": 80,
+  "gate_order": [
+    "disqualifier_check",
+    "reviewer_green_check",
+    "trace_presence_check",
+    "taste_gate_check",
+    "task_tree_check",
+    "evidence_manifest_check",
+    "repeated_verify_check",
+    "cross_verification_check",
+    "convention_lock_check",
+    "summary_coverage_check",
+    "axis_floor_check",
+    "anti_cheat_guard_check",
+    "platform_cap_check",
+    "existing_readiness_and_manual_close_out_check",
+    "clean_room_verify_check"
+  ],
+  "axis_floor_check": {
+    "status": "PASS",
+    "failed_axes": [],
+    "raw_total_passes": true
+  },
+  "anti_cheat_signals": [],
+  "anti_cheat_layer": {
+    "status": "PASS",
+    "signals": [],
+    "decision_summary": {
+      "highest_decision": "warn",
+      "counts": {
+        "warn": 0,
+        "penalty": 0,
+        "cap": 0,
+        "dq": 0
+      },
+      "auto_dq_signals": []
+    },
+    "signal_points": 0,
+    "penalty_signal_points": 0,
+    "cap_signal_points": 0,
+    "penalty_points": 0,
+    "guarded_total_score": 84,
+    "active_caps": []
+  },
+  "platform_cap": {
+    "status": "PASS",
+    "cap_applied": false,
+    "cap_limit": 84,
+    "active_caps": []
+  },
+  "reviewer_requirements": {
+    "required_roles": [
+      "skeptic_reviewer",
+      "correctness_verifier",
+      "contamination_monitor",
+      "final_auditor"
+    ],
+    "missing_required_roles": [],
+    "non_green_required_roles": [],
+    "reviewer_green": true
+  },
+  "requested_credit": [
+    {
+      "axis": "completion_score",
+      "requested_points": 24,
+      "source": "clean_room_verify",
+      "reason": "reserved completion credit generated from clean_room_verify PASS evidence",
+      "evidence_ref": "C:\\Users\\anise\\code\\Dev-Management\\reports\\acceptance-report.json"
+    }
+  ],
+  "credited_credit": [
+    {
+      "axis": "completion_score",
+      "requested_points": 24,
+      "credited_points": 24,
+      "source": "clean_room_verify",
+      "capped": false,
+      "blocked": false,
+      "block_reason": ""
+    }
+  ],
+  "reviewer_penalties": {
+    "skeptic_reviewer": [],
+    "correctness_verifier": [],
+    "contamination_monitor": [],
+    "final_auditor": []
+  },
+  "derived_awards": [
+    {
+      "axis": "completion_score",
+      "award_id": "confirmed_work_execution",
+      "points": 24,
+      "requested_points": 24,
+      "credited_points": 24,
+      "reason": "reserved completion credit generated from clean_room_verify PASS evidence",
+      "category": "system_derived",
+      "evidence_refs": [
+        "C:\\Users\\anise\\code\\Dev-Management\\reports\\acceptance-report.json",
+        "tests.test_check_ai_slop tests.test_windows_app_resource_health tests.test_iaw_closeout",
+        "tests.test_global_agent_workflow tests.test_check_ai_slop",
+        "tests.test_codex_app_maintenance tests.test_codex_app_maintenance_cycle tests.test_windows_app_resource_health tests.test_windows_process_burst tests.test_serena_dashboard_repro",
+        "tests.test_check_config_provenance tests.test_check_user_dev_environment tests.test_devmgmt_runtime_helpers tests.test_scorecard_runtime_hook tests.test_compute_user_scorecard_v12",
+        ".agent-runs/20260427-codex-app-global-cleanup-delegation/SUBAGENT_RESULTS.json",
+        "reports/ai-slop.final.json",
+        "reports/domain-mission-refresh.final.json",
+        "reports/windows-app-resource-health.final.json"
+      ],
+      "reported_by": "clean_room_verify",
+      "source": "clean_room_verify",
+      "credit_block_reason": "",
+      "reserved": true,
+      "credit_status": "PASS"
+    }
+  ],
+  "user_penalties": [],
+  "user_awards": [],
+  "existing_readiness": {
+    "status": "PASS",
+    "reason": "Windows-native Dev-Management readiness checks report ready state for this closeout scope.",
+    "manual_close_out": [],
+    "evidence_refs": [
+      "reports/user-dev-environment-baseline.final.json",
+      "reports/windows-app-local-readiness.final.json",
+      "reports/config-provenance.final.json",
+      "reports/global-agent-workflow.final.json"
+    ],
+    "created_at": "2026-04-26T17:23:13.590845+00:00",
+    "run_id": "20260427-codex-app-global-cleanup-delegation",
+    "schema_version": 1,
+    "report_path": "C:\\Users\\anise\\code\\Dev-Management\\reports\\user-readiness.json",
+    "report_present": true
+  },
+  "clean_room_verify": {
+    "status": "PASS",
+    "reason": "Targeted unit/checker paths completed, subagent review findings were patched, and residual live resource-health WARN is explicitly tracked.",
+    "manual_close_out": [],
+    "evidence_refs": [
+      "tests.test_check_ai_slop tests.test_windows_app_resource_health tests.test_iaw_closeout",
+      "tests.test_global_agent_workflow tests.test_check_ai_slop",
+      "tests.test_codex_app_maintenance tests.test_codex_app_maintenance_cycle tests.test_windows_app_resource_health tests.test_windows_process_burst tests.test_serena_dashboard_repro",
+      "tests.test_check_config_provenance tests.test_check_user_dev_environment tests.test_devmgmt_runtime_helpers tests.test_scorecard_runtime_hook tests.test_compute_user_scorecard_v12",
+      ".agent-runs/20260427-codex-app-global-cleanup-delegation/SUBAGENT_RESULTS.json",
+      "reports/ai-slop.final.json",
+      "reports/domain-mission-refresh.final.json",
+      "reports/windows-app-resource-health.final.json"
+    ],
+    "created_at": "2026-04-26T17:22:33.864483+00:00",
+    "run_id": "20260427-codex-app-global-cleanup-delegation",
+    "schema_version": 1,
+    "report_path": "C:\\Users\\anise\\code\\Dev-Management\\reports\\acceptance-report.json",
+    "report_present": true
+  },
+  "advisories": [],
+  "errors": [],
+  "gate_checks": {
+    "1_disqualifier_check": {
+      "status": "PASS",
+      "reasons": [
+        "no disqualifiers recorded"
+      ]
+    },
+    "2_reviewer_green_check": {
+      "status": "PASS",
+      "reasons": []
+    },
+    "3_trace_presence_check": {
+      "status": "PASS",
+      "reasons": []
+    },
+    "4_taste_gate_check": {
+      "status": "PASS",
+      "reasons": []
+    },
+    "5_task_tree_check": {
+      "status": "PASS",
+      "reasons": []
+    },
+    "6_evidence_manifest_check": {
+      "status": "PASS",
+      "reasons": []
+    },
+    "7_repeated_verify_check": {
+      "status": "PASS",
+      "reasons": []
+    },
+    "8_cross_verification_check": {
+      "status": "PASS",
+      "reasons": []
+    },
+    "9_convention_lock_check": {
+      "status": "PASS",
+      "reasons": []
+    },
+    "10_summary_coverage_check": {
+      "status": "PASS",
+      "reasons": []
+    },
+    "11_axis_floor_check": {
+      "status": "PASS",
+      "reasons": []
+    },
+    "12_anti_cheat_guard_check": {
+      "status": "PASS",
+      "reasons": []
+    },
+    "13_platform_cap_check": {
+      "status": "PASS",
+      "reasons": []
+    },
+    "14_existing_readiness_and_manual_close_out_check": {
+      "status": "PASS",
+      "reasons": [
+        "Windows-native Dev-Management readiness checks report ready state for this closeout scope."
+      ]
+    },
+    "15_clean_room_verify_check": {
+      "status": "PASS",
+      "reasons": [
+        "Targeted unit/checker paths completed, subagent review findings were patched, and residual live resource-health WARN is explicitly tracked."
+      ]
+    }
+  },
+  "gate_status": "PASS",
+  "gate_failure_step": "",
+  "gate_reasons": [],
+  "remaining_manual_close_out": [],
+  "final_decision": "PASS"
+}

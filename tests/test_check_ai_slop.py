@@ -38,6 +38,17 @@ def _write_slop_pass(run_root: Path, run_id: str) -> None:
 
 def _write_delegation_plan(run_root: Path, run_id: str, mode: str = "read_only_scouts") -> None:
     _write_json(
+        run_root / "DELEGATION_DECISION.json",
+        {
+            "schema_version": 1,
+            "run_id": run_id,
+            "decision": "delegate",
+            "delegation_mode": mode,
+            "trigger_classes": ["l2_plus_verification"],
+            "rationale": "test",
+        },
+    )
+    _write_json(
         run_root / "DELEGATION_PLAN.json",
         {
             "schema_version": 1,
@@ -62,6 +73,26 @@ def _write_delegation_plan(run_root: Path, run_id: str, mode: str = "read_only_s
             "evidence_refs": [".agent-runs/run/IDEA_BRIEF.json"],
         },
     )
+
+
+def _write_workorder(
+    run_root: Path,
+    run_id: str,
+    *,
+    mode: str = "none",
+    triggers: list[str] | None = None,
+    waiver_reason: str | None = None,
+) -> None:
+    payload: dict[str, object] = {
+        "schema_version": 1,
+        "run_id": run_id,
+        "delegation_mode": mode,
+    }
+    if triggers is not None:
+        payload["delegation_triggers"] = triggers
+    if waiver_reason is not None:
+        payload["delegation_waiver_reason"] = waiver_reason
+    _write_json(run_root / "WORKORDER.json", payload)
 
 
 def _write_delegation_support(run_root: Path, run_id: str, *, mode: str = "read_only_scouts", tasks: list[dict[str, object]] | None = None, results: list[dict[str, object]] | None = None) -> None:
@@ -282,13 +313,67 @@ class CheckAiSlopTests(unittest.TestCase):
         self.assertEqual(report["status"], "BLOCKED")
         self.assertIn("required delegation artifact is missing for active delegation: SUBAGENT_RESULTS.json", report["blockers"])
 
+    def test_active_delegation_missing_decision_blocks_l2(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            workspace = Path(tmpdir)
+            run_id = "run-delegated-no-decision"
+            run_root = workspace / ".agent-runs" / run_id
+            _write_slop_pass(run_root, run_id)
+            _write_delegation_plan(run_root, run_id)
+            _write_delegation_support(run_root, run_id)
+            (run_root / "DELEGATION_DECISION.json").unlink()
+
+            report = self.module.evaluate_ai_slop(workspace, run_id, "L2")
+
+        self.assertEqual(report["status"], "BLOCKED")
+        self.assertIn("required delegation artifact is missing for active delegation: DELEGATION_DECISION.json", report["blockers"])
+
+    def test_missing_delegation_decision_blocks_broad_l2(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            workspace = Path(tmpdir)
+            run_id = "run-broad-none"
+            run_root = workspace / ".agent-runs" / run_id
+            _write_slop_pass(run_root, run_id)
+            _write_workorder(run_root, run_id, mode="none", triggers=["broad_multi_surface_audit"])
+
+            report = self.module.evaluate_ai_slop(workspace, run_id, "L2")
+
+        self.assertEqual(report["status"], "BLOCKED")
+        self.assertIn(
+            "inactive delegation for L2+ triggered work requires allowed waiver in DELEGATION_DECISION.json or WORKORDER.json: broad_multi_surface_audit",
+            report["blockers"],
+        )
+
+    def test_allowed_delegation_decision_waiver_passes_broad_l2(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            workspace = Path(tmpdir)
+            run_id = "run-broad-waived"
+            run_root = workspace / ".agent-runs" / run_id
+            _write_slop_pass(run_root, run_id)
+            _write_workorder(run_root, run_id, mode="main_only", triggers=["policy_checker_change"])
+            _write_json(
+                run_root / "DELEGATION_DECISION.json",
+                {
+                    "schema_version": 1,
+                    "run_id": run_id,
+                    "delegation_mode": "main_only",
+                    "delegation_waiver_reason": "narrow_leaf_change",
+                    "rationale": "Only the checker and its focused tests are owned.",
+                },
+            )
+
+            report = self.module.evaluate_ai_slop(workspace, run_id, "L2")
+
+        self.assertEqual(report["status"], "PASS")
+        self.assertEqual(report["blockers"], [])
+
     def test_narrow_patch_without_delegation_passes(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             workspace = Path(tmpdir)
             run_id = "run-narrow"
             run_root = workspace / ".agent-runs" / run_id
             _write_slop_pass(run_root, run_id)
-            _write_json(run_root / "WORKORDER.json", {"schema_version": 1, "run_id": run_id, "delegation_mode": "none"})
+            _write_workorder(run_root, run_id, mode="none")
 
             report = self.module.evaluate_ai_slop(workspace, run_id, "L2")
 
@@ -336,6 +421,56 @@ class CheckAiSlopTests(unittest.TestCase):
 
         self.assertEqual(report["status"], "BLOCKED")
         self.assertIn("overlapping subagent write ownership: src/app.py", report["blockers"])
+
+    def test_subagent_tool_gap_without_fallback_blocks(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            workspace = Path(tmpdir)
+            run_id = "run-tool-gap"
+            run_root = workspace / ".agent-runs" / run_id
+            _write_slop_pass(run_root, run_id)
+            _write_delegation_plan(run_root, run_id, mode="read_only_scouts")
+            results = [
+                {
+                    "task_id": "scope-scout-1",
+                    "role": "scope_scout",
+                    "status": "WARN",
+                    "summary": "Serena was unavailable.",
+                    "evidence_refs": [".agent-runs/run/SUBAGENT_RESULTS.json"],
+                    "tool_availability": {"serena": "unavailable"},
+                }
+            ]
+            _write_delegation_support(run_root, run_id, mode="read_only_scouts", results=results)
+
+            report = self.module.evaluate_ai_slop(workspace, run_id, "L2")
+
+        self.assertEqual(report["status"], "BLOCKED")
+        self.assertIn("SUBAGENT_RESULTS.json result reports tool gap without fallback: scope-scout-1", report["blockers"])
+
+    def test_subagent_tool_gap_with_fallback_passes(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            workspace = Path(tmpdir)
+            run_id = "run-tool-gap-fallback"
+            run_root = workspace / ".agent-runs" / run_id
+            _write_slop_pass(run_root, run_id)
+            _write_delegation_plan(run_root, run_id, mode="read_only_scouts")
+            results = [
+                {
+                    "task_id": "scope-scout-1",
+                    "role": "scope_scout",
+                    "status": "WARN",
+                    "summary": "Serena was unavailable; git/file evidence was used.",
+                    "evidence_refs": [".agent-runs/run/SUBAGENT_RESULTS.json"],
+                    "tool_surface_gaps": ["serena_unavailable"],
+                    "fallback_used": True,
+                    "fallback_refs": [".agent-runs/run/COMMAND_LOG.jsonl"],
+                }
+            ]
+            _write_delegation_support(run_root, run_id, mode="read_only_scouts", results=results)
+
+            report = self.module.evaluate_ai_slop(workspace, run_id, "L2")
+
+        self.assertEqual(report["status"], "PASS")
+        self.assertEqual(report["blockers"], [])
 
     def test_verification_subagent_partial_pass_blocks(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

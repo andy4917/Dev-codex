@@ -1,0 +1,31 @@
+{
+  "checked_at": "2026-04-26T17:21:32.322562+00:00",
+  "context_path": "C:\\Users\\anise\\.codex\\state\\scorecard-context\\Dev-Management\\Dev-Management-verify.json",
+  "expected_input_report_hash": "193293ef4296d5d2852583c01a208e1a100ab5064f69e003554ea8f5ddd04c11",
+  "files": [
+    {
+      "before": 2,
+      "kept": 1,
+      "path": "C:\\Users\\anise\\.codex\\state\\reviewer-verdicts\\Dev-Management\\Dev-Management-verify\\skeptic_reviewer.jsonl",
+      "removed_invalid_or_stale": 1
+    },
+    {
+      "before": 2,
+      "kept": 1,
+      "path": "C:\\Users\\anise\\.codex\\state\\reviewer-verdicts\\Dev-Management\\Dev-Management-verify\\correctness_verifier.jsonl",
+      "removed_invalid_or_stale": 1
+    },
+    {
+      "before": 2,
+      "kept": 1,
+      "path": "C:\\Users\\anise\\.codex\\state\\reviewer-verdicts\\Dev-Management\\Dev-Management-verify\\contamination_monitor.jsonl",
+      "removed_invalid_or_stale": 1
+    },
+    {
+      "before": 2,
+      "kept": 1,
+      "path": "C:\\Users\\anise\\.codex\\state\\reviewer-verdicts\\Dev-Management\\Dev-Management-verify\\final_auditor.jsonl",
+      "removed_invalid_or_stale": 1
+    }
+  ]
+}

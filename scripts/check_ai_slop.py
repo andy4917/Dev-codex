@@ -63,6 +63,21 @@ USER_DELEGATION_PATTERNS = (
 )
 DELEGATION_ACTIVE_MODES = {"read_only_scouts", "bounded_workers", "verification_pair"}
 DELEGATION_MODES = DELEGATION_ACTIVE_MODES | {"none", "main_only"}
+DELEGATION_TRIGGER_CLASSES = {
+    "broad_multi_surface_audit",
+    "global_cleanup",
+    "dirty_closeout",
+    "policy_checker_change",
+    "l2_plus_verification",
+    "explicit_exhaustive_file_or_folder_review",
+}
+DELEGATION_WAIVER_REASONS = {
+    "critical_path_live_restart",
+    "narrow_leaf_change",
+    "tool_unavailable",
+    "no_parallelizable_sidecar",
+    "plan_mode_read_only",
+}
 
 
 def _run_root(workspace_root: Path, run_id: str) -> Path:
@@ -146,6 +161,120 @@ def _delegation_mode(delegation_plan: dict[str, Any], workorder: dict[str, Any])
     return "none"
 
 
+def _string_list(value: Any) -> list[str]:
+    if isinstance(value, str):
+        return [value.strip()] if value.strip() else []
+    if isinstance(value, list):
+        return [str(item).strip() for item in value if str(item).strip()]
+    return []
+
+
+def _workorder_delegation_triggers(workorder: dict[str, Any]) -> list[str]:
+    values: list[str] = []
+    for key in ("delegation_triggers", "trigger_classes", "work_classes", "task_classes"):
+        values.extend(_string_list(workorder.get(key)))
+    for key in ("delegation_trigger", "trigger_class", "work_class", "task_class", "task_type"):
+        value = str(workorder.get(key, "")).strip()
+        if value:
+            values.append(value)
+    if bool(workorder.get("broad_multi_surface", False)) or bool(workorder.get("multi_surface", False)):
+        values.append("broad_multi_surface_audit")
+    if bool(workorder.get("global_cleanup", False)):
+        values.append("global_cleanup")
+    if bool(workorder.get("dirty_closeout", False)):
+        values.append("dirty_closeout")
+    if bool(workorder.get("policy_checker_change", False)):
+        values.append("policy_checker_change")
+    return [value for value in dict.fromkeys(values) if value in DELEGATION_TRIGGER_CLASSES]
+
+
+def _delegation_waiver_reason(payload: dict[str, Any]) -> str:
+    candidates = [
+        payload.get("delegation_waiver_reason"),
+        payload.get("waiver_reason"),
+        payload.get("delegation_waiver"),
+    ]
+    decision = payload.get("delegation_decision")
+    if isinstance(decision, dict):
+        candidates.extend(
+            [
+                decision.get("waiver_reason"),
+                decision.get("reason"),
+                decision.get("allowed_reason"),
+            ]
+        )
+    for candidate in candidates:
+        reason = str(candidate or "").strip()
+        if reason:
+            return reason
+    return ""
+
+
+def _allowed_delegation_waiver(workorder: dict[str, Any], delegation_decision: dict[str, Any]) -> tuple[bool, str]:
+    for payload in (delegation_decision, workorder):
+        reason = _delegation_waiver_reason(payload)
+        if reason:
+            return reason in DELEGATION_WAIVER_REASONS, reason
+    return False, ""
+
+
+def _validate_inactive_delegation_decision(
+    *,
+    issues: dict[str, list[str]],
+    profile: str,
+    mode: str,
+    workorder: dict[str, Any],
+    delegation_decision: dict[str, Any],
+) -> None:
+    if profile not in L2_PLUS or mode in DELEGATION_ACTIVE_MODES:
+        return
+    triggers = _workorder_delegation_triggers(workorder)
+    if not triggers:
+        return
+    allowed, reason = _allowed_delegation_waiver(workorder, delegation_decision)
+    if allowed:
+        return
+    trigger_text = ", ".join(triggers)
+    if reason:
+        _append_issue(
+            issues,
+            profile,
+            f"inactive delegation for L2+ triggered work has unsupported waiver_reason: {reason} ({trigger_text})",
+            blocking=True,
+        )
+        return
+    _append_issue(
+        issues,
+        profile,
+        f"inactive delegation for L2+ triggered work requires allowed waiver in DELEGATION_DECISION.json or WORKORDER.json: {trigger_text}",
+        blocking=True,
+    )
+
+
+def _result_reports_tool_gap(result: dict[str, Any]) -> bool:
+    gaps = result.get("tool_surface_gaps", [])
+    if isinstance(gaps, list) and [str(item).strip() for item in gaps if str(item).strip()]:
+        return True
+    if result.get("serena_available") is False:
+        return True
+    availability = result.get("tool_availability")
+    if isinstance(availability, dict):
+        serena = str(availability.get("serena", "")).strip().lower()
+        if serena in {"missing", "unavailable", "blocked", "failed"}:
+            return True
+    return False
+
+
+def _result_has_tool_gap_fallback(result: dict[str, Any]) -> bool:
+    if bool(result.get("fallback_used", False)):
+        return True
+    for key in ("fallback_refs", "fallback_evidence_refs"):
+        refs = [str(item).strip() for item in result.get(key, []) if str(item).strip()]
+        if refs:
+            return True
+    return bool(str(result.get("fallback_path", "")).strip())
+
+
 def _validate_delegation_artifacts(
     *,
     issues: dict[str, list[str]],
@@ -209,6 +338,8 @@ def _validate_delegation_artifacts(
             _append_issue(issues, profile, f"SUBAGENT_RESULTS.json contains pending result at closeout: {task_id}", blocking=True)
         if not _evidence_refs(result):
             _append_issue(issues, profile, f"SUBAGENT_RESULTS.json result lacks evidence_refs: {task_id}", blocking=True)
+        if _result_reports_tool_gap(result) and not _result_has_tool_gap_fallback(result):
+            _append_issue(issues, profile, f"SUBAGENT_RESULTS.json result reports tool gap without fallback: {task_id}", blocking=True)
         if status == "PASS" and role == "independent_verifier":
             verification_scope = str(result.get("verification_scope", "")).strip().lower()
             ran_full_suite = result.get("ran_full_suite")
@@ -243,6 +374,7 @@ def evaluate_ai_slop(workspace_root: Path, run_id: str, profile: str = "L2") -> 
         "question_queue": run_root / "QUESTION_QUEUE.json",
         "claim_ledger": run_root / "CLAIM_LEDGER.json",
         "summary_coverage": run_root / "SUMMARY_COVERAGE.json",
+        "delegation_decision": run_root / "DELEGATION_DECISION.json",
         "delegation_plan": run_root / "DELEGATION_PLAN.json",
         "subagent_tasks": run_root / "SUBAGENT_TASKS.json",
         "subagent_results": run_root / "SUBAGENT_RESULTS.json",
@@ -312,11 +444,27 @@ def evaluate_ai_slop(workspace_root: Path, run_id: str, profile: str = "L2") -> 
 
     workorder, workorder_error = _read_json(paths["workorder"])
     delegation_plan, delegation_error = _read_json(paths["delegation_plan"])
+    delegation_decision, delegation_decision_error = _read_json(paths["delegation_decision"])
     checks["workorder_present"] = not workorder_error
+    checks["delegation_decision_present"] = not delegation_decision_error
     checks["delegation_plan_present"] = not delegation_error
     mode = _delegation_mode(delegation_plan if not delegation_error else {}, workorder if not workorder_error else {})
     checks["delegation_mode"] = mode
+    _validate_inactive_delegation_decision(
+        issues=issues,
+        profile=normalized_profile,
+        mode=mode,
+        workorder=workorder if not workorder_error else {},
+        delegation_decision=delegation_decision if not delegation_decision_error else {},
+    )
     if mode in DELEGATION_ACTIVE_MODES:
+        if delegation_decision_error:
+            reason = (
+                "required delegation artifact is missing for active delegation: DELEGATION_DECISION.json"
+                if delegation_decision_error == "missing"
+                else f"DELEGATION_DECISION.json is {delegation_decision_error}"
+            )
+            _append_issue(issues, normalized_profile, reason, blocking=True)
         if delegation_error:
             reason = "required delegation artifact is missing for active delegation: DELEGATION_PLAN.json" if delegation_error == "missing" else f"DELEGATION_PLAN.json is {delegation_error}"
             _append_issue(issues, normalized_profile, reason, blocking=True)

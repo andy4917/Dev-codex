@@ -1,0 +1,120 @@
+{
+  "context_version": 2,
+  "status": "READY",
+  "task_id": "Dev-Workflow-quick",
+  "workspace_root": "C:\\Users\\anise\\code\\Dev-Management",
+  "delivery_mode": "verify",
+  "run_id": "20260427-codex-app-global-cleanup-delegation",
+  "trace_id": "Dev-Management-verify",
+  "codex_project_id": "Dev-Management",
+  "git_sha": "66d0a3390c5eabe069885aafd0a3d6163f0668c3",
+  "worktree_id": "C:/Users/anise/code/Dev-Management",
+  "fresh_evidence_manifest_path": "C:\\Users\\anise\\code\\Dev-Management\\reports\\authority\\fresh-evidence.json",
+  "task_context": {
+    "small_l0": false,
+    "completion_review_required": true,
+    "contamination_review_required": false,
+    "final_auditor_required": true,
+    "trace_required": true,
+    "reliability_applicable": false,
+    "external_calls": false,
+    "reliability_evidence_present": false,
+    "search_evidence_applicable": true,
+    "search_engineering_core_path": false,
+    "retrieval_canonical_decision_path": false,
+    "external_docs_dependency": true,
+    "untrusted_context": false,
+    "web_or_mcp_access": true,
+    "security_sensitive": false,
+    "security_evidence_present": false,
+    "legacy_hardcoding_violation": false
+  },
+  "evidence_inputs": {
+    "evidence_manifest_path": "C:\\Users\\anise\\code\\Dev-Management\\.agent-runs\\20260427-codex-app-global-cleanup-delegation\\EVIDENCE_MANIFEST.json",
+    "workorder_path": "C:\\Users\\anise\\code\\Dev-Management\\.agent-runs\\20260427-codex-app-global-cleanup-delegation\\WORKORDER.json",
+    "command_log_path": "C:\\Users\\anise\\code\\Dev-Management\\.agent-runs\\20260427-codex-app-global-cleanup-delegation\\COMMAND_LOG.jsonl",
+    "waivers_path": "C:\\Users\\anise\\code\\Dev-Management\\.agent-runs\\20260427-codex-app-global-cleanup-delegation\\WAIVERS.json",
+    "task_tree_path": "C:\\Users\\anise\\code\\Dev-Management\\.agent-runs\\20260427-codex-app-global-cleanup-delegation\\TASK_TREE.json",
+    "repeated_verify_path": "C:\\Users\\anise\\code\\Dev-Management\\.agent-runs\\20260427-codex-app-global-cleanup-delegation\\REPEATED_VERIFY.json",
+    "cross_verification_path": "C:\\Users\\anise\\code\\Dev-Management\\.agent-runs\\20260427-codex-app-global-cleanup-delegation\\CROSS_VERIFICATION.json",
+    "claim_ledger_path": "C:\\Users\\anise\\code\\Dev-Management\\.agent-runs\\20260427-codex-app-global-cleanup-delegation\\CLAIM_LEDGER.json",
+    "summary_coverage_path": "C:\\Users\\anise\\code\\Dev-Management\\.agent-runs\\20260427-codex-app-global-cleanup-delegation\\SUMMARY_COVERAGE.json",
+    "convention_lock_path": "C:\\Users\\anise\\code\\Dev-Management\\.agent-runs\\20260427-codex-app-global-cleanup-delegation\\CONVENTION_LOCK.json",
+    "taste_gate_path": "C:\\Users\\anise\\code\\Dev-Management\\.agent-runs\\20260427-codex-app-global-cleanup-delegation\\TASTE_GATE.json",
+    "summary_path": "C:\\Users\\anise\\code\\Dev-Management\\SUMMARY.md",
+    "design_review_path": "",
+    "trace_report_path": "C:\\Users\\anise\\code\\Dev-Management\\reports\\traceability-report.json",
+    "existing_readiness_report_path": "C:\\Users\\anise\\code\\Dev-Management\\reports\\user-readiness.json",
+    "clean_room_verify_report_path": "C:\\Users\\anise\\code\\Dev-Management\\reports\\acceptance-report.json"
+  },
+  "trace": {
+    "required": true,
+    "status": "PASS",
+    "evidence_refs": [
+      "C:\\Users\\anise\\code\\Dev-Management\\reports\\traceability-report.json"
+    ],
+    "notes": "Traceability evidence binds user request, workorder, claim ledger, tests, subagent review findings, and final reports for this Dev-Management closeout."
+  },
+  "existing_readiness": {
+    "status": "PASS",
+    "reason": "Windows-native Dev-Management readiness checks report ready state for this closeout scope.",
+    "manual_close_out": [],
+    "evidence_refs": [
+      "reports/user-dev-environment-baseline.final.json",
+      "reports/windows-app-local-readiness.final.json",
+      "reports/config-provenance.final.json",
+      "reports/global-agent-workflow.final.json"
+    ]
+  },
+  "clean_room_verify": {
+    "status": "PASS",
+    "reason": "Targeted unit/checker paths completed, subagent review findings were patched, and residual live resource-health WARN is explicitly tracked.",
+    "manual_close_out": [],
+    "evidence_refs": [
+      "tests.test_check_ai_slop tests.test_windows_app_resource_health tests.test_iaw_closeout",
+      "tests.test_global_agent_workflow tests.test_check_ai_slop",
+      "tests.test_codex_app_maintenance tests.test_codex_app_maintenance_cycle tests.test_windows_app_resource_health tests.test_windows_process_burst tests.test_serena_dashboard_repro",
+      "tests.test_check_config_provenance tests.test_check_user_dev_environment tests.test_devmgmt_runtime_helpers tests.test_scorecard_runtime_hook tests.test_compute_user_scorecard_v12",
+      ".agent-runs/20260427-codex-app-global-cleanup-delegation/SUBAGENT_RESULTS.json",
+      "reports/ai-slop.final.json",
+      "reports/domain-mission-refresh.final.json",
+      "reports/windows-app-resource-health.final.json"
+    ]
+  },
+  "user_review": {
+    "status": "PENDING",
+    "awards": [],
+    "penalties": [],
+    "notes": ""
+  },
+  "disqualifiers": [],
+  "reviewers": {
+    "skeptic_reviewer": {
+      "status": "APPROVED",
+      "green": true,
+      "penalties": [],
+      "notes": "Approved for 20260427-codex-app-global-cleanup-delegation after readiness, clean-room verify, trace, patched subagent findings, and targeted tests."
+    },
+    "correctness_verifier": {
+      "status": "APPROVED",
+      "green": true,
+      "penalties": [],
+      "notes": "Approved for 20260427-codex-app-global-cleanup-delegation after readiness, clean-room verify, trace, patched subagent findings, and targeted tests."
+    },
+    "contamination_monitor": {
+      "status": "APPROVED",
+      "green": true,
+      "penalties": [],
+      "notes": "Approved for 20260427-codex-app-global-cleanup-delegation after readiness, clean-room verify, trace, patched subagent findings, and targeted tests."
+    },
+    "final_auditor": {
+      "status": "APPROVED",
+      "green": true,
+      "penalties": [],
+      "notes": "Approved for 20260427-codex-app-global-cleanup-delegation after readiness, clean-room verify, trace, patched subagent findings, and targeted tests."
+    }
+  },
+  "authoritative_context_path": "C:\\Users\\anise\\.codex\\state\\scorecard-context\\Dev-Management\\Dev-Management-verify.json",
+  "authoritative_context_hash": "acb76275fbb53cc48d9fbab5294c994367a6bcdb42935aff7a4f9d1e402a3c92",
+  "authority_audit_path": "C:\\Users\\anise\\code\\Dev-Management\\reports\\scorecard-authority-audit.json"
+}

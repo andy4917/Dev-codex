@@ -1,0 +1,44 @@
+{
+  "root_task": "Codex App/global cleanup closeout",
+  "run_id": "20260427-codex-app-global-cleanup-delegation",
+  "schema_version": 1,
+  "tasks": [
+    {
+      "children": [
+        "restart-mode",
+        "health-report",
+        "noise-ignore"
+      ],
+      "owner": "main",
+      "task_id": "resource-health"
+    },
+    {
+      "children": [
+        "policy",
+        "checker",
+        "tests",
+        "evidence"
+      ],
+      "owner": "main+subagent",
+      "task_id": "delegation"
+    },
+    {
+      "children": [
+        "trusted-project-cleanup",
+        "provenance-report"
+      ],
+      "owner": "main",
+      "task_id": "global-config"
+    },
+    {
+      "children": [
+        "iaw-artifacts",
+        "tests",
+        "commit",
+        "push"
+      ],
+      "owner": "main",
+      "task_id": "closeout"
+    }
+  ]
+}
