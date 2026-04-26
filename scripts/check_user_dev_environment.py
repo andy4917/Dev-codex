@@ -533,11 +533,9 @@ def render_markdown(report: dict[str, Any]) -> str:
 
 
 def write_reports(report: dict[str, Any], *, output_file: Path | None = None) -> None:
-    save_json(DEFAULT_OUTPUT_PATH, report)
-    write_markdown(DEFAULT_MARKDOWN_PATH, render_markdown(report))
-    if output_file is not None and output_file.resolve() != DEFAULT_OUTPUT_PATH.resolve():
-        save_json(output_file, report)
-        write_markdown(output_file.with_suffix(".md"), render_markdown(report))
+    target = output_file or DEFAULT_OUTPUT_PATH
+    save_json(target, report)
+    write_markdown(target.with_suffix(".md"), render_markdown(report))
 
 
 def main() -> int:

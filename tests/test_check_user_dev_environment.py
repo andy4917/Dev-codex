@@ -230,6 +230,35 @@ class CheckUserDevEnvironmentTests(unittest.TestCase):
         self.assertEqual(report["status"], "BLOCKED")
         self.assertEqual(report["tools"]["git"]["status"], "BLOCKED")
 
+    def test_explicit_output_file_does_not_refresh_default_report(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp = Path(tmpdir)
+            default_json = tmp / "default.json"
+            default_md = tmp / "default.md"
+            explicit_json = tmp / "scratch" / "user-dev-environment.json"
+            with (
+                patch.object(self.module, "DEFAULT_OUTPUT_PATH", default_json),
+                patch.object(self.module, "DEFAULT_MARKDOWN_PATH", default_md),
+            ):
+                self.module.write_reports({"status": "PASS"}, output_file=explicit_json)
+            self.assertTrue(explicit_json.exists())
+            self.assertTrue(explicit_json.with_suffix(".md").exists())
+            self.assertFalse(default_json.exists())
+            self.assertFalse(default_md.exists())
+
+    def test_missing_output_file_refreshes_default_report(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp = Path(tmpdir)
+            default_json = tmp / "default.json"
+            default_md = tmp / "default.md"
+            with (
+                patch.object(self.module, "DEFAULT_OUTPUT_PATH", default_json),
+                patch.object(self.module, "DEFAULT_MARKDOWN_PATH", default_md),
+            ):
+                self.module.write_reports({"status": "PASS"})
+            self.assertTrue(default_json.exists())
+            self.assertTrue(default_md.exists())
+
 
 if __name__ == "__main__":
     unittest.main()
